@@ -1,0 +1,31 @@
+PHONY := __build
+__build:
+
+obj-y :=
+subdir-y :=
+
+include Makefile
+
+__subdir-y := $(patsubst %/, %, $(filter %/, $(obj-y)))
+
+subdir-y += $(__subdir-y)
+
+subdir_objs := $(foreach f, $(subdir-y), $(f)/built-in.o)
+
+cur_objs := $(filter-out %/, $(obj-y))
+
+PHONY += $(subdir-y)
+
+__build: $(subdir-y) built-in.o
+
+$(subdir-y):
+	make -C $@ -f $(TOPDIR)/Makefile.build
+
+built-in.o: $(cur_objs) $(subdir_objs)
+	$(LD) -r -o $@ $^
+
+%.o: %.c
+	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_HAL_DIR)/include $(DEBUG) -c $< -o $@
+
+
+.PHONY: $(PHONY)
