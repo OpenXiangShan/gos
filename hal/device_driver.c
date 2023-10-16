@@ -187,7 +187,10 @@ int device_driver_init(struct device_init_entry *hw)
 int open(char *name)
 {
 	struct driver *drv;
-	for_each_driver(drv, _drivers.p_drivers, _drivers.avail) {
+	struct driver *p_tmp = _drivers.p_drivers;
+	int nr = _drivers.avail;
+
+	for_each_driver(drv, p_tmp, nr) {
 		if (!drv->probe)
 			continue;
 
@@ -202,6 +205,10 @@ int read(int fd, char *buf, unsigned long offset, unsigned int len, int flag)
 {
 	struct driver *drv = &_drivers.p_drivers[fd];
 
+	if (!drv->ops->read) {
+		return NULL;
+	}
+
 	return drv->ops->read(buf, offset, len, flag);
 
 }
@@ -210,7 +217,22 @@ int write(int fd, char *buf, unsigned long offset, unsigned int len)
 {
 	struct driver *drv = &_drivers.p_drivers[fd];
 
+	if (!drv->ops->write) {
+		return NULL;
+	}
+
 	return drv->ops->write(buf, offset, len);
+}
+
+int ioctl(int fd, unsigned int cmd, void *arg)
+{
+	struct driver *drv = &_drivers.p_drivers[fd];
+
+	if (!drv->ops || !drv->ops->ioctl) {
+		return NULL;
+	}
+
+	return drv->ops->ioctl(cmd, arg);
 }
 
 void walk_devices()
