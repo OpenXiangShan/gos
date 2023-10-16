@@ -91,10 +91,14 @@ static int my_vprintf(const char *fmt, va_list ap)
 			break;
 		case 'x':
 		case 'X':
-			out_num(va_arg(ap, u64), 16, lead, maxwidth);
+			out_num(va_arg(ap, u32), 16, lead, maxwidth);
+			break;
+		case 'l':
+			if (*(fmt + 1) == 'x')
+				out_num(va_arg(ap, u64), 16, lead, maxwidth);
 			break;
 		case 'b':
-			out_num(va_arg(ap, u64), 2, lead, maxwidth);
+			out_num(va_arg(ap, u32), 2, lead, maxwidth);
 			break;
 		case 'c':
 			uart_putc(va_arg(ap, int));

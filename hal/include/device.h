@@ -38,6 +38,7 @@ struct driver_ops {
 	int (*write)(char *buf, unsigned long offset, unsigned int len);
 	int (*read)(char *buf, unsigned long offset, unsigned int len,
 		    int flag);
+	int (*ioctl)(unsigned int cmd, void *arg);
 };
 
 struct driver {
@@ -144,6 +145,7 @@ int regist_device_irq(unsigned long hwirq, void (*handler)(void *data),
 int open(char *name);
 int write(int fd, char *buf, unsigned long offset, unsigned int len);
 int read(int fd, char *buf, unsigned long offset, unsigned int len, int flag);
+int ioctl(int fd, unsigned int cmd, void *arg);
 void walk_devices(void);
 
 #endif

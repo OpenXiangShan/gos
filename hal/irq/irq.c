@@ -8,7 +8,7 @@
 
 #define MAX_IRQ_NUM 64
 static struct irq_info interrupts_ctx[MAX_IRQ_NUM];
-static unsigned char irq_bit_flag;
+static unsigned long irq_bit_flag;
 
 static struct irq_domain domain[] = {
 	{
@@ -126,7 +126,7 @@ int register_device_irq(int hwirq, void (*handler)(void *data), void *priv)
 	if (0x01 & (irq_bit_flag >> hwirq))
 		return -1;
 
-	irq_bit_flag |= 1 << hwirq;
+	irq_bit_flag |= (unsigned long)1 << hwirq;
 
 	interrupt = &interrupts_ctx[hwirq];
 	interrupt->hwirq = hwirq;
@@ -141,7 +141,7 @@ irq_handler_t get_irq_handler(int hwirq)
 	if (hwirq > MAX_IRQ_NUM)
 		return NULL;
 
-	if (0x01 & (irq_bit_flag >> hwirq))
+	if (!(0x01 & (irq_bit_flag >> hwirq)))
 		return NULL;
 
 	return interrupts_ctx[hwirq].handler;

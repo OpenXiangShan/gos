@@ -6,7 +6,7 @@
 #include <asm/sbi.h>
 #include <timer.h>
 
-#define HZ 100
+#define HZ 1000
 
 #define CLINT_TIMER_CMP 0x4000
 #define CLINT_TIMER_VAL 0xbff8

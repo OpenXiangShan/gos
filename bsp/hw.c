@@ -66,11 +66,20 @@ static const struct device_init_entry __attribute__((used))
 	 &qemu_clint_hw_data,
 	  },
 #endif
+#ifndef USE_QEMU
+	{
+	 "dw,dmac",
+	 0x30040000,
+	 0x10000,
+	 4,
+	 0,
+	  },
+#endif
 	{
 	 "THE END",
 	 0xFF,
 	 0xFF,
 	 0xFF,
 	 0,
-	  }
+	  },
 };
