@@ -9,18 +9,23 @@ extern unsigned long volatile jiffies;
 
 unsigned long get_system_time()
 {
-	return jiffies * 10;
+	return jiffies;
+}
+
+unsigned long get_system_time_ms()
+{
+	return get_system_time();
 }
 
 int set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data)
 {
-	if(timer.registered == 1)
+	if (timer.registered == 1)
 		return -1;
 
 	timer.registered = 1;
 	timer.handler = timer_handler;
 	timer.data = data;
-	timer.ms = ms / 10;
+	timer.ms = ms;
 	timer.done = 0;
 
 	return 0;
