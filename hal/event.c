@@ -3,8 +3,8 @@
 
 void wait_for_event(void *data, int (*expr)(void *data))
 {
-	while(1)
-		if(expr(data))
+	while (1)
+		if (expr(data))
 			break;
 }
 
@@ -48,4 +48,22 @@ char wait_for_input_timeout(int fd, unsigned long ms)
 	del_timer();
 
 	return c;
+}
+
+void wait_for_event_timeout(void *data, int (*expr)(void *data),
+			    unsigned long ms)
+{
+	int start = 0;
+
+	set_timer(get_system_time() + ms, do_timer, &start);
+
+	while (1) {
+		if (expr(data))
+			break;
+
+		if (start == 1)
+			break;
+	}
+
+	del_timer();
 }
