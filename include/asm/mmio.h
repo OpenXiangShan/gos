@@ -15,12 +15,12 @@
 #define __iowmb()	dmb()
 
 #define readl(a)	({ unsigned int  __v = __arch_getl((unsigned int)a); __iormb(); __v; })
-#define writel(a,v)	({ unsigned int  __v = v; __iowmb(); __arch_putl((unsigned int)a, __v);})
+#define writel(a,v)	({ unsigned int  __v = v; __iowmb(); __arch_putl((unsigned long)a, __v);})
 
 #define readb(a)	({ unsigned char  __v = __arch_getb((unsigned int)a); __iormb(); __v; })
-#define writeb(a,v)	({ unsigned char  __v = v; __iowmb(); __arch_putb((unsigned int)a,__v);})
+#define writeb(a,v)	({ unsigned char  __v = v; __iowmb(); __arch_putb((unsigned long)a,__v);})
 
 #define readq(a)	({ unsigned long  __v = __arch_getq((unsigned int)a); __iormb(); __v; })
-#define writeq(a,v)	({ unsigned long  __v = v; __iowmb(); __arch_putq((unsigned int)a, __v);})
+#define writeq(a,v)	({ unsigned long  __v = v; __iowmb(); __arch_putq((unsigned long)a, __v);})
 
 #endif

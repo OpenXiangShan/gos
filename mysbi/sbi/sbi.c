@@ -44,6 +44,7 @@ static void sbi_trap_error(struct sbi_trap_regs *regs, const char *msg, int rc)
 
 static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 {
+	unsigned long ret_value = 0;
 	int ret = 0;
 	struct sbi_trap_hw_context *ctx = h_context + read_csr(mhartid);
 
@@ -56,7 +57,12 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 		sbi_uart_putc(regs->a0);
 		ret = 0;
 		break;
+	case SBI_GET_CPU_CYCLE:
+		ret_value = read_csr(mcycle);
+		break;
 	}
+
+	regs->a0 = ret_value;
 
 	if (!ret)
 		regs->mepc += 4;
