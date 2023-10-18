@@ -4,4 +4,5 @@ obj-y += ls.o
 obj-y += devmm.o
 obj-y += history.o
 obj-y += dma_test.o
+obj-y += dma_test_ext.o
 obj-y += mem_read.o
