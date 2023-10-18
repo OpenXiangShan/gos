@@ -19,5 +19,6 @@ int del_timer();
 int set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data);
 unsigned long get_timer_event_ms(void);
 int mod_timer(unsigned long ms);
+unsigned long get_system_cycles(void);
 
 #endif

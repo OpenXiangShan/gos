@@ -19,7 +19,7 @@ unsigned long get_system_time_ms()
 
 int set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data)
 {
-	if (timer.registered == 1)
+	if(timer.registered == 1)
 		return -1;
 
 	timer.registered = 1;
@@ -73,6 +73,11 @@ void do_timer_handler()
 
 	timer.done = 1;
 	timer.handler(timer.data);
+}
+
+unsigned long get_system_cycles(void)
+{
+	return get_cycles();
 }
 
 int init_timer(struct device_init_entry *hw)

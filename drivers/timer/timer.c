@@ -19,7 +19,7 @@ struct clint_priv_data {
 	unsigned long clint_freq;
 };
 
-static unsigned long get_cycles(void)
+unsigned long get_cycles(void)
 {
 	return readq(base_address + CLINT_TIMER_VAL);
 }

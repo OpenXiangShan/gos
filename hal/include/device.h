@@ -148,4 +148,6 @@ int read(int fd, char *buf, unsigned long offset, unsigned int len, int flag);
 int ioctl(int fd, unsigned int cmd, void *arg);
 void walk_devices(void);
 
+unsigned long get_cycles(void);
+
 #endif
