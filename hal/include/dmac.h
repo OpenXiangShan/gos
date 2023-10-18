@@ -15,8 +15,11 @@ struct dmac_ioctl_data {
 	unsigned int des_width;
 	unsigned int src_burstsize;
 	unsigned int des_burstsize;
+	unsigned int burst_len;
 };
 
 int memcpy_hw(char *dst, char *src, unsigned int size);
+int dma_transfer(char *dst, char *src, unsigned int size,
+		 unsigned int data_width, unsigned int burst_len);
 
 #endif
