@@ -20,6 +20,7 @@
 #define DMAC_AXI_CH_DAR                 0x08
 #define DMAC_AXI_CH_BLOCK_TS            0x10
 #define DMAC_AXI_CH_CTL                 0x18
+#define DMAC_AXI_CH_CTL_HI              0x1c
 #define DMAC_AXI_CH_CFG                 0x20
 #define DMAC_AXI_CH_LLP                 0x28
 #define DMAC_AXI_CH_STATUS              0x30
@@ -52,6 +53,7 @@
 #define DMAC_AXI0_CH1_DAR                        DMAC_AXI_CH1_REG + DMAC_AXI_CH_DAR
 #define DMAC_AXI0_CH1_BLOCK_TS                   DMAC_AXI_CH1_REG + DMAC_AXI_CH_BLOCK_TS
 #define DMAC_AXI0_CH1_CTL                        DMAC_AXI_CH1_REG + DMAC_AXI_CH_CTL
+#define DMAC_AXI0_CH1_CTL_HI                     DMAC_AXI_CH1_REG + DMAC_AXI_CH_CTL_HI
 #define DMAC_AXI0_CH1_CFG                        DMAC_AXI_CH1_REG + DMAC_AXI_CH_CFG
 #define DMAC_AXI0_CH1_LLP                        DMAC_AXI_CH1_REG + DMAC_AXI_CH_LLP
 #define DMAC_AXI0_CH1_STATUS                     DMAC_AXI_CH1_REG + DMAC_AXI_CH_STATUS

@@ -1,4 +1,5 @@
 #include <asm/mmio.h>
+#include <asm/sbi.h>
 #include <device.h>
 #include <print.h>
 #include <asm/type.h>
@@ -24,19 +25,21 @@ static int dw_dmac_mem_to_mem(unsigned int src_addr,
 			      unsigned int src_width,
 			      unsigned int des_width,
 			      unsigned int src_burstsize,
-			      unsigned int des_burstsize)
+			      unsigned int des_burstsize,
+			      unsigned int burst_len)
 {
 	unsigned long ch1_cfg;
 	unsigned long ch1_cfg_high;
 	unsigned long ch1_ctl;
+	unsigned long ch1_ctl_hi;
 	unsigned int type = 0;
 	unsigned int src_hs = 0;
 	unsigned int des_hs = 0;
 
 	print
-	    ("src_addr: 0x%x des_addr: 0x%x blockTS: %d src_addr_inc: %d des_addr_inc: %d src_width: %d des_width: %d src_burstsize: %d des_burstsize: %d\n",
+	    ("src_addr: 0x%x des_addr: 0x%x blockTS: %d src_addr_inc: %d des_addr_inc: %d src_width: %d des_width: %d src_burstsize: %d des_burstsize: %d burst_len: %d\n",
 	     src_addr, des_addr, blockTS, src_addr_inc, des_addr_inc, src_width,
-	     des_width, src_burstsize, des_burstsize);
+	     des_width, src_burstsize, des_burstsize, burst_len);
 
 	/* check dmac reset complete */
 	while ((readl(base + DMAC_AXI0_COMMON_RST_REG) & 0x01) != 0) ;
@@ -94,6 +97,13 @@ static int dw_dmac_mem_to_mem(unsigned int src_addr,
 
 	writel(base + DMAC_AXI0_CH1_CTL, ch1_ctl);
 
+	ch1_ctl_hi = readl(base + DMAC_AXI0_CH1_CTL_HI);
+	ch1_ctl_hi = (ch1_ctl_hi & 0xff00ffff) | (burst_len << 16);	//AWLEN
+	ch1_ctl_hi = (ch1_ctl_hi & 0xffff7fff) | (1 << 15);	//AWLEN
+	ch1_ctl_hi = (ch1_ctl_hi & 0xffff807f) | (burst_len << 7);	//AWLEN
+	ch1_ctl_hi = (ch1_ctl_hi & 0xffffffbf) | (1 << 6);	//AWLEN
+	writel(base + DMAC_AXI0_CH1_CTL_HI, ch1_ctl_hi);
+
 	/* CHANNEL_ENABLE */
 	writel(base + DMAC_AXI0_COMMON_CH_EN,
 	       readl(base + DMAC_AXI0_COMMON_CH_EN) | 0x101);
@@ -121,6 +131,8 @@ static int dw_dmac_ioctl(unsigned int cmd, void *arg)
 	unsigned int des_width;
 	unsigned int src_burstsize;
 	unsigned int des_burstsize;
+	unsigned int burst_len;
+	unsigned long start_cycles = 0, end_cycles = 0;
 
 	switch (cmd) {
 	case MEM_TO_MEM:
@@ -133,6 +145,7 @@ static int dw_dmac_ioctl(unsigned int cmd, void *arg)
 		des_width = data->des_width;
 		src_burstsize = data->src_burstsize;
 		des_burstsize = data->des_burstsize;
+		burst_len = data->burst_len;
 
 		dw_dmac_mem_to_mem(src_addr,
 				   des_addr,
@@ -140,7 +153,12 @@ static int dw_dmac_ioctl(unsigned int cmd, void *arg)
 				   src_addr_inc,
 				   des_addr_inc,
 				   src_width,
-				   des_width, src_burstsize, des_burstsize);
+				   des_width,
+				   src_burstsize, des_burstsize, burst_len);
+
+		start_cycles = sbi_get_cpu_cycles();
+		print("start dma transfer m2m, get system cycles: %d\n",
+		      start_cycles);
 
 		wait_for_event_timeout(&done, wake_expr, 5 * 1000 /* 5s */ );
 		if (done == 0)
@@ -148,6 +166,10 @@ static int dw_dmac_ioctl(unsigned int cmd, void *arg)
 		else {
 			done = 0;
 			ret = 0;
+			end_cycles = sbi_get_cpu_cycles();
+			print("end dma transfer m2m, get system cycles: %d\n",
+			      end_cycles);
+			print("cycles diff: %d\n", end_cycles - start_cycles);
 		}
 
 		break;
