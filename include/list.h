@@ -2,6 +2,7 @@
 #define _H_LIST_H
 
 #include <asm/barrier.h>
+#include <container_of.h>
 
 #define POISON_POINTER_DELTA 0xffffffffffff0000
 
@@ -23,17 +24,14 @@ static inline void INIT_LIST_HEAD(struct list_head *list)
 	list->prev = list;
 }
 
-static inline bool __list_del_entry_valid(struct list_head *entry)
+static inline int __list_del_entry_valid(struct list_head *entry)
 {
-	return true;
+	return 1;
 }
 
 static inline void __list_add(struct list_head *new,
 			      struct list_head *prev, struct list_head *next)
 {
-	if (!__list_add_valid(new, prev, next))
-		return;
-
 	next->prev = new;
 	new->next = next;
 	new->prev = prev;
@@ -70,6 +68,9 @@ static inline void list_del(struct list_head *entry)
 	entry->next = LIST_POISON1;
 	entry->prev = LIST_POISON2;
 }
+
+#define list_entry(ptr, type, member) \
+        container_of(ptr, type, member)
 
 #define list_first_entry(ptr, type, member) \
 	list_entry((ptr)->next, type, member)
