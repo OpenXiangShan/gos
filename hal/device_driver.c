@@ -3,6 +3,7 @@
 #include <string.h>
 #include <mm.h>
 #include <print.h>
+#include "dma_mapping.h"
 
 static struct devices _devices;
 static struct drivers _drivers;
@@ -59,6 +60,7 @@ found:
 	dev->start = entry->start;
 	dev->len = entry->len;
 	dev->irq = entry->irq;
+	dev->iommu.dev_id = entry->dev_id;
 	_devices.avail++;
 
 	return dev;
@@ -138,11 +140,13 @@ static int __probe_device_table(struct driver_init_entry *driver_head,
 			if (!strncmp
 			    (driver_entry->compatible, device_entry->compatible,
 			     128)) {
+				strcpy(dev->compatible, device_entry->compatible);
 				dev->drv = drv;
 				dev->probe = 1;
 				drv->dev = dev;
 				drv->probe = 1;
-				driver_entry->init(dev, 0);
+				dma_mapping_probe_device(dev);
+				driver_entry->init(dev, device_entry->data);
 			}
 		}
 		device_entry++;

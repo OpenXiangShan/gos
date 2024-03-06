@@ -45,6 +45,7 @@ void handle_irq(unsigned long cause)
 
 	if (!d) {
 		print("unsupported cause: %d\n", cause & (~SCAUSE_IRQ));
+		while (1);
 		return;
 	}
 
