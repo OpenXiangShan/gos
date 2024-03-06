@@ -1,14 +1,14 @@
 #ifndef _MMIO_H
 #define _MMIO_H
 
-#define __arch_getl(a)			(*(volatile unsigned int *)(a))
-#define __arch_putl(a,v)		(*(volatile unsigned int *)(a) = (v))
+#define __arch_getl(a)			(*(volatile unsigned int *)((unsigned long)a))
+#define __arch_putl(a,v)		(*(volatile unsigned int *)((unsigned long)a) = (v))
 
-#define __arch_getb(a)			(*(volatile unsigned char *)(a))
-#define __arch_putb(a,v)		(*(volatile unsigned char *)(a) = (v))
+#define __arch_getb(a)			(*(volatile unsigned char *)(unsigned long)(a))
+#define __arch_putb(a,v)		(*(volatile unsigned char *)((unsigned long)a) = (v))
 
-#define __arch_getq(a)			(*(volatile unsigned long *)(a))
-#define __arch_putq(a,v)		(*(volatile unsigned long *)(a) = (v))
+#define __arch_getq(a)			(*(volatile unsigned long *)((unsigned long)a))
+#define __arch_putq(a,v)		(*(volatile unsigned long *)((unsigned long)a) = (v))
 
 #define dmb()		__asm__ __volatile__ ("" : : : "memory")
 #define __iormb()	dmb()

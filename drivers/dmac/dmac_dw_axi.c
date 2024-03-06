@@ -5,7 +5,9 @@
 #include <asm/type.h>
 #include <dmac.h>
 #include <timer.h>
+#include <string.h>
 #include "dmac_dw_axi.h"
+#include "event.h"
 
 static int done = 0;
 static unsigned long base;
@@ -122,8 +124,8 @@ static int dw_dmac_ioctl(unsigned int cmd, void *arg)
 {
 	int ret = 0;
 	struct dmac_ioctl_data *data = (struct dmac_ioctl_data *)arg;
-	unsigned int src_addr;
-	unsigned int des_addr;
+	unsigned long src_addr;
+	unsigned long des_addr;
 	unsigned int blockTS;
 	unsigned int src_addr_inc;
 	unsigned int des_addr_inc;
@@ -136,8 +138,8 @@ static int dw_dmac_ioctl(unsigned int cmd, void *arg)
 
 	switch (cmd) {
 	case MEM_TO_MEM:
-		src_addr = (unsigned int)data->src;
-		des_addr = (unsigned int)data->dst;
+		src_addr = (unsigned long)data->src;
+		des_addr = (unsigned long)data->dst;
 		blockTS = data->blockTS;
 		src_addr_inc = data->src_addr_inc;
 		des_addr_inc = data->des_addr_inc;
@@ -147,8 +149,8 @@ static int dw_dmac_ioctl(unsigned int cmd, void *arg)
 		des_burstsize = data->des_burstsize;
 		burst_len = data->burst_len;
 
-		dw_dmac_mem_to_mem(src_addr,
-				   des_addr,
+		dw_dmac_mem_to_mem((unsigned int)src_addr,
+				   (unsigned int)des_addr,
 				   blockTS,
 				   src_addr_inc,
 				   des_addr_inc,
