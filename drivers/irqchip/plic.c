@@ -1,5 +1,4 @@
 #include <device.h>
-#include <device.h>
 #include <asm/csr.h>
 #include <print.h>
 #include <asm/mmio.h>

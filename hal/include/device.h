@@ -2,6 +2,7 @@
 #define DEVICE_H
 
 #include <irq.h>
+#include <list.h>
 
 #define DRIVER_INIT_TABLE __driver_init_table
 #define DRIVER_INIT_TABLE_END __driver_init_table_end
@@ -18,7 +19,16 @@
 #define BLOCK 0
 #define NONBLOCK 1
 
+struct iommu_group;
+struct iommu {
+	int dev_id;
+	struct iommu_group *group;
+	void *priv_data;
+	struct list_head list;
+};
+
 struct device {
+	struct list_head list;
 	int in_used;
 	int probe;
 	char name[64];
@@ -26,6 +36,8 @@ struct device {
 	unsigned int len;
 	unsigned int irq;
 	struct driver *drv;
+	struct iommu iommu;
+	char compatible[128];
 };
 
 struct devices {
@@ -60,6 +72,7 @@ struct device_init_entry {
 	unsigned long start;
 	unsigned int len;
 	unsigned int irq;
+	int dev_id;
 	void *data;
 };
 
