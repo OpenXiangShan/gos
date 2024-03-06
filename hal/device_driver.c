@@ -140,7 +140,8 @@ static int __probe_device_table(struct driver_init_entry *driver_head,
 			if (!strncmp
 			    (driver_entry->compatible, device_entry->compatible,
 			     128)) {
-				strcpy(dev->compatible, device_entry->compatible);
+				strcpy(dev->compatible,
+				       device_entry->compatible);
 				dev->drv = drv;
 				dev->probe = 1;
 				drv->dev = dev;

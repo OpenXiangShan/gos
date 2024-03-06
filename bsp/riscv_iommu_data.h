@@ -9,7 +9,7 @@ struct riscv_iommu_data {
 	int fltq_irq;
 	int priq_irq;
 	int ddt_mode;
-	int pg_mode; 
+	int pg_mode;
 };
 
 #endif

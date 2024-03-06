@@ -96,7 +96,7 @@ run_shell:
 				arrow_flag = 2;
 			} else if (arrow_flag == 2) {
 				arrow_flag = 0;
-				if (buf[i] == 65 /* up */ ) { //use to show last history cmd
+				if (buf[i] == 65 /* up */ ) {	//use to show last history cmd
 					cmd = get_last_cmd_pos();
 					if (cmd) {
 						while (input_count--)
@@ -107,7 +107,7 @@ run_shell:
 						strcpy(tmp, cmd->name);
 						tmp += input_count;
 					}
-				} else if (buf[i] == 66 /* down */ ) { // use to show next history cmd
+				} else if (buf[i] == 66 /* down */ ) {	// use to show next history cmd
 					cmd = get_last_next_cmd_pos();
 					if (cmd) {
 						while (input_count--)

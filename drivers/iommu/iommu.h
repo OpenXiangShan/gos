@@ -168,18 +168,18 @@ struct riscv_iommu_priv_data {
 	int fltq_irq;
 	int priq_irq;
 	int ddt_mode;
-	int pg_mode; 
+	int pg_mode;
 };
 
 struct riscv_iommu_dc {
-        unsigned long tc;
-        unsigned long iohgatp;
-        unsigned long ta;
-        unsigned long fsc;
-        unsigned long msiptp;
-        unsigned long msi_addr_mask;
-        unsigned long msi_addr_pattern;
-        unsigned long _reserved;
+	unsigned long tc;
+	unsigned long iohgatp;
+	unsigned long ta;
+	unsigned long fsc;
+	unsigned long msiptp;
+	unsigned long msi_addr_mask;
+	unsigned long msi_addr_pattern;
+	unsigned long _reserved;
 };
 
 struct riscv_iommu_device {
@@ -200,12 +200,12 @@ struct riscv_iommu {
 	int fltq_irq;
 	int priq_irq;
 	struct riscv_iommu_queue cmdq;
-	struct riscv_iommu_queue fltq; 
-	struct riscv_iommu_queue priq; 
+	struct riscv_iommu_queue fltq;
+	struct riscv_iommu_queue priq;
 	int ddt_mode;
 	void *ddtp;
 	unsigned long cap;
-	int pg_mode; 
+	int pg_mode;
 };
 
 #endif

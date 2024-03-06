@@ -34,10 +34,10 @@ static const struct device_init_entry __attribute__((used))
 	 "riscv,iommu",
 	 0x10001000,
 	 0x100,
-         0xFF,
-         0,
-	 &riscv_iommu_data,	
-	},
+	 0xFF,
+	 0,
+	 &riscv_iommu_data,
+	  },
 	{
 	 "riscv,iommu_test",
 	 0x10001000,
@@ -45,7 +45,7 @@ static const struct device_init_entry __attribute__((used))
 	 0xff,
 	 0,
 	 0,
-	},
+	  },
 	{
 	 "riscv,iommu_test2",
 	 0x10001000,
@@ -53,7 +53,7 @@ static const struct device_init_entry __attribute__((used))
 	 0xff,
 	 1,
 	 0,
-	},
+	  },
 	{
 	 "riscv,iommu_test3",
 	 0x10001000,
@@ -61,7 +61,7 @@ static const struct device_init_entry __attribute__((used))
 	 0xff,
 	 1,
 	 0,
-	},
+	  },
 #endif
 	{
 	 "memory-map",
@@ -69,7 +69,7 @@ static const struct device_init_entry __attribute__((used))
 	 0x80000000,
 	 0xFF,
 	 0,
-         0,
+	 0,
 	  },
 #ifndef USE_QEMU
 	{
@@ -77,7 +77,7 @@ static const struct device_init_entry __attribute__((used))
 	 0x3c000000,
 	 0x4000000,
 	 0xFF,
-         0,
+	 0,
 	 &plic_hw_data,
 	  },
 #else
@@ -86,7 +86,7 @@ static const struct device_init_entry __attribute__((used))
 	 0xc000000,
 	 0x4000000,
 	 0xFF,
-         0,
+	 0,
 	 &plic_hw_data,
 	  },
 #endif
@@ -96,7 +96,7 @@ static const struct device_init_entry __attribute__((used))
 	 0x38000000,
 	 0x10000,
 	 0xFF,
-         0,
+	 0,
 	 &clint_hw_data,
 	  },
 #else
@@ -105,7 +105,7 @@ static const struct device_init_entry __attribute__((used))
 	 0x2000000,
 	 0x10000,
 	 0xFF,
-         0,
+	 0,
 	 &qemu_clint_hw_data,
 	  },
 #endif
@@ -125,6 +125,6 @@ static const struct device_init_entry __attribute__((used))
 	 0xFF,
 	 0xFF,
 	 0,
-         0,
+	 0,
 	  },
 };

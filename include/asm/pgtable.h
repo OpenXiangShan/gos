@@ -21,7 +21,7 @@ extern int pgtable_l4_enabled;
                 (pgtable_l4_enabled ? PGDIR_SHIFT_L4 : PGDIR_SHIFT_L3))
 
 typedef struct {
-        unsigned long pgprot;
+	unsigned long pgprot;
 } pgprot_t;
 
 #define pgprot_val(x)   ((x).pgprot)
@@ -29,14 +29,14 @@ typedef struct {
 #define __pgprot(x)     ((pgprot_t) { (x) } )
 
 #define _PAGE_PRESENT   (1 << 0)
-#define _PAGE_READ      (1 << 1)    /* Readable */
-#define _PAGE_WRITE     (1 << 2)    /* Writable */
-#define _PAGE_EXEC      (1 << 3)    /* Executable */
-#define _PAGE_USER      (1 << 4)    /* User */
-#define _PAGE_GLOBAL    (1 << 5)    /* Global */
-#define _PAGE_ACCESSED  (1 << 6)    /* Set by hardware on any access */
-#define _PAGE_DIRTY     (1 << 7)    /* Set by hardware on any write */
-#define _PAGE_SOFT      (1 << 8)    /* Reserved for software */
+#define _PAGE_READ      (1 << 1)	/* Readable */
+#define _PAGE_WRITE     (1 << 2)	/* Writable */
+#define _PAGE_EXEC      (1 << 3)	/* Executable */
+#define _PAGE_USER      (1 << 4)	/* User */
+#define _PAGE_GLOBAL    (1 << 5)	/* Global */
+#define _PAGE_ACCESSED  (1 << 6)	/* Set by hardware on any access */
+#define _PAGE_DIRTY     (1 << 7)	/* Set by hardware on any write */
+#define _PAGE_SOFT      (1 << 8)	/* Reserved for software */
 
 /* Page protection bits */
 #define _PAGE_BASE      (_PAGE_PRESENT | _PAGE_ACCESSED | _PAGE_USER)
@@ -48,13 +48,13 @@ typedef struct {
 #define PAGE_WRITE_EXEC         __pgprot(_PAGE_BASE | _PAGE_READ |      \
                                          _PAGE_EXEC | _PAGE_WRITE)
 
-#define pfn_to_phys(pfn)    (pfn << PAGE_SHIFT)    
+#define pfn_to_phys(pfn)    (pfn << PAGE_SHIFT)
 
 static inline unsigned long pfn_pte(unsigned long pfn, pgprot_t prot)
 {
-        unsigned long prot_val = pgprot_val(prot);
+	unsigned long prot_val = pgprot_val(prot);
 
-        return ((pfn << _PAGE_PFN_SHIFT) | prot_val);
+	return ((pfn << _PAGE_PFN_SHIFT) | prot_val);
 }
 
 static inline unsigned long pte_pfn(unsigned long pte)
@@ -69,7 +69,8 @@ static inline int pmd_present(unsigned long pmd)
 
 static inline int pmd_leaf(unsigned long pmd)
 {
-	return (pmd_present(pmd) && (pmd & (_PAGE_READ | _PAGE_WRITE | _PAGE_EXEC))); 
+	return (pmd_present(pmd)
+		&& (pmd & (_PAGE_READ | _PAGE_WRITE | _PAGE_EXEC)));
 }
 
 static inline int pmd_none(unsigned long pmd)

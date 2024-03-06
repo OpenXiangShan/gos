@@ -7,7 +7,7 @@ int pgtable_l5_enabled = 0;
 unsigned long alloc_zero_page(int gfp)
 {
 	void *ptr = mm_alloc(4096);
-	
+
 	if (!ptr)
 		return 0;
 

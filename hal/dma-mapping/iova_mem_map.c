@@ -16,11 +16,11 @@ void *iova_alloc(struct device *dev, unsigned int size)
 	unsigned long *maps;
 	int per_mem_map = sizeof(maps[0]) * 8;
 
-	if (!group){
+	if (!group) {
 		print("%s -- find iommu group failed\n", __FUNCTION__);
 		return NULL;
 	}
-	maps = group->iova_mem_maps;	
+	maps = group->iova_mem_maps;
 
 	/* 
 	 * Find free pages from maps according to page_nr 
@@ -56,8 +56,8 @@ success:
 		mem_map |= (1 << (index % per_mem_map));
 		maps[(index / per_mem_map)] = mem_map;
 	}
-	
-	return addr;	
+
+	return addr;
 }
 
 void iova_free(struct device *dev, void *addr, unsigned int size)
@@ -65,15 +65,15 @@ void iova_free(struct device *dev, void *addr, unsigned int size)
 	struct iommu_group *group = dev->iommu.group;
 	unsigned long index;
 	unsigned long mem_map;
-	unsigned long *maps; 
+	unsigned long *maps;
 	int per_mem_map = sizeof(maps[0]) * 8;
 	int page_nr = N_PAGE(size);
-	
-	if (!group){
+
+	if (!group) {
 		print("%s -- find iommu group failed\n", __FUNCTION__);
 		return;
 	}
-	maps = group->iova_mem_maps;	
+	maps = group->iova_mem_maps;
 
 	index = ((unsigned long)addr - iova_address_start) / PAGE_SIZE;
 	if (index >= TOTAL_IOVA_PAGE_NUM)
