@@ -134,6 +134,9 @@
 #define phys_to_ppn(pa)  (((pa) >> 2) & (((1ULL << 44) - 1) << 10))
 #define ppn_to_phys(pn)  (((pn) << 2) & (((1ULL << 44) - 1) << 12))
 
+#define RISCV_IOMMU_FIRST_STAGE 1
+#define RISCV_IOMMU_GSTAGE 2
+
 enum riscv_iommu_ddtp_modes {
 	DDTP_MODE_OFF,
 	DDTP_MODE_BARE,
@@ -189,6 +192,7 @@ struct riscv_iommu_device {
 	int pasid_enabled;
 	int mode;
 	void *pgdp;
+	void *pgdp_gstage;
 };
 
 struct riscv_iommu {

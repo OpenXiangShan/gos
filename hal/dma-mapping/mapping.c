@@ -64,6 +64,51 @@ void set_dma_mapping_ops(struct dma_map_ops *ops)
 	dma_mapping_ops = ops;
 }
 
+void *dma_two_stage_alloc(struct device *dev, unsigned long *iova,
+			  unsigned long *gpa, unsigned int size)
+{
+	void *addr = NULL, *p_iova = NULL, *p_gpa = NULL;
+
+	if (!dma_mapping_ops || !dma_mapping_ops->map_pages)
+		return NULL;
+	else {
+		p_iova = iova_alloc(dev, size);
+		if (p_iova == (void *)U64_MAX) {
+			print("%s -- alloc iova failed\n", __FUNCTION__);
+			return NULL;
+		}
+
+		p_gpa = gpa_alloc(dev, size);
+		if (p_gpa == (void *)U64_MAX) {
+			print("%s -- alloc gpa failed\n", __FUNCTION__);
+			return NULL;
+		}
+
+		addr = mm_alloc(size);
+		if (!addr) {
+			print("%s -- mm alloc failed\n", __FUNCTION__);
+			return NULL;
+		}
+		// first stage mapping (iova --> gpa)
+		if (dma_mapping_ops->map_pages
+		    (dev, (unsigned long)p_iova, p_gpa, size, 0)) {
+			print("%s -- first stage mapping failed\n",
+			      __FUNCTION__);
+			return NULL;
+		}
+		// gstage mapping (gpa->hpa)
+		if (dma_mapping_ops->map_pages
+		    (dev, (unsigned long)p_gpa, addr, size, 1)) {
+			print("%s -- gstage mapping failed\n", __FUNCTION__);
+			return NULL;
+		}
+	}
+	*iova = (unsigned long)p_iova;
+	*gpa = (unsigned long)p_gpa;
+
+	return addr;
+}
+
 void *dma_alloc(struct device *dev, unsigned long *iova, unsigned int size)
 {
 	void *addr = NULL, *p_iova;
@@ -99,4 +144,30 @@ void *dma_iova_to_phys_with_devid(int dev_id, unsigned long iova)
 		return NULL;
 
 	return (void *)dma_mapping_ops->iova_to_phys_with_devid(dev_id, iova);
+}
+
+void dma_gstage_enable(struct device *dev, int gstage)
+{
+	if (!dma_mapping_ops || !dma_mapping_ops->enable_gstage)
+		return;
+
+	dma_mapping_ops->enable_gstage(dev, gstage);
+}
+
+void *dma_iova_to_phys_in_two_stage(struct device *dev, unsigned long iova)
+{
+	if (!dma_mapping_ops || !dma_mapping_ops->iova_to_phys_in_two_stage)
+		return NULL;
+
+	return (void *)dma_mapping_ops->iova_to_phys_in_two_stage(dev, iova);
+}
+
+void *dma_iova_to_phys_in_two_stage_with_devid(int dev_id, unsigned long iova)
+{
+	if (!dma_mapping_ops
+	    || !dma_mapping_ops->iova_to_phys_in_two_stage_with_devid)
+		return NULL;
+
+	return (void *)
+	    dma_mapping_ops->iova_to_phys_in_two_stage_with_devid(dev_id, iova);
 }

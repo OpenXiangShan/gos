@@ -93,8 +93,8 @@ static int riscv_iommu_enable(struct riscv_iommu *iommu)
 	case DDTP_MODE_3LEVEL:
 		iommu->ddtp = mm_alloc(4096);
 		ddtp =
-		    (((unsigned long)iommu->
-		      ddtp >> 2) & DDTP_PPN_MASK) | iommu->ddt_mode;
+		    (((unsigned long)iommu->ddtp >> 2) & DDTP_PPN_MASK) |
+		    iommu->ddt_mode;
 		break;
 	default:
 		return -1;
@@ -105,13 +105,60 @@ static int riscv_iommu_enable(struct riscv_iommu *iommu)
 	return 0;
 }
 
+static unsigned long riscv_iommu_atp(struct riscv_iommu_device *iommu)
+{
+	unsigned long atp = iommu->mode & DC_FSC_MODE_MASK;
+	void *pgdp = iommu->g_stage_enabled ? iommu->pgdp_gstage : iommu->pgdp;
+
+	if (iommu->mode != RISCV_IOMMU_DC_FSC_MODE_BARE)
+		atp |= ((unsigned long)pgdp >> PAGE_SHIFT) & ATP_PPN_MASK;
+	if (iommu->g_stage_enabled)
+		atp |= iommu->pscid & IOHGATP_GSCID_MASK;
+
+	return atp;
+}
+
+static int riscv_iommu_gstage_finalize(struct riscv_iommu_device *iommu_dev)
+{
+	if (!iommu_dev->g_stage_enabled)
+		return -1;
+
+	iommu_dev->dc->fsc = riscv_iommu_atp(iommu_dev);
+
+	return 0;
+}
+
+static int riscv_iommu_map_pages(struct device *dev, unsigned long iova,
+				 void *addr, unsigned int size, int gstage)
+{
+	int ret = 0;
+	struct riscv_iommu_device *iommu_dev =
+	    (struct riscv_iommu_device *)dev->iommu.priv_data;
+
+	if (gstage) {
+		if (!iommu_dev->g_stage_enabled) {
+			print("%s -- g_stage_enabled is NULL\n", __FUNCTION__);
+			return -1;
+		}
+
+		ret = riscv_gstage_map_pages(iommu_dev, iova, addr, size, 0);
+	} else
+		ret = riscv_fstage_map_pages(iommu_dev, iova, addr, size, 0);
+
+	if (ret)
+		return ret;
+
+	if (gstage)
+		riscv_iommu_gstage_finalize(iommu_dev);
+
+	return ret;
+}
+
 static void *riscv_iommu_alloc(struct device *dev, unsigned long iova,
 			       unsigned int size, unsigned int gfp)
 {
 	void *addr = NULL;
 	static struct riscv_iommu_dc *dc;
-	struct riscv_iommu_device *iommu_dev =
-	    (struct riscv_iommu_device *)dev->iommu.priv_data;
 
 	dc = riscv_iommu_get_dc(&iommu, dev->iommu.dev_id);
 	if (!dc) {
@@ -125,25 +172,12 @@ static void *riscv_iommu_alloc(struct device *dev, unsigned long iova,
 		return NULL;
 	}
 
-	if (riscv_map_pages(iommu_dev, iova, addr, size, gfp)) {
+	if (riscv_iommu_map_pages(dev, iova, addr, size, 0)) {
 		print("riscv map pages failed\n");
 		return NULL;
 	}
 
 	return addr;
-}
-
-static unsigned long riscv_iommu_atp(struct riscv_iommu_device *iommu)
-{
-	unsigned long atp = iommu->mode & DC_FSC_MODE_MASK;
-
-	if (iommu->mode != RISCV_IOMMU_DC_FSC_MODE_BARE)
-		atp |=
-		    (((unsigned long)iommu->pgdp) >> PAGE_SHIFT) & ATP_PPN_MASK;
-	if (iommu->g_stage_enabled)
-		atp |= iommu->pscid & IOHGATP_GSCID_MASK;
-
-	return atp;
 }
 
 static int riscv_iommu_finalize(struct device *dev, int pscid)
@@ -153,6 +187,7 @@ static int riscv_iommu_finalize(struct device *dev, int pscid)
 	struct riscv_iommu_device *iommu_dev =
 	    (struct riscv_iommu_device *)dev->iommu.priv_data;
 	struct riscv_iommu_dc *dc;
+	int pgd_size;
 
 	if (!iommu_dev) {
 		print("%s -- iommu_dev is NULL\n", __FUNCTION__);
@@ -172,14 +207,51 @@ static int riscv_iommu_finalize(struct device *dev, int pscid)
 	}
 
 	if (!gp->pgdp) {
-		gp->pgdp = mm_alloc(PAGE_SIZE);
+		if (iommu_dev->mode == RISCV_IOMMU_DC_FSC_IOSATP_MODE_SV32)
+			pgd_size = PAGE_SIZE;
+		else if (iommu_dev->mode == RISCV_IOMMU_DC_FSC_IOSATP_MODE_SV39)
+			pgd_size = PAGE_SIZE;
+		else if (iommu_dev->mode == RISCV_IOMMU_DC_FSC_IOSATP_MODE_SV48)
+			pgd_size = PAGE_SIZE;
+		else if (iommu_dev->mode == RISCV_IOMMU_DC_FSC_IOSATP_MODE_SV57)
+			pgd_size = PAGE_SIZE;
+		else {
+			print("%s -- unsupported pt mode\n", __FUNCTION__);
+			return -1;
+		}
+
+		gp->pgdp = mm_alloc(pgd_size);
 		if (!gp->pgdp) {
-			print("%s -- Out of memory\n", __FUNCTION__);
+			print("%s -- Out of memory size:%d\n", __FUNCTION__,
+			      pgd_size);
+			return -1;
+		}
+	}
+
+	if (!gp->pgdp_gstage) {
+		if (iommu_dev->mode == RISCV_IOMMU_DC_FSC_IOSATP_MODE_SV32)
+			pgd_size = PAGE_SIZE * 4;
+		else if (iommu_dev->mode == RISCV_IOMMU_DC_FSC_IOSATP_MODE_SV39)
+			pgd_size = PAGE_SIZE * 4;
+		else if (iommu_dev->mode == RISCV_IOMMU_DC_FSC_IOSATP_MODE_SV48)
+			pgd_size = PAGE_SIZE * 4;
+		else if (iommu_dev->mode == RISCV_IOMMU_DC_FSC_IOSATP_MODE_SV57)
+			pgd_size = PAGE_SIZE * 4;
+		else {
+			print("%s -- unsupported pt mode\n", __FUNCTION__);
+			return -1;
+		}
+
+		gp->pgdp_gstage = mm_alloc(pgd_size);
+		if (!gp->pgdp_gstage) {
+			print("%s -- Out of memory size:%d\n", __FUNCTION__,
+			      pgd_size);
 			return -1;
 		}
 	}
 
 	iommu_dev->pgdp = gp->pgdp;
+	iommu_dev->pgdp_gstage = gp->pgdp_gstage;
 	iommu_dev->pscid = pscid;
 
 	if (iommu_dev->g_stage_enabled) {
@@ -290,12 +362,55 @@ static unsigned long riscv_iommu_iova_to_phys_with_devid(int dev_id,
 	return (pfn_to_phys(pte_pfn(*pte)) | (iova & (PAGE_SIZE - 1)));
 }
 
+void riscv_iommu_enable_gstage(struct device *dev, int gstage)
+{
+	struct riscv_iommu_device *iommu_dev =
+	    (struct riscv_iommu_device *)dev->iommu.priv_data;
+
+	iommu_dev->g_stage_enabled = gstage;
+}
+
+unsigned long riscv_iommu_iova_to_phys_in_two_stage(struct device *dev,
+						    unsigned long iova)
+{
+	struct riscv_iommu_device *iommu_dev =
+	    (struct riscv_iommu_device *)dev->iommu.priv_data;
+	unsigned long gpa = 0;
+
+	if (!iommu_dev) {
+		print("%s -- iommu_dev is NULL\n", __FUNCTION__);
+		return 0;
+	}
+
+	if (!iommu_dev->g_stage_enabled) {
+		print("%s -- g_stage_enabled is NULL\n", __FUNCTION__);
+		return 0;
+	}
+	//first stage page walk (iova --> gpa)
+	gpa = riscv_iova_to_phys(iommu_dev, iova);
+
+	//gstage page walk
+	return riscv_iova_to_phys_gstage(iommu_dev, gpa);
+}
+
+unsigned long riscv_iommu_iova_to_phys_in_two_stage_with_devid(int dev_id,
+							       unsigned long
+							       iova)
+{
+	return NULL;
+}
+
 static struct dma_map_ops riscv_iommu_mapping_ops = {
 	.alloc = riscv_iommu_alloc,
+	.map_pages = riscv_iommu_map_pages,
 	.probe_device = riscv_iommu_probe_device,
 	.finalize = riscv_iommu_finalize,
 	.iova_to_phys = riscv_iommu_iova_to_phys,
 	.iova_to_phys_with_devid = riscv_iommu_iova_to_phys_with_devid,
+	.enable_gstage = riscv_iommu_enable_gstage,
+	.iova_to_phys_in_two_stage = riscv_iommu_iova_to_phys_in_two_stage,
+	.iova_to_phys_in_two_stage_with_devid =
+	    riscv_iommu_iova_to_phys_in_two_stage_with_devid,
 };
 
 int riscv_iommu_init(struct device *dev, void *data)
