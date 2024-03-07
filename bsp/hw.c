@@ -62,6 +62,22 @@ static const struct device_init_entry __attribute__((used))
 	 1,
 	 0,
 	  },
+	{
+	 "riscv,iommu_test_two_stage",
+	 0x10001000,
+	 0x100,
+	 0xff,
+	 1,
+	 0,
+	  },
+	{
+	 "riscv,iommu_test_two_stage2",
+	 0x10001000,
+	 0x100,
+	 0xff,
+	 2,
+	 0,
+	  },
 #endif
 	{
 	 "memory-map",
