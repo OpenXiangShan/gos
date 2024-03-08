@@ -156,6 +156,13 @@ enum riscv_iommu_dc_fsc_atp_modes {
 	RISCV_IOMMU_DC_FSC_PDTP_MODE_PD20 = 3
 };
 
+enum riscv_iommu_pgtable_level {
+	PGTABLE_PGD,
+	PGTABLE_PMD,
+	PGTABLE_PTE,
+	PGTABLE_INVAILD,
+};
+
 struct riscv_iommu_queue {
 	void *base;
 	int irq;

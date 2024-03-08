@@ -10,9 +10,10 @@ static unsigned long *riscv_iommu_pt_walk_alloc(unsigned long *ptp,
 						int root,
 						unsigned long (*pg_alloc)(int
 									  gfp),
-						int gfp)
+						int gstage, int level, int gfp)
 {
 	unsigned long *pte, ptr, pfn;
+	int next_shift;
 
 	if (root)
 		pte = ptp + (iova >> shift);
@@ -32,8 +33,16 @@ static unsigned long *riscv_iommu_pt_walk_alloc(unsigned long *ptp,
 		*pte = (pfn << _PAGE_PFN_SHIFT) | _PAGE_PRESENT;
 	}
 
-	return riscv_iommu_pt_walk_alloc(pte, iova, shift - 9, pgsize, 0,
-					 pg_alloc, gfp);
+	if (gstage == RISCV_IOMMU_GSTAGE) {
+		if (level == PGTABLE_PGD)
+			next_shift = shift - 11;
+		else
+			next_shift = shift - 9;
+	} else
+		next_shift = shift - 9;
+
+	return riscv_iommu_pt_walk_alloc(pte, iova, next_shift, pgsize, 0,
+					 pg_alloc, gstage, ++level, gfp);
 }
 
 unsigned long *riscv_iommu_pt_walk_fetch(unsigned long *ptp,
@@ -110,6 +119,7 @@ static int riscv_map_pages(struct riscv_iommu_device *iommu_dev,
 	unsigned long pfn, pte_val;
 	unsigned int pgd_shift = 0;
 	void *pgdp;
+	int pgtable_level = PGTABLE_PGD;
 
 	if (!iommu_dev) {
 		print("%s -- iommu_dev is NULL\n");
@@ -131,7 +141,8 @@ static int riscv_map_pages(struct riscv_iommu_device *iommu_dev,
 		pte =
 		    riscv_iommu_pt_walk_alloc((unsigned long *)pgdp,
 					      iova, pgd_shift, PAGE_SIZE, 1,
-					      alloc_zero_page, gfp);
+					      alloc_zero_page, gstage,
+					      pgtable_level, gfp);
 		if (!pte)
 			return NULL;
 
