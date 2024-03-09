@@ -20,12 +20,6 @@ extern int pgtable_l4_enabled;
 #define PGDIR_SHIFT     (pgtable_l5_enabled ? PGDIR_SHIFT_L5 : \
                 (pgtable_l4_enabled ? PGDIR_SHIFT_L4 : PGDIR_SHIFT_L3))
 
-#define PGDIR_SHIFT_L3_GSTAGE 34
-#define PGDIR_SHIFT_L4_GSTAGE 41
-#define PGDIR_SHIFT_L5_GSTAGE 50
-#define PGDIR_SHIFT_GSTAGE     (pgtable_l5_enabled ? PGDIR_SHIFT_L5_GSTAGE : \
-                (pgtable_l4_enabled ? PGDIR_SHIFT_L4_GSTAGE : PGDIR_SHIFT_L3_GSTAGE))
-
 typedef struct {
 	unsigned long pgprot;
 } pgprot_t;

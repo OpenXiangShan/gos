@@ -10,16 +10,19 @@ static unsigned long *riscv_iommu_pt_walk_alloc(unsigned long *ptp,
 						int root,
 						unsigned long (*pg_alloc)(int
 									  gfp),
-						int gstage, int level, int gfp)
+						int gfp)
 {
 	unsigned long *pte, ptr, pfn;
-	int next_shift;
 
 	if (root)
 		pte = ptp + (iova >> shift);
 	else {
-		pte = (unsigned long *)pfn_to_phys(pte_pfn(*ptp));
+		pte =
+		    (unsigned long *)pfn_to_phys(pte_pfn(*ptp)) +
+		    (iova >> shift);
 	}
+
+	//print("%s %d shift:%d pgtable_entry:0x%x\n", __FUNCTION__, __LINE__, shift, pte);
 
 	if ((1UL << shift) <= pgsize) {
 		return pte;
@@ -33,16 +36,8 @@ static unsigned long *riscv_iommu_pt_walk_alloc(unsigned long *ptp,
 		*pte = (pfn << _PAGE_PFN_SHIFT) | _PAGE_PRESENT;
 	}
 
-	if (gstage == RISCV_IOMMU_GSTAGE) {
-		if (level == PGTABLE_PGD)
-			next_shift = shift - 11;
-		else
-			next_shift = shift - 9;
-	} else
-		next_shift = shift - 9;
-
-	return riscv_iommu_pt_walk_alloc(pte, iova, next_shift, pgsize, 0,
-					 pg_alloc, gstage, ++level, gfp);
+	return riscv_iommu_pt_walk_alloc(pte, iova, shift - 9, pgsize, 0,
+					 pg_alloc, gfp);
 }
 
 unsigned long *riscv_iommu_pt_walk_fetch(unsigned long *ptp,
@@ -54,7 +49,11 @@ unsigned long *riscv_iommu_pt_walk_fetch(unsigned long *ptp,
 	if (root)
 		pte = ptp + (iova >> shift);
 	else
-		pte = (unsigned long *)pfn_to_phys(pte_pfn(*ptp));
+		pte =
+		    (unsigned long *)pfn_to_phys(pte_pfn(*ptp)) +
+		    (iova >> shift);
+
+	//print("%s %d shift:%d pgtable_entry:0x%x\n", __FUNCTION__, __LINE__, shift, pte);
 
 	if (pmd_leaf(*pte))
 		return pte;
@@ -71,20 +70,17 @@ static unsigned long __riscv_iova_to_phys(struct riscv_iommu_device *dev,
 {
 	unsigned long *pte;
 	unsigned long *ptp;
-	int shift;
 
 	if (stage == RISCV_IOMMU_FIRST_STAGE) {
-		shift = PGDIR_SHIFT;
 		ptp = dev->pgdp;
 	} else if (stage == RISCV_IOMMU_GSTAGE) {
-		shift = PGDIR_SHIFT_GSTAGE;
 		ptp = dev->pgdp_gstage;
 	} else {
 		print("%s -- unsupported stage\n");
 		return 0;
 	}
 
-	pte = riscv_iommu_pt_walk_fetch(ptp, iova, shift, 1);
+	pte = riscv_iommu_pt_walk_fetch(ptp, iova, PGDIR_SHIFT, 1);
 	if (!pte) {
 		print("%s -- pt walk fetch pte is NULL\n", __FUNCTION__);
 		return 0;
@@ -117,9 +113,7 @@ static int riscv_map_pages(struct riscv_iommu_device *iommu_dev,
 	int page_nr = N_PAGE(size);
 	unsigned long *pte;
 	unsigned long pfn, pte_val;
-	unsigned int pgd_shift = 0;
 	void *pgdp;
-	int pgtable_level = PGTABLE_PGD;
 
 	if (!iommu_dev) {
 		print("%s -- iommu_dev is NULL\n");
@@ -127,10 +121,8 @@ static int riscv_map_pages(struct riscv_iommu_device *iommu_dev,
 	}
 
 	if (gstage == RISCV_IOMMU_GSTAGE) {
-		pgd_shift = PGDIR_SHIFT_GSTAGE;
 		pgdp = iommu_dev->pgdp_gstage;
 	} else if (gstage == RISCV_IOMMU_FIRST_STAGE) {
-		pgd_shift = PGDIR_SHIFT;
 		pgdp = iommu_dev->pgdp;
 	}
 
@@ -140,9 +132,8 @@ static int riscv_map_pages(struct riscv_iommu_device *iommu_dev,
 		pfn = (unsigned long)addr >> PAGE_SHIFT;
 		pte =
 		    riscv_iommu_pt_walk_alloc((unsigned long *)pgdp,
-					      iova, pgd_shift, PAGE_SIZE, 1,
-					      alloc_zero_page, gstage,
-					      pgtable_level, gfp);
+					      iova, PGDIR_SHIFT, PAGE_SIZE, 1,
+					      alloc_zero_page, gfp);
 		if (!pte)
 			return NULL;
 
