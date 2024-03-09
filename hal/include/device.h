@@ -37,6 +37,7 @@ struct device {
 	unsigned int irq;
 	struct driver *drv;
 	struct iommu iommu;
+	struct irq_domain *irq_domain;
 	char compatible[128];
 };
 
@@ -71,6 +72,7 @@ struct device_init_entry {
 	char compatible[128];
 	unsigned long start;
 	unsigned int len;
+	char irq_parent[128];
 	unsigned int irq;
 	int dev_id;
 	void *data;
@@ -97,8 +99,8 @@ struct earlycon_init_entry {
 	earlycon_init init;
 };
 
-typedef int (*irqchip_init)(unsigned long base, struct irq_domain * d,
-			    void *priv);
+typedef int (*irqchip_init)(char *name, unsigned long base,
+			    struct irq_domain * d, void *priv);
 
 struct irqchip_init_entry {
 	char compatible[128];

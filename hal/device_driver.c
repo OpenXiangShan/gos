@@ -3,6 +3,7 @@
 #include <string.h>
 #include <mm.h>
 #include <print.h>
+#include "irq.h"
 #include "dma_mapping.h"
 
 static struct devices _devices;
@@ -61,6 +62,9 @@ found:
 	dev->len = entry->len;
 	dev->irq = entry->irq;
 	dev->iommu.dev_id = entry->dev_id;
+	dev->irq_domain = find_irq_domain(entry->irq_parent);
+	print("%s %d irq_domain:0x%x name:%s\n", __FUNCTION__, __LINE__,
+	      dev->irq_domain, entry->irq_parent);
 	_devices.avail++;
 
 	return dev;

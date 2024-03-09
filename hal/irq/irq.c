@@ -5,43 +5,43 @@
 #include <asm/type.h>
 #include <irq.h>
 #include <timer.h>
+#include "mm.h"
 
 #define MAX_IRQ_NUM 64
-static struct irq_info interrupts_ctx[MAX_IRQ_NUM];
-static unsigned long irq_bit_flag;
 
-static struct irq_domain domain[] = {
-	{
-	 .cause = 1,
-	 .handler = NULL,
-	  },
-	{
-	 .cause = 5,
-	 .handler = NULL,
-	  },
-	{
-	 .cause = 9,
-	 .handler = NULL,
-	  },
-};
+static LIST_HEAD(irq_domains);
 
-#define DOMAIN_NUM sizeof(domain)/sizeof(domain[0])
+static struct irq_domain intc_domain;
 
-static struct irq_domain *find_irq_domain(unsigned long cause)
+struct irq_domain *find_irq_domain(char *name)
 {
-	int i;
+	struct irq_domain *domain;
 
-	for (i = 0; i < DOMAIN_NUM; i++) {
-		if (domain[i].cause == cause)
-			return &domain[i];
-	}
+	list_for_each_entry(domain, &irq_domains, list)
+	    if (!strncmp(domain->name, name, 128))
+		return domain;
+
+	return NULL;
+}
+
+struct irq_info *find_irq_info(struct irq_domain *domain, int hwirq)
+{
+	struct irq_info *info;
+
+	if (!domain)
+		return NULL;
+
+	list_for_each_entry(info, &domain->irq_info_head, list)
+	    if (info->hwirq == hwirq)
+		return info;
 
 	return NULL;
 }
 
 void handle_irq(unsigned long cause)
 {
-	struct irq_domain *d = find_irq_domain(cause & (~SCAUSE_IRQ));
+	struct irq_domain *d = find_irq_domain("INTC");
+	struct irq_info *irq_info;
 
 	if (!d) {
 		print("unsupported cause: %d\n", cause & (~SCAUSE_IRQ));
@@ -49,7 +49,11 @@ void handle_irq(unsigned long cause)
 		return;
 	}
 
-	d->handler();
+	irq_info = find_irq_info(d, cause & (~SCAUSE_IRQ));
+	if (!irq_info || !irq_info->handler)
+		return;
+
+	irq_info->handler(irq_info->priv);
 }
 
 int irqchip_setup(struct device_init_entry *hw)
@@ -59,58 +63,22 @@ int irqchip_setup(struct device_init_entry *hw)
 	    (struct irqchip_init_entry *)&IRQCHIP_INIT_TABLE_END -
 	    (struct irqchip_init_entry *)&IRQCHIP_INIT_TABLE;
 	int driver_nr_tmp = 0;
-	int i;
 	struct irqchip_init_entry *driver_entry;
 	struct device_init_entry *device_entry = hw;
 	struct irqchip_init_entry *driver_tmp =
 	    (struct irqchip_init_entry *)&IRQCHIP_INIT_TABLE;
-	struct irq_domain *d = find_irq_domain(INTERRUPT_CAUSE_EXTERNAL);
+	struct irq_domain *d;
 
 	while (strncmp(device_entry->compatible, "THE END", sizeof("THE_END"))) {
 		driver_nr_tmp = driver_nr;
 		for (driver_entry = driver_tmp; driver_nr_tmp;
 		     driver_entry++, driver_nr_tmp--) {
+			d = find_irq_domain(device_entry->irq_parent);
 			if (!strncmp
 			    (driver_entry->compatible, device_entry->compatible,
 			     128)) {
-				driver_entry->init(device_entry->start, d,
-						   device_entry->data);
-			}
-		}
-		device_entry++;
-	}
-
-	for (i = 0; i < 64; i++) {
-		interrupts_ctx[i].hwirq = -1;
-		interrupts_ctx[i].handler = NULL;
-		interrupts_ctx[i].priv = NULL;
-	}
-	irq_bit_flag = 0;
-
-	return 0;
-}
-
-int timer_setup(struct device_init_entry *hw)
-{
-	extern unsigned long TIMER_INIT_TABLE, TIMER_INIT_TABLE_END;
-	int driver_nr =
-	    (struct timer_init_entry *)&TIMER_INIT_TABLE_END -
-	    (struct timer_init_entry *)&TIMER_INIT_TABLE;
-	int driver_nr_tmp = 0;
-	struct timer_init_entry *driver_entry;
-	struct device_init_entry *device_entry = hw;
-	struct timer_init_entry *driver_tmp =
-	    (struct timer_init_entry *)&TIMER_INIT_TABLE;
-	struct irq_domain *d = find_irq_domain(INTERRUPT_CAUSE_TIMER);
-
-	while (strncmp(device_entry->compatible, "THE END", sizeof("THE END"))) {
-		driver_nr_tmp = driver_nr;
-		for (driver_entry = driver_tmp; driver_nr_tmp;
-		     driver_entry++, driver_nr_tmp--) {
-			if (!strncmp
-			    (driver_entry->compatible, device_entry->compatible,
-			     128)) {
-				driver_entry->init(device_entry->start, d,
+				driver_entry->init(device_entry->compatible,
+						   device_entry->start, d,
 						   device_entry->data);
 			}
 		}
@@ -120,41 +88,64 @@ int timer_setup(struct device_init_entry *hw)
 	return 0;
 }
 
-int register_device_irq(int hwirq, void (*handler)(void *data), void *priv)
+int domain_handle_irq(struct irq_domain *domain, unsigned int hwirq, void *data)
 {
-	struct irq_info *interrupt;
-
-	if (0x01 & (irq_bit_flag >> hwirq))
+	struct irq_info *irq_info;
+	if (!domain->parent_domain)
 		return -1;
 
-	irq_bit_flag |= (unsigned long)1 << hwirq;
+	irq_info = find_irq_info(domain, hwirq);
+	if (!irq_info || !irq_info->handler)
+		return -1;
 
-	interrupt = &interrupts_ctx[hwirq];
-	interrupt->hwirq = hwirq;
-	interrupt->handler = handler;
-	interrupt->priv = priv;
+	irq_info->handler(irq_info->priv);
 
 	return 0;
 }
 
-irq_handler_t get_irq_handler(int hwirq)
+int register_device_irq(struct irq_domain *domain, unsigned int hwirq,
+			void (*handler)(void *data), void *priv)
 {
-	if (hwirq > MAX_IRQ_NUM)
-		return NULL;
+	struct irq_info *irq_info = NULL;
 
-	if (!(0x01 & (irq_bit_flag >> hwirq)))
-		return NULL;
+	irq_info = find_irq_info(domain, hwirq);
+	if (!irq_info) {
+		irq_info = (struct irq_info *)mm_alloc(sizeof(struct irq_info));
+		if (!irq_info) {
+			print("%s -- Out of memory\n", __FUNCTION__);
+			return -1;
+		}
+	}
 
-	return interrupts_ctx[hwirq].handler;
+	irq_info->hwirq = hwirq;
+	irq_info->handler = handler;
+	irq_info->priv = priv;
+	list_add(&irq_info->list, &domain->irq_info_head);
+
+	return 0;
 }
 
-void *get_irq_priv_data(int hwirq)
+int irq_domain_init(struct irq_domain *domain, char *name,
+		    struct irq_domain *parent)
 {
-	if (hwirq > MAX_IRQ_NUM)
-		return NULL;
+	domain->parent_domain = parent;
+	strcpy(domain->name, name);
+	INIT_LIST_HEAD(&domain->irq_info_head);
+	list_add(&domain->list, &irq_domains);
 
-	if (0x01 & (irq_bit_flag >> hwirq))
-		return NULL;
+	return 0;
+}
 
-	return interrupts_ctx[hwirq].priv;
+int irq_domain_init_hierarchy(struct irq_domain *domain, char *name,
+			      struct irq_domain *parent, unsigned int hwirq,
+			      void (*handler)(void *data), void *priv)
+{
+	register_device_irq(parent, hwirq, handler, priv);
+
+	return irq_domain_init(domain, name, parent);
+}
+
+int irq_init()
+{
+	return irq_domain_init(&intc_domain, "INTC", NULL);
 }

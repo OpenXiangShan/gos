@@ -141,7 +141,8 @@ int ns16550a_init(struct device *dev, void *data)
 
 	writel(dev->start + IER, 1);
 
-	register_device_irq(dev->irq, ns16550a_irq_handler, NULL);
+	register_device_irq(dev->irq_domain, dev->irq, ns16550a_irq_handler,
+			    NULL);
 
 	drv = dev->drv;
 	strcpy(dev->name, "UART0");

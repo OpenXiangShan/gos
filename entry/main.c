@@ -21,6 +21,7 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 
 	mm_init(hw);
 	trap_init();
+	irq_init();
 	irqchip_setup(hw);
 	init_timer(hw);
 	device_driver_init(hw);

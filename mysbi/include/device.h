@@ -14,6 +14,7 @@ struct device_init_entry {
 	char compatible[128];
 	unsigned long start;
 	unsigned int len;
+	char irq_parent[128];
 	unsigned int irq;
 	int dev_id;
 	void *data;

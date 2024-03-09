@@ -109,7 +109,10 @@ int qemu_8250_driver_init(struct device *dev, void *data)
 
 	writeb(dev->start + UART_IER, 1);
 
-	register_device_irq(dev->irq, qemu_8250_irq_handler, NULL);
+	print("%s %d handler:0x%x\n", __FUNCTION__, __LINE__,
+	      qemu_8250_irq_handler);
+	register_device_irq(dev->irq_domain, dev->irq, qemu_8250_irq_handler,
+			    NULL);
 
 	drv = dev->drv;
 	strcpy(dev->name, "UART0");

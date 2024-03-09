@@ -198,7 +198,9 @@ int dw_dmac_init(struct device *dev, void *data)
 
 	base = dev->start;
 
-	ret = register_device_irq(dev->irq, dw_dmac_irq_handler, NULL);
+	ret =
+	    register_device_irq(dev->irq_domain, dev->irq, dw_dmac_irq_handler,
+				NULL);
 	if (ret == -1)
 		print("%s register device irq failed. irq=%d\n", __FUNCTION__,
 		      dev->irq);

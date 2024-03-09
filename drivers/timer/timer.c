@@ -1,5 +1,7 @@
 #include <irq.h>
 #include <device.h>
+#include <asm/type.h>
+#include <asm/trap.h>
 #include <asm/mmio.h>
 #include <asm/csr.h>
 #include <print.h>
@@ -24,7 +26,7 @@ unsigned long get_cycles(void)
 	return readq(base_address + CLINT_TIMER_VAL);
 }
 
-static void timer_handle_irq(void)
+static void timer_handle_irq(void *data)
 {
 	csr_clear(sie, SIE_STIE);
 	jiffies++;
@@ -63,7 +65,7 @@ int clint_timer_init(unsigned long base, struct irq_domain *d, void *priv)
 
 	__timer_init();
 
-	d->handler = timer_handle_irq;
+	register_device_irq(d, INTERRUPT_CAUSE_TIMER, timer_handle_irq, NULL);
 
 	return 0;
 }

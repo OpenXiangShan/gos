@@ -1,7 +1,8 @@
-#include "timer.h"
 #include <device.h>
 #include <irq.h>
 #include <asm/type.h>
+#include "timer.h"
+#include "string.h"
 
 struct timer_event_info timer;
 
@@ -19,7 +20,7 @@ unsigned long get_system_time_ms()
 
 int set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data)
 {
-	if (timer.registered == 1)
+	if(timer.registered == 1)
 		return -1;
 
 	timer.registered = 1;
@@ -78,6 +79,38 @@ void do_timer_handler()
 unsigned long get_system_cycles(void)
 {
 	return get_cycles();
+}
+
+static int timer_setup(struct device_init_entry *hw)
+{
+	extern unsigned long TIMER_INIT_TABLE, TIMER_INIT_TABLE_END;
+	int driver_nr =
+	    (struct timer_init_entry *)&TIMER_INIT_TABLE_END -
+	    (struct timer_init_entry *)&TIMER_INIT_TABLE;
+	int driver_nr_tmp = 0;
+	struct timer_init_entry *driver_entry;
+	struct device_init_entry *device_entry = hw;
+	struct timer_init_entry *driver_tmp =
+	    (struct timer_init_entry *)&TIMER_INIT_TABLE;
+	struct irq_domain *d;
+
+	while (strncmp(device_entry->compatible, "THE END", sizeof("THE END"))) {
+		driver_nr_tmp = driver_nr;
+		for (driver_entry = driver_tmp; driver_nr_tmp;
+		     driver_entry++, driver_nr_tmp--) {
+			if (!strncmp
+			    (driver_entry->compatible, device_entry->compatible,
+			     128)) {
+				d = find_irq_domain(device_entry->irq_parent);
+
+				driver_entry->init(device_entry->start, d,
+						   device_entry->data);
+			}
+		}
+		device_entry++;
+	}
+
+	return 0;
 }
 
 int init_timer(struct device_init_entry *hw)

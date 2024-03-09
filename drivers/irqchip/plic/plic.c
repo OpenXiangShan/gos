@@ -1,8 +1,10 @@
 #include <device.h>
 #include <asm/csr.h>
+#include <asm/type.h>
 #include <print.h>
 #include <asm/mmio.h>
 #include <irq.h>
+#include <asm/trap.h>
 
 #define MAX_CPUS 1
 #define CPU_TO_HART(cpu) (2 * cpu + 1)
@@ -15,6 +17,8 @@
 #define PLIC_MCOMPLETE(hart) (0x200004 + (hart) * 0x1000)
 
 unsigned int base_address;
+
+static struct irq_domain plic_irq_domain;
 
 struct plic_priv_data {
 	unsigned char max_priority;
@@ -43,25 +47,16 @@ static void plic_enable_irq(int cpu, int hwirq, int enable)
 static void plic_handle_irq()
 {
 	int hwirq;
-	/*TODO: only CPU0 handle it */
 	int hart = CPU_TO_HART(0);
-	irq_handler_t irq_handler;
-
 	unsigned int claim_reg = base_address + PLIC_MCLAIM(hart);
 
 	csr_clear(sie, SIE_SEIE);
 
 	while ((hwirq = readl(claim_reg))) {
-		irq_handler = get_irq_handler(hwirq);
-		if (!irq_handler)
-			goto done;
-
-		irq_handler(get_irq_priv_data(hwirq));
-
+		domain_handle_irq(&plic_irq_domain, hwirq, NULL);
 		writel(claim_reg, hwirq);
 	}
 
-done:
 	csr_set(sie, SIE_SEIE);
 }
 
@@ -94,7 +89,8 @@ static int __plic_init(unsigned long base, struct plic_priv_data *priv)
 	return 0;
 }
 
-int plic_init(unsigned long base, struct irq_domain *d, void *data)
+int plic_init(char *name, unsigned long base, struct irq_domain *parent,
+	      void *data)
 {
 	struct plic_priv_data *priv = (struct plic_priv_data *)data;
 	unsigned char max_priority = 0, ndev = 0;
@@ -104,12 +100,14 @@ int plic_init(unsigned long base, struct irq_domain *d, void *data)
 		ndev = priv->ndev;
 	}
 
-	print("%s -- %s %d, base:0x%x, max_priority: %d, ndev: %d\n", __FILE__,
-	      __FUNCTION__, __LINE__, base, max_priority, ndev);
+	print("%s -- %s %d, name:%s, base:0x%x, max_priority: %d, ndev: %d\n",
+	      __FILE__, __FUNCTION__, __LINE__, name, base, max_priority, ndev);
 
 	__plic_init(base, priv);
 
-	d->handler = plic_handle_irq;
+	irq_domain_init_hierarchy(&plic_irq_domain, name, parent,
+				  INTERRUPT_CAUSE_EXTERNAL, plic_handle_irq,
+				  NULL);
 
 	return 0;
 }

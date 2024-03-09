@@ -1,1 +1,2 @@
-obj-y += plic.o
+obj-y += plic/
+#obj-y += imsic/
