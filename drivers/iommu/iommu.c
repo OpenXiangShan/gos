@@ -419,7 +419,7 @@ int riscv_iommu_init(struct device *dev, void *data)
 	    (struct riscv_iommu_priv_data *)data;
 
 	print("%s %d base: 0x%x, len: %d, irq: %d\n", __FUNCTION__, __LINE__,
-	      dev->start, dev->len, dev->irq);
+	      dev->start, dev->len, dev->irqs[0]);
 
 	memset((char *)&iommu, 0, sizeof(struct riscv_iommu));
 

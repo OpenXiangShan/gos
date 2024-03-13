@@ -7,7 +7,10 @@ LD := $(GNU)ld
 RISCV_COPY := $(GNU)objcopy
 RISCV_COPY_FLAGS := --set-section-flags .bss=alloc,contents --set-section-flags .sbss=alloc,contents -O binary
 RISCV_DUMP := $(GNU)objdump
-#DEBUG := -DUSE_QEMU
+
+DEBUG := -DUSE_QEMU
+DEBUG += -DUSE_AIA
+#DEBUG += -DIOMMU_PTWALK_TEST
 
 COPS := -g -O0 -Wall -nostdlib -mcmodel=medany -mabi=lp64 -march=rv64imafdc -fno-PIE -fomit-frame-pointer -Wno-builtin-declaration-mismatch
 
@@ -117,13 +120,18 @@ clean:
 	rm -rf out
 	
 run:
-	qemu-system-riscv64 -nographic \
-	-machine virt -smp 2 -m 2G \
+	./qemu-system-riscv64 -nographic \
+	-machine virt -smp 2 -m 8G \
 	-bios out/Image.bin \
 
+run-aia:
+	./qemu-system-riscv64-aia -nographic \
+        -machine virt,aia=aplic-imsic -smp 1 -m 8G \
+        -bios out/Image.bin \
+
 run-debug:
-	qemu-system-riscv64 -nographic \
-	-machine virt -m 2G \
+	./qemu-system-riscv64 -nographic \
+	-machine virt -m 8G \
 	-bios out/Image.bin \
 	-S -s
 

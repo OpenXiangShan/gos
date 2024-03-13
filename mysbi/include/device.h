@@ -15,7 +15,8 @@ struct device_init_entry {
 	unsigned long start;
 	unsigned int len;
 	char irq_parent[128];
-	unsigned int irq;
+	unsigned int irq[16];
+	int irq_num;
 	int dev_id;
 	void *data;
 };

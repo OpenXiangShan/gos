@@ -6,3 +6,4 @@ obj-y += history.o
 obj-y += dma_test.o
 obj-y += dma_test_ext.o
 obj-y += mem_read.o
+obj-y += imsic_test.o

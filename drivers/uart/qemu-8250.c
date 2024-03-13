@@ -103,16 +103,17 @@ static const struct driver_ops qemu_8250_ops = {
 int qemu_8250_driver_init(struct device *dev, void *data)
 {
 	struct driver *drv;
+	int irqs[16], nr_irqs, i;
 
-	print("%s %d base: 0x%x, len: %d, irq: %d\n", __FUNCTION__, __LINE__,
-	      dev->start, dev->len, dev->irq);
+	print("%s -- base: 0x%x, len: %d, nr_irqs:%d irq: %d\n", __FUNCTION__,
+	      dev->start, dev->len, dev->irq_num, dev->irqs[0]);
 
 	writeb(dev->start + UART_IER, 1);
 
-	print("%s %d handler:0x%x\n", __FUNCTION__, __LINE__,
-	      qemu_8250_irq_handler);
-	register_device_irq(dev->irq_domain, dev->irq, qemu_8250_irq_handler,
-			    NULL);
+	nr_irqs = get_hwirq(dev, irqs);
+	for (i = 0; i < nr_irqs; i++)
+		register_device_irq(dev->irq_domain, irqs[i],
+				    qemu_8250_irq_handler, NULL);
 
 	drv = dev->drv;
 	strcpy(dev->name, "UART0");

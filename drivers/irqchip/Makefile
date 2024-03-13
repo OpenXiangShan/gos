@@ -1,2 +1,2 @@
 obj-y += plic/
-#obj-y += imsic/
+obj-y += aia/

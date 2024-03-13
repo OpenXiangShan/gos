@@ -7,8 +7,6 @@
 #include <timer.h>
 #include "mm.h"
 
-#define MAX_IRQ_NUM 64
-
 static LIST_HEAD(irq_domains);
 
 static struct irq_domain intc_domain;
@@ -103,6 +101,55 @@ int domain_handle_irq(struct irq_domain *domain, unsigned int hwirq, void *data)
 	return 0;
 }
 
+int get_hwirq(struct device *dev, int *ret_irq)
+{
+	struct irq_domain *irq_domain = dev->irq_domain;
+	int *irqs = dev->irqs, i, num, hwirq;
+
+	if (dev->irq_num > MAX_IRQ_NUM)
+		num = MAX_IRQ_NUM;
+	else
+		num = dev->irq_num;
+
+	if (!irqs)
+		return -1;
+
+	for (i = 0; i < num; i++)
+		ret_irq[i] = irqs[i];
+
+	if (!irq_domain->domain_ops || !irq_domain->domain_ops->alloc_irqs)
+		return num;
+
+	hwirq = irq_domain->domain_ops->alloc_irqs(num, irq_domain->priv);
+	if (hwirq == -1)
+		return 0;
+
+	for (i = 0; i < num; i++) {
+		domain_activate_irq(irq_domain, hwirq + i, NULL);
+	}
+
+	return num;
+}
+
+int msi_get_hwirq(struct device *dev, int nr_irqs,
+		  write_msi_msg_t write_msi_msg)
+{
+	struct irq_domain *irq_domain = dev->irq_domain;
+	int i, hwirq;
+
+	if (!irq_domain->domain_ops->alloc_irqs)
+		return 0;
+
+	hwirq = irq_domain->domain_ops->alloc_irqs(nr_irqs, irq_domain->priv);
+	if (hwirq == -1)
+		return 0;
+
+	for (i = 0; i < nr_irqs; i++)
+		domain_activate_irq(irq_domain, hwirq + i, write_msi_msg);
+
+	return hwirq;
+}
+
 int register_device_irq(struct irq_domain *domain, unsigned int hwirq,
 			void (*handler)(void *data), void *priv)
 {
@@ -122,30 +169,84 @@ int register_device_irq(struct irq_domain *domain, unsigned int hwirq,
 	irq_info->priv = priv;
 	list_add(&irq_info->list, &domain->irq_info_head);
 
+	if (domain->domain_ops && domain->domain_ops->unmask_irq)
+		domain->domain_ops->unmask_irq(hwirq, domain->priv);
+
+	return 0;
+}
+
+int domain_activate_irq(struct irq_domain *domain, int hwirq,
+			write_msi_msg_t write_msi_msg)
+{
+	struct irq_domain *p_domain = domain;
+	unsigned long msi_addr = 0, msi_data = 0;
+
+	while (p_domain) {
+		if (p_domain && p_domain->domain_ops->get_msi_msg)
+			break;
+
+		p_domain = p_domain->parent_domain;
+	}
+
+	if (p_domain && p_domain->domain_ops->get_msi_msg)
+		p_domain->domain_ops->get_msi_msg(p_domain, hwirq,
+						  &msi_addr, &msi_data,
+						  p_domain->priv);
+
+	if (write_msi_msg) {
+		write_msi_msg(msi_addr, msi_data, hwirq, NULL);
+		return 0;
+	}
+
+	p_domain = domain;
+	while (p_domain) {
+		if (p_domain && p_domain->write_msi_msg)
+			break;
+
+		p_domain = p_domain->parent_domain;
+	}
+
+	if (p_domain && p_domain->write_msi_msg)
+		p_domain->write_msi_msg(msi_addr, msi_data, hwirq,
+					domain->priv);
+
 	return 0;
 }
 
 int irq_domain_init(struct irq_domain *domain, char *name,
-		    struct irq_domain *parent)
+		    struct irq_domain_ops *ops,
+		    struct irq_domain *parent, void *priv)
 {
 	domain->parent_domain = parent;
 	strcpy(domain->name, name);
 	INIT_LIST_HEAD(&domain->irq_info_head);
 	list_add(&domain->list, &irq_domains);
+	domain->priv = priv;
+	domain->domain_ops = ops;
 
 	return 0;
 }
 
+int msi_domain_init(struct irq_domain *domain, char *name,
+		    struct irq_domain_ops *ops, struct irq_domain *parent,
+		    write_msi_msg_t write_msi_msg, void *priv)
+{
+	domain->write_msi_msg = write_msi_msg;
+
+	return irq_domain_init(domain, name, ops, parent, priv);
+}
+
 int irq_domain_init_hierarchy(struct irq_domain *domain, char *name,
+			      struct irq_domain_ops *ops,
 			      struct irq_domain *parent, unsigned int hwirq,
 			      void (*handler)(void *data), void *priv)
 {
 	register_device_irq(parent, hwirq, handler, priv);
 
-	return irq_domain_init(domain, name, parent);
+	return irq_domain_init(domain, name, ops, parent, priv);
 }
 
-int irq_init()
+int irq_init(void)
 {
-	return irq_domain_init(&intc_domain, "INTC", NULL);
+	return irq_domain_init(&intc_domain, "INTC", NULL, NULL, NULL);
 }

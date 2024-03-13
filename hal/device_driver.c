@@ -60,11 +60,10 @@ found:
 	dev->in_used = 1;
 	dev->start = entry->start;
 	dev->len = entry->len;
-	dev->irq = entry->irq;
+	dev->irqs = entry->irq;
+	dev->irq_num = entry->irq_num;
 	dev->iommu.dev_id = entry->dev_id;
 	dev->irq_domain = find_irq_domain(entry->irq_parent);
-	print("%s %d irq_domain:0x%x name:%s\n", __FUNCTION__, __LINE__,
-	      dev->irq_domain, entry->irq_parent);
 	_devices.avail++;
 
 	return dev;
@@ -248,14 +247,15 @@ void walk_devices()
 {
 	struct device *dev;
 	int nr = _devices.avail;
-	int id = 0;
+	int id = 0, i;
 
 	print("================= walk devices =================\n");
 	for_each_device(dev, _devices.p_devices, nr) {
 		print("device %d\n", id++);
 		print("    name: %s\n", dev->name);
 		print("    base address: 0x%x\n", dev->start);
-		print("    irq: %d\n", dev->irq);
+		for (i = 0; i < dev->irq_num; i++)
+			print("    irq[i]: %d\n", dev->irqs[i]);
 		print("    probe: %d\n", dev->probe);
 	}
 }

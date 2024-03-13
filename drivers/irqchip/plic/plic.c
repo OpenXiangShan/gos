@@ -105,7 +105,7 @@ int plic_init(char *name, unsigned long base, struct irq_domain *parent,
 
 	__plic_init(base, priv);
 
-	irq_domain_init_hierarchy(&plic_irq_domain, name, parent,
+	irq_domain_init_hierarchy(&plic_irq_domain, name, NULL, parent,
 				  INTERRUPT_CAUSE_EXTERNAL, plic_handle_irq,
 				  NULL);
 

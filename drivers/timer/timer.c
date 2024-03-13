@@ -50,7 +50,8 @@ int clint_timer_init(unsigned long base, struct irq_domain *d, void *priv)
 {
 	struct clint_priv_data *data = (struct clint_priv_data *)priv;
 
-	print("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
+	print("%s -- base:0x%x, clint_freq:0x%x\n", __FUNCTION__, base,
+	      data->clint_freq);
 
 	if (!data) {
 		print("%s %s %d can not find clint info...\n", __FILE__,
@@ -59,7 +60,6 @@ int clint_timer_init(unsigned long base, struct irq_domain *d, void *priv)
 	}
 
 	clint_freq = data->clint_freq;
-	print("clint freq: %d\n", clint_freq);
 
 	base_address = base;
 

@@ -19,6 +19,8 @@
 #define BLOCK 0
 #define NONBLOCK 1
 
+#define MAX_IRQ_NUM 16
+
 struct iommu_group;
 struct iommu {
 	int dev_id;
@@ -34,7 +36,8 @@ struct device {
 	char name[64];
 	unsigned long start;
 	unsigned int len;
-	unsigned int irq;
+	int *irqs;
+	int irq_num;
 	struct driver *drv;
 	struct iommu iommu;
 	struct irq_domain *irq_domain;
@@ -73,7 +76,8 @@ struct device_init_entry {
 	unsigned long start;
 	unsigned int len;
 	char irq_parent[128];
-	unsigned int irq;
+	int irq[16];
+	int irq_num;
 	int dev_id;
 	void *data;
 };
@@ -164,5 +168,15 @@ int ioctl(int fd, unsigned int cmd, void *arg);
 void walk_devices(void);
 
 unsigned long get_cycles(void);
+
+int msi_get_hwirq(struct device *dev, int nr_irqs,
+		  write_msi_msg_t write_msi_msg);
+int get_hwirq(struct device *dev, int *ret_irq);
+
+static inline int dev_register_irq(struct device *dev, unsigned int hwirq,
+				   void (*handler)(void *data), void *priv)
+{
+	return register_device_irq(dev->irq_domain, hwirq, handler, priv);
+}
 
 #endif

@@ -25,6 +25,8 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 	irqchip_setup(hw);
 	init_timer(hw);
 	device_driver_init(hw);
+
+	print("local irq enable!!!\n");
 	enable_local_irq();
 
 	shell_init();

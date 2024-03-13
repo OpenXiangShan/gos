@@ -191,20 +191,17 @@ static const struct driver_ops dw_dmac_ops = {
 int dw_dmac_init(struct device *dev, void *data)
 {
 	struct driver *drv;
-	int ret = 0;
+	int irqs[16], nr_irqs, i;
 
 	print("%s %d base: 0x%x, len: %d, irq: %d\n", __FUNCTION__, __LINE__,
-	      dev->start, dev->len, dev->irq);
+	      dev->start, dev->len, dev->irqs[0]);
 
 	base = dev->start;
 
-	ret =
-	    register_device_irq(dev->irq_domain, dev->irq, dw_dmac_irq_handler,
-				NULL);
-	if (ret == -1)
-		print("%s register device irq failed. irq=%d\n", __FUNCTION__,
-		      dev->irq);
-
+	nr_irqs = get_hwirq(dev, irqs);
+	for (i = 0; i < nr_irqs; i++)
+		register_device_irq(dev->irq_domain, irqs[i],
+				    dw_dmac_irq_handler, NULL);
 	/* enable interrupt */
 	writel(base + DMAC_AXI0_CH1_INTR_STATUS_ENABLE, 0x3);
 	writel(base + DMAC_AXI0_CH2_INTR_STATUS_ENABLE, 0x3);

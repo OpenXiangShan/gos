@@ -2,6 +2,8 @@
 #include "plic.h"
 #include "clint.h"
 #include "riscv_iommu_data.h"
+#include "imsic_data.h"
+#include "aplic_data.h"
 
 extern struct clint_data clint_hw_data;
 extern struct clint_data qemu_clint_hw_data;
@@ -15,9 +17,13 @@ static const struct device_init_entry __attribute__((used))
 	 "ns16550a",
 	 0x310b0000,
 	 0x10000,
+#ifndef USE_AIA
 	 "PLIC",
-	 40,
-	 0,
+#else
+	 "APLIC",
+#endif
+	 { 40,}
+	 1 0,
 	 0,
 	  },
 #else
@@ -25,19 +31,26 @@ static const struct device_init_entry __attribute__((used))
 	 "qemu-8250",
 	 0x10000000,
 	 0x1000,
+#ifndef USE_AIA
 	 "PLIC",
-	 10,
+#else
+	 "APLIC",
+#endif
+	 { 10,},
+	 1,
 	 0,
 	 0,
 	  },
 #endif
 #ifdef USE_QEMU
+#ifdef IOMMU_PTEWALK_TEST
 	{
 	 "riscv,iommu",
 	 0x10001000,
 	 0x100,
 	 "PLIC",
-	 0xFF,
+	 { 0xFF,},
+	 0,
 	 0,
 	 &riscv_iommu_data,
 	  },
@@ -46,7 +59,8 @@ static const struct device_init_entry __attribute__((used))
 	 0x10001000,
 	 0x100,
 	 "PLIC",
-	 0xff,
+	 { 0xff,},
+	 0,
 	 0,
 	 0,
 	  },
@@ -55,7 +69,8 @@ static const struct device_init_entry __attribute__((used))
 	 0x10001000,
 	 0x100,
 	 "PLIC",
-	 0xff,
+	 { 0xff,},
+	 0,
 	 1,
 	 0,
 	  },
@@ -64,7 +79,8 @@ static const struct device_init_entry __attribute__((used))
 	 0x10001000,
 	 0x100,
 	 "PLIC",
-	 0xff,
+	 { 0xff,},
+	 0,
 	 1,
 	 0,
 	  },
@@ -73,7 +89,8 @@ static const struct device_init_entry __attribute__((used))
 	 0x10001000,
 	 0x100,
 	 "PLIC",
-	 0xff,
+	 { 0xff,},
+	 0,
 	 1,
 	 0,
 	  },
@@ -82,17 +99,20 @@ static const struct device_init_entry __attribute__((used))
 	 0x10001000,
 	 0x100,
 	 "PLIC",
-	 0xff,
+	 { 0xff,},
+	 0,
 	 2,
 	 0,
 	  },
+#endif
 #endif
 	{
 	 "memory-map",
 	 0x80000000,
 	 0x80000000,
 	 "PLIC",
-	 0xFF,
+	 { 0xFF,},
+	 0,
 	 0,
 	 0,
 	  },
@@ -102,20 +122,45 @@ static const struct device_init_entry __attribute__((used))
 	 0x3c000000,
 	 0x4000000,
 	 "INTC",
-	 0xFF,
+	 { 0xFF,},
+	 0,
 	 0,
 	 &plic_hw_data,
 	  },
 #else
+#ifndef USE_AIA
 	{
 	 "PLIC",
 	 0xc000000,
 	 0x4000000,
 	 "INTC",
-	 0xFF,
+	 { 0xFF,},
+	 0,
 	 0,
 	 &plic_hw_data,
 	  },
+#else
+	{
+	 "IMSIC",
+	 0x28000000,
+	 0x4000000,
+	 "INTC",
+	 { 0xFF,},
+	 0,
+	 0,
+	 &imsic_hw_data,
+	  },
+	{
+	 "APLIC",
+	 0xd000000,
+	 0x4000,
+	 "IMSIC",
+	 { 0xFF,},
+	 0,
+	 0,
+	 &aplic_hw_data,
+	  },
+#endif
 #endif
 #ifndef USE_QEMU
 	{
@@ -123,7 +168,8 @@ static const struct device_init_entry __attribute__((used))
 	 0x38000000,
 	 0x10000,
 	 "INTC",
-	 0xFF,
+	 { 0xFF,},
+	 0,
 	 0,
 	 &clint_hw_data,
 	  },
@@ -133,7 +179,8 @@ static const struct device_init_entry __attribute__((used))
 	 0x2000000,
 	 0x10000,
 	 "INTC",
-	 0xFF,
+	 { 0xFF,},
+	 0,
 	 0,
 	 &qemu_clint_hw_data,
 	  },
@@ -144,7 +191,20 @@ static const struct device_init_entry __attribute__((used))
 	 0x30040000,
 	 0x10000,
 	 "PLIC",
-	 4,
+	 { 4,},
+	 1,
+	 0,
+	 0,
+	  },
+#endif
+#ifdef USE_AIA
+	{
+	 "imsic,test",
+	 0x70000000,
+	 0x1000,
+	 "IMSIC",
+	 { 0xff,},
+	 0,
 	 0,
 	 0,
 	  },
@@ -154,7 +214,8 @@ static const struct device_init_entry __attribute__((used))
 	 0xFF,
 	 0xFF,
 	 " ",
-	 0xFF,
+	 { 0xFF,},
+	 0,
 	 0,
 	 0,
 	  },

@@ -37,6 +37,24 @@
 
 #define SATP_MODE_39 (1UL << 63)
 
+/* AIA csr */
+/* Supervisor-Level Window to Indirectly Accessed Registers (AIA) */
+#define CSR_SISELECT            0x150
+#define CSR_SIREG               0x151
+/* Supervisor-Level Interrupts (AIA) */
+#define CSR_STOPEI              0x15c
+#define CSR_STOPI               0xdb0
+/* Supervisor-Level High-Half CSRs (AIA) */
+#define CSR_SIEH                0x114
+#define CSR_SIPH                0x154
+
+#define CSR_IEH        CSR_SIEH
+#define CSR_ISELECT    CSR_SISELECT
+#define CSR_IREG       CSR_SIREG
+#define CSR_IPH        CSR_SIPH
+#define CSR_TOPEI      CSR_STOPEI
+#define CSR_TOPI       CSR_STOPI
+
 /* VS csr */
 #define CSR_VSSTATUS 0x200
 #define CSR_VSIE 0x204
@@ -113,6 +131,15 @@
 	__asm__ __volatile__ ("csrw "__ASM_STR(csr)", %0"		\
 			      : : "rK" (__v)			\
 			      : "memory");			\
+})
+
+#define csr_swap(csr, val)                                      \
+({                                                              \
+        unsigned long __v = (unsigned long)(val);               \
+        __asm__ __volatile__ ("csrrw %0, " __ASM_STR(csr) ", %1"\
+                              : "=r" (__v) : "rK" (__v)         \
+                              : "memory");                      \
+        __v;                                                    \
 })
 
 #define csr_set(csr, val)					\
