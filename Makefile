@@ -135,6 +135,9 @@ run-debug:
 	-bios out/Image.bin \
 	-S -s
 
+run-aia-debug-qemu:
+	./qemu-system-riscv64-debug -nographic -machine virt,aia=aplic-imsic -smp 1 -m 8G -bios out/Image.bin
+
 format:
 	find . -name *.c |xargs ./Lindent
 	find . -name *.h |xargs ./Lindent
