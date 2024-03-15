@@ -56,16 +56,32 @@
 #define APLIC_TARGET_IPRIO_MASK         0xff
 #define APLIC_TARGET_EIID_MASK          0x7ff
 
+#define APLIC_MMSICFGADDR              0x1bc0
+#define APLIC_MMSICFGADDRH             0x1bc4
+#define APLIC_SMSICFGADDR              0x1bc8
+#define APLIC_SMSICFGADDRH             0x1bcc
+
+#define APLIC_M_MODE 0
+#define APLIC_S_MODE 1
+
 struct aplic_priv_data {
+	int index;
+	int mmode;
 	int mode;
 	int nr_irqs;
+	int delegate;
+	int child_index;
 	struct imsic_priv_data *imsic_data;
 };
 
 struct aplic {
 	struct irq_domain domain;
 	char *name;
+	int index;
+	int delegate;
+	int child_index;
 	unsigned long base;
+	int mmode;
 	int mode;
 	int nr_irqs;
 	struct irq_domain *parent;
@@ -77,5 +93,6 @@ struct aplic {
 void aplic_hw_mode_init(struct aplic *p_aplic);
 void aplic_irq_mask(int hwirq, void *data);
 void aplic_irq_unmask(int hwirq, void *data);
+int aplic_irq_set_type(int hwirq, int type, void *data);
 
 #endif

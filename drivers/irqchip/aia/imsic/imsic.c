@@ -30,6 +30,26 @@ static int imsic_get_msi_msg(struct irq_domain *domain, int hwirq,
 	return 0;
 }
 
+struct irq_domain *imsic_get_irq_domain()
+{
+	return &imsic.irq_domain;
+}
+
+unsigned long imsic_get_interrupt_file_base()
+{
+	return imsic.interrupt_file_base[0][0];
+}
+
+int imsic_get_hart_index_bits()
+{
+	return imsic.hart_index_bits;
+}
+
+int imsic_get_group_index_bits()
+{
+	return imsic.group_index_bits;
+}
+
 void imsic_ids_local_delivery(int enable)
 {
 	if (enable) {
@@ -252,10 +272,10 @@ int imsic_init(char *name, unsigned long base, struct irq_domain *parent,
 	imsic.base = base;
 	imsic_state_setup(&imsic, state);
 
-	irq_domain_init_hierarchy(&imsic.irq_domain, name,
-				  &imsic_irq_domain_ops, parent,
-				  INTERRUPT_CAUSE_EXTERNAL, imsic_handle_irq,
-				  &imsic);
+	irq_domain_init_cascade(&imsic.irq_domain, name,
+				&imsic_irq_domain_ops, parent,
+				INTERRUPT_CAUSE_EXTERNAL, imsic_handle_irq,
+				&imsic);
 	imsic_ids_local_delivery(1);
 
 	print("%s success irq_domain:0x%x\n", __FUNCTION__, &imsic.irq_domain);

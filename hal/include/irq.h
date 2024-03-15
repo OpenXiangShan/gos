@@ -4,6 +4,13 @@
 #include <asm/asm-irq.h>
 #include "list.h"
 
+#define IRQ_TYPE_NONE           0
+#define IRQ_TYPE_EDGE_RISING    1
+#define IRQ_TYPE_EDGE_FALLING   2
+#define IRQ_TYPE_EDGE_BOTH      (IRQ_TYPE_EDGE_FALLING | IRQ_TYPE_EDGE_RISING)
+#define IRQ_TYPE_LEVEL_HIGH     4
+#define IRQ_TYPE_LEVEL_LOW      8
+
 #define enable_local_irq __enable_local_irq
 
 #define SCAUSE_IRQ (1UL << 63)
@@ -33,6 +40,7 @@ struct irq_domain_ops {
 	int (*get_msi_msg)(struct irq_domain * domain, int hwirq,
 			   unsigned long *msi_addr, unsigned long *msi_data,
 			   void *priv);
+	int (*set_type)(int hwirq, int type, void *data);
 };
 
 struct irq_domain {
@@ -40,16 +48,17 @@ struct irq_domain {
 	char name[128];
 	struct list_head irq_info_head;
 	struct irq_domain *parent_domain;
+	struct irq_domain *link_domain;
 	struct irq_domain_ops *domain_ops;
 	void *priv;
 	write_msi_msg_t write_msi_msg;
 };
 
 int irq_init(void);
-int irq_domain_init_hierarchy(struct irq_domain *domain, char *name,
-			      struct irq_domain_ops *ops,
-			      struct irq_domain *parent, unsigned int hwirq,
-			      void (*handler)(void *data), void *priv);
+int irq_domain_init_cascade(struct irq_domain *domain, char *name,
+			    struct irq_domain_ops *ops,
+			    struct irq_domain *parent, unsigned int hwirq,
+			    void (*handler)(void *data), void *priv);
 int irq_domain_init(struct irq_domain *domain, char *name,
 		    struct irq_domain_ops *ops, struct irq_domain *parent,
 		    void *priv);
@@ -67,5 +76,9 @@ irq_handler_t get_irq_handler(int hwirq);
 int msi_domain_init(struct irq_domain *domain, char *name,
 		    struct irq_domain_ops *ops, struct irq_domain *parent,
 		    write_msi_msg_t write_msi_msg, void *priv);
+int msi_domain_init_hierarchy(struct irq_domain *domain, char *name,
+			      struct irq_domain_ops *ops,
+			      struct irq_domain *base_domain,
+			      write_msi_msg_t write_msi_msg, void *priv);
 
 #endif

@@ -17,6 +17,38 @@ void aplic_irq_unmask(int hwirq, void *data)
 	writel(aplic.base + APLIC_SETIENUM, hwirq);
 }
 
+int aplic_irq_set_type(int hwirq, int type, void *data)
+{
+	unsigned long sourcecfg;
+	unsigned int val;
+
+	switch (type) {
+	case IRQ_TYPE_NONE:
+		val = APLIC_SOURCECFG_SM_INACTIVE;
+		break;
+	case IRQ_TYPE_LEVEL_LOW:
+		val = APLIC_SOURCECFG_SM_LEVEL_LOW;
+		break;
+	case IRQ_TYPE_LEVEL_HIGH:
+		val = APLIC_SOURCECFG_SM_LEVEL_HIGH;
+		break;
+	case IRQ_TYPE_EDGE_FALLING:
+		val = APLIC_SOURCECFG_SM_EDGE_FALL;
+		break;
+	case IRQ_TYPE_EDGE_RISING:
+		val = APLIC_SOURCECFG_SM_EDGE_RISE;
+		break;
+	default:
+		return -1;
+	}
+
+	sourcecfg = aplic.base + APLIC_SOURCECFG_BASE;
+	sourcecfg += (hwirq - 1) * sizeof(unsigned int);
+	writel(sourcecfg, val);
+
+	return 0;
+}
+
 void aplic_hw_mode_init(struct aplic *p_aplic)
 {
 	unsigned int val;
@@ -26,6 +58,19 @@ void aplic_hw_mode_init(struct aplic *p_aplic)
 	if (p_aplic->mode == APLIC_MSI_MODE)
 		val |= APLIC_DOMAINCFG_DM;
 	writel(p_aplic->base + APLIC_DOMAINCFG, val);
+}
+
+static void aplic_deleg_init(struct aplic *p_aplic)
+{
+	int i;
+
+	if (p_aplic->delegate) {
+		for (i = 0; i < p_aplic->nr_irqs; i++)
+			writel(p_aplic->base + APLIC_SOURCECFG_BASE +
+			       (i - 1) * sizeof(unsigned int),
+			       (1U << 10) | p_aplic->child_index);
+		return;
+	}
 }
 
 static void aplic_hw_init(struct aplic *p_aplic)
@@ -46,6 +91,27 @@ static void aplic_hw_init(struct aplic *p_aplic)
 	writel(p_aplic->base + APLIC_DOMAINCFG, 0);
 }
 
+static void aplic_m_mode_init(struct aplic *p_aplic)
+{
+	unsigned long imsic_base;
+	int hart_index;
+	unsigned int low_base_ppn, high_base_ppn, LHXS;
+	unsigned int val_smsicfgaddrh = 0, val_smsicfgaddr = 0;
+
+	imsic_base = imsic_get_interrupt_file_base();
+	hart_index = imsic_get_hart_index_bits();
+
+	low_base_ppn = (imsic_base << 32) >> 32 >> 12;
+	high_base_ppn = (imsic_base >> 32) >> 12;
+	LHXS = hart_index;
+
+	val_smsicfgaddr = low_base_ppn;
+	val_smsicfgaddrh = high_base_ppn | (LHXS << 20);
+
+	writel(p_aplic->base + APLIC_SMSICFGADDR, val_smsicfgaddr);
+	writel(p_aplic->base + APLIC_SMSICFGADDRH, val_smsicfgaddrh);
+}
+
 int aplic_init(char *name, unsigned long base, struct irq_domain *parent,
 	       void *data)
 {
@@ -54,14 +120,29 @@ int aplic_init(char *name, unsigned long base, struct irq_domain *parent,
 
 	memset((char *)&aplic, 0, sizeof(struct aplic));
 
+	aplic.mmode = aplic_priv_data->mmode;
 	aplic.mode = aplic_priv_data->mode;
+	aplic.index = aplic_priv_data->index;
 	aplic.name = name;
 	aplic.base = base;
 	aplic.parent = parent;
 	aplic.nr_irqs = aplic_priv_data->nr_irqs;
+	aplic.delegate = aplic_priv_data->delegate;
+	aplic.child_index = aplic_priv_data->child_index;
 
-	print("%s -- name:%s base:0x%x mode:%d\n", __FUNCTION__, aplic.name,
-	      aplic.base, aplic.mode);
+	print
+	    ("%s -- name:%s base:0x%x mmode:%d mode:%d index:%d delegate:%d child_index:%d\n",
+	     __FUNCTION__, aplic.name, aplic.base, aplic.mmode, aplic.mode,
+	     aplic.index, aplic.delegate, aplic.child_index);
+
+	if (aplic.mmode == APLIC_M_MODE) {
+		aplic_m_mode_init(&aplic);
+	}
+
+	if (aplic.delegate) {
+		aplic_deleg_init(&aplic);
+		return 0;
+	}
 
 	aplic_hw_init(&aplic);
 
@@ -91,4 +172,5 @@ int aplic_init(char *name, unsigned long base, struct irq_domain *parent,
 	return 0;
 }
 
-IRQCHIP_REGISTER(aplic, aplic_init, "APLIC");
+IRQCHIP_REGISTER(aplic_m, aplic_init, "APLIC_M");
+IRQCHIP_REGISTER(aplic_s, aplic_init, "APLIC_S");

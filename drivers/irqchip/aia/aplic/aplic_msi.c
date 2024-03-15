@@ -3,11 +3,7 @@
 #include "aplic.h"
 #include "irq.h"
 #include "print.h"
-
-static void aplic_msi_handle_irq(void *data)
-{
-	print("############## %s %d\n", __FUNCTION__, __LINE__);
-}
+#include "../imsic/imsic.h"
 
 void aplic_msi_write_msi_msg(unsigned long msi_addr, unsigned long msi_data,
 			     int hwirq, void *priv)
@@ -51,10 +47,11 @@ static int aplic_msi_alloc_irqs(int nr_irqs, void *data)
 								  parent_domain->
 								  priv);
 
-	if (hwirq != -1)
+	if (hwirq != -1) {
 		for (i = 0; i < nr_irqs; i++)
 			register_device_irq(domain->parent_domain, hwirq + i,
-					    aplic_msi_handle_irq, data);
+					    NULL, data);
+	}
 
 	return hwirq;
 }
@@ -78,14 +75,19 @@ static struct irq_domain_ops aplic_msi_domain_ops = {
 	.mask_irq = aplic_msi_mask_irq,
 	.unmask_irq = aplic_msi_unmask_irq,
 	.activate_irq = domain_activate_irq,
+	.set_type = aplic_irq_set_type,
 };
 
 int aplic_msi_setup(struct aplic *aplic)
 {
+	struct irq_domain *base_domain;
+
 	aplic_hw_mode_init(aplic);
 
-	msi_domain_init(&aplic->domain, aplic->name, &aplic_msi_domain_ops,
-			aplic->parent, aplic_msi_write_msi_msg, aplic);
+	base_domain = imsic_get_irq_domain();
+	msi_domain_init_hierarchy(&aplic->domain, aplic->name,
+				  &aplic_msi_domain_ops, base_domain,
+				  aplic_msi_write_msi_msg, aplic);
 
 	return 0;
 }

@@ -20,7 +20,7 @@ static const struct device_init_entry __attribute__((used))
 #ifndef USE_AIA
 	 "PLIC",
 #else
-	 "APLIC",
+	 "APLIC_S",
 #endif
 	 { 40,}
 	 1 0,
@@ -34,7 +34,7 @@ static const struct device_init_entry __attribute__((used))
 #ifndef USE_AIA
 	 "PLIC",
 #else
-	 "APLIC",
+	 "APLIC_S",
 #endif
 	 { 10,},
 	 1,
@@ -151,14 +151,24 @@ static const struct device_init_entry __attribute__((used))
 	 &imsic_hw_data,
 	  },
 	{
-	 "APLIC",
+	 "APLIC_M",
+	 0xc000000,
+	 0x4000,
+	 "APLIC_S",
+	 { 0xFF,},
+	 0,
+	 0,
+	 &aplic_hw_data_m,
+	  },
+	{
+	 "APLIC_S",
 	 0xd000000,
 	 0x4000,
 	 "IMSIC",
 	 { 0xFF,},
 	 0,
 	 0,
-	 &aplic_hw_data,
+	 &aplic_hw_data_s,
 	  },
 #endif
 #endif

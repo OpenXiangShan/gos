@@ -32,7 +32,7 @@ static void imsic_test_write_msi_msg(unsigned long msi_addr,
 				     unsigned long msi_data, int hwirq,
 				     void *priv)
 {
-	static ii = 0;
+	static int ii = 0;
 
 	print
 	    ("##### %s %d base_hwirq:%d hwirq:%d msi_addr:0x%x msi_data:0x%x\n",

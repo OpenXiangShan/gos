@@ -5,7 +5,7 @@
 #include <event.h>
 #include "../command.h"
 
-#define TEST_COUNT 100
+#define TEST_COUNT 3
 
 static int cmd_imsic_test_handler(int argc, char *argv[], void *priv)
 {
