@@ -28,8 +28,8 @@ void aplic_msi_write_msi_msg(unsigned long msi_addr, unsigned long msi_data,
 	val |= (msi_data & APLIC_TARGET_EIID_MASK);
 
 	//print
-	//    ("%s -- msi_addr:0x%x, msi_data:%d hart_id:%d guest_id:%d target:0x%x val:0x%x\n",
-	//     __FUNCTION__, msi_addr, msi_data, hart_id, guest_id, target, val);
+	//    ("%s -- hwirq:%d, msi_addr:0x%x, msi_data:%d hart_id:%d guest_id:%d target:0x%x val:0x%x\n",
+	//     __FUNCTION__, hwirq, msi_addr, msi_data, hart_id, guest_id, target, val);
 	writel(target, val);
 }
 
@@ -43,9 +43,7 @@ static int aplic_msi_alloc_irqs(int nr_irqs, void *data)
 	    && domain->parent_domain->domain_ops->alloc_irqs)
 		hwirq =
 		    domain->parent_domain->domain_ops->alloc_irqs(nr_irqs,
-								  domain->
-								  parent_domain->
-								  priv);
+								  domain->parent_domain->priv);
 
 	if (hwirq != -1) {
 		for (i = 0; i < nr_irqs; i++)

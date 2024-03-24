@@ -3,6 +3,7 @@
 #include <trap.h>
 #include <print.h>
 #include <asm/type.h>
+#include <asm/sbi.h>
 #include <irq.h>
 #include <timer.h>
 #include "mm.h"
@@ -127,7 +128,7 @@ int get_hwirq(struct device *dev, int *ret_irq)
 		return 0;
 
 	for (i = 0; i < num; i++) {
-		domain_activate_irq(irq_domain, hwirq + i, NULL);
+		domain_activate_irq(irq_domain, irqs[i], hwirq + i, NULL);
 	}
 
 	if (irq_domain->link_domain) {
@@ -137,15 +138,18 @@ int get_hwirq(struct device *dev, int *ret_irq)
 		for (i = 0; i < num; i++) {
 			if (irq_domain->link_domain->domain_ops
 			    && irq_domain->link_domain->domain_ops->set_type)
-				irq_domain->link_domain->domain_ops->
-				    set_type(hwirq + i, IRQ_TYPE_LEVEL_HIGH,
-					     irq_domain->link_domain->priv);
+				irq_domain->link_domain->
+				    domain_ops->set_type(hwirq + i,
+							 IRQ_TYPE_LEVEL_HIGH,
+							 irq_domain->
+							 link_domain->priv);
 
 			if (irq_domain->link_domain->domain_ops
 			    && irq_domain->link_domain->domain_ops->unmask_irq)
-				irq_domain->link_domain->domain_ops->
-				    unmask_irq(hwirq + i,
-					       irq_domain->link_domain->priv);
+				irq_domain->link_domain->
+				    domain_ops->unmask_irq(hwirq + i,
+							   irq_domain->
+							   link_domain->priv);
 		}
 	}
 
@@ -165,6 +169,41 @@ out:
 	return num;
 }
 
+int msi_get_hwirq_affinity(struct device *dev, int nr_irqs,
+			   write_msi_msg_t write_msi_msg, int cpu)
+{
+	int i, hwirq;
+	struct irq_domain *irq_domain = dev->irq_domain;
+
+	hwirq = irq_domain->domain_ops->alloc_irqs(nr_irqs, irq_domain->priv);
+	if (hwirq == -1)
+		return 0;
+
+	if (!irq_domain->domain_ops || !irq_domain->domain_ops->set_affinity)
+		goto activate_irqs;
+
+	for (i = 0; i < nr_irqs; i++)
+		irq_domain->domain_ops->set_affinity(hwirq + i, cpu);
+
+activate_irqs:
+	for (i = 0; i < nr_irqs; i++) {
+		domain_activate_irq(irq_domain, hwirq + i, hwirq + i,
+				    write_msi_msg);
+
+		if (irq_domain->domain_ops && irq_domain->domain_ops->set_type)
+			irq_domain->domain_ops->set_type(hwirq + i,
+							 IRQ_TYPE_LEVEL_HIGH,
+							 irq_domain->priv);
+
+		if (irq_domain->domain_ops
+		    && irq_domain->domain_ops->unmask_irq)
+			irq_domain->domain_ops->unmask_irq(hwirq + i,
+							   irq_domain->priv);
+	}
+
+	return hwirq;
+}
+
 int msi_get_hwirq(struct device *dev, int nr_irqs,
 		  write_msi_msg_t write_msi_msg)
 {
@@ -179,7 +218,8 @@ int msi_get_hwirq(struct device *dev, int nr_irqs,
 		return 0;
 
 	for (i = 0; i < nr_irqs; i++) {
-		domain_activate_irq(irq_domain, hwirq + i, write_msi_msg);
+		domain_activate_irq(irq_domain, hwirq + i, hwirq + i,
+				    write_msi_msg);
 
 		if (irq_domain->domain_ops && irq_domain->domain_ops->set_type)
 			irq_domain->domain_ops->set_type(hwirq + i,
@@ -223,7 +263,7 @@ int register_device_irq(struct irq_domain *irq_domain, unsigned int hwirq,
 	return 0;
 }
 
-int domain_activate_irq(struct irq_domain *domain, int hwirq,
+int domain_activate_irq(struct irq_domain *domain, int msi_irq, int hwirq,
 			write_msi_msg_t write_msi_msg)
 {
 	struct irq_domain *p_domain = domain;
@@ -242,7 +282,7 @@ int domain_activate_irq(struct irq_domain *domain, int hwirq,
 						  p_domain->priv);
 
 	if (write_msi_msg) {
-		write_msi_msg(msi_addr, msi_data, hwirq, NULL);
+		write_msi_msg(msi_addr, msi_data, msi_irq, NULL);
 		return 0;
 	}
 
@@ -255,7 +295,7 @@ int domain_activate_irq(struct irq_domain *domain, int hwirq,
 	}
 
 	if (p_domain && p_domain->write_msi_msg)
-		p_domain->write_msi_msg(msi_addr, msi_data, hwirq,
+		p_domain->write_msi_msg(msi_addr, msi_data, msi_irq,
 					domain->priv);
 
 	return 0;

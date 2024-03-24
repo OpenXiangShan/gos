@@ -83,14 +83,13 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 		ret_value = read_csr(mhartid);
 		break;
 	case SBI_HART_START:
-		sbi_hart_start(regs->a0, regs->a1);
+		ret = sbi_hart_start(regs->a0, regs->a1);
 		break;
 	}
 
 	regs->a0 = ret_value;
 
-	if (!ret)
-		regs->mepc += 4;
+	regs->mepc += 4;
 
 	return ret;
 }

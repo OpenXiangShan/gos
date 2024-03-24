@@ -36,11 +36,12 @@ struct irq_domain_ops {
 	int (*mask_irq)(int hwirq, void *data);
 	int (*unmask_irq)(int hwirq, void *data);
 	int (*activate_irq)(struct irq_domain * domain, int hwirq,
-			    write_msi_msg_t write_msi_msg);
+			    int msi_irq, write_msi_msg_t write_msi_msg);
 	int (*get_msi_msg)(struct irq_domain * domain, int hwirq,
 			   unsigned long *msi_addr, unsigned long *msi_data,
 			   void *priv);
 	int (*set_type)(int hwirq, int type, void *data);
+	int (*set_affinity)(int hwirq, int cpu);
 };
 
 struct irq_domain {
@@ -70,7 +71,7 @@ int domain_handle_irq(struct irq_domain *domain, unsigned int hwirq,
 int irqchip_setup(struct device_init_entry *hw);
 int register_device_irq(struct irq_domain *domain, unsigned int hwirq,
 			void (*handler)(void *data), void *priv);
-int domain_activate_irq(struct irq_domain *domain, int hwirq,
+int domain_activate_irq(struct irq_domain *domain, int msi_irq, int hwirq,
 			write_msi_msg_t write_msi_msg);
 irq_handler_t get_irq_handler(int hwirq);
 int msi_domain_init(struct irq_domain *domain, char *name,

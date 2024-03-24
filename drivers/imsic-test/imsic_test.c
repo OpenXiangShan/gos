@@ -4,6 +4,7 @@
 #include "print.h"
 #include "asm/type.h"
 #include "asm/mmio.h"
+#include "asm/sbi.h"
 
 struct msi_msg {
 	unsigned long msi_addr;
@@ -15,17 +16,17 @@ static int base_hwirq;
 
 static void imsic_test_irq_handler0(void *data)
 {
-	print("###### enter %s\n", __FUNCTION__);
+	print("###### enter %s (cpu%d)\n", __FUNCTION__, sbi_get_cpu_id());
 }
 
 static void imsic_test_irq_handler1(void *data)
 {
-	print("###### enter %s\n", __FUNCTION__);
+	print("###### enter %s (cpu%d)\n", __FUNCTION__, sbi_get_cpu_id());
 }
 
 static void imsic_test_irq_handler2(void *data)
 {
-	print("###### enter %s\n", __FUNCTION__);
+	print("###### enter %s (cpu%d)\n", __FUNCTION__, sbi_get_cpu_id());
 }
 
 static void imsic_test_write_msi_msg(unsigned long msi_addr,
@@ -80,7 +81,7 @@ int imsic_test_init(struct device *dev, void *data)
 	int hwirq;
 	struct driver *drv;
 
-	hwirq = msi_get_hwirq(dev, 3, imsic_test_write_msi_msg);
+	hwirq = msi_get_hwirq_affinity(dev, 3, imsic_test_write_msi_msg, 3);
 	if (hwirq == -1) {
 		print("%s -- msi_get_hwirq failed\n", __FUNCTION__);
 		return -1;

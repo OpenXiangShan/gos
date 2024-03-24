@@ -5,6 +5,7 @@
 #include "device.h"
 #include "imsic.h"
 #include "imsic_reg.h"
+#include "cpu.h"
 
 static struct imsic imsic;
 
@@ -233,9 +234,8 @@ static int imsic_alloc_irqs(int nr_irqs, void *data)
 		return -1;
 
 	for (i = 0; i < nr_irqs; i++) {
-		// set target cpus of all cpus to cpu0
+		// set target cpus of all cpus to cpu0 default
 		imsic_id_set_target(p_imsic, id + i, 0);
-		imsic_enable_id(p_imsic, i);
 	}
 
 	return id;
@@ -255,16 +255,39 @@ static int imsic_unmask_irq(int hwirq, void *data)
 	return imsic_enable_id(p_imsic, hwirq);
 }
 
+static int imsic_set_affinity(int hwirq, int cpu)
+{
+	return imsic_id_set_target(&imsic, hwirq, cpu);
+}
+
 static struct irq_domain_ops imsic_irq_domain_ops = {
 	.alloc_irqs = imsic_alloc_irqs,
 	.mask_irq = imsic_mask_irq,
 	.unmask_irq = imsic_unmask_irq,
 	.get_msi_msg = imsic_get_msi_msg,
+	.set_affinity = imsic_set_affinity,
+};
+
+static int imsic_cpuhp_startup(struct cpu_hotplug_notifier *notifier, int cpu)
+{
+	int i;
+
+	imsic_ids_local_delivery(1);
+
+	for (i = 0; i < imsic.nr_ids; i++)
+		imsic_enable_id(&imsic, i);
+
+	return 0;
+}
+
+static struct cpu_hotplug_notifier imsic_cpuhp_notifier = {
+	.startup = imsic_cpuhp_startup,
 };
 
 int imsic_init(char *name, unsigned long base, struct irq_domain *parent,
 	       void *data)
 {
+	int i;
 	struct imsic_priv_data *state = (struct imsic_priv_data *)data;
 
 	memset((char *)&imsic, 0, sizeof(struct imsic));
@@ -276,7 +299,13 @@ int imsic_init(char *name, unsigned long base, struct irq_domain *parent,
 				&imsic_irq_domain_ops, parent,
 				INTERRUPT_CAUSE_EXTERNAL, imsic_handle_irq,
 				&imsic);
+
 	imsic_ids_local_delivery(1);
+
+	for (i = 0; i < imsic.nr_ids; i++)
+		imsic_enable_id(&imsic, i);
+
+	cpu_hotplug_notify_register(&imsic_cpuhp_notifier);
 
 	print("%s success irq_domain:0x%x\n", __FUNCTION__, &imsic.irq_domain);
 

@@ -39,7 +39,7 @@ void switch_cpu_regs(struct pt_regs *prev, struct pt_regs *next,
 
 void bringup_secondary_cpus(struct device_init_entry *hw)
 {
-	int i, found = 0;
+	int i, found = 0, cpu_nums = 0;
 	struct riscv_hart_info *info;
 
 	while (strncmp(hw->compatible, "THE END", sizeof("THE END"))) {
@@ -56,9 +56,13 @@ void bringup_secondary_cpus(struct device_init_entry *hw)
 
 	info = (struct riscv_hart_info *)hw->data;
 	for (i = 1; i < info->hart_num; i++) {
-		sbi_cpu_start(i);
-		set_online_cpumask(i);
+		if (!sbi_cpu_start(i)) {
+			set_online_cpumask(i);
+			cpu_nums++;
+		}
 	}
+
+	print("bringup %d cpus success\n", cpu_nums + 1);
 }
 
 void cpu_regs_init(struct pt_regs *regs)
@@ -89,6 +93,8 @@ static int cpu_hotplug_notify_callback(int cpu)
 
 void secondary_cpus_init(unsigned int hart_id, unsigned long stack)
 {
+	write_csr(sie, -1);
+
 	cpu_hotplug_notify_callback(hart_id);
 
 	percpu_tasks_init(hart_id);

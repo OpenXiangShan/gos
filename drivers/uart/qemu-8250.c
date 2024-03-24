@@ -5,6 +5,7 @@
 #include <event.h>
 #include <string.h>
 #include "qemu-8250.h"
+#include <asm/sbi.h>
 
 static unsigned long base_address;
 static int wakeup = 0;

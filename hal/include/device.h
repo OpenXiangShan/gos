@@ -169,6 +169,8 @@ void walk_devices(void);
 
 unsigned long get_cycles(void);
 
+int msi_get_hwirq_affinity(struct device *dev, int nr_irqs,
+			   write_msi_msg_t write_msi_msg, int cpu);
 int msi_get_hwirq(struct device *dev, int nr_irqs,
 		  write_msi_msg_t write_msi_msg);
 int get_hwirq(struct device *dev, int *ret_irq);
