@@ -3,82 +3,43 @@
 #include <asm/type.h>
 #include "timer.h"
 #include "string.h"
-
-struct timer_event_info timer;
-
-extern unsigned long volatile jiffies;
+#include "cpu.h"
+#include "mm.h"
+#include "clock.h"
 
 unsigned long get_system_time()
 {
-	return jiffies;
+	return get_clocksource_counter();
 }
 
 unsigned long get_system_time_ms()
 {
-	return get_system_time();
+	return get_clocksource_counter();
+}
+
+static void timer_del_handler(void *self)
+{
+	struct timer_event_info *t = (struct timer_event_info *)self;
+
+	mm_free(t, sizeof(struct timer_event_info));
 }
 
 int set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data)
 {
-	if (timer.registered == 1)
+	struct timer_event_info *timer;
+
+	timer = mm_alloc(sizeof(struct timer_event_info));
+
+	if (!timer)
 		return -1;
 
-	timer.registered = 1;
-	timer.handler = timer_handler;
-	timer.data = data;
-	timer.ms = ms;
-	timer.done = 0;
+	timer->handler = timer_handler;
+	timer->del_cb = timer_del_handler;
+	timer->data = data;
+	timer->expiry_time = ms + get_system_time();
+	timer->restart = 0;
 
-	return 0;
-}
-
-int del_timer()
-{
-	timer.registered = -1;
-	timer.handler = NULL;
-	timer.data = NULL;
-	timer.ms = 0;
-
-	return 0;
-}
-
-int mod_timer(unsigned long ms)
-{
-	if (timer.registered == -1)
-		return -1;
-
-	timer.ms = ms / 10;
-	timer.done = 0;
-
-	return 0;
-}
-
-unsigned long get_timer_event_ms()
-{
-	if (timer.registered == -1)
-		return 0;
-
-	return timer.ms;
-}
-
-void do_timer_handler()
-{
-	if (timer.registered == -1)
-		return;
-
-	if (timer.done)
-		return;
-
-	if (!timer.handler)
-		return;
-
-	timer.done = 1;
-	timer.handler(timer.data);
-}
-
-unsigned long get_system_cycles(void)
-{
-	return get_cycles();
+	return register_timer_event(timer, 0);
 }
 
 static int timer_setup(struct device_init_entry *hw)
@@ -115,7 +76,5 @@ static int timer_setup(struct device_init_entry *hw)
 
 int init_timer(struct device_init_entry *hw)
 {
-	timer.registered = -1;
-
 	return timer_setup(hw);
 }

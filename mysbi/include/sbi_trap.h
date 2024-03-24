@@ -65,6 +65,7 @@ struct sbi_trap_hw_context {
 	unsigned long ipi;
 	unsigned long uart_base;
 	unsigned long next_addr;
+	char wait_var;
 	char next_mode[16];
 	unsigned long hw_info;
 };

@@ -36,6 +36,7 @@
 #define EXC_LOAD_PAGE_FAULT     13
 #define EXC_STORE_PAGE_FAULT    15
 
-#define SBI_HW_CTX_SIZE 0x100
+#define SBI_HW_CTX_SIZE   0x100
+#define SBI_HW_STACK_SIZE 0x400
 
 #endif

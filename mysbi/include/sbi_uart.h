@@ -1,7 +1,7 @@
 #ifndef	_UART_H
 #define	_UART_H
 
-#include "../sbi/sbi_trap.h"
+#include "sbi_trap.h"
 
 struct sbi_uart_ops {
 	void (*putc)(char c);

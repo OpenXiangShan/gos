@@ -7,6 +7,8 @@
 #define SBI_CONSOLE_PUTCHAR 0x1
 #define SBI_CONSOLE_GETCHAR 0x2
 #define SBI_GET_CPU_CYCLE 0x200
+#define SBI_GET_CPU_ID 0x201
+#define SBI_HART_START 0x300
 #define SBI_EXIT_VM_TEST 0x100
 
 #define SBI_CALL(which, arg0, arg1, arg2) ({                    \
@@ -47,4 +49,10 @@ static inline unsigned long sbi_get_cpu_cycles()
 {
 	return SBI_CALL_0(SBI_GET_CPU_CYCLE);
 }
+
+static inline int sbi_get_cpu_id()
+{
+	return SBI_CALL_0(SBI_GET_CPU_ID);
+}
+
 #endif

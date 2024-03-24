@@ -69,6 +69,16 @@ static inline void list_del(struct list_head *entry)
 	entry->prev = LIST_POISON2;
 }
 
+static inline int list_empty(struct list_head *head)
+{
+	return READ_ONCE(head->next) == head;
+}
+
+static inline struct list_head *list_first(struct list_head *head)
+{
+	return head->next;
+}
+
 #define list_entry(ptr, type, member) \
         container_of(ptr, type, member)
 

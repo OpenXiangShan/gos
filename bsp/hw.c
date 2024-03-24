@@ -10,8 +10,20 @@ extern struct clint_data qemu_clint_hw_data;
 extern struct plic_data plic_hw_data;
 extern struct riscv_iommu_data riscv_iommu_data;
 
+extern struct riscv_hart riscv_hart;
+
 static const struct device_init_entry __attribute__((used))
     device_info[] __attribute__((section(".device_init_table"))) = {
+	{
+	 "riscv-hart",
+	 0,
+	 0,
+	 " ",
+	 { 0,},
+	 0,
+	 0,
+	 &riscv_hart,
+	  },
 #ifndef USE_QEMU
 	{
 	 "ns16550a",
@@ -22,8 +34,9 @@ static const struct device_init_entry __attribute__((used))
 #else
 	 "APLIC_S",
 #endif
-	 { 40,}
-	 1 0,
+	 { 40,},
+	 1,
+	 0,
 	 0,
 	  },
 #else

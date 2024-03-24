@@ -10,7 +10,7 @@
 #define ESC_ASCII 27
 #define SHELL_DEVICE_NAME "UART0"
 
-void shell_init()
+int shell_init(void *data)
 {
 	int i;
 	int left = 5;
@@ -28,13 +28,13 @@ void shell_init()
 	shell_command = (char *)mm_alloc(PAGE_SIZE);
 	if (!shell_command) {
 		print("alloc shell command buffer failed...\n");
-		return;
+		return -1;
 	}
 
 	fd = open(SHELL_DEVICE_NAME);
 	if (fd < 0) {
 		print("open %s failed...\n", SHELL_DEVICE_NAME);
-		return;
+		return -1;
 	}
 
 	print("open %s as console...\n", SHELL_DEVICE_NAME);
@@ -133,4 +133,6 @@ run_shell:
 	}
 
 	mm_free(shell_command, PAGE_SIZE);
+
+	return 0;
 }

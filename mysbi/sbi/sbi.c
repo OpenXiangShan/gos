@@ -9,7 +9,7 @@
 #include "sbi_uart.h"
 #include "sbi_trap.h"
 
-static struct sbi_trap_hw_context *h_context;
+static struct sbi_trap_hw_context *h_context[8] = { 0 };
 
 extern void exception_vector(void);
 
@@ -22,6 +22,7 @@ void sbi_panic()
 
 static void sbi_trap_error(struct sbi_trap_regs *regs, const char *msg, int rc)
 {
+	sbi_print("mhartid:%d:\n", read_csr(mhartid));
 	sbi_print("%s: %s (error %d)\n", __FUNCTION__, msg, rc);
 	sbi_print("mcause: %x  mtval: %x \n",
 		  read_csr(mcause), read_csr(mtval));
@@ -42,11 +43,29 @@ static void sbi_trap_error(struct sbi_trap_regs *regs, const char *msg, int rc)
 	sbi_panic();
 }
 
+static int sbi_hart_start(unsigned int hartid, unsigned long jump_addr)
+{
+	struct sbi_trap_hw_context *ctx;
+
+	ctx = h_context[hartid];
+	if (!ctx) {
+		sbi_print("%s -- invalid hartid, hartid:%d\n", __FUNCTION__,
+			  hartid);
+		return -1;
+	}
+
+	ctx->next_addr = jump_addr;
+	strcpy(ctx->next_mode, "S_MODE");
+	ctx->wait_var = 1;
+
+	return 0;
+}
+
 static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 {
 	unsigned long ret_value = 0;
 	int ret = 0;
-	struct sbi_trap_hw_context *ctx = h_context + read_csr(mhartid);
+	struct sbi_trap_hw_context *ctx = h_context[read_csr(mhartid)];
 
 	switch (id) {
 	case SBI_SET_TIMER:
@@ -59,6 +78,12 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 		break;
 	case SBI_GET_CPU_CYCLE:
 		ret_value = read_csr(mcycle);
+		break;
+	case SBI_GET_CPU_ID:
+		ret_value = read_csr(mhartid);
+		break;
+	case SBI_HART_START:
+		sbi_hart_start(regs->a0, regs->a1);
 		break;
 	}
 
@@ -135,8 +160,6 @@ trap_error:
 
 static void sbi_trap_init(void)
 {
-	sbi_print("%s -- %s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-
 	write_csr(mtvec, exception_vector);
 	sbi_print("mtvec=0x%x, 0x%x\n", read_csr(mtvec), exception_vector);
 
@@ -145,8 +168,6 @@ static void sbi_trap_init(void)
 
 static void sbi_setup_pmp(void)
 {
-	sbi_print("%s -- %s:%d\n", __FILE__, __FUNCTION__, __LINE__);
-
 	// Set up a PMP to permit access to all of memory.
 	// Ignore the illegal-instruction trap if PMPs aren't supported.
 	unsigned long pmpc = PMP_A_NAPOT | PMP_R | PMP_W | PMP_X;
@@ -216,7 +237,7 @@ static void sbi_jump_to_machine(unsigned long addr)
 	fn();
 }
 
-static void sbi_jump_to_next(struct sbi_trap_hw_context *ctx)
+void sbi_jump_to_next(struct sbi_trap_hw_context *ctx)
 {
 	if (next_is_s_mode(ctx->next_mode)) {
 		sbi_jump_to_supervisor(ctx->hart_id, ctx->hw_info,
@@ -274,9 +295,36 @@ void delegate_traps(void)
 	write_csr(medeleg, exceptions);
 }
 
+void sbi_exit(unsigned int hart_id)
+{
+	sbi_print("sbi exit... hart id:%d\n", hart_id);
+
+	while (1) ;
+}
+
+void sbi_secondary_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
+{
+	extern unsigned long DEVICE_INIT_TABLE;
+
+	sbi_print("sbi secondary init... hart_id: %d ctx:0x%x\n", hart_id, ctx);
+
+	h_context[hart_id] = ctx;
+	ctx->wait_var = 0;
+	ctx->hart_id = hart_id;
+	ctx->hw_info = (unsigned long)&DEVICE_INIT_TABLE;
+
+	sbi_trap_init();
+	sbi_setup_pmp();
+
+	sbi_clint_init(hart_id, ctx);
+
+	write_csr(mie, MIP_MSIP | MIP_MEIP | MIP_MTIP);
+	delegate_traps();
+}
+
 void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 {
-	h_context = ctx;
+	h_context[hart_id] = ctx;
 
 	if (-1 == sbi_uart_init(hart_id, ctx))
 		return;
@@ -295,5 +343,4 @@ void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 	write_csr(mie, MIP_MSIP | MIP_MEIP | MIP_MTIP);
 
 	delegate_traps();
-	sbi_jump_to_next(ctx);
 }

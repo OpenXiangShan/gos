@@ -137,15 +137,18 @@ int get_hwirq(struct device *dev, int *ret_irq)
 		for (i = 0; i < num; i++) {
 			if (irq_domain->link_domain->domain_ops
 			    && irq_domain->link_domain->domain_ops->set_type)
-				irq_domain->link_domain->domain_ops->
-				    set_type(hwirq + i, IRQ_TYPE_LEVEL_HIGH,
-					     irq_domain->link_domain->priv);
+				irq_domain->link_domain->
+				    domain_ops->set_type(hwirq + i,
+							 IRQ_TYPE_LEVEL_HIGH,
+							 irq_domain->
+							 link_domain->priv);
 
 			if (irq_domain->link_domain->domain_ops
 			    && irq_domain->link_domain->domain_ops->unmask_irq)
-				irq_domain->link_domain->domain_ops->
-				    unmask_irq(hwirq + i,
-					       irq_domain->link_domain->priv);
+				irq_domain->link_domain->
+				    domain_ops->unmask_irq(hwirq + i,
+							   irq_domain->
+							   link_domain->priv);
 		}
 	}
 

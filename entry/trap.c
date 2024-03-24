@@ -1,7 +1,9 @@
 #include <print.h>
 #include <asm/ptregs.h>
 #include <asm/csr.h>
+#include <asm/sbi.h>
 #include <irq.h>
+#include "task.h"
 
 extern void do_exception_vector(void);
 
@@ -102,7 +104,11 @@ static inline const struct fault_info *ec_to_fault_info(unsigned int scause)
 
 int do_exception(struct pt_regs *regs, unsigned long scause)
 {
+	task_scheduler_enter(regs);
+
 	handle_irq(scause);
+
+	task_scheduler_exit(regs);
 
 	return 0;
 }

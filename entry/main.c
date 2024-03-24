@@ -1,3 +1,4 @@
+#include <asm/type.h>
 #include <uart.h>
 #include <device.h>
 #include <print.h>
@@ -7,6 +8,9 @@
 #include <asm/csr.h>
 #include <timer.h>
 #include <shell.h>
+#include <cpu.h>
+#include <percpu.h>
+#include <task.h>
 
 extern const char logo[];
 
@@ -20,48 +24,24 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 	//__asm__ __volatile__ ("j  .\n");
 
 	mm_init(hw);
+
 	trap_init();
+
+	percpu_init();
+
 	irq_init();
+
 	irqchip_setup(hw);
+
 	init_timer(hw);
+
 	device_driver_init(hw);
 
-	print("local irq enable!!!\n");
+	bringup_secondary_cpus(hw);
+
+	percpu_tasks_init(0);
+
 	enable_local_irq();
 
-	shell_init();
-
-#if 0				//mm_alloc mm_free test
-	void *addr;
-	int size;
-
-	size = 1024;
-	addr = mm_alloc(size);
-	print("mm_alloc size:%d addr: 0x%x\n", size, addr);
-
-	mm_free(addr, size);
-
-	size = 4097;
-	addr = mm_alloc(size);
-	print("mm_alloc size:%d addr: 0x%x\n", size, addr);
-
-	size = 8192;
-	addr = mm_alloc(size);
-	print("mm_alloc size:%d addr: 0x%x\n", size, addr);
-
-	size = 4096;
-	addr = mm_alloc(size);
-	print("mm_alloc size:%d addr: 0x%x\n", size, addr);
-
-	size = 64 * 4096;
-	addr = mm_alloc(size);
-	print("mm_alloc size:%d addr: 0x%x\n", size, addr);
-	mm_free(addr, size);
-
-	size = 4096;
-	addr = mm_alloc(size);
-	print("mm_alloc size:%d addr: 0x%x\n", size, addr);
-
-#endif
-
+	create_task("shell_init", shell_init, NULL, 0, NULL, 0);
 }

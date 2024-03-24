@@ -110,3 +110,6 @@ do_exception_vector:
 	ld sp,  PT_SP(sp)
 	
 	sret	
+
+.global task_do_exception_vector
+	

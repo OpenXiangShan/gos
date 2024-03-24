@@ -3,12 +3,15 @@
 #include <string.h>
 #include <print.h>
 #include <asm/type.h>
+#include "spinlocks.h"
 
 extern unsigned long bss_end;
 
 /* each bit identifies a page, MEM_MAP_NR is the number of mem_maps*/
 #define MEM_MAP_NR 8192		//2*1024*1024*1024/PAGE_SIZE/(sizeof(unsigned long)*8)
 #define TOTAL_PAGE_NUM MEM_MAP_NR * sizeof(unsigned long)
+
+static DEFINE_SPINLOCK(mem_lock);
 
 static unsigned long mem_maps[MEM_MAP_NR];
 static unsigned long phy_address_start;
@@ -60,6 +63,7 @@ void *mm_alloc(unsigned int size)
 	void *addr = (void *)phy_address_start;
 	int per_mem_map = sizeof(mem_maps[0]) * 8;
 
+	spin_lock(&mem_lock);
 	/* 
 	 * Find free pages from mem_maps according to page_nr 
 	 * index/per_mem_map indicates that the page represented by index is located in which mem_map of mem_maps  
@@ -79,6 +83,7 @@ void *mm_alloc(unsigned int size)
 		index++;
 	}
 
+	spin_unlock(&mem_lock);
 	print("out of memory!!\n");
 
 	return NULL;
@@ -95,6 +100,8 @@ success:
 		mem_maps[(index / per_mem_map)] = mem_map;
 	}
 
+	spin_unlock(&mem_lock);
+
 	return addr;
 }
 
@@ -109,6 +116,7 @@ void mm_free(void *addr, unsigned int size)
 	if (index >= TOTAL_PAGE_NUM)
 		return;
 
+	spin_lock(&mem_lock);
 	/* set bits in mem_maps according to [addr, addr + size) to 0 */
 	for (; page_nr; page_nr--, index++) {
 		mem_map = mem_maps[(index / per_mem_map)];
@@ -117,4 +125,5 @@ void mm_free(void *addr, unsigned int size)
 				     (index % per_mem_map));
 		mem_maps[(index / per_mem_map)] = mem_map;
 	}
+	spin_unlock(&mem_lock);
 }

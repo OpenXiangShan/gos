@@ -13,6 +13,11 @@ SECTIONS
 	}
 		
 	.rodata : { *(.rodata) }
+
+	. = ALIGN(0x1000);
+	__percpu_start = .;
+	.per_cpu : { *(.percpu) }
+	__percpu_end = .;
 	
 	. = ALIGN(8);
 	__driver_init_table = .;

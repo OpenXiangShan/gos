@@ -7,6 +7,8 @@
 #include <print.h>
 #include <asm/sbi.h>
 #include <timer.h>
+#include "cpu.h"
+#include "clock.h"
 
 #define HZ 1000
 
@@ -14,7 +16,6 @@
 #define CLINT_TIMER_VAL 0xbff8
 
 unsigned long clint_freq;
-unsigned long volatile jiffies;
 static unsigned long base_address;
 
 struct clint_priv_data {
@@ -28,23 +29,102 @@ unsigned long get_cycles(void)
 
 static void timer_handle_irq(void *data)
 {
-	csr_clear(sie, SIE_STIE);
-	jiffies++;
+	do_clock_event_handler();
+}
 
-	if (jiffies >= get_timer_event_ms()) {
-		do_timer_handler();
+static void __timer_init()
+{
+	csr_set(sie, SIE_STIE);
+}
+
+static int timer_set_next_event(unsigned long next, struct clock_event *evt)
+{
+	//csr_clear(sie, SIE_STIE);
+	sbi_set_timer(next);
+	csr_set(sie, SIE_STIE);
+
+	return 0;
+}
+
+static void timer_evt_handler(struct clock_event *evt)
+{
+	csr_clear(sie, SIE_STIE);
+}
+
+static unsigned long timer_counter_read(struct clock_source *src)
+{
+	return readq(base_address + CLINT_TIMER_VAL);
+}
+
+static struct clock_event clock_event_info = {
+	.hwirq = INTERRUPT_CAUSE_TIMER,
+	.evt_handler = timer_evt_handler,
+	.set_next_event = timer_set_next_event,
+};
+
+static struct clock_source clock_source_info = {
+	.read = timer_counter_read,
+};
+
+static void calc_mult_shift(unsigned int *mult, unsigned int *shift,
+			    unsigned int from, unsigned int to,
+			    unsigned int maxsec)
+{
+	u64 tmp;
+	u32 sft, sftacc = 32;
+
+	/*
+	 * Calculate the shift factor which is limiting the conversion
+	 * range:
+	 */
+	tmp = ((u64) maxsec * from) >> 32;
+	while (tmp) {
+		tmp >>= 1;
+		sftacc--;
 	}
 
-	sbi_set_timer(get_cycles() + clint_freq / HZ);
-	csr_set(sie, SIE_STIE);
+	/*
+	 * Find the conversion shift/mult pair which has the best
+	 * accuracy and fits the maxsec conversion range:
+	 */
+	for (sft = 32; sft > 0; sft--) {
+		tmp = (u64) to << sft;
+		tmp += from / 2;
+		tmp = tmp / from;
+		if ((tmp >> sftacc) == 0)
+			break;
+	}
+	*mult = tmp;
+	*shift = sft;
+
 }
 
-void __timer_init()
+static void clock_source_init(struct clock_source *src)
 {
-	jiffies = 0;
-	sbi_set_timer(get_cycles() + clint_freq / HZ);
-	csr_set(sie, SIE_STIE);
+	unsigned int mult, shift;
+
+	calc_mult_shift(&mult, &shift, clint_freq, NSEC_PER_SEC, 10);
+
+	src->mult = mult;
+	src->shift = shift;
+	src->freq = clint_freq;
+	src->last_cycles = get_cycles();
+	//src->last_ns = (get_cycles() * mult) >> shift; 
+	src->last_ms = cycles_to_ms(get_cycles(), src->freq);
 }
+
+static int timer_cpuhp_startup(struct cpu_hotplug_notifier *notifier, int cpu)
+{
+	__timer_init();
+
+	register_clock_event(&clock_event_info, cpu);
+
+	return 0;
+}
+
+static struct cpu_hotplug_notifier timer_cpuhp_notifier = {
+	.startup = timer_cpuhp_startup,
+};
 
 int clint_timer_init(unsigned long base, struct irq_domain *d, void *priv)
 {
@@ -65,7 +145,13 @@ int clint_timer_init(unsigned long base, struct irq_domain *d, void *priv)
 
 	__timer_init();
 
+	clock_source_init(&clock_source_info);
+
+	register_clock_event(&clock_event_info, 0);
+	register_clock_source(&clock_source_info, 0);
 	register_device_irq(d, INTERRUPT_CAUSE_TIMER, timer_handle_irq, NULL);
+
+	cpu_hotplug_notify_register(&timer_cpuhp_notifier);
 
 	return 0;
 }

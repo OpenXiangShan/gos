@@ -2,23 +2,22 @@
 #define _TIMER_H
 
 #include <device.h>
+#include "list.h"
 
 struct timer_event_info {
-	int registered;
-	unsigned long ms;
+	struct list_head list;
 	void (*handler)(void *data);
+	void (*del_cb)(void *data);
 	void *data;
 	int done;
+	unsigned long expiry_time;
+	unsigned long period;
+	int restart;
 };
 
 int init_timer(struct device_init_entry *hw);
-void do_timer_handler();
 unsigned long get_system_time(void);
 unsigned long get_system_time_ms(void);
-int del_timer();
 int set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data);
-unsigned long get_timer_event_ms(void);
-int mod_timer(unsigned long ms);
-unsigned long get_system_cycles(void);
 
 #endif

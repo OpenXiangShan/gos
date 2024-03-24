@@ -1,0 +1,416 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AFCE	sbi/uart_ns16550a.h	36;"	d
+BI	sbi/uart_ns16550a.h	29;"	d
+CAUSE_BREAKPOINT	include/asm/trap.h	8;"	d
+CAUSE_FETCH_ACCESS	include/asm/trap.h	6;"	d
+CAUSE_FETCH_GUEST_PAGE_FAULT	include/asm/trap.h	20;"	d
+CAUSE_FETCH_PAGE_FAULT	include/asm/trap.h	17;"	d
+CAUSE_ILLEGAL_INSTRUCTION	include/asm/trap.h	7;"	d
+CAUSE_LOAD_ACCESS	include/asm/trap.h	10;"	d
+CAUSE_LOAD_GUEST_PAGE_FAULT	include/asm/trap.h	21;"	d
+CAUSE_LOAD_PAGE_FAULT	include/asm/trap.h	18;"	d
+CAUSE_MACHINE_ECALL	include/asm/trap.h	16;"	d
+CAUSE_MISALIGNED_FETCH	include/asm/trap.h	5;"	d
+CAUSE_MISALIGNED_LOAD	include/asm/trap.h	9;"	d
+CAUSE_MISALIGNED_STORE	include/asm/trap.h	11;"	d
+CAUSE_STORE_ACCESS	include/asm/trap.h	12;"	d
+CAUSE_STORE_GUEST_PAGE_FAULT	include/asm/trap.h	23;"	d
+CAUSE_STORE_PAGE_FAULT	include/asm/trap.h	19;"	d
+CAUSE_SUPERVISOR_ECALL	include/asm/trap.h	14;"	d
+CAUSE_USER_ECALL	include/asm/trap.h	13;"	d
+CAUSE_VIRTUAL_INST_FAULT	include/asm/trap.h	22;"	d
+CAUSE_VIRTUAL_SUPERVISOR_ECALL	include/asm/trap.h	15;"	d
+CSR_HCOUNTEREN	include/asm/csr.h	64;"	d
+CSR_HEDELEG	include/asm/csr.h	59;"	d
+CSR_HGATP	include/asm/csr.h	70;"	d
+CSR_HGEIE	include/asm/csr.h	65;"	d
+CSR_HGEIP	include/asm/csr.h	73;"	d
+CSR_HIDELEG	include/asm/csr.h	60;"	d
+CSR_HIE	include/asm/csr.h	61;"	d
+CSR_HIP	include/asm/csr.h	67;"	d
+CSR_HSTATUS	include/asm/csr.h	52;"	d
+CSR_HTIMEDELTA	include/asm/csr.h	62;"	d
+CSR_HTIMEDELTAH	include/asm/csr.h	63;"	d
+CSR_HTINST	include/asm/csr.h	69;"	d
+CSR_HTVAL	include/asm/csr.h	66;"	d
+CSR_HVIP	include/asm/csr.h	68;"	d
+CSR_PMPADDR0	include/asm/csr.h	79;"	d
+CSR_PMPADDR1	include/asm/csr.h	80;"	d
+CSR_PMPADDR2	include/asm/csr.h	81;"	d
+CSR_PMPADDR3	include/asm/csr.h	82;"	d
+CSR_PMPADDR4	include/asm/csr.h	83;"	d
+CSR_PMPADDR5	include/asm/csr.h	84;"	d
+CSR_PMPADDR6	include/asm/csr.h	85;"	d
+CSR_PMPADDR7	include/asm/csr.h	86;"	d
+CSR_PMPCFG0	include/asm/csr.h	78;"	d
+CSR_VSATP	include/asm/csr.h	49;"	d
+CSR_VSCAUSE	include/asm/csr.h	46;"	d
+CSR_VSEPC	include/asm/csr.h	45;"	d
+CSR_VSIE	include/asm/csr.h	42;"	d
+CSR_VSIP	include/asm/csr.h	48;"	d
+CSR_VSSCRATCH	include/asm/csr.h	44;"	d
+CSR_VSSTATUS	include/asm/csr.h	41;"	d
+CSR_VSTVAL	include/asm/csr.h	47;"	d
+CSR_VSTVEC	include/asm/csr.h	43;"	d
+CTR	sbi/uart_ns16550a.h	24;"	d
+CTS	sbi/uart_ns16550a.h	38;"	d
+DEVICE_H	include/device.h	2;"	d
+DEVICE_INIT_TABLE	include/device.h	4;"	d
+DEVICE_INIT_TABLE_END	include/device.h	5;"	d
+DLH	sbi/uart_ns16550a.h	9;"	d
+DLL	sbi/uart_ns16550a.h	8;"	d
+DMASA	sbi/uart_ns16550a.h	22;"	d
+DR	sbi/uart_ns16550a.h	33;"	d
+DTR	sbi/uart_ns16550a.h	34;"	d
+EXC_BREAKPOINT	include/asm/trap.h	31;"	d
+EXC_INST_ACCESS	include/asm/trap.h	30;"	d
+EXC_INST_MISALIGNED	include/asm/trap.h	29;"	d
+EXC_INST_PAGE_FAULT	include/asm/trap.h	35;"	d
+EXC_LOAD_ACCESS	include/asm/trap.h	32;"	d
+EXC_LOAD_PAGE_FAULT	include/asm/trap.h	36;"	d
+EXC_STORE_ACCESS	include/asm/trap.h	33;"	d
+EXC_STORE_PAGE_FAULT	include/asm/trap.h	37;"	d
+EXC_SYSCALL	include/asm/trap.h	34;"	d
+FCR	sbi/uart_ns16550a.h	12;"	d
+FE	sbi/uart_ns16550a.h	30;"	d
+HGATP_MODE_Sv39x4	include/asm/csr.h	71;"	d
+HSTATUS_SPV	include/asm/csr.h	54;"	d
+HSTATUS_SPVP	include/asm/csr.h	57;"	d
+HSTATUS_SPVP_SHIFT	include/asm/csr.h	56;"	d
+HSTATUS_SPV_SHIFT	include/asm/csr.h	53;"	d
+HTX	sbi/uart_ns16550a.h	21;"	d
+IER	sbi/uart_ns16550a.h	10;"	d
+IIR	sbi/uart_ns16550a.h	11;"	d
+INSERT_FIELD	include/asm/csr.h	6;"	d
+INTERRUPT_CAUSE_EXTERNAL	include/asm/trap.h	27;"	d
+INTERRUPT_CAUSE_SOFTWARE	include/asm/trap.h	25;"	d
+INTERRUPT_CAUSE_TIMER	include/asm/trap.h	26;"	d
+IRQ_M_EXT	sbi/sbi_trap.h	13;"	d
+IRQ_M_SOFT	sbi/sbi_trap.h	9;"	d
+IRQ_M_TIMER	sbi/sbi_trap.h	12;"	d
+IRQ_S_EXT	sbi/sbi_trap.h	11;"	d
+IRQ_S_SOFT	sbi/sbi_trap.h	8;"	d
+IRQ_S_TIMER	sbi/sbi_trap.h	10;"	d
+LCR	sbi/uart_ns16550a.h	13;"	d
+LPDLH	sbi/uart_ns16550a.h	19;"	d
+LPDLL	sbi/uart_ns16550a.h	18;"	d
+LSR	sbi/uart_ns16550a.h	15;"	d
+Loop	entry/start.S	/^Loop:$/;"	l
+MAX_CSR_PMP	include/asm/csr.h	76;"	d
+MAX_NUMBER_BYTES	lib/print.c	12;"	d	file:
+MCAUSE_IRQ	sbi/sbi_trap.h	6;"	d
+MCR	sbi/uart_ns16550a.h	14;"	d
+MIP_MEIP	sbi/sbi_trap.h	19;"	d
+MIP_MSIP	sbi/sbi_trap.h	20;"	d
+MIP_MTIP	sbi/sbi_trap.h	18;"	d
+MIP_SEIP	sbi/sbi_trap.h	17;"	d
+MIP_SSIP	sbi/sbi_trap.h	15;"	d
+MIP_STIP	sbi/sbi_trap.h	16;"	d
+MSR	sbi/uart_ns16550a.h	16;"	d
+MSTATUS_MPIE	include/asm/csr.h	15;"	d
+MSTATUS_MPP	include/asm/csr.h	14;"	d
+MSTATUS_MPP_SHIFT	include/asm/csr.h	13;"	d
+M_MODE	sbi/sbi_trap.h	22;"	d
+NULL	include/asm/type.h	4;"	d
+OE	sbi/uart_ns16550a.h	32;"	d
+PE	sbi/uart_ns16550a.h	31;"	d
+PMP_A	include/asm/csr.h	91;"	d
+PMP_A_NA4	include/asm/csr.h	93;"	d
+PMP_A_NAPOT	include/asm/csr.h	94;"	d
+PMP_A_TOR	include/asm/csr.h	92;"	d
+PMP_L	include/asm/csr.h	95;"	d
+PMP_R	include/asm/csr.h	88;"	d
+PMP_RWX	include/asm/csr.h	96;"	d
+PMP_SHIFT	include/asm/csr.h	97;"	d
+PMP_W	include/asm/csr.h	89;"	d
+PMP_X	include/asm/csr.h	90;"	d
+PRINT_H	include/print.h	2;"	d
+PRV_M	include/asm/csr.h	11;"	d
+PRV_S	include/asm/csr.h	10;"	d
+PRV_U	include/asm/csr.h	9;"	d
+PT_A0	include/asm/asm-offsets.h	24;"	d
+PT_A0	include/asm/sbi_asm_offsets.h	24;"	d
+PT_A1	include/asm/asm-offsets.h	25;"	d
+PT_A1	include/asm/sbi_asm_offsets.h	25;"	d
+PT_A2	include/asm/asm-offsets.h	26;"	d
+PT_A2	include/asm/sbi_asm_offsets.h	26;"	d
+PT_A3	include/asm/asm-offsets.h	27;"	d
+PT_A3	include/asm/sbi_asm_offsets.h	27;"	d
+PT_A4	include/asm/asm-offsets.h	28;"	d
+PT_A4	include/asm/sbi_asm_offsets.h	28;"	d
+PT_A5	include/asm/asm-offsets.h	29;"	d
+PT_A5	include/asm/sbi_asm_offsets.h	29;"	d
+PT_A6	include/asm/asm-offsets.h	30;"	d
+PT_A6	include/asm/sbi_asm_offsets.h	30;"	d
+PT_A7	include/asm/asm-offsets.h	31;"	d
+PT_A7	include/asm/sbi_asm_offsets.h	31;"	d
+PT_FP	include/asm/asm-offsets.h	9;"	d
+PT_FP	include/asm/sbi_asm_offsets.h	9;"	d
+PT_GP	include/asm/asm-offsets.h	39;"	d
+PT_GP	include/asm/sbi_asm_offsets.h	39;"	d
+PT_MEPC	include/asm/sbi_asm_offsets.h	7;"	d
+PT_MSTATUS	include/asm/sbi_asm_offsets.h	40;"	d
+PT_ORIG_A0	include/asm/asm-offsets.h	40;"	d
+PT_RA	include/asm/asm-offsets.h	8;"	d
+PT_RA	include/asm/sbi_asm_offsets.h	8;"	d
+PT_S0	include/asm/asm-offsets.h	10;"	d
+PT_S0	include/asm/sbi_asm_offsets.h	10;"	d
+PT_S1	include/asm/asm-offsets.h	11;"	d
+PT_S1	include/asm/sbi_asm_offsets.h	11;"	d
+PT_S10	include/asm/asm-offsets.h	20;"	d
+PT_S10	include/asm/sbi_asm_offsets.h	20;"	d
+PT_S11	include/asm/asm-offsets.h	21;"	d
+PT_S11	include/asm/sbi_asm_offsets.h	21;"	d
+PT_S2	include/asm/asm-offsets.h	12;"	d
+PT_S2	include/asm/sbi_asm_offsets.h	12;"	d
+PT_S3	include/asm/asm-offsets.h	13;"	d
+PT_S3	include/asm/sbi_asm_offsets.h	13;"	d
+PT_S4	include/asm/asm-offsets.h	14;"	d
+PT_S4	include/asm/sbi_asm_offsets.h	14;"	d
+PT_S5	include/asm/asm-offsets.h	15;"	d
+PT_S5	include/asm/sbi_asm_offsets.h	15;"	d
+PT_S6	include/asm/asm-offsets.h	16;"	d
+PT_S6	include/asm/sbi_asm_offsets.h	16;"	d
+PT_S7	include/asm/asm-offsets.h	17;"	d
+PT_S7	include/asm/sbi_asm_offsets.h	17;"	d
+PT_S8	include/asm/asm-offsets.h	18;"	d
+PT_S8	include/asm/sbi_asm_offsets.h	18;"	d
+PT_S9	include/asm/asm-offsets.h	19;"	d
+PT_S9	include/asm/sbi_asm_offsets.h	19;"	d
+PT_SBADADDR	include/asm/asm-offsets.h	42;"	d
+PT_SCAUSE	include/asm/asm-offsets.h	43;"	d
+PT_SEPC	include/asm/asm-offsets.h	7;"	d
+PT_SIZE	include/asm/asm-offsets.h	6;"	d
+PT_SIZE	include/asm/sbi_asm_offsets.h	6;"	d
+PT_SP	include/asm/asm-offsets.h	22;"	d
+PT_SP	include/asm/sbi_asm_offsets.h	22;"	d
+PT_SSTATUS	include/asm/asm-offsets.h	41;"	d
+PT_T0	include/asm/asm-offsets.h	32;"	d
+PT_T0	include/asm/sbi_asm_offsets.h	32;"	d
+PT_T1	include/asm/asm-offsets.h	33;"	d
+PT_T1	include/asm/sbi_asm_offsets.h	33;"	d
+PT_T2	include/asm/asm-offsets.h	34;"	d
+PT_T2	include/asm/sbi_asm_offsets.h	34;"	d
+PT_T3	include/asm/asm-offsets.h	35;"	d
+PT_T3	include/asm/sbi_asm_offsets.h	35;"	d
+PT_T4	include/asm/asm-offsets.h	36;"	d
+PT_T4	include/asm/sbi_asm_offsets.h	36;"	d
+PT_T5	include/asm/asm-offsets.h	37;"	d
+PT_T5	include/asm/sbi_asm_offsets.h	37;"	d
+PT_T6	include/asm/asm-offsets.h	38;"	d
+PT_T6	include/asm/sbi_asm_offsets.h	38;"	d
+PT_TP	include/asm/asm-offsets.h	23;"	d
+PT_TP	include/asm/sbi_asm_offsets.h	23;"	d
+RBR	sbi/uart_ns16550a.h	6;"	d
+RFE	sbi/uart_ns16550a.h	26;"	d
+RISCV_FENCE	include/asm/barrier.h	15;"	d
+RISCV_XLEN	include/asm/csr.h	4;"	d
+RTS	sbi/uart_ns16550a.h	35;"	d
+SATP_MODE_39	include/asm/csr.h	38;"	d
+SBI_CLINT_H	sbi/sbi_clint.h	2;"	d
+SBI_CONSOLE_GETCHAR	include/sbi.h	6;"	d
+SBI_CONSOLE_PUTCHAR	include/sbi.h	5;"	d
+SBI_GET_CPU_CYCLE	include/sbi.h	7;"	d
+SBI_H	include/sbi.h	2;"	d
+SBI_HW_CTX_SIZE	include/asm/trap.h	39;"	d
+SBI_SET_TIMER	include/sbi.h	4;"	d
+SCAUSE_EC	include/asm/csr.h	36;"	d
+SCAUSE_INT	include/asm/csr.h	33;"	d
+SCR_UART	sbi/uart_ns16550a.h	17;"	d
+SIE_SEIE	include/asm/csr.h	31;"	d
+SIE_SSIE	include/asm/csr.h	29;"	d
+SIE_STIE	include/asm/csr.h	30;"	d
+SIRE	sbi/uart_ns16550a.h	37;"	d
+SR_FS	include/asm/csr.h	25;"	d
+SR_SIE	include/asm/csr.h	21;"	d
+SR_SPIE	include/asm/csr.h	22;"	d
+SR_SPP	include/asm/csr.h	23;"	d
+SR_SUM	include/asm/csr.h	24;"	d
+SR_XS	include/asm/csr.h	26;"	d
+SSTATUS_SPP	include/asm/csr.h	19;"	d
+SSTATUS_SPP_SHIFT	include/asm/csr.h	18;"	d
+STRING_H	include/string.h	2;"	d
+SYNC_ADDR	sbi/uart_ns16550a.h	4;"	d
+S_MODE	sbi/sbi_trap.h	23;"	d
+TEMT	sbi/uart_ns16550a.h	27;"	d
+THR	sbi/uart_ns16550a.h	7;"	d
+THRE	sbi/uart_ns16550a.h	28;"	d
+TRAP_H_	include/asm/trap.h	2;"	d
+UART_CLK	sbi/uart_ns16550a.c	6;"	d	file:
+UART_DAT	sbi/uart_qemu-8250.h	4;"	d
+UART_DEFAULT_BAUD	sbi/uart_ns16550a.c	7;"	d	file:
+UART_DEFAULT_BAUD	sbi/uart_qemu-8250.c	6;"	d	file:
+UART_DLL	sbi/uart_qemu-8250.h	13;"	d
+UART_DLM	sbi/uart_qemu-8250.h	14;"	d
+UART_FCR	sbi/uart_qemu-8250.h	7;"	d
+UART_IER	sbi/uart_qemu-8250.h	5;"	d
+UART_IIR	sbi/uart_qemu-8250.h	6;"	d
+UART_LCR	sbi/uart_qemu-8250.h	8;"	d
+UART_LSR	sbi/uart_qemu-8250.h	10;"	d
+UART_LSR_BI	sbi/uart_qemu-8250.h	19;"	d
+UART_LSR_DR	sbi/uart_qemu-8250.h	23;"	d
+UART_LSR_EMPTY	sbi/uart_qemu-8250.h	17;"	d
+UART_LSR_ERROR	sbi/uart_qemu-8250.h	16;"	d
+UART_LSR_FE	sbi/uart_qemu-8250.h	20;"	d
+UART_LSR_OE	sbi/uart_qemu-8250.h	22;"	d
+UART_LSR_PE	sbi/uart_qemu-8250.h	21;"	d
+UART_LSR_TFE	sbi/uart_qemu-8250.h	18;"	d
+UART_MCR	sbi/uart_qemu-8250.h	9;"	d
+UART_MSR	sbi/uart_qemu-8250.h	11;"	d
+UCV	sbi/uart_ns16550a.h	23;"	d
+USR	sbi/uart_ns16550a.h	20;"	d
+_ASM_RISCV_BARRIER_H	include/asm/barrier.h	11;"	d
+_ASM_RISCV_CSR_H	include/asm/csr.h	2;"	d
+_MMIO_H	include/asm/mmio.h	2;"	d
+_QEMU_8250_UART_H	sbi/uart_qemu-8250.h	2;"	d
+_SBI_TRAP_H	sbi/sbi_trap.h	2;"	d
+_TYPE_H	include/asm/type.h	2;"	d
+_UART_H	include/sbi_uart.h	2;"	d
+_UART_NS16550A_H	sbi/uart_ns16550a.h	2;"	d
+__ASM_OFFSETS_H__	include/asm/asm-offsets.h	2;"	d
+__ASM_OFFSETS_H__	include/asm/sbi_asm_offsets.h	2;"	d
+__ASM_STR	include/asm/csr.h	99;"	d
+__arch_getb	include/asm/mmio.h	7;"	d
+__arch_getl	include/asm/mmio.h	4;"	d
+__arch_getq	include/asm/mmio.h	10;"	d
+__arch_putb	include/asm/mmio.h	8;"	d
+__arch_putl	include/asm/mmio.h	5;"	d
+__arch_putq	include/asm/mmio.h	11;"	d
+__gnuc_va_list	lib/print.c	/^typedef __builtin_va_list __gnuc_va_list;$/;"	t	file:
+__iormb	include/asm/mmio.h	14;"	d
+__iowmb	include/asm/mmio.h	15;"	d
+__sbi_uart_init	sbi/sbi_uart.c	/^static int __sbi_uart_init(struct sbi_trap_hw_context *ctx)$/;"	f	file:
+__smp_mb	include/asm/barrier.h	24;"	d
+__smp_rmb	include/asm/barrier.h	25;"	d
+__smp_wmb	include/asm/barrier.h	26;"	d
+_run	entry/start.S	/^_run:$/;"	l
+_start	entry/start.S	/^_start:$/;"	l
+a0	sbi/sbi_trap.h	/^	unsigned long a0;$/;"	m	struct:sbi_trap_regs
+a1	sbi/sbi_trap.h	/^	unsigned long a1;$/;"	m	struct:sbi_trap_regs
+a2	sbi/sbi_trap.h	/^	unsigned long a2;$/;"	m	struct:sbi_trap_regs
+a3	sbi/sbi_trap.h	/^	unsigned long a3;$/;"	m	struct:sbi_trap_regs
+a4	sbi/sbi_trap.h	/^	unsigned long a4;$/;"	m	struct:sbi_trap_regs
+a5	sbi/sbi_trap.h	/^	unsigned long a5;$/;"	m	struct:sbi_trap_regs
+a6	sbi/sbi_trap.h	/^	unsigned long a6;$/;"	m	struct:sbi_trap_regs
+a7	sbi/sbi_trap.h	/^	unsigned long a7;$/;"	m	struct:sbi_trap_regs
+base_address	sbi/uart_ns16550a.c	/^static unsigned long base_address;$/;"	v	file:
+base_address	sbi/uart_qemu-8250.c	/^static unsigned long base_address;$/;"	v	file:
+boot_hart_start	entry/init.c	/^void boot_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)$/;"	f
+clint_timer_event_start	sbi/sbi_clint.c	/^void clint_timer_event_start(struct sbi_trap_hw_context *ctx,$/;"	f
+compatible	include/device.h	/^	char compatible[128];$/;"	m	struct:device_init_entry
+csr_clear	include/asm/csr.h	126;"	d
+csr_set	include/asm/csr.h	118;"	d
+data	include/device.h	/^	void *data;$/;"	m	struct:device_init_entry
+delegate_traps	sbi/sbi.c	/^void delegate_traps(void)$/;"	f
+device	include/device.h	/^struct device {$/;"	s
+device_init_entry	include/device.h	/^struct device_init_entry {$/;"	s
+dmb	include/asm/mmio.h	13;"	d
+exception_vector	sbi/sbi_entry.S	/^exception_vector:$/;"	l
+get_clint_base	sbi/sbi_clint.c	/^static unsigned long get_clint_base(void)$/;"	f	file:
+gos_init	entry/init.c	/^void gos_init(unsigned int hart, struct sbi_trap_hw_context *ctx)$/;"	f
+gp	sbi/sbi_trap.h	/^	unsigned long gp;$/;"	m	struct:sbi_trap_regs
+h_context	sbi/sbi.c	/^static struct sbi_trap_hw_context *h_context;$/;"	v	typeref:struct:sbi_trap_hw_context	file:
+hart_id	sbi/sbi_trap.h	/^	unsigned int hart_id;$/;"	m	struct:sbi_trap_hw_context
+hex_tab	lib/print.c	/^const unsigned char hex_tab[] =$/;"	v
+hw_info	sbi/sbi_trap.h	/^	unsigned long hw_info;$/;"	m	struct:sbi_trap_hw_context
+ipi	sbi/sbi_trap.h	/^	unsigned long ipi;$/;"	m	struct:sbi_trap_hw_context
+irq	include/device.h	/^	unsigned int irq;$/;"	m	struct:device
+irq	include/device.h	/^	unsigned int irq;$/;"	m	struct:device_init_entry
+is_interrupt_fault	include/asm/csr.h	34;"	d
+len	include/device.h	/^	unsigned int len;$/;"	m	struct:device
+len	include/device.h	/^	unsigned int len;$/;"	m	struct:device_init_entry
+mb	include/asm/barrier.h	19;"	d
+mepc	sbi/sbi_trap.h	/^	unsigned long mepc;$/;"	m	struct:sbi_trap_regs
+mstatus	sbi/sbi_trap.h	/^	unsigned long mstatus;$/;"	m	struct:sbi_trap_regs
+my_vprintf	lib/print.c	/^static int my_vprintf(const char *fmt, va_list ap)$/;"	f	file:
+next_addr	sbi/sbi_trap.h	/^	unsigned long next_addr;$/;"	m	struct:sbi_trap_hw_context
+next_is_m_mode	sbi/sbi.c	/^static inline int next_is_m_mode(char *MODE)$/;"	f	file:
+next_is_s_mode	sbi/sbi.c	/^static inline int next_is_s_mode(char *MODE)$/;"	f	file:
+next_mode	sbi/sbi_trap.h	/^	char next_mode[16];$/;"	m	struct:sbi_trap_hw_context
+nop	include/asm/barrier.h	13;"	d
+ns16550a_delay	sbi/uart_ns16550a.c	/^static void ns16550a_delay(unsigned int loops)$/;"	f	file:
+ns16550a_putc	sbi/uart_ns16550a.c	/^static void ns16550a_putc(char c)$/;"	f	file:
+ops	sbi/sbi_uart.c	/^static struct sbi_uart_ops ops = { 0, };$/;"	v	typeref:struct:sbi_uart_ops	file:
+other_hart_run	entry/start.S	/^other_hart_run:$/;"	l
+other_hart_start	entry/init.c	/^void other_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)$/;"	f
+out_num	lib/print.c	/^static void out_num(long n, int base, char lead, int maxwidth)$/;"	f	file:
+putc	include/sbi_uart.h	/^	void (*putc)(char c);$/;"	m	struct:sbi_uart_ops
+qemu_8250_putc	sbi/uart_qemu-8250.c	/^static void qemu_8250_putc(char c)$/;"	f	file:
+ra	sbi/sbi_trap.h	/^	unsigned long ra;$/;"	m	struct:sbi_trap_regs
+read_csr	include/asm/csr.h	101;"	d
+readb	include/asm/mmio.h	20;"	d
+readl	include/asm/mmio.h	17;"	d
+readq	include/asm/mmio.h	23;"	d
+rmb	include/asm/barrier.h	20;"	d
+s0	sbi/sbi_trap.h	/^	unsigned long s0;$/;"	m	struct:sbi_trap_regs
+s1	sbi/sbi_trap.h	/^	unsigned long s1;$/;"	m	struct:sbi_trap_regs
+s10	sbi/sbi_trap.h	/^	unsigned long s10;$/;"	m	struct:sbi_trap_regs
+s11	sbi/sbi_trap.h	/^	unsigned long s11;$/;"	m	struct:sbi_trap_regs
+s2	sbi/sbi_trap.h	/^	unsigned long s2;$/;"	m	struct:sbi_trap_regs
+s3	sbi/sbi_trap.h	/^	unsigned long s3;$/;"	m	struct:sbi_trap_regs
+s4	sbi/sbi_trap.h	/^	unsigned long s4;$/;"	m	struct:sbi_trap_regs
+s5	sbi/sbi_trap.h	/^	unsigned long s5;$/;"	m	struct:sbi_trap_regs
+s6	sbi/sbi_trap.h	/^	unsigned long s6;$/;"	m	struct:sbi_trap_regs
+s64	include/asm/type.h	/^typedef signed long long s64;$/;"	t
+s7	sbi/sbi_trap.h	/^	unsigned long s7;$/;"	m	struct:sbi_trap_regs
+s8	sbi/sbi_trap.h	/^	unsigned long s8;$/;"	m	struct:sbi_trap_regs
+s9	sbi/sbi_trap.h	/^	unsigned long s9;$/;"	m	struct:sbi_trap_regs
+sbi_clint_init	sbi/sbi_clint.c	/^int sbi_clint_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)$/;"	f
+sbi_ecall_handle	sbi/sbi.c	/^static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)$/;"	f	file:
+sbi_ext_process	sbi/sbi.c	/^static void sbi_ext_process()$/;"	f	file:
+sbi_get_hw_info	sbi/sbi.c	/^static void sbi_get_hw_info(struct sbi_trap_hw_context *ctx)$/;"	f	file:
+sbi_init	sbi/sbi.c	/^void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)$/;"	f
+sbi_jump_to_machine	sbi/sbi.c	/^static void sbi_jump_to_machine(unsigned long addr)$/;"	f	file:
+sbi_jump_to_next	sbi/sbi.c	/^static void sbi_jump_to_next(struct sbi_trap_hw_context *ctx)$/;"	f	file:
+sbi_jump_to_supervisor	sbi/sbi.c	/^static void sbi_jump_to_supervisor(unsigned int hart_id,$/;"	f	file:
+sbi_panic	sbi/sbi.c	/^void sbi_panic()$/;"	f
+sbi_print	lib/print.c	/^int sbi_print(const char *fmt, ...)$/;"	f
+sbi_set_next	sbi/sbi.c	/^static void sbi_set_next(struct sbi_trap_hw_context *ctx)$/;"	f	file:
+sbi_setup_pmp	sbi/sbi.c	/^static void sbi_setup_pmp(void)$/;"	f	file:
+sbi_soft_process	sbi/sbi.c	/^static void sbi_soft_process()$/;"	f	file:
+sbi_timer_process	sbi/sbi_clint.c	/^void sbi_timer_process(void)$/;"	f
+sbi_trap_error	sbi/sbi.c	/^static void sbi_trap_error(struct sbi_trap_regs *regs, const char *msg, int rc)$/;"	f	file:
+sbi_trap_handler	sbi/sbi.c	/^void sbi_trap_handler(struct sbi_trap_regs *regs)$/;"	f
+sbi_trap_hw_context	sbi/sbi_trap.h	/^struct sbi_trap_hw_context {$/;"	s
+sbi_trap_init	sbi/sbi.c	/^static void sbi_trap_init(void)$/;"	f	file:
+sbi_trap_regs	sbi/sbi_trap.h	/^struct sbi_trap_regs {$/;"	s
+sbi_uart_init	sbi/sbi_uart.c	/^int sbi_uart_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)$/;"	f
+sbi_uart_ops	include/sbi_uart.h	/^struct sbi_uart_ops {$/;"	s
+sbi_uart_putc	sbi/sbi_uart.c	/^void sbi_uart_putc(char c)$/;"	f
+sbi_uart_puts	sbi/sbi_uart.c	/^void sbi_uart_puts(char *str)$/;"	f
+sp	sbi/sbi_trap.h	/^	unsigned long sp;$/;"	m	struct:sbi_trap_regs
+stack_bottom	entry/start.S	/^stack_bottom:$/;"	l
+start	include/device.h	/^	unsigned long start;$/;"	m	struct:device
+start	include/device.h	/^	unsigned long start;$/;"	m	struct:device_init_entry
+strcpy	lib/string.c	/^int strcpy(char *dst, char *src)$/;"	f
+strncmp	lib/string.c	/^int strncmp(const char *cs, const char *ct, int count)$/;"	f
+t0	sbi/sbi_trap.h	/^	unsigned long t0;$/;"	m	struct:sbi_trap_regs
+t1	sbi/sbi_trap.h	/^	unsigned long t1;$/;"	m	struct:sbi_trap_regs
+t2	sbi/sbi_trap.h	/^	unsigned long t2;$/;"	m	struct:sbi_trap_regs
+t3	sbi/sbi_trap.h	/^	unsigned long t3;$/;"	m	struct:sbi_trap_regs
+t4	sbi/sbi_trap.h	/^	unsigned long t4;$/;"	m	struct:sbi_trap_regs
+t5	sbi/sbi_trap.h	/^	unsigned long t5;$/;"	m	struct:sbi_trap_regs
+t6	sbi/sbi_trap.h	/^	unsigned long t6;$/;"	m	struct:sbi_trap_regs
+timer_cmp	sbi/sbi_trap.h	/^	unsigned long timer_cmp;$/;"	m	struct:sbi_trap_hw_context
+tp	sbi/sbi_trap.h	/^	unsigned long tp;$/;"	m	struct:sbi_trap_regs
+u64	include/asm/type.h	/^typedef unsigned long long u64;$/;"	t
+u8	include/asm/type.h	/^typedef unsigned char u8;$/;"	t
+uart_base	sbi/sbi_trap.h	/^	unsigned long uart_base;$/;"	m	struct:sbi_trap_hw_context
+uart_ns16550a_init	sbi/uart_ns16550a.c	/^void uart_ns16550a_init(unsigned long base, struct sbi_uart_ops *ops)$/;"	f
+uart_qemu_8250_init	sbi/uart_qemu-8250.c	/^void uart_qemu_8250_init(unsigned long base, struct sbi_uart_ops *ops)$/;"	f
+va_arg	lib/print.c	15;"	d	file:
+va_end	lib/print.c	14;"	d	file:
+va_list	lib/print.c	/^typedef __gnuc_va_list va_list;$/;"	t	file:
+va_start	lib/print.c	13;"	d	file:
+wait_for_boot_hart	entry/start.S	/^wait_for_boot_hart:$/;"	l
+wake	entry/start.S	/^wake:$/;"	l
+wmb	include/asm/barrier.h	21;"	d
+write_csr	include/asm/csr.h	110;"	d
+writeb	include/asm/mmio.h	21;"	d
+writel	include/asm/mmio.h	18;"	d
+writeq	include/asm/mmio.h	24;"	d
