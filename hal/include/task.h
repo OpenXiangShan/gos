@@ -37,10 +37,6 @@ int percpu_tasks_init(int cpu);
 int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 		unsigned long stack, unsigned int stack_size);
 int do_idle(void *data);
-int do_idle2(void *data);
-int do_idle3(void *data);
-int do_idle4(void *data);
-int do_idle5(void *data);
 void task_scheduler_enter(struct pt_regs *regs);
 void task_scheduler_exit(struct pt_regs *regs);
 
