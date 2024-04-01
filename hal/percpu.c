@@ -19,12 +19,11 @@ int percpu_init()
 	if (percpu_sec_size == 0)
 		return 0;
 
-	print("%s size:%d\n", __FUNCTION__, percpu_sec_size);
 	for (i = 0; i < MAX_CPU_COUNT; i++) {
 		percpu_buf[i] = (unsigned long)mm_alloc(percpu_sec_size);
 		memset((char *)percpu_buf[i], 0, percpu_sec_size);
 		percpu_offset[i] = percpu_buf[i] - percpu_sec_base;
-		print("cpu%d -- percpu_buf:0x%x, percpu_offset:%d\n", i,
+		print("cpu%d -- percpu_buf:0x%lx, percpu_offset:0x%lx\n", i,
 		      percpu_buf[i], percpu_offset[i]);
 	}
 

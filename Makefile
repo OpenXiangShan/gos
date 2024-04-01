@@ -121,22 +121,21 @@ clean:
 	
 run:
 	./qemu-system-riscv64 -nographic \
-	-machine virt -smp 2 -m 8G \
+	-machine virt -smp 8 -m 8G \
 	-bios out/Image.bin \
 
 run-aia:
-	./qemu-system-riscv64-aia -nographic \
-        -machine virt,aia=aplic-imsic -smp 4 -m 8G \
+	./qemu-system-riscv64-debug -nographic \
+        -machine virt,aia=aplic-imsic -smp 8 \
+	-cpu rv64,sv39=on -m 8G \
         -bios out/Image.bin \
 
 run-debug:
-	./qemu-system-riscv64-aia -nographic \
-        -machine virt,aia=aplic-imsic -smp 4 -m 8G \
+	./qemu-system-riscv64-debug -nographic \
+        -machine virt,aia=aplic-imsic -smp 8 \
+	-cpu rv64,sv39=on -m 8G \
         -bios out/Image.bin \
 	-S -s
-
-run-aia-debug-qemu:
-	./qemu-system-riscv64-debug -nographic -machine virt,aia=aplic-imsic -smp 1 -m 8G -bios out/Image.bin
 
 format:
 	find . -name *.c |xargs ./Lindent

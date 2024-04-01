@@ -21,11 +21,13 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 	print(logo);
 	print("Hello, gos!\n");
 
-	//__asm__ __volatile__ ("j  .\n");
+	trap_init();
 
 	mm_init(hw);
 
-	trap_init();
+	paging_init(hw);
+
+	early_print_setup(hw);
 
 	percpu_init();
 

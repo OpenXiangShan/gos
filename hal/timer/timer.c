@@ -6,6 +6,9 @@
 #include "cpu.h"
 #include "mm.h"
 #include "clock.h"
+#include "vmap.h"
+
+extern int mmu_is_on;
 
 unsigned long get_system_time()
 {
@@ -54,6 +57,7 @@ static int timer_setup(struct device_init_entry *hw)
 	struct timer_init_entry *driver_tmp =
 	    (struct timer_init_entry *)&TIMER_INIT_TABLE;
 	struct irq_domain *d;
+	unsigned long base;
 
 	while (strncmp(device_entry->compatible, "THE END", sizeof("THE END"))) {
 		driver_nr_tmp = driver_nr;
@@ -63,9 +67,17 @@ static int timer_setup(struct device_init_entry *hw)
 			    (driver_entry->compatible, device_entry->compatible,
 			     128)) {
 				d = find_irq_domain(device_entry->irq_parent);
+				if (mmu_is_on)
+					base =
+					    (unsigned long)ioremap((void *)
+								   device_entry->
+								   start,
+								   device_entry->
+								   len, 0);
+				else
+					base = device_entry->start;
 
-				driver_entry->init(device_entry->start, d,
-						   device_entry->data);
+				driver_entry->init(base, d, device_entry->data);
 			}
 		}
 		device_entry++;

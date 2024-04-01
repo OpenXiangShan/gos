@@ -130,7 +130,7 @@ int clint_timer_init(unsigned long base, struct irq_domain *d, void *priv)
 {
 	struct clint_priv_data *data = (struct clint_priv_data *)priv;
 
-	print("%s -- base:0x%x, clint_freq:0x%x\n", __FUNCTION__, base,
+	print("%s -- base:0x%lx, clint_freq:0x%x\n", __FUNCTION__, base,
 	      data->clint_freq);
 
 	if (!data) {

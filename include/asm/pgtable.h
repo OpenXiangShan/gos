@@ -1,10 +1,17 @@
 #ifndef PGTABLE_H
 #define PGTABLE_H
 
-#include "mm.h"
-
 extern int pgtable_l5_enabled;
 extern int pgtable_l4_enabled;
+
+extern unsigned long va_pa_offset;
+
+#define PAGE_ALIGN(addr) (((addr) + PAGE_SIZE - 1) & PAGE_MASK)
+
+#define N_PAGE(size)     size % PAGE_SIZE == 0 ? size/PAGE_SIZE : (size/PAGE_SIZE + 1)
+
+#define phy_to_virt(phy) ((unsigned long)(phy) + va_pa_offset)
+#define virt_to_phy(virt) ((unsigned long)(virt) - va_pa_offset)
 
 #define PGDIR_SHIFT_L3  30
 #define PGDIR_SHIFT_L4  39
@@ -19,6 +26,13 @@ extern int pgtable_l4_enabled;
 
 #define PGDIR_SHIFT     (pgtable_l5_enabled ? PGDIR_SHIFT_L5 : \
                 (pgtable_l4_enabled ? PGDIR_SHIFT_L4 : PGDIR_SHIFT_L3))
+
+#define SATP_MODE_39    0x8000000000000000UL
+#define SATP_MODE_48    0x9000000000000000UL
+#define SATP_MODE_57    0xa000000000000000UL
+
+#define SATP_MODE (pgtable_l5_enabled ? SATP_MODE_57 : \
+		(pgtable_l4_enabled ? SATP_MODE_48 : SATP_MODE_39))
 
 typedef struct {
 	unsigned long pgprot;
@@ -39,7 +53,7 @@ typedef struct {
 #define _PAGE_SOFT      (1 << 8)	/* Reserved for software */
 
 /* Page protection bits */
-#define _PAGE_BASE      (_PAGE_PRESENT | _PAGE_ACCESSED | _PAGE_USER)
+#define _PAGE_BASE      (_PAGE_PRESENT | _PAGE_ACCESSED)
 
 #define PAGE_READ               __pgprot(_PAGE_BASE | _PAGE_READ)
 #define PAGE_WRITE              __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE)

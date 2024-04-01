@@ -5,6 +5,9 @@
 #include <print.h>
 #include "irq.h"
 #include "dma_mapping.h"
+#include "vmap.h"
+
+extern int mmu_is_on;
 
 static struct devices _devices;
 static struct drivers _drivers;
@@ -15,6 +18,7 @@ static struct device *create_device(struct device_init_entry *entry)
 	struct device *dev = NULL;
 	int remain;
 	struct driver *drv;
+	unsigned long base;
 
 retry:
 	dev = _devices.p_devices;
@@ -57,8 +61,14 @@ retry:
 	goto retry;
 
 found:
+	if (mmu_is_on)
+		base =
+		    (unsigned long)ioremap((void *)entry->start, entry->len, 0);
+	else
+		base = entry->start;
+
 	dev->in_used = 1;
-	dev->start = entry->start;
+	dev->start = base;
 	dev->len = entry->len;
 	dev->irqs = entry->irq;
 	dev->irq_num = entry->irq_num;
@@ -135,6 +145,11 @@ static int __probe_device_table(struct driver_init_entry *driver_head,
 	int driver_nr_tmp;
 
 	while (strncmp(device_entry->compatible, "THE END", sizeof("THE END"))) {
+		if (!strncmp
+		    (device_entry->compatible, "memory-map",
+		     sizeof("memory-map")))
+			goto next_device_entry;
+
 		driver_nr_tmp = driver_nr;
 		dev = create_device(device_entry);
 		for (driver_entry = driver_head; driver_nr_tmp;
@@ -153,6 +168,7 @@ static int __probe_device_table(struct driver_init_entry *driver_head,
 				driver_entry->init(dev, device_entry->data);
 			}
 		}
+next_device_entry:
 		device_entry++;
 	}
 

@@ -131,7 +131,7 @@ int aplic_init(char *name, unsigned long base, struct irq_domain *parent,
 	aplic.child_index = aplic_priv_data->child_index;
 
 	print
-	    ("%s -- name:%s base:0x%x mmode:%d mode:%d index:%d delegate:%d child_index:%d\n",
+	    ("%s -- name:%s base:0x%lx mmode:%d mode:%d index:%d delegate:%d child_index:%d\n",
 	     __FUNCTION__, aplic.name, aplic.base, aplic.mmode, aplic.mode,
 	     aplic.index, aplic.delegate, aplic.child_index);
 

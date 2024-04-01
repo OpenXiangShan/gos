@@ -11,7 +11,7 @@ SECTIONS
         .bss : { *(.bss*) }
         bss_end = .;
 
-	. = ALIGN(8);
+	. = ALIGN(0x1000);
 	__device_init_table = .;
 	.device_init_table : { *(.device_init_table) }
 	__device_init_table_end = .;

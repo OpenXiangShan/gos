@@ -5,6 +5,8 @@
 #include "asm/type.h"
 #include "asm/mmio.h"
 #include "asm/sbi.h"
+#include "vmap.h"
+#include "asm/pgtable.h"
 
 struct msi_msg {
 	unsigned long msi_addr;
@@ -34,6 +36,7 @@ static void imsic_test_write_msi_msg(unsigned long msi_addr,
 				     void *priv)
 {
 	static int ii = 0;
+	unsigned long msi_addr_va;
 
 	print
 	    ("##### %s %d base_hwirq:%d hwirq:%d msi_addr:0x%x msi_data:0x%x\n",
@@ -42,7 +45,9 @@ static void imsic_test_write_msi_msg(unsigned long msi_addr,
 	if (ii++ == 0)
 		base_hwirq = hwirq;
 
-	msi_msg[hwirq - base_hwirq].msi_addr = msi_addr;
+	msi_addr_va = (unsigned long)ioremap((void *)msi_addr, PAGE_SIZE, 0);
+
+	msi_msg[hwirq - base_hwirq].msi_addr = msi_addr_va;
 	msi_msg[hwirq - base_hwirq].msi_data = msi_data;
 }
 

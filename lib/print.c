@@ -16,7 +16,7 @@ const unsigned char hex_tab[] =
 #define va_end(v) __builtin_va_end(v)
 #define va_arg(v,l) __builtin_va_arg(v,l)
 
-static void out_num(long n, int base, char lead, int maxwidth)
+static void out_num(unsigned long n, int base, char lead, int maxwidth)
 {
 	unsigned long m = 0;
 	char buf[MAX_NUMBER_BYTES], *s = buf + sizeof(buf);
@@ -57,7 +57,7 @@ static void out_num(long n, int base, char lead, int maxwidth)
 static int my_vprintf(const char *fmt, va_list ap)
 {
 	char lead = ' ';
-	int maxwidth = 0;
+	unsigned int maxwidth = 0;
 
 	for (; *fmt != '\0'; fmt++) {
 		if (*fmt != '%') {
@@ -94,8 +94,10 @@ static int my_vprintf(const char *fmt, va_list ap)
 			out_num(va_arg(ap, u32), 16, lead, maxwidth);
 			break;
 		case 'l':
-			if (*(fmt + 1) == 'x')
+			if (*(fmt + 1) == 'x') {
+				fmt++;
 				out_num(va_arg(ap, u64), 16, lead, maxwidth);
+			}
 			break;
 		case 'b':
 			out_num(va_arg(ap, u32), 2, lead, maxwidth);

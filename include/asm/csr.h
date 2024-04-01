@@ -35,7 +35,7 @@
 
 #define SCAUSE_EC (0xf)
 
-#define SATP_MODE_39 (1UL << 63)
+//#define SATP_MODE_39 (1UL << 63)
 
 /* AIA csr */
 /* Supervisor-Level Window to Indirectly Accessed Registers (AIA) */

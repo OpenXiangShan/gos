@@ -95,6 +95,8 @@ void secondary_cpus_init(unsigned int hart_id, unsigned long stack)
 {
 	write_csr(sie, -1);
 
+	enable_mmu(1);
+
 	cpu_hotplug_notify_callback(hart_id);
 
 	percpu_tasks_init(hart_id);

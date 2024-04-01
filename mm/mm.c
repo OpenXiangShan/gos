@@ -5,7 +5,9 @@
 #include <asm/type.h>
 #include "spinlocks.h"
 
+extern int mmu_is_on;
 extern unsigned long bss_end;
+extern unsigned long va_pa_offset;
 
 /* each bit identifies a page, MEM_MAP_NR is the number of mem_maps*/
 #define MEM_MAP_NR 8192		//2*1024*1024*1024/PAGE_SIZE/(sizeof(unsigned long)*8)
@@ -32,6 +34,16 @@ static unsigned long get_ddr_end(struct device_init_entry *hw)
 	return NULL;
 }
 
+unsigned long get_phy_start(void)
+{
+	return phy_address_start;
+}
+
+unsigned long get_phy_end(void)
+{
+	return phy_address_end;
+}
+
 void mm_init(struct device_init_entry *hw)
 {
 	unsigned long start = PAGE_ALIGN((unsigned long)(&bss_end));
@@ -49,7 +61,7 @@ void mm_init(struct device_init_entry *hw)
 	}
 
 	print
-	    ("Available Memory: phy_start_address:0x%x, phy_end_address:0x%x, available size:%dKB, %d available pages, page_size:%d\n",
+	    ("Available Memory: phy_start_address:0x%lx, phy_end_address:0x%lx, available size:%dKB, %d available pages, page_size:%d\n",
 	     phy_address_start, phy_address_end,
 	     (phy_address_end - phy_address_start) / 1024, nr_free_pages,
 	     PAGE_SIZE);
@@ -62,6 +74,7 @@ void *mm_alloc(unsigned int size)
 	unsigned long mem_map;
 	void *addr = (void *)phy_address_start;
 	int per_mem_map = sizeof(mem_maps[0]) * 8;
+	void *ret;
 
 	spin_lock(&mem_lock);
 	/* 
@@ -102,7 +115,12 @@ success:
 
 	spin_unlock(&mem_lock);
 
-	return addr;
+	if (!mmu_is_on)
+		ret = addr;
+	else
+		ret = (void *)((unsigned long)addr + va_pa_offset);
+
+	return ret;
 }
 
 void mm_free(void *addr, unsigned int size)
@@ -111,6 +129,9 @@ void mm_free(void *addr, unsigned int size)
 	unsigned long mem_map;
 	int per_mem_map = sizeof(mem_maps[0]) * 8;
 	int page_nr = N_PAGE(size);
+
+	if (mmu_is_on)
+		addr = addr - va_pa_offset;
 
 	index = ((unsigned long)addr - phy_address_start) / PAGE_SIZE;
 	if (index >= TOTAL_PAGE_NUM)

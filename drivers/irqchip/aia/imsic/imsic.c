@@ -2,6 +2,7 @@
 #include <string.h>
 #include <asm/trap.h>
 #include <asm/csr.h>
+#include "mm.h"
 #include "device.h"
 #include "imsic.h"
 #include "imsic_reg.h"
@@ -181,7 +182,7 @@ static int imsic_state_setup(struct imsic *p_imsic,
 			unsigned long interrupt_file_base;
 
 			per_hart_base =
-			    p_imsic->base +
+			    (unsigned long)walk_pt_va_to_pa(p_imsic->base) +
 			    (1ULL << (p_imsic->guest_index_bits + 12)) *
 			    hart_id;
 			interrupt_file_base =
