@@ -1,4 +1,5 @@
 #include <asm/type.h>
+#include <asm/pgtable.h>
 #include "spinlocks.h"
 #include "mm.h"
 #include "print.h"
@@ -96,6 +97,18 @@ void *ioremap(void *addr, unsigned int size, int gfp)
 	return (void *)virt;
 }
 
+void iounmap(void *addr, unsigned int size)
+{
+	void *phys;
+
+	phys = walk_pt_va_to_pa((unsigned long)addr);
+	if (!phys)
+		return;
+
+	vmap_free(addr, size);
+	mm_free(addr, size);
+}
+
 void *vmem_map(void *addr, unsigned int size, int gfp)
 {
 	return ioremap(addr, size, gfp);
@@ -129,5 +142,5 @@ void *vmem_alloc(unsigned int size, int gfp)
 
 void vmem_free(void *addr, unsigned int size)
 {
-
+	return iounmap(addr, size);
 }
