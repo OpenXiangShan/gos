@@ -26,6 +26,7 @@ static void task_fn_wrap(void)
 
 	spin_lock(&tsk_ctl->lock);
 	list_del(&cur_task->list);
+	sc->current_task = NULL;
 	spin_unlock(&tsk_ctl->lock);
 }
 
