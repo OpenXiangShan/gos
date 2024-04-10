@@ -1,8 +1,6 @@
 #ifndef __ASM_OFFSETS_H__
 #define __ASM_OFFSETS_H__
 
-/*struct pt_regs 数据结构中每个字段的偏移量*/
-
 #define PT_SIZE 288		/* sizeof(struct pt_regs) */
 #define PT_SEPC 0		/* offsetof(struct pt_regs, sepc) */
 #define PT_RA 8			/* offsetof(struct pt_regs, ra) */
@@ -42,5 +40,79 @@
 #define PT_SBADADDR 264		/* offsetof(struct pt_regs, sbadaddr) */
 #define PT_SCAUSE 272		/* offsetof(struct pt_regs, scause) */
 #define PT_HSTATUS 280		/* offsetof(struct pt_regs, hstatus) */
+
+#define VIRT_CPU_HOST_ZERO 0         /* offsetof(struct cpu_context, host_context.zero) */
+#define VIRT_CPU_HOST_RA   8         /* offsetof(struct cpu_context, host_context.ra) */
+#define VIRT_CPU_HOST_SP   16        /* offsetof(struct cpu_context, host_context.sp) */
+#define VIRT_CPU_HOST_GP   24        /* offsetof(struct cpu_context, host_context.gp) */
+#define VIRT_CPU_HOST_TP   32        /* offsetof(struct cpu_context, host_context.tp) */
+#define VIRT_CPU_HOST_T0   40        /* offsetof(struct cpu_context, host_context.t0) */
+#define VIRT_CPU_HOST_T1   48        /* offsetof(struct cpu_context, host_context.t1) */
+#define VIRT_CPU_HOST_T2   56        /* offsetof(struct cpu_context, host_context.t2) */
+#define VIRT_CPU_HOST_S0   64        /* offsetof(struct cpu_context, host_context.s0) */
+#define VIRT_CPU_HOST_S1   72        /* offsetof(struct cpu_context, host_context.s1) */
+#define VIRT_CPU_HOST_A0   80        /* offsetof(struct cpu_context, host_context.s2) */
+#define VIRT_CPU_HOST_A1   88        /* offsetof(struct cpu_context, host_context.a1) */
+#define VIRT_CPU_HOST_A2   96        /* offsetof(struct cpu_context, host_context.a2) */
+#define VIRT_CPU_HOST_A3   104       /* offsetof(struct cpu_context, host_context.a3) */
+#define VIRT_CPU_HOST_A4   112       /* offsetof(struct cpu_context, host_context.a4) */
+#define VIRT_CPU_HOST_A5   120       /* offsetof(struct cpu_context, host_context.a5) */
+#define VIRT_CPU_HOST_A6   128       /* offsetof(struct cpu_context, host_context.a6) */
+#define VIRT_CPU_HOST_A7   136       /* offsetof(struct cpu_context, host_context.a6) */
+#define VIRT_CPU_HOST_S2   144       /* offsetof(struct cpu_context, host_context.s2) */
+#define VIRT_CPU_HOST_S3   152       /* offsetof(struct cpu_context, host_context.s3) */
+#define VIRT_CPU_HOST_S4   160       /* offsetof(struct cpu_context, host_context.s4) */
+#define VIRT_CPU_HOST_S5   168       /* offsetof(struct cpu_context, host_context.s5) */
+#define VIRT_CPU_HOST_S6   176       /* offsetof(struct cpu_context, host_context.s6) */
+#define VIRT_CPU_HOST_S7   184       /* offsetof(struct cpu_context, host_context.s7) */
+#define VIRT_CPU_HOST_S8   192       /* offsetof(struct cpu_context, host_context.s8) */
+#define VIRT_CPU_HOST_S9   200       /* offsetof(struct cpu_context, host_context.s9) */
+#define VIRT_CPU_HOST_S10  208       /* offsetof(struct cpu_context, host_context.s10) */
+#define VIRT_CPU_HOST_S11  216       /* offsetof(struct cpu_context, host_context.s11) */
+#define VIRT_CPU_HOST_T3   224       /* offsetof(struct cpu_context, host_context.t3) */
+#define VIRT_CPU_HOST_T4   232       /* offsetof(struct cpu_context, host_context.t4) */
+#define VIRT_CPU_HOST_T5   240       /* offsetof(struct cpu_context, host_context.t5) */
+#define VIRT_CPU_HOST_T6   248       /* offsetof(struct cpu_context, host_context.t6) */
+#define VIRT_CPU_HOST_SEPC    256    /* offsetof(struct cpu_context, host_context.sepc) */
+#define VIRT_CPU_HOST_SSTATUS 264    /* offsetof(struct cpu_context, host_context.sstatus) */
+#define VIRT_CPU_HOST_HSTATUS 272    /* offsetof(struct cpu_context, host_context.hstatus) */
+
+#define VIRT_CPU_GUEST_ZERO 280         /* offsetof(struct cpu_context, guest_context.zero) */
+#define VIRT_CPU_GUEST_RA   288         /* offsetof(struct cpu_context, guest_context.ra) */
+#define VIRT_CPU_GUEST_SP   296        /* offsetof(struct cpu_context, guest_context.sp) */
+#define VIRT_CPU_GUEST_GP   304        /* offsetof(struct cpu_context, guest_context.gp) */
+#define VIRT_CPU_GUEST_TP   312        /* offsetof(struct cpu_context, guest_context.tp) */
+#define VIRT_CPU_GUEST_T0   320        /* offsetof(struct cpu_context, guest_context.t0) */
+#define VIRT_CPU_GUEST_T1   328        /* offsetof(struct cpu_context, guest_context.t1) */
+#define VIRT_CPU_GUEST_T2   336        /* offsetof(struct cpu_context, guest_context.t2) */
+#define VIRT_CPU_GUEST_S0   344        /* offsetof(struct cpu_context, guest_context.s0) */
+#define VIRT_CPU_GUEST_S1   352        /* offsetof(struct cpu_context, guest_context.s1) */
+#define VIRT_CPU_GUEST_A0   360        /* offsetof(struct cpu_context, guest_context.s2) */
+#define VIRT_CPU_GUEST_A1   368        /* offsetof(struct cpu_context, guest_context.a1) */
+#define VIRT_CPU_GUEST_A2   376        /* offsetof(struct cpu_context, guest_context.a2) */
+#define VIRT_CPU_GUEST_A3   384       /* offsetof(struct cpu_context, guest_context.a3) */
+#define VIRT_CPU_GUEST_A4   392       /* offsetof(struct cpu_context, guest_context.a4) */
+#define VIRT_CPU_GUEST_A5   400       /* offsetof(struct cpu_context, guest_context.a5) */
+#define VIRT_CPU_GUEST_A6   408       /* offsetof(struct cpu_context, guest_context.a6) */
+#define VIRT_CPU_GUEST_A7   416       /* offsetof(struct cpu_context, guest_context.a6) */
+#define VIRT_CPU_GUEST_S2   424       /* offsetof(struct cpu_context, guest_context.s2) */
+#define VIRT_CPU_GUEST_S3   432       /* offsetof(struct cpu_context, guest_context.s3) */
+#define VIRT_CPU_GUEST_S4   440       /* offsetof(struct cpu_context, guest_context.s4) */
+#define VIRT_CPU_GUEST_S5   448       /* offsetof(struct cpu_context, guest_context.s5) */
+#define VIRT_CPU_GUEST_S6   456       /* offsetof(struct cpu_context, guest_context.s6) */
+#define VIRT_CPU_GUEST_S7   464       /* offsetof(struct cpu_context, guest_context.s7) */
+#define VIRT_CPU_GUEST_S8   472       /* offsetof(struct cpu_context, guest_context.s8) */
+#define VIRT_CPU_GUEST_S9   480       /* offsetof(struct cpu_context, guest_context.s9) */
+#define VIRT_CPU_GUEST_S10  488       /* offsetof(struct cpu_context, guest_context.s10) */
+#define VIRT_CPU_GUEST_S11  496       /* offsetof(struct cpu_context, guest_context.s11) */
+#define VIRT_CPU_GUEST_T3   504       /* offsetof(struct cpu_context, guest_context.t3) */
+#define VIRT_CPU_GUEST_T4   512       /* offsetof(struct cpu_context, guest_context.t4) */
+#define VIRT_CPU_GUEST_T5   520       /* offsetof(struct cpu_context, guest_context.t5) */
+#define VIRT_CPU_GUEST_T6   528       /* offsetof(struct cpu_context, guest_context.t6) */
+#define VIRT_CPU_GUEST_SEPC    536    /* offsetof(struct cpu_context, guest_context.sepc) */
+#define VIRT_CPU_GUEST_SSTATUS 544    /* offsetof(struct cpu_context, guest_context.sstatus) */
+#define VIRT_CPU_GUEST_HSTATUS 552    /* offsetof(struct cpu_context, guest_context.hstatus) */
+#define VIRT_CPU_HOST_SSCRATCH 560    /* offsetof(struct cpu_context, host_scratch) */
+#define VIRT_CPU_HOST_STVEC    568    /* offsetof(struct cpu_context, host_stvec) */
 
 #endif

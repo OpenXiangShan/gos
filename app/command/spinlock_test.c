@@ -8,7 +8,7 @@
 #include "print.h"
 
 static spinlock_t _lock;
-static int per_cpu_info[8];
+static int per_cpu_info[2];
 
 int spinlock_test(void *data)
 {
@@ -32,7 +32,7 @@ static int cmd_spinlock_test_handler(int argc, char *argv[], void *priv)
 {
 	int i = 0;
 
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < 2; i++) {
 		per_cpu_info[i] = i;
 		create_task("spinlock_test", spinlock_test, &per_cpu_info[i], i,
 			    NULL, 0);

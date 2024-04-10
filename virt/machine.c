@@ -39,6 +39,22 @@ static int memory_region_is_overlay(unsigned long start, unsigned long end,
 	return 0;
 }
 
+struct memory_region *find_memory_region(struct virt_machine *machine, unsigned long gpa)
+{
+	struct memory_region *entry;
+
+	spin_lock(&machine->lock);
+	list_for_each_entry(entry, &machine->memory_region_list, list) {
+		if (gpa >= entry->start && gpa <= entry->end) {
+			spin_unlock(&machine->lock);
+			return entry;
+		}
+	}	
+	spin_unlock(&machine->lock);
+
+	return NULL;
+}
+
 struct memory_region *find_memory_region_by_id(struct virt_machine *machine,
 					       int id)
 {

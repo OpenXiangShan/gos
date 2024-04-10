@@ -181,13 +181,13 @@ run:
 
 run-aia:
 	./qemu-system-riscv64-debug -nographic \
-        -machine virt,aia=aplic-imsic -smp 8 \
+        -machine virt,aia=aplic-imsic -smp 2 \
 	-cpu rv64,sv39=on -m 8G \
         -bios out/Image.bin \
 
 run-debug:
 	./qemu-system-riscv64-new -nographic \
-        -machine virt,aia=aplic-imsic -smp 8 \
+        -machine virt,aia=aplic-imsic -smp 2 \
 	-cpu rv64,sv39=on -m 8G \
         -bios out/Image.bin \
 	-S -s

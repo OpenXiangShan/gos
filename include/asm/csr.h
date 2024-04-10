@@ -37,6 +37,24 @@
 
 //#define SATP_MODE_39 (1UL << 63)
 
+/* Supervisor Trap Setup */
+#define CSR_SSTATUS			0x100
+#define CSR_SEDELEG			0x102
+#define CSR_SIDELEG			0x103
+#define CSR_SIE				0x104
+#define CSR_STVEC			0x105
+#define CSR_SCOUNTEREN			0x106
+
+/* Supervisor Trap Handling */
+#define CSR_SSCRATCH			0x140
+#define CSR_SEPC			0x141
+#define CSR_SCAUSE			0x142
+#define CSR_STVAL			0x143
+#define CSR_SIP				0x144
+
+/* Supervisor Protection and Translation */
+#define CSR_SATP			0x180
+
 /* AIA csr */
 /* Supervisor-Level Window to Indirectly Accessed Registers (AIA) */
 #define CSR_SISELECT            0x150
@@ -65,6 +83,26 @@
 #define CSR_VSTVAL 0x243
 #define CSR_VSIP 0x244
 #define CSR_VSATP 0x280
+
+/* Exception causes */
+#define EXC_INST_MISALIGNED	0
+#define EXC_INST_ACCESS		1
+#define EXC_INST_ILLEGAL	2
+#define EXC_BREAKPOINT		3
+#define EXC_LOAD_MISALIGNED	4
+#define EXC_LOAD_ACCESS		5
+#define EXC_STORE_MISALIGNED	6
+#define EXC_STORE_ACCESS	7
+#define EXC_SYSCALL		8
+#define EXC_HYPERVISOR_SYSCALL	9
+#define EXC_SUPERVISOR_SYSCALL	10
+#define EXC_INST_PAGE_FAULT	12
+#define EXC_LOAD_PAGE_FAULT	13
+#define EXC_STORE_PAGE_FAULT	15
+#define EXC_INST_GUEST_PAGE_FAULT	20
+#define EXC_LOAD_GUEST_PAGE_FAULT	21
+#define EXC_VIRTUAL_INST_FAULT		22
+#define EXC_STORE_GUEST_PAGE_FAULT	23
 
 /* HS csr */
 #define CSR_HSTATUS 0x600

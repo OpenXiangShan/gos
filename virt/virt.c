@@ -8,6 +8,7 @@
 #include "string.h"
 #include "machine.h"
 #include "cpu_tlb.h"
+#include "virt_vm_exit.h"
 
 extern char guest_bin[];
 
@@ -23,7 +24,7 @@ static void enable_gstage_mmu(unsigned long pgdp, int on)
 struct vcpu *vcpu_create(void)
 {
 	struct vcpu *vcpu;
-	struct pt_regs *guest_ctx;
+	struct virt_cpu_context *guest_ctx;
 
 	vcpu = (struct vcpu *)mm_alloc(sizeof(struct vcpu));
 	if (!vcpu) {
@@ -32,8 +33,8 @@ struct vcpu *vcpu_create(void)
 	}
 	memset((char *)vcpu, 0, sizeof(struct vcpu));
 
-	guest_ctx = &vcpu->guest_context;
-	guest_ctx->sstatus = SR_SPP | SR_SPIE;
+	guest_ctx = &vcpu->cpu_ctx.guest_context;
+	guest_ctx->sstatus = SR_SPP;
 	guest_ctx->hstatus = 0;
 	guest_ctx->hstatus |= HSTATUS_VTW;
 	guest_ctx->hstatus |= HSTATUS_SPVP;
@@ -44,9 +45,9 @@ struct vcpu *vcpu_create(void)
 	return vcpu;
 }
 
-int vcpu_run(struct vcpu *vcpu, unsigned long pc)
+int vcpu_run(struct vcpu *vcpu, char *cmd)
 {
-	struct pt_regs *guest_ctx = &vcpu->guest_context;
+	struct virt_cpu_context *guest_ctx = &vcpu->cpu_ctx.guest_context;
 	extern unsigned long __guest_payload_start;
 	extern unsigned long __guest_payload_end;
 	int guest_bin_size =
@@ -55,6 +56,7 @@ int vcpu_run(struct vcpu *vcpu, unsigned long pc)
 	unsigned long gpa, sram_gpa;
 	unsigned long pgdp_va;
 	char *guest_bin_ptr = guest_bin;
+	int len;
 
 	/* map ddr gstage page table */
 	gpa = machine_get_ddr_start(&vcpu->machine);
@@ -113,11 +115,18 @@ int vcpu_run(struct vcpu *vcpu, unsigned long pc)
 	       vcpu->machine.device_entry_count *
 	       sizeof(struct device_init_entry));
 
+	len = vcpu->machine.device_entry_count * sizeof(struct device_init_entry);
+	if (cmd)
+		strcpy((char *)vcpu->host_sram_va + len, cmd);
+
+
 	guest_ctx->sepc = vcpu->guest_memory_pa;
 	guest_ctx->a0 = vcpu->guest_sram_pa;
+	guest_ctx->a1 = vcpu->guest_sram_pa + len;
 
 	while (1) {
-		vcpu_switch_to(&vcpu->host_context, &vcpu->guest_context);
+		vcpu_switch_to(&vcpu->cpu_ctx);
+		vcpu_process_vm_exit(vcpu);
 	}
 
 	return 0;
