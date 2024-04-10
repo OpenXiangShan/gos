@@ -27,7 +27,7 @@ int uart_gstage_ioremap(unsigned long *pgdp, unsigned long gpa,
 	if (!mmu_is_on)
 		hpa = addr;
 	else
-		hpa = walk_pt_va_to_pa((unsigned long)addr);
+		hpa = (unsigned long)walk_pt_va_to_pa((unsigned long)addr);
 
 	pgprot_t pgprot;
 

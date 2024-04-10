@@ -28,7 +28,7 @@ struct memory_region {
 	int id;
 	unsigned long start;
 	unsigned long end;
-	struct memory_region_ops *ops;
+	const struct memory_region_ops *ops;
 };
 
 struct virt_machine {
