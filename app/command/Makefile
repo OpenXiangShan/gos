@@ -8,3 +8,4 @@ obj-y += dma_test_ext.o
 obj-y += mem_read.o
 obj-y += imsic_test.o
 obj-y += spinlock_test.o
+obj-y += vcpu_run.o

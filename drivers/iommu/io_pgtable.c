@@ -15,11 +15,11 @@ static unsigned long *riscv_iommu_pt_walk_alloc(unsigned long *ptp,
 	unsigned long *pte, ptr, pfn;
 
 	if (root)
-		pte = ptp + (iova >> shift);
+		pte = ptp + ((iova >> shift) & 0x1FF);
 	else {
 		pte =
 		    (unsigned long *)pfn_to_phys(pte_pfn(*ptp)) +
-		    (iova >> shift);
+		    ((iova >> shift) & 0x1FF);
 	}
 
 	//print("%s %d shift:%d pgtable_entry:0x%x\n", __FUNCTION__, __LINE__, shift, pte);
@@ -47,11 +47,11 @@ unsigned long *riscv_iommu_pt_walk_fetch(unsigned long *ptp,
 	unsigned long *pte;
 
 	if (root)
-		pte = ptp + (iova >> shift);
+		pte = ptp + ((iova >> shift) & 0x1FF);
 	else
 		pte =
 		    (unsigned long *)pfn_to_phys(pte_pfn(*ptp)) +
-		    (iova >> shift);
+		    ((iova >> shift) & 0x1FF);
 
 	//print("%s %d shift:%d pgtable_entry:0x%x\n", __FUNCTION__, __LINE__, shift, pte);
 

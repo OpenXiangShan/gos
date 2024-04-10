@@ -41,4 +41,6 @@
 #define PT_SSTATUS 256		/* offsetof(struct pt_regs, sstatus) */
 #define PT_SBADADDR 264		/* offsetof(struct pt_regs, sbadaddr) */
 #define PT_SCAUSE 272		/* offsetof(struct pt_regs, scause) */
+#define PT_HSTATUS 280		/* offsetof(struct pt_regs, hstatus) */
+
 #endif

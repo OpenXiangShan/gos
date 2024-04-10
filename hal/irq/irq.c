@@ -82,12 +82,8 @@ int irqchip_setup(struct device_init_entry *hw)
 			    (driver_entry->compatible, device_entry->compatible,
 			     128)) {
 				if (mmu_is_on)
-					base =
-					    (unsigned long)ioremap((void *)
-								   device_entry->
-								   start,
-								   device_entry->
-								   len, 0);
+					base = (unsigned long)ioremap((void *)
+								      device_entry->start, device_entry->len, 0);
 				else
 					base = device_entry->start;
 

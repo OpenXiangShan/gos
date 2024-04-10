@@ -37,17 +37,15 @@ static unsigned long *riscv_pt_walk_alloc(unsigned long *ptp,
 							  0x1FF));
 	} else {
 		if (!mmu_is_on)
-			pte =
-			    (unsigned long *)((unsigned long *)
-					      pfn_to_phys(pte_pfn(*ptp)) +
-					      ((va >> shift) & 0x1FF));
+			pte = (unsigned long *)((unsigned long *)
+						pfn_to_phys(pte_pfn(*ptp)) +
+						((va >> shift) & 0x1FF));
 		else
-			pte =
-			    (unsigned long *)phy_to_virt((unsigned long *)
-							 pfn_to_phys(pte_pfn
-								     (*ptp)) +
-							 ((va >> shift) &
-							  0x1FF));
+			pte = (unsigned long *)phy_to_virt((unsigned long *)
+							   pfn_to_phys(pte_pfn
+								       (*ptp)) +
+							   ((va >> shift) &
+							    0x1FF));
 	}
 
 	if ((1UL << shift) <= pgsize) {
@@ -85,11 +83,12 @@ static unsigned long *mmu_pt_walk_fetch(unsigned long *ptp, unsigned long va,
 			    (unsigned long *)(pfn_to_phys(pte_pfn(*ptp)) +
 					      ((va >> shift) & 0x1FF));
 		else
-			pte =
-			    (unsigned long
-			     *)(phy_to_virt((unsigned long *)
-					    pfn_to_phys(pte_pfn(*ptp)) +
-					    ((va >> shift) & 0x1FF)));
+			pte = (unsigned long *)(phy_to_virt((unsigned long *)
+							    pfn_to_phys(pte_pfn
+									(*ptp))
+							    +
+							    ((va >> shift) &
+							     0x1FF)));
 	}
 
 	if (pmd_leaf(*pte))
@@ -120,8 +119,9 @@ void *walk_pt_va_to_pa(unsigned long va)
 	return (void *)((pfn_to_phys(pte_pfn(*pte)) | (va & (PAGE_SIZE - 1))));
 }
 
-int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
-		     pgprot_t pgprot)
+static int __mmu_page_mapping(unsigned long *_pgdp, unsigned long phy,
+			      unsigned long virt, unsigned int size,
+			      pgprot_t pgprot)
 {
 	unsigned int page_nr = N_PAGE(size);
 	unsigned long *pte;
@@ -132,7 +132,7 @@ int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 	while (page_nr--) {
 		pfn = (unsigned long)phy_addr >> PAGE_SHIFT;
 		pte =
-		    riscv_pt_walk_alloc((unsigned long *)pgdp,
+		    riscv_pt_walk_alloc(_pgdp,
 					virt_addr, PGDIR_SHIFT, PAGE_SIZE, 1,
 					alloc_zero_page, 0);
 		if (!pte)
@@ -147,6 +147,20 @@ int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 	}
 
 	return 0;
+}
+
+int mmu_gstage_page_mapping(unsigned long *_pgdp, unsigned long phy,
+			    unsigned long virt, unsigned int size,
+			    pgprot_t pgprot)
+{
+	return __mmu_page_mapping(_pgdp, phy, virt, size, pgprot);
+}
+
+int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
+		     pgprot_t pgprot)
+{
+	return __mmu_page_mapping((unsigned long *)pgdp, phy, virt, size,
+				  pgprot);
 }
 
 static int mmu_direct_page_mapping()

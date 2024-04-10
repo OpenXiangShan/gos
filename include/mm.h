@@ -8,6 +8,9 @@ int paging_init(struct device_init_entry *hw);
 void enable_mmu(int on);
 int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 		     pgprot_t pgprot);
+int mmu_gstage_page_mapping(unsigned long *_pgdp, unsigned long phy,
+			    unsigned long virt, unsigned int size,
+			    pgprot_t pgprot);
 void *walk_pt_va_to_pa(unsigned long va);
 void mm_init(struct device_init_entry *hw);
 void *mm_alloc(unsigned int size);

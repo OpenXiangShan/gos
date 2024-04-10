@@ -8,7 +8,18 @@
 #include <asm/sbi.h>
 
 static unsigned long base_address;
+static unsigned int size;
 static int wakeup = 0;
+
+unsigned long qemu_8250_get_base(void)
+{
+	return base_address;
+}
+
+unsigned long qemu_8250_get_size(void)
+{
+	return size;
+}
 
 static void qemu_8250_putc(char c)
 {
@@ -120,6 +131,9 @@ int qemu_8250_driver_init(struct device *dev, void *data)
 	strcpy(dev->name, "UART0");
 	strcpy(drv->name, "UART0");
 	drv->ops = &qemu_8250_ops;
+
+	base_address = dev->start;
+	size = dev->len;
 
 	return 0;
 }

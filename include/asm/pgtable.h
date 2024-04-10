@@ -34,6 +34,13 @@ extern unsigned long va_pa_offset;
 #define SATP_MODE (pgtable_l5_enabled ? SATP_MODE_57 : \
 		(pgtable_l4_enabled ? SATP_MODE_48 : SATP_MODE_39))
 
+#define HGATP_MODE_39    0x8000000000000000UL
+#define HGATP_MODE_48    0x9000000000000000UL
+#define HGATP_MODE_57    0xa000000000000000UL
+
+#define HGATP_MODE (pgtable_l5_enabled ? HGATP_MODE_57 : \
+		(pgtable_l4_enabled ? HGATP_MODE_48 : HGATP_MODE_39))
+
 typedef struct {
 	unsigned long pgprot;
 } pgprot_t;

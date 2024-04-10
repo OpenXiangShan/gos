@@ -1,5 +1,5 @@
-#ifndef QEMU_8250_H
-#define QEMU_8250_H
+#ifndef _QEMU_8250_UART_H
+#define _QEMU_8250_UART_H
 
 #define UART_DAT    0x00
 #define UART_IER    0x01
@@ -22,7 +22,6 @@
 #define UART_LSR_OE	    0x02
 #define UART_LSR_DR	    0x01
 
-unsigned long qemu_8250_get_base(void);
-unsigned long qemu_8250_get_size(void);
+void uart_qemu_8250_init(unsigned long base, struct myGuest_uart_ops *ops);
 
 #endif
