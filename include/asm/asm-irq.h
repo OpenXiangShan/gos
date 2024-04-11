@@ -14,4 +14,9 @@ static inline void __enable_local_irq(void)
 	csr_set(sstatus, SR_SIE);
 }
 
+static inline void __disable_local_irq(void)
+{
+	csr_clear(sstatus, SR_SIE);
+}
+
 #endif

@@ -125,8 +125,14 @@ int vcpu_run(struct vcpu *vcpu, char *cmd)
 	guest_ctx->a1 = vcpu->guest_sram_pa + len;
 
 	while (1) {
+		disable_local_irq();
+
 		vcpu_switch_to(&vcpu->cpu_ctx);
 		vcpu_process_vm_exit(vcpu);
+
+		enable_local_irq();
+		disable_local_irq();
+		enable_local_irq();
 	}
 
 	return 0;

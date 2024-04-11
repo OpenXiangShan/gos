@@ -84,7 +84,7 @@ __vcpu_switch_return:
 .section .text
 .global vcpu_switch_to
 vcpu_switch_to:
-	// a0 -- struct vcpu
+	// a0 -- vcpu->cpu_context
 	
 	/* Save Host GPRs */ 
 	sd ra, (VIRT_CPU_HOST_RA)(a0)

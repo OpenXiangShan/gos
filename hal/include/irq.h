@@ -12,6 +12,7 @@
 #define IRQ_TYPE_LEVEL_LOW      8
 
 #define enable_local_irq __enable_local_irq
+#define disable_local_irq __disable_local_irq
 
 #define SCAUSE_IRQ (1UL << 63)
 
