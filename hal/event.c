@@ -3,8 +3,8 @@
 
 void wait_for_event(void *data, int (*expr)(void *data))
 {
-	while (1)
-		if (expr(data))
+	while(1)
+		if(expr(data))
 			break;
 }
 

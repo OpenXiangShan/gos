@@ -9,3 +9,4 @@ obj-y += mem_read.o
 obj-y += imsic_test.o
 obj-y += spinlock_test.o
 obj-y += vcpu_run.o
+obj-y += user_run.o

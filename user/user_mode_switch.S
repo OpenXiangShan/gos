@@ -1,0 +1,156 @@
+#include "asm/asm-offsets.h"
+#include "asm/csr.h"
+
+.section .text
+.align 2
+.global __user_mode_switch_return
+__user_mode_switch_return:
+	csrrw a0, CSR_SSCRATCH, a0
+	
+	sd ra, (USER_CPU_U_RA)(a0)
+	sd sp, (USER_CPU_U_SP)(a0)
+	sd gp, (USER_CPU_U_GP)(a0)
+	sd tp, (USER_CPU_U_TP)(a0)
+	sd a1, (USER_CPU_U_A1)(a0)
+	sd a2, (USER_CPU_U_A2)(a0)
+	sd a3, (USER_CPU_U_A3)(a0)
+	sd a4, (USER_CPU_U_A4)(a0)
+	sd a5, (USER_CPU_U_A5)(a0)
+	sd a6, (USER_CPU_U_A6)(a0)
+	sd a7, (USER_CPU_U_A7)(a0)
+	sd s0, (USER_CPU_U_S0)(a0)
+	sd s1, (USER_CPU_U_S1)(a0)
+	sd s2, (USER_CPU_U_S2)(a0)
+	sd s3, (USER_CPU_U_S3)(a0)
+	sd s4, (USER_CPU_U_S4)(a0)
+	sd s5, (USER_CPU_U_S5)(a0)
+	sd s6, (USER_CPU_U_S6)(a0)
+	sd s7, (USER_CPU_U_S7)(a0)
+	sd s8, (USER_CPU_U_S8)(a0)
+	sd s9, (USER_CPU_U_S9)(a0)
+	sd s10, (USER_CPU_U_S10)(a0)
+	sd s11, (USER_CPU_U_S11)(a0)
+	sd t0, (USER_CPU_U_T0)(a0)
+	sd t1, (USER_CPU_U_T1)(a0)
+	sd t2, (USER_CPU_U_T2)(a0)
+	sd t3, (USER_CPU_U_T3)(a0)
+	sd t4, (USER_CPU_U_T4)(a0)
+	sd t5, (USER_CPU_U_T5)(a0)
+	sd t6, (USER_CPU_U_T6)(a0)
+	
+	ld t1, (USER_CPU_S_STVEC)(a0)	
+	ld t2, (USER_CPU_S_SSCRATCH)(a0)	
+	ld t5, (USER_CPU_S_SSTATUS)(a0)	
+	
+	csrr t0, CSR_SEPC
+	csrw CSR_STVEC, t1
+	csrrw t2, CSR_SSCRATCH, t2
+	csrrw t5, CSR_SSTATUS, t5
+	
+	sd t0, (USER_CPU_U_SEPC)(a0)
+	sd t2, (USER_CPU_U_A0)(a0)
+	sd t5, (USER_CPU_U_SSTATUS)(a0)
+	
+	ld ra, (USER_CPU_S_RA)(a0)
+	ld sp, (USER_CPU_S_SP)(a0)
+	ld gp, (USER_CPU_S_GP)(a0)
+	ld tp, (USER_CPU_S_TP)(a0)
+	ld a1, (USER_CPU_S_A1)(a0)
+	ld a2, (USER_CPU_S_A2)(a0)
+	ld a3, (USER_CPU_S_A3)(a0)
+	ld a4, (USER_CPU_S_A4)(a0)
+	ld a5, (USER_CPU_S_A5)(a0)
+	ld a6, (USER_CPU_S_A6)(a0)
+	ld a7, (USER_CPU_S_A7)(a0)
+	ld s0, (USER_CPU_S_S0)(a0)
+	ld s1, (USER_CPU_S_S1)(a0)
+	ld s2, (USER_CPU_S_S2)(a0)
+	ld s3, (USER_CPU_S_S3)(a0)
+	ld s4, (USER_CPU_S_S4)(a0)
+	ld s5, (USER_CPU_S_S5)(a0)
+	ld s6, (USER_CPU_S_S6)(a0)
+	ld s7, (USER_CPU_S_S7)(a0)
+	ld s8, (USER_CPU_S_S8)(a0)
+	ld s9, (USER_CPU_S_S9)(a0)
+	ld s10, (USER_CPU_S_S10)(a0)
+	ld s11, (USER_CPU_S_S11)(a0)
+	
+	ret
+
+.section .text
+.align 2
+.global user_mode_switch_to
+user_mode_switch_to:
+	sd ra, (USER_CPU_S_RA)(a0)
+	sd sp, (USER_CPU_S_SP)(a0)
+	sd gp, (USER_CPU_S_GP)(a0)
+	sd tp, (USER_CPU_S_TP)(a0)
+	sd s0, (USER_CPU_S_S0)(a0)
+	sd s1, (USER_CPU_S_S1)(a0)
+	sd a2, (USER_CPU_S_A2)(a0)
+	sd a3, (USER_CPU_S_A3)(a0)
+	sd a4, (USER_CPU_S_A4)(a0)
+	sd a5, (USER_CPU_S_A5)(a0)
+	sd a6, (USER_CPU_S_A6)(a0)
+	sd a7, (USER_CPU_S_A7)(a0)
+	sd s2, (USER_CPU_S_S2)(a0)
+	sd s3, (USER_CPU_S_S3)(a0)
+	sd s4, (USER_CPU_S_S4)(a0)
+	sd s5, (USER_CPU_S_S5)(a0)
+	sd s6, (USER_CPU_S_S6)(a0)
+	sd s7, (USER_CPU_S_S7)(a0)
+	sd s8, (USER_CPU_S_S8)(a0)
+	sd s9, (USER_CPU_S_S9)(a0)
+	sd s10, (USER_CPU_S_S10)(a0)
+	sd s11, (USER_CPU_S_S11)(a0)
+	
+	ld t0, (USER_CPU_U_SSTATUS)(a0)
+	la t4, __user_mode_switch_return
+	ld t5, (USER_CPU_U_SEPC)(a0)
+	
+	csrrw t0, CSR_SSTATUS, t0
+	csrrw t4, CSR_STVEC, t4
+	csrw CSR_SEPC, t5
+	
+	csrrw t3, CSR_SSCRATCH, a0
+	
+	sd t0, (USER_CPU_S_SSTATUS)(a0)
+	sd t1, (USER_CPU_S_HSTATUS)(a0)
+	sd t3, (USER_CPU_S_SSCRATCH)(a0)
+	sd t4, (USER_CPU_S_STVEC)(a0)
+	
+	ld ra, (USER_CPU_U_RA)(a0)
+	ld sp, (USER_CPU_U_SP)(a0)
+	ld gp, (USER_CPU_U_GP)(a0)
+	ld tp, (USER_CPU_U_TP)(a0)
+	ld s0, (USER_CPU_U_S3)(a0)
+	ld s1, (USER_CPU_U_S1)(a0)
+	ld a1, (USER_CPU_U_A1)(a0)
+	ld a2, (USER_CPU_U_A2)(a0)
+	ld a3, (USER_CPU_U_A3)(a0)
+	ld a4, (USER_CPU_U_A4)(a0)
+	ld a5, (USER_CPU_U_A5)(a0)
+	ld a6, (USER_CPU_U_A6)(a0)
+	ld a7, (USER_CPU_U_A7)(a0)
+	ld s2, (USER_CPU_U_S2)(a0)
+	ld s3, (USER_CPU_U_S3)(a0)
+	ld s4, (USER_CPU_U_S4)(a0)
+	ld s5, (USER_CPU_U_S5)(a0)
+	ld s6, (USER_CPU_U_S6)(a0)
+	ld s7, (USER_CPU_U_S7)(a0)
+	ld s8, (USER_CPU_U_S8)(a0)
+	ld s9, (USER_CPU_U_S9)(a0)
+	ld s10, (USER_CPU_U_S10)(a0)
+	ld s11, (USER_CPU_U_S11)(a0)
+	ld t0, (USER_CPU_U_T0)(a0)
+	ld t1, (USER_CPU_U_T1)(a0)
+	ld t2, (USER_CPU_U_T2)(a0)
+	ld t3, (USER_CPU_U_T3)(a0)
+	ld t4, (USER_CPU_U_T4)(a0)
+	ld t5, (USER_CPU_U_T5)(a0)
+	ld t6, (USER_CPU_U_T6)(a0)
+	
+	ld a0, (USER_CPU_U_A0)(a0)
+	
+	sret
+

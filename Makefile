@@ -24,13 +24,60 @@ BUILD_DIR = build
 MYSBI_DIR = mysbi
 BSP_DIR   = bsp
 MYGUEST_DIR = myGuest
+MYUSER_DIR = myUser
 
-default: clean mysbi myGuest gos pack.sh
+default: clean mysbi myUser myGuest gos pack.sh
 	./pack.sh
 
 fpga:
 	./bin2fpgadata -i out/Image.bin
 
+#build user
+USER_TARGET := myUser.elf
+USER_TARGET_BIN := myUser.bin
+
+MYUSER_ENTRY_DIR = $(MYUSER_DIR)/entry
+MYUSER_CORE_DIR = $(MYUSER_DIR)/core
+MYUSER_LIB_DIR = $(MYUSER_DIR)/lib
+MYUSER_COMMAND_DIR = $(MYUSER_DIR)/command
+
+USER_ENTRY_C_FILES = $(wildcard $(MYUSER_ENTRY_DIR)/*.c)
+USER_ENTRY_ASM_FILES = $(wildcard $(MYUSER_ENTRY_DIR)/*.S)
+USER_CORE_C_FILES = $(wildcard $(MYUSER_CORE_DIR)/*.c)
+USER_CORE_ASM_FILES = $(wildcard $(MYUSER_CORE_DIR)/*.S)
+USER_LIB_C_FILES = $(wildcard $(MYUSER_LIB_DIR)/*.c)
+USER_COMMAND_C_FILES = $(wildcard $(MYUSER_COMMAND_DIR)/*.c)
+
+MYUSER_OBJ_FILES = $(USER_ENTRY_ASM_FILES:$(MYUSER_ENTRY_DIR)/%.S=$(MYUSER_ENTRY_DIR)/%_s.o)
+MYUSER_OBJ_FILES += $(USER_ENTRY_C_FILES:$(MYUSER_ENTRY_DIR)/%.c=$(MYUSER_ENTRY_DIR)/%_c.o)
+MYUSER_OBJ_FILES += $(USER_CORE_ASM_FILES:$(MYUSER_CORE_DIR)/%.S=$(MYUSER_CORE_DIR)/%_s.o)
+MYUSER_OBJ_FILES += $(USER_CORE_C_FILES:$(MYUSER_CORE_DIR)/%.c=$(MYUSER_CORE_DIR)/%_c.o)
+MYUSER_OBJ_FILES += $(USER_LIB_C_FILES:$(MYUSER_LIB_DIR)/%.c=$(MYUSER_LIB_DIR)/%_c.o)
+MYUSER_OBJ_FILES += $(USER_COMMAND_C_FILES:$(MYUSER_COMMAND_DIR)/%.c=$(MYUSER_COMMAND_DIR)/%_c.o)
+
+myUser: $(MYUSER_OBJ_FILES)
+	mkdir -p $(BUILD_DIR)
+	$(LD) -T $(MYUSER_DIR)/myUser.lds -o $(BUILD_DIR)/$(USER_TARGET) $(MYUSER_OBJ_FILES) -Map $(BUILD_DIR)/myUser.map
+	$(RISCV_COPY) $(BUILD_DIR)/$(USER_TARGET) -O binary $(BUILD_DIR)/$(USER_TARGET_BIN)
+
+$(MYUSER_ENTRY_DIR)/%_s.o: $(MYUSER_ENTRY_DIR)/%.S
+	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+
+$(MYUSER_ENTRY_DIR)/%_c.o: $(MYUSER_ENTRY_DIR)/%.c
+	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+
+$(MYUSER_CORE_DIR)/%_s.o: $(MYUSER_CORE_DIR)/%.S
+	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+
+$(MYUSER_CORE_DIR)/%_c.o: $(MYUSER_CORE_DIR)/%.c
+	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+
+$(MYUSER_LIB_DIR)/%_c.o: $(MYUSER_LIB_DIR)/%.c
+	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+
+$(MYUSER_COMMAND_DIR)/%_c.o: $(MYUSER_COMMAND_DIR)/%.c
+	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	
 #build guest
 GUEST_TARGET := myGuest.elf
 GUEST_TARGET_BIN := myGuest.bin
@@ -125,6 +172,7 @@ GOS_HAL_DIR = $(TOPDIR)/hal
 APP_DIR   = app
 
 GOS_VIRT_DIR = virt
+GOS_USER_DIR = user
 
 export GOS_HAL_DIR
 
@@ -136,12 +184,16 @@ GOS_ENTRY_C_FILES = $(wildcard $(GOS_ENTRY_DIR)/*.c)
 GOS_LIB_C_FILES = $(wildcard $(GOS_LIB_DIR)/*.c)
 GOS_VIRT_ASM_FILES = $(wildcard $(GOS_VIRT_DIR)/*.S)
 GOS_VIRT_C_FILES = $(wildcard $(GOS_VIRT_DIR)/*.c)
+GOS_USER_ASM_FILES = $(wildcard $(GOS_USER_DIR)/*.S)
+GOS_USER_C_FILES = $(wildcard $(GOS_USER_DIR)/*.c)
 
 GOS_OBJ_FILES = $(GOS_ENTRY_ASM_FILES:$(GOS_ENTRY_DIR)/%.S=$(GOS_ENTRY_DIR)/%_s.o)
 GOS_OBJ_FILES += $(GOS_ENTRY_C_FILES:$(GOS_ENTRY_DIR)/%.c=$(GOS_ENTRY_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_LIB_C_FILES:$(GOS_LIB_DIR)/%.c=$(GOS_LIB_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_VIRT_ASM_FILES:$(GOS_VIRT_DIR)/%.S=$(GOS_VIRT_DIR)/%_s.o)
 GOS_OBJ_FILES += $(GOS_VIRT_C_FILES:$(GOS_VIRT_DIR)/%.c=$(GOS_VIRT_DIR)/%_c.o)
+GOS_OBJ_FILES += $(GOS_USER_ASM_FILES:$(GOS_USER_DIR)/%.S=$(GOS_USER_DIR)/%_s.o)
+GOS_OBJ_FILES += $(GOS_USER_C_FILES:$(GOS_USER_DIR)/%.c=$(GOS_USER_DIR)/%_c.o)
 
 obj-y += drivers/
 obj-y += hal/
@@ -167,6 +219,12 @@ $(GOS_VIRT_DIR)/%_s.o: $(GOS_VIRT_DIR)/%.S
 	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
 
 $(GOS_VIRT_DIR)/%_c.o: $(GOS_VIRT_DIR)/%.c
+	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_HAL_DIR)/include -c $< -o $@
+
+$(GOS_USER_DIR)/%_s.o: $(GOS_USER_DIR)/%.S
+	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
+
+$(GOS_USER_DIR)/%_c.o: $(GOS_USER_DIR)/%.c
 	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_HAL_DIR)/include -c $< -o $@
 	
 clean:

@@ -13,22 +13,26 @@ static int gstage_page_fault(struct vcpu *vcpu, unsigned long reason)
 	htval = read_csr(CSR_HTVAL);
 	stval = read_csr(CSR_STVAL);
 	htinst = read_csr(CSR_HTINST);
-	
+
 	fault_addr = (htval << 2) | (stval & 0x3);
-	print("%s %d fault_addr:0x%lx htinst:0x%lx\n", __FUNCTION__, __LINE__, fault_addr, htinst);
+	print("%s %d fault_addr:0x%lx htinst:0x%lx\n", __FUNCTION__, __LINE__,
+	      fault_addr, htinst);
 
 	region = find_memory_region(&vcpu->machine, fault_addr);
 	if (!region) {
-		print("%s -- cannot find region, fault_addr:0x%lx\n", __FUNCTION__, fault_addr);
+		print("%s -- cannot find region, fault_addr:0x%lx\n",
+		      __FUNCTION__, fault_addr);
 		return -1;
 	}
-	
+
 	switch (reason) {
 	case EXC_LOAD_GUEST_PAGE_FAULT:
-		print("EXC_LOAD_GUEST_PAGE_FAULT region->base:0x%lx\n", region->start);
+		print("EXC_LOAD_GUEST_PAGE_FAULT region->base:0x%lx\n",
+		      region->start);
 		return 1;
 	case EXC_STORE_GUEST_PAGE_FAULT:
-		print("EXC_STORE_GUEST_PAGE_FAULT region->base:0x%lx\n", region->start);
+		print("EXC_STORE_GUEST_PAGE_FAULT region->base:0x%lx\n",
+		      region->start);
 		return 1;
 	}
 
@@ -43,7 +47,7 @@ void vcpu_process_vm_exit(struct vcpu *vcpu)
 	guest_ctx = &vcpu->cpu_ctx.guest_context;
 
 	scause = read_csr(CSR_SCAUSE);
-	
+
 	switch (scause) {
 	case EXC_INST_ILLEGAL:
 	case EXC_LOAD_MISALIGNED:
@@ -57,12 +61,13 @@ void vcpu_process_vm_exit(struct vcpu *vcpu)
 		if (guest_ctx->hstatus & HSTATUS_SPV)
 			gstage_page_fault(vcpu, scause);
 		else
-			print("%s -- hstatus state error! hstatus:0x%lx\n", guest_ctx->hstatus);	
+			print("%s -- hstatus state error! hstatus:0x%lx\n",
+			      guest_ctx->hstatus);
 		break;
 	case EXC_SUPERVISOR_SYSCALL:
 		break;
 	default:
 		break;
 
-	}	
+	}
 }

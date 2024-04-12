@@ -106,7 +106,7 @@ void iounmap(void *addr, unsigned int size)
 		return;
 
 	vmap_free(addr, size);
-	mm_free(addr, size);
+	mm_free((void *)phy_to_virt((unsigned long)phys), size);
 }
 
 void *vmem_map(void *addr, unsigned int size, int gfp)

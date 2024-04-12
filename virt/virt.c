@@ -115,10 +115,10 @@ int vcpu_run(struct vcpu *vcpu, char *cmd)
 	       vcpu->machine.device_entry_count *
 	       sizeof(struct device_init_entry));
 
-	len = vcpu->machine.device_entry_count * sizeof(struct device_init_entry);
+	len =
+	    vcpu->machine.device_entry_count * sizeof(struct device_init_entry);
 	if (cmd)
 		strcpy((char *)vcpu->host_sram_va + len, cmd);
-
 
 	guest_ctx->sepc = vcpu->guest_memory_pa;
 	guest_ctx->a0 = vcpu->guest_sram_pa;
@@ -130,8 +130,6 @@ int vcpu_run(struct vcpu *vcpu, char *cmd)
 		vcpu_switch_to(&vcpu->cpu_ctx);
 		vcpu_process_vm_exit(vcpu);
 
-		enable_local_irq();
-		disable_local_irq();
 		enable_local_irq();
 	}
 

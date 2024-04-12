@@ -14,33 +14,41 @@ struct fault_info {
 
 void panic()
 {
-	//print("Kernel panic\n");
+	print("Kernel panic\n");
 	while (1) ;
 }
 
 void show_regs(struct pt_regs *regs)
 {
-#if 0
-	print("sepc: %x ra : %x sp : %x\n", regs->sepc, regs->ra, regs->sp);
-	print(" gp : %x tp : %x t0 : %x\n", regs->gp, regs->tp, regs->t0);
-	print(" t1 : %x t2 : %x t3 : %x\n", regs->t1, regs->t2, regs->s0);
-	print(" s1 : %x a0 : %x a1 : %x\n", regs->s1, regs->a0, regs->a1);
-	print(" a2 : %x a3 : %x a4 : %x\n", regs->a2, regs->a3, regs->a4);
-	print(" a5 : %x a6 : %x a7 : %x\n", regs->a5, regs->a6, regs->a7);
-	print(" s2 : %x s3 : %x s4 : %x\n", regs->s2, regs->s3, regs->s4);
-	print(" s5 : %x s6 : %x s7 : %x\n", regs->s5, regs->s6, regs->s7);
-	print(" s8 : %x s9 : %x s10: %x\n", regs->s8, regs->s9, regs->s10);
-	print(" s11: %x t3 : %x t4: %x\n", regs->s11, regs->t3, regs->t4);
-	print(" t5 : %x t6 : %x\n", regs->t5, regs->t6);
-#endif
+	print("sepc: 0x%lx ra : 0x%lx sp : 0x%lx\n", regs->sepc, regs->ra,
+	      regs->sp);
+	print(" gp : 0x%lx tp : 0x%lx t0 : 0x%lx\n", regs->gp, regs->tp,
+	      regs->t0);
+	print(" t1 : 0x%lx t2 : 0x%lx t3 : 0x%lx\n", regs->t1, regs->t2,
+	      regs->s0);
+	print(" s1 : 0x%lx a0 : 0x%lx a1 : 0x%lx\n", regs->s1, regs->a0,
+	      regs->a1);
+	print(" a2 : 0x%lx a3 : 0x%lx a4 : 0x%lx\n", regs->a2, regs->a3,
+	      regs->a4);
+	print(" a5 : 0x%lx a6 : 0x%lx a7 : 0x%lx\n", regs->a5, regs->a6,
+	      regs->a7);
+	print(" s2 : 0x%lx s3 : 0x%lx s4 : 0x%lx\n", regs->s2, regs->s3,
+	      regs->s4);
+	print(" s5 : 0x%lx s6 : 0x%lx s7 : 0x%lx\n", regs->s5, regs->s6,
+	      regs->s7);
+	print(" s8 : 0x%lx s9 : 0x%lx s10: 0x%lx\n", regs->s8, regs->s9,
+	      regs->s10);
+	print(" s11: 0x%lx t3 : 0x%lx t4: 0x%lx\n", regs->s11, regs->t3,
+	      regs->t4);
+	print(" t5 : 0x%lx t6 : 0x%lx\n", regs->t5, regs->t6);
 }
 
 static void do_trap_error(struct pt_regs *regs, const char *str)
 {
-	//print("Oops - %s\n", str);
+	print("Oops - %s\n", str);
 	show_regs(regs);
-	//print("sstatus:0x%x  sbadaddr:0x%x  scause:0x%x\n",
-	//              regs->sstatus, regs->sbadaddr, regs->scause);
+	print("sstatus:0x%lx  sbadaddr:0x%lx  scause:0x%lx\n",
+	      regs->sstatus, regs->sbadaddr, regs->scause);
 	panic();
 }
 
@@ -64,7 +72,7 @@ DO_ERROR_INFO(do_trap_ecall_s);
 DO_ERROR_INFO(do_trap_break);
 DO_ERROR_INFO(do_page_fault);
 
-static const struct fault_info fault_info[] = {
+static struct fault_info fault_info[] = {
 	{ do_trap_insn_misaligned, "Instruction address misaligned" },
 	{ do_trap_insn_fault, "Instruction access fault" },
 	{ do_trap_insn_illegal, "Illegal instruction" },
@@ -83,7 +91,7 @@ static const struct fault_info fault_info[] = {
 	{ do_page_fault, "Store/AMO page fault" },
 };
 
-static inline const struct fault_info *ec_to_fault_info(unsigned int scause)
+static inline struct fault_info *ec_to_fault_info(unsigned int scause)
 {
 	return fault_info + (scause & SCAUSE_EC);
 }
@@ -102,13 +110,33 @@ static inline const struct fault_info *ec_to_fault_info(unsigned int scause)
 #define EXC_LOAD_PAGE_FAULT     13
 #define EXC_STORE_PAGE_FAULT    15
 
+static int handle_exception(struct pt_regs *regs, unsigned long cause)
+{
+	struct fault_info *fi;
+
+	switch (cause) {
+	default:
+		fi = ec_to_fault_info(cause);
+		if (fi)
+			fi->fn(regs, fi->name);
+		else {
+			print("unknown exception!! -- %d\n", cause);
+			panic();
+		}
+	}
+
+	return 0;
+}
+
 int do_exception(struct pt_regs *regs, unsigned long scause)
 {
-	task_scheduler_enter(regs);
-
-	handle_irq(scause);
-
-	task_scheduler_exit(regs);
+	if (scause & (1UL << 63)) {
+		task_scheduler_enter(regs);
+		handle_irq(scause);
+		task_scheduler_exit(regs);
+	} else {
+		handle_exception(regs, scause);
+	}
 
 	return 0;
 }

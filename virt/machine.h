@@ -97,6 +97,7 @@ int add_memory_region(struct virt_machine *machine, int id, unsigned long base,
 		      unsigned int size, const struct memory_region_ops *ops);
 struct memory_region *find_memory_region_by_id(struct virt_machine *machine,
 					       int id);
-struct memory_region *find_memory_region(struct virt_machine *machine, unsigned long gpa);
+struct memory_region *find_memory_region(struct virt_machine *machine,
+					 unsigned long gpa);
 
 #endif

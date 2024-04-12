@@ -43,7 +43,9 @@ static int aplic_msi_alloc_irqs(int nr_irqs, void *data)
 	    && domain->parent_domain->domain_ops->alloc_irqs)
 		hwirq =
 		    domain->parent_domain->domain_ops->alloc_irqs(nr_irqs,
-								  domain->parent_domain->priv);
+								  domain->
+								  parent_domain->
+								  priv);
 
 	if (hwirq != -1) {
 		for (i = 0; i < nr_irqs; i++)

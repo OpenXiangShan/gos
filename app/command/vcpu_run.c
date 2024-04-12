@@ -13,7 +13,7 @@ static int vcpu_start(void *data)
 	if (!vcpu)
 		return -1;
 
-	vcpu_run(vcpu, "test");
+	vcpu_run(vcpu, "hello");
 
 	return 0;
 }

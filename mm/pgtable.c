@@ -149,6 +149,12 @@ static int __mmu_page_mapping(unsigned long *_pgdp, unsigned long phy,
 	return 0;
 }
 
+int mmu_user_page_mapping(unsigned long phy, unsigned long virt,
+			  unsigned int size, pgprot_t pgprot)
+{
+	return __mmu_page_mapping(pgdp, phy, virt, size, pgprot);
+}
+
 int mmu_gstage_page_mapping(unsigned long *_pgdp, unsigned long phy,
 			    unsigned long virt, unsigned int size,
 			    pgprot_t pgprot)

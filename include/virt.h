@@ -45,7 +45,7 @@ struct virt_cpu_context {
 struct cpu_context {
 	struct virt_cpu_context host_context;
 	struct virt_cpu_context guest_context;
-	unsigned long host_scratch;	
+	unsigned long host_scratch;
 	unsigned long host_stvec;
 };
 

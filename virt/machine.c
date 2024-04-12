@@ -39,7 +39,8 @@ static int memory_region_is_overlay(unsigned long start, unsigned long end,
 	return 0;
 }
 
-struct memory_region *find_memory_region(struct virt_machine *machine, unsigned long gpa)
+struct memory_region *find_memory_region(struct virt_machine *machine,
+					 unsigned long gpa)
 {
 	struct memory_region *entry;
 
@@ -49,7 +50,7 @@ struct memory_region *find_memory_region(struct virt_machine *machine, unsigned 
 			spin_unlock(&machine->lock);
 			return entry;
 		}
-	}	
+	}
 	spin_unlock(&machine->lock);
 
 	return NULL;
@@ -143,8 +144,7 @@ int machine_init(struct virt_machine *machine)
 	struct device_init_entry *entry;
 	int n = 0;
 
-	device_entry =
-	    (struct device_init_entry *)
+	device_entry = (struct device_init_entry *)
 	    mm_alloc(sizeof(struct device_init_entry) * (VIRT_MEMMAP_CNT + 1));
 
 	if (!device_entry) {
