@@ -77,7 +77,7 @@ $(MYUSER_LIB_DIR)/%_c.o: $(MYUSER_LIB_DIR)/%.c
 
 $(MYUSER_COMMAND_DIR)/%_c.o: $(MYUSER_COMMAND_DIR)/%.c
 	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
-	
+
 #build guest
 GUEST_TARGET := myGuest.elf
 GUEST_TARGET_BIN := myGuest.bin

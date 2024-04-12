@@ -6,5 +6,5 @@
 .align 2
 __user_payload_start:
 user_bin:
-	.incbin "build/myUser.bin"	
+	.incbin "build/myUser.bin"
 __user_payload_end:

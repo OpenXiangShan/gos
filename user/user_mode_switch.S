@@ -6,7 +6,7 @@
 .global __user_mode_switch_return
 __user_mode_switch_return:
 	csrrw a0, CSR_SSCRATCH, a0
-	
+
 	sd ra, (USER_CPU_U_RA)(a0)
 	sd sp, (USER_CPU_U_SP)(a0)
 	sd gp, (USER_CPU_U_GP)(a0)
@@ -37,20 +37,20 @@ __user_mode_switch_return:
 	sd t4, (USER_CPU_U_T4)(a0)
 	sd t5, (USER_CPU_U_T5)(a0)
 	sd t6, (USER_CPU_U_T6)(a0)
-	
-	ld t1, (USER_CPU_S_STVEC)(a0)	
-	ld t2, (USER_CPU_S_SSCRATCH)(a0)	
-	ld t5, (USER_CPU_S_SSTATUS)(a0)	
-	
+
+	ld t1, (USER_CPU_S_STVEC)(a0)
+	ld t2, (USER_CPU_S_SSCRATCH)(a0)
+	ld t5, (USER_CPU_S_SSTATUS)(a0)
+
 	csrr t0, CSR_SEPC
 	csrw CSR_STVEC, t1
 	csrrw t2, CSR_SSCRATCH, t2
 	csrrw t5, CSR_SSTATUS, t5
-	
+
 	sd t0, (USER_CPU_U_SEPC)(a0)
 	sd t2, (USER_CPU_U_A0)(a0)
 	sd t5, (USER_CPU_U_SSTATUS)(a0)
-	
+
 	ld ra, (USER_CPU_S_RA)(a0)
 	ld sp, (USER_CPU_S_SP)(a0)
 	ld gp, (USER_CPU_S_GP)(a0)
@@ -74,7 +74,7 @@ __user_mode_switch_return:
 	ld s9, (USER_CPU_S_S9)(a0)
 	ld s10, (USER_CPU_S_S10)(a0)
 	ld s11, (USER_CPU_S_S11)(a0)
-	
+
 	ret
 
 .section .text
@@ -103,17 +103,17 @@ user_mode_switch_to:
 	sd s9, (USER_CPU_S_S9)(a0)
 	sd s10, (USER_CPU_S_S10)(a0)
 	sd s11, (USER_CPU_S_S11)(a0)
-	
+
 	ld t0, (USER_CPU_U_SSTATUS)(a0)
 	la t4, __user_mode_switch_return
 	ld t5, (USER_CPU_U_SEPC)(a0)
-	
+
 	csrrw t0, CSR_SSTATUS, t0
 	csrrw t4, CSR_STVEC, t4
 	csrw CSR_SEPC, t5
-	
+
 	csrrw t3, CSR_SSCRATCH, a0
-	
+
 	sd t0, (USER_CPU_S_SSTATUS)(a0)
 	sd t1, (USER_CPU_S_HSTATUS)(a0)
 	sd t3, (USER_CPU_S_SSCRATCH)(a0)
@@ -149,8 +149,8 @@ user_mode_switch_to:
 	ld t4, (USER_CPU_U_T4)(a0)
 	ld t5, (USER_CPU_U_T5)(a0)
 	ld t6, (USER_CPU_U_T6)(a0)
-	
+
 	ld a0, (USER_CPU_U_A0)(a0)
-	
+
 	sret
 
