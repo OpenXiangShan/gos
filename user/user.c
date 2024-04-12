@@ -36,6 +36,7 @@ struct user *user_create(void)
 	u_context = &user->cpu_context.u_context;
 	u_context->sstatus = read_csr(CSR_SSTATUS);
 	u_context->sstatus &= ~SR_SPP;
+	u_context->sstatus |= SR_SPIE;
 
 	INIT_LIST_HEAD(&user->memory_region);
 	__SPINLOCK_INIT(&user->lock);

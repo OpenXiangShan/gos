@@ -34,7 +34,7 @@ struct vcpu *vcpu_create(void)
 	memset((char *)vcpu, 0, sizeof(struct vcpu));
 
 	guest_ctx = &vcpu->cpu_ctx.guest_context;
-	guest_ctx->sstatus = SR_SPP;
+	guest_ctx->sstatus = SR_SPP | SR_SPIE;
 	guest_ctx->hstatus = 0;
 	guest_ctx->hstatus |= HSTATUS_VTW;
 	guest_ctx->hstatus |= HSTATUS_SPVP;
