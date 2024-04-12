@@ -34,6 +34,7 @@ struct device {
 	int in_used;
 	int probe;
 	char name[64];
+	unsigned long base;
 	unsigned long start;
 	unsigned int len;
 	int *irqs;
@@ -180,5 +181,7 @@ static inline int dev_register_irq(struct device *dev, unsigned int hwirq,
 {
 	return register_device_irq(dev->irq_domain, hwirq, handler, priv);
 }
+
+struct devices *get_devices(void);
 
 #endif

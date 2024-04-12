@@ -8,6 +8,7 @@
 #include "uart_emulator.h"
 #include "memory_emulator.h"
 #include "asm/type.h"
+#include "device.h"
 
 static struct virt_machine_memmap virt_memmap[] = {
 	[VIRT_MEMORY] = { 0x90000000, 0x1000000 },
@@ -107,8 +108,11 @@ int add_memory_region(struct virt_machine *machine, int id, unsigned long base,
 	return 0;
 }
 
-static int uart_gstage_ioremap(struct virt_machine *machine)
+static int uart_device_emulate(struct virt_machine *machine, char *name, int pt)
 {
+	int nr, found = 0;
+	struct device *dev;
+	struct devices *p_devs = get_devices();
 	struct memory_region *region;
 	unsigned long gpa;
 	unsigned int size;
@@ -120,20 +124,38 @@ static int uart_gstage_ioremap(struct virt_machine *machine)
 	if (!region)
 		return -1;
 
-	if (!region->ops->ioremap)
+	nr = p_devs->avail;
+	for_each_device(dev, p_devs->p_devices, nr) {
+		if (!strncmp(dev->compatible, name, 128)) {
+			found = 1;
+			goto find;
+		}
+	}
+
+find:
+	if (!found)
 		return -1;
 
-	if (!machine->gstage_pgdp)
-		return -1;
+	region->hpa_base = dev->base;
 
-	return region->ops->ioremap((unsigned long *)machine->gstage_pgdp, gpa,
-				    size);
+	if (pt) {
+		if (!region->ops->ioremap)
+			return -1;
+
+		if (!machine->gstage_pgdp)
+			return -1;
+
+		return region->ops->
+		    ioremap((unsigned long *)machine->gstage_pgdp, gpa, size);
+	}
+
+	return 0;
 }
 
 int machine_finialize(struct virt_machine *machine)
 {
 	/* uart gstage ioremap */
-	uart_gstage_ioremap(machine);
+	uart_device_emulate(machine, "qemu-8250", 0);
 
 	return 0;
 }

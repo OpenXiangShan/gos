@@ -2,37 +2,31 @@
 #include "asm/csr.h"
 #include "print.h"
 #include "machine.h"
+#include "vcpu_insn.h"
 
 static int gstage_page_fault(struct vcpu *vcpu, unsigned long reason)
 {
 	unsigned long fault_addr;
 	unsigned long htval, stval;
-	struct memory_region *region;
 	unsigned long htinst;
+	struct virt_cpu_context *guest_ctx = &vcpu->cpu_ctx.guest_context;
 
 	htval = read_csr(CSR_HTVAL);
 	stval = read_csr(CSR_STVAL);
 	htinst = read_csr(CSR_HTINST);
 
 	fault_addr = (htval << 2) | (stval & 0x3);
-	print("%s %d fault_addr:0x%lx htinst:0x%lx\n", __FUNCTION__, __LINE__,
-	      fault_addr, htinst);
-
-	region = find_memory_region(&vcpu->machine, fault_addr);
-	if (!region) {
-		print("%s -- cannot find region, fault_addr:0x%lx\n",
-		      __FUNCTION__, fault_addr);
-		return -1;
-	}
+	//print("%s %d fault_addr:0x%lx htinst:0x%lx\n", __FUNCTION__, __LINE__,
+	//      fault_addr, htinst);
 
 	switch (reason) {
 	case EXC_LOAD_GUEST_PAGE_FAULT:
-		print("EXC_LOAD_GUEST_PAGE_FAULT region->base:0x%lx\n",
-		      region->start);
+		vcpu_mmio_load(vcpu, fault_addr, htinst);
+		guest_ctx->sepc += 4;
 		return 1;
 	case EXC_STORE_GUEST_PAGE_FAULT:
-		print("EXC_STORE_GUEST_PAGE_FAULT region->base:0x%lx\n",
-		      region->start);
+		vcpu_mmio_store(vcpu, fault_addr, htinst);
+		guest_ctx->sepc += 4;
 		return 1;
 	}
 

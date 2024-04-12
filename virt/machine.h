@@ -11,9 +11,12 @@ enum {
 	VIRT_SRAM,
 };
 
+struct memory_region;
 struct memory_region_ops {
-	void (*write)(unsigned long addr, unsigned long val, unsigned int len);
-	unsigned long (*read)(unsigned long addr, unsigned int len);
+	void (*write)(struct memory_region * region, unsigned long addr,
+		      unsigned long val, unsigned int len);
+	unsigned long (*read)(struct memory_region * region, unsigned long addr,
+			      unsigned int len);
 	int (*ioremap)(unsigned long *pgdp, unsigned long gpa,
 		       unsigned int size);
 };
@@ -28,6 +31,7 @@ struct memory_region {
 	int id;
 	unsigned long start;
 	unsigned long end;
+	unsigned long hpa_base;
 	const struct memory_region_ops *ops;
 };
 

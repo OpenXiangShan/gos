@@ -1,13 +1,15 @@
 #include "machine.h"
 #include "print.h"
 
-static void memory_write(unsigned long addr, unsigned long val,
+static void memory_write(struct memory_region *region,
+			 unsigned long addr, unsigned long val,
 			 unsigned int len)
 {
 	print("%s %d\n", __FUNCTION__, __LINE__);
 }
 
-static unsigned long memory_read(unsigned long addr, unsigned int len)
+static unsigned long memory_read(struct memory_region *region,
+				 unsigned long addr, unsigned int len)
 {
 	print("%s %d\n", __FUNCTION__, __LINE__);
 
@@ -27,12 +29,14 @@ int create_memory_device(struct virt_machine *machine, int id,
 	return 0;
 }
 
-static void sram_write(unsigned long addr, unsigned long val, unsigned int len)
+static void sram_write(struct memory_region *region, unsigned long addr,
+		       unsigned long val, unsigned int len)
 {
 	print("%s %d\n", __FUNCTION__, __LINE__);
 }
 
-static unsigned long sram_read(unsigned long addr, unsigned int len)
+static unsigned long sram_read(struct memory_region *region,
+			       unsigned long addr, unsigned int len)
 {
 	print("%s %d\n", __FUNCTION__, __LINE__);
 

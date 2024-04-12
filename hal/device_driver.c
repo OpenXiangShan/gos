@@ -69,11 +69,13 @@ found:
 
 	dev->in_used = 1;
 	dev->start = base;
+	dev->base = base;
 	dev->len = entry->len;
 	dev->irqs = entry->irq;
 	dev->irq_num = entry->irq_num;
 	dev->iommu.dev_id = entry->dev_id;
 	dev->irq_domain = find_irq_domain(entry->irq_parent);
+	strcpy(dev->compatible, entry->compatible);
 	_devices.avail++;
 
 	return dev;
@@ -257,6 +259,11 @@ int ioctl(int fd, unsigned int cmd, void *arg)
 	}
 
 	return drv->ops->ioctl(cmd, arg);
+}
+
+struct devices *get_devices()
+{
+	return &_devices;
 }
 
 void walk_devices()
