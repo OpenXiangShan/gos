@@ -1,7 +1,10 @@
 #include "uart.h"
 #include "string.h"
 #include "../drivers/qemu-8250.h"
+#include "vmap.h"
+#include "asm/type.h"
 
+extern int mmu_is_on;
 static struct myGuest_uart_ops ops = { 0 };
 
 void myGuest_uart_putc(char c)
@@ -24,7 +27,15 @@ int myGuest_uart_init(struct device_init_entry *entry)
 
 	while (strncmp(device_entry->compatible, "THE END", sizeof("THE END"))) {
 		if (!strncmp(device_entry->compatible, "qemu-8250", 128)) {
-			uart_qemu_8250_init(device_entry->start, &ops);
+			if (!mmu_is_on)
+				uart_qemu_8250_init(device_entry->start, &ops);
+			else {
+				void *base =
+				    ioremap((void *)device_entry->start,
+					    device_entry->len, NULL);
+				uart_qemu_8250_init((unsigned long)base, &ops);
+			}
+
 			return 0;
 		}
 		device_entry++;

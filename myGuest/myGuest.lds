@@ -2,7 +2,7 @@ OUTPUT_ARCH("riscv")
 ENTRY(__start_guest)
 SECTIONS
 {
-	. = 0x90000000,	
+	. = 0x80000000,	
 	.text.boot : { *(.text.boot) }
 	.text : { *(.text) }
 	.data : { 

@@ -86,18 +86,21 @@ MYGUEST_ENTRY_DIR = $(MYGUEST_DIR)/entry
 MYGUEST_CORE_DIR = $(MYGUEST_DIR)/core
 MYGUEST_DRIVERS_DIR = $(MYGUEST_DIR)/drivers
 MYGUEST_LIB_DIR = $(MYGUEST_DIR)/lib
+MYGUEST_MM_DIR = $(MYGUEST_DIR)/mm
 
 GUEST_ENTRY_C_FILES = $(wildcard $(MYGUEST_ENTRY_DIR)/*.c)
 GUEST_ENTRY_ASM_FILES = $(wildcard $(MYGUEST_ENTRY_DIR)/*.S)
 GUEST_CORE_C_FILES = $(wildcard $(MYGUEST_CORE_DIR)/*.c)
 GUEST_DRIVERS_C_FILES = $(wildcard $(MYGUEST_DRIVERS_DIR)/*.c)
 GUEST_LIB_C_FILES = $(wildcard $(MYGUEST_LIB_DIR)/*.c)
+GUEST_MM_C_FILES = $(wildcard $(MYGUEST_MM_DIR)/*.c)
 
 MYGUEST_OBJ_FILES = $(GUEST_ENTRY_ASM_FILES:$(MYGUEST_ENTRY_DIR)/%.S=$(MYGUEST_ENTRY_DIR)/%_s.o)
 MYGUEST_OBJ_FILES += $(GUEST_ENTRY_C_FILES:$(MYGUEST_ENTRY_DIR)/%.c=$(MYGUEST_ENTRY_DIR)/%_c.o)
 MYGUEST_OBJ_FILES += $(GUEST_LIB_C_FILES:$(MYGUEST_LIB_DIR)/%.c=$(MYGUEST_LIB_DIR)/%_c.o)
 MYGUEST_OBJ_FILES += $(GUEST_CORE_C_FILES:$(MYGUEST_CORE_DIR)/%.c=$(MYGUEST_CORE_DIR)/%_c.o)
 MYGUEST_OBJ_FILES += $(GUEST_DRIVERS_C_FILES:$(MYGUEST_DRIVERS_DIR)/%.c=$(MYGUEST_DRIVERS_DIR)/%_c.o)
+MYGUEST_OBJ_FILES += $(GUEST_MM_C_FILES:$(MYGUEST_MM_DIR)/%.c=$(MYGUEST_MM_DIR)/%_c.o)
 
 myGuest: $(MYGUEST_OBJ_FILES)
 	mkdir -p $(BUILD_DIR)
@@ -117,6 +120,9 @@ $(MYGUEST_DRIVERS_DIR)/%_c.o: $(MYGUEST_DRIVERS_DIR)/%.c
 	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
 
 $(MYGUEST_LIB_DIR)/%_c.o: $(MYGUEST_LIB_DIR)/%.c
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+
+$(MYGUEST_MM_DIR)/%_c.o: $(MYGUEST_MM_DIR)/%.c
 	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
 
 # build sbi
@@ -244,7 +250,7 @@ run-aia:
         -bios out/Image.bin \
 
 run-debug:
-	./qemu-system-riscv64-new -nographic \
+	./qemu-system-riscv64-new2 -nographic \
         -machine virt,aia=aplic-imsic -smp 2 \
 	-cpu rv64,sv39=on -m 8G \
         -bios out/Image.bin \

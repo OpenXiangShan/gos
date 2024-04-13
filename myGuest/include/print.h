@@ -3,4 +3,6 @@
 
 int myGuest_print(const char *fmt, ...);
 
+#define print myGuest_print
+
 #endif

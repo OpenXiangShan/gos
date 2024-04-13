@@ -12,4 +12,6 @@ struct device_init_entry {
 	void *data;
 };
 
+void create_devices(void);
+
 #endif

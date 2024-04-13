@@ -11,7 +11,7 @@
 #include "device.h"
 
 static struct virt_machine_memmap virt_memmap[] = {
-	[VIRT_MEMORY] = { 0x90000000, 0x1000000 },
+	[VIRT_MEMORY] = { 0x80000000, 0x1000000 },
 	[VIRT_UART] = { 0x310b0000, 0x10000 },
 	[VIRT_SRAM] = { 0x1000, 0x1000 },
 };
@@ -155,7 +155,7 @@ find:
 int machine_finialize(struct virt_machine *machine)
 {
 	/* uart gstage ioremap */
-	uart_device_emulate(machine, "qemu-8250", 0);
+	uart_device_emulate(machine, "qemu-8250", 1);
 
 	return 0;
 }
