@@ -6,6 +6,8 @@
 #define U64_MAX (~(0ULL))
 #define BITS_PER_LONG 64
 
+#define INT_MAX (~(0U))
+
 #define IMSIC_MMIO_PAGE_SHIFT           12
 #define IMSIC_MMIO_PAGE_SZ              (1UL << IMSIC_MMIO_PAGE_SHIFT)
 #define IMSIC_MMIO_PAGE_LE              0x00
@@ -37,5 +39,7 @@ typedef signed int s32;
 typedef unsigned long long u64;
 typedef signed long long s64;
 typedef unsigned char u8;
+typedef unsigned short u16;
+typedef signed short s16;
 
 #endif

@@ -4,6 +4,7 @@ obj-y += timer/
 obj-y += dma-mapping/
 obj-y += dmac/
 obj-y += task/
+obj-y += devicetree/
 obj-y += device_driver.o
 obj-y += event.o
 obj-y += cpu.o

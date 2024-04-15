@@ -173,15 +173,26 @@ static int mmu_direct_page_mapping()
 {
 	pgprot_t pgprot;
 	unsigned long phy_start = get_phy_start();
-	unsigned long phy_end = get_phy_end();
-	unsigned int size = phy_end - phy_start;
-	unsigned long virt_addr = PAGE_OFFSET;
+	struct memory_block *mm_blocks = get_mm_blocks();
+	int n, i, ret = 0;
 
 	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
 
 	va_pa_offset = PAGE_OFFSET - phy_start;
 
-	return mmu_page_mapping(phy_start, virt_addr, size, pgprot);
+	n = mm_blocks->avail;
+	for (i = 0; i < n; i++) {
+		unsigned long start;
+		unsigned int size;
+
+		start = mm_blocks->memory_block_start[i];
+		size = mm_blocks->memory_block_size[i];
+		ret = mmu_page_mapping(start, phy_to_virt(start), size, pgprot);
+		if (ret)
+			return ret;
+	}
+
+	return 0;
 }
 
 static int mmu_hw_page_mapping(struct device_init_entry *hw)
@@ -192,6 +203,21 @@ static int mmu_hw_page_mapping(struct device_init_entry *hw)
 	unsigned int size = phy_end - phy_start;
 	unsigned long virt_start = (unsigned long)0x80000000;
 
+	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
+
+	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
+}
+
+extern char dtb_bin[];
+static int mmu_dtb_page_mapping()
+{
+	pgprot_t pgprot;
+	extern unsigned long __dtb_payload_start;
+	extern unsigned long __dtb_payload_end;
+	unsigned long phy_start = (unsigned long)dtb_bin;
+	unsigned size =
+	    (char *)&__dtb_payload_end - (char *)&__dtb_payload_start;
+	unsigned long virt_start = (unsigned long)FIXMAP_DTB_START;
 	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
 
 	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
@@ -252,6 +278,7 @@ int paging_init(struct device_init_entry *hw)
 	mmu_code_page_mapping();
 	mmu_direct_page_mapping();
 	mmu_hw_page_mapping(hw);
+	mmu_dtb_page_mapping();
 
 	print("mmu page mapping finish...\n");
 

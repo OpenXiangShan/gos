@@ -6,6 +6,11 @@ extern int pgtable_l4_enabled;
 
 extern unsigned long va_pa_offset;
 
+#define FIXMAP_START 0xffffffc6fea00000
+#define FIXMAP_LEN (6 * 1024 * 1024)
+
+#define FIXMAP_DTB_START FIXMAP_START
+
 #define PAGE_ALIGN(addr) (((addr) + PAGE_SIZE - 1) & PAGE_MASK)
 
 #define N_PAGE(size)     size % PAGE_SIZE == 0 ? size/PAGE_SIZE : (size/PAGE_SIZE + 1)

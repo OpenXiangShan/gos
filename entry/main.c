@@ -11,6 +11,7 @@
 #include <cpu.h>
 #include <percpu.h>
 #include <task.h>
+#include <devicetree.h>
 
 extern const char logo[];
 
@@ -28,6 +29,8 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 	paging_init(hw);
 
 	early_print_setup(hw);
+
+	parse_dtb();
 
 	percpu_init();
 

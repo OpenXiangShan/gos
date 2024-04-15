@@ -2,7 +2,7 @@
 #define _MM_H
 
 #include <device.h>
-#include <pgtable.h>
+#include <asm/pgtable.h>
 
 int paging_init(struct device_init_entry *hw);
 void enable_mmu(int on);
