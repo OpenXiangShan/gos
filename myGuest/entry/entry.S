@@ -5,3 +5,7 @@ __start_guest:
 	jal start_guest
 1:
 	j 1b
+
+.section ".data.stack"
+stack:
+	.skip 4096

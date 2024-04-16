@@ -20,7 +20,7 @@ static int vcpu_start(void *data)
 
 static int cmd_vcpu_run_handler(int argc, char *argv[], void *priv)
 {
-	create_task("vcpu", vcpu_start, NULL, 1, NULL, 0);
+	create_task("vcpu", vcpu_start, NULL, 0, NULL, 0);
 
 	return 0;
 }

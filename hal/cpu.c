@@ -11,6 +11,8 @@
 #include "spinlocks.h"
 #include "cpu.h"
 
+extern void do_exception_vector(void);
+
 spinlock_t cpumask_lock = __SPINLOCK_INITIALIZER;
 
 unsigned long online_cpu_mask = 0;

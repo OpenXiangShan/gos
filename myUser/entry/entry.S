@@ -5,3 +5,7 @@ __start_user:
 	jal start_user
 1:
 	j 1b
+
+.section ".data.stack"
+stack:
+	.skip 4096

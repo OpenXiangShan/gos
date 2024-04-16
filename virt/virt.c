@@ -129,7 +129,7 @@ int vcpu_run(struct vcpu *vcpu, char *cmd)
 
 		vcpu_switch_to(&vcpu->cpu_ctx);
 		vcpu_process_vm_exit(vcpu);
-
+		
 		enable_local_irq();
 	}
 

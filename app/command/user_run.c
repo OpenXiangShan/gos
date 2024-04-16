@@ -35,7 +35,7 @@ static int cmd_user_run_handler(int argc, char *argv[], void *priv)
 	}
 	command = argv[0];
 
-	create_task("user", user_task_start, command, 1, NULL, 0);
+	create_task("user", user_task_start, command, 0, NULL, 0);
 
 	return 0;
 }

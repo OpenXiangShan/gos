@@ -106,7 +106,7 @@ do_exception_vector:
 	ld x29, PT_T4(sp)
 	ld x30, PT_T5(sp)
 	ld x31, PT_T6(sp)
-
+	
 	ld sp,  PT_SP(sp)
 	
 	sret	

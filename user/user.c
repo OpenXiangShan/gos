@@ -100,6 +100,8 @@ int user_mode_run(struct user *user, char *cmd)
 			  user->user_share_memory_user_va,
 			  USER_SPACE_SHARE_MEMORY_SIZE);
 
+	__asm__ __volatile("sfence.vma":::"memory");
+
 	if (-1 ==
 	    add_user_space_memory(user, user->user_share_memory_user_va,
 				  USER_SPACE_SHARE_MEMORY_SIZE)) {

@@ -3,5 +3,5 @@ struct riscv_hart {
 };
 
 struct riscv_hart riscv_hart = {
-	2,
+	4,
 };

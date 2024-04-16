@@ -4,6 +4,7 @@
 #include <asm/sbi.h>
 #include <irq.h>
 #include "task.h"
+#include "asm/pgtable.h"
 
 extern void do_exception_vector(void);
 
@@ -20,6 +21,7 @@ void panic()
 
 void show_regs(struct pt_regs *regs)
 {
+	print("cpu_id:%d\n", sbi_get_cpu_id());
 	print("sepc: 0x%lx ra : 0x%lx sp : 0x%lx\n", regs->sepc, regs->ra,
 	      regs->sp);
 	print(" gp : 0x%lx tp : 0x%lx t0 : 0x%lx\n", regs->gp, regs->tp,
@@ -43,12 +45,21 @@ void show_regs(struct pt_regs *regs)
 	print(" t5 : 0x%lx t6 : 0x%lx\n", regs->t5, regs->t6);
 }
 
+extern int mmu_is_on;
 static void do_trap_error(struct pt_regs *regs, const char *str)
 {
 	print("Oops - %s\n", str);
 	show_regs(regs);
-	print("sstatus:0x%lx  sbadaddr:0x%lx  scause:0x%lx\n",
-	      regs->sstatus, regs->sbadaddr, regs->scause);
+
+	if (!mmu_is_on)
+		print("sstatus:0x%lx  sbadaddr:0x%lx  scause:0x%lx\n",
+		      regs->sstatus, regs->sbadaddr, regs->scause);
+	else
+		print
+		    ("sstatus:0x%lx  sbadaddr:0x%lx sbadaddr(pa):0x%lx scause:0x%lx\n",
+		     regs->sstatus, regs->sbadaddr, virt_to_phy(regs->sbadaddr),
+		     regs->scause);
+
 	panic();
 }
 
