@@ -16,7 +16,7 @@
 #define PLIC_MCLAIM(hart) (0x200004 + (hart) * 0x1000)
 #define PLIC_MCOMPLETE(hart) (0x200004 + (hart) * 0x1000)
 
-unsigned int base_address;
+unsigned long base_address;
 
 static struct irq_domain plic_irq_domain;
 
@@ -27,7 +27,7 @@ struct plic_priv_data {
 
 static void plic_set_prority(int hwirq, int pro)
 {
-	unsigned int reg = base_address + PLIC_PRIORITY(hwirq);
+	unsigned long reg = base_address + PLIC_PRIORITY(hwirq);
 
 	writel(reg, 1);
 }
@@ -36,7 +36,7 @@ static void plic_enable_irq(int cpu, int hwirq, int enable)
 {
 	unsigned int hwirq_mask = 1 << (hwirq % 32);
 	int hart = CPU_TO_HART(cpu);
-	unsigned int reg = base_address + PLIC_MENABLE(hart) + 4 * (hwirq / 32);
+	unsigned long reg = base_address + PLIC_MENABLE(hart) + 4 * (hwirq / 32);
 
 	if (enable)
 		writel(reg, readl(reg) | hwirq_mask);
@@ -48,7 +48,7 @@ static void plic_handle_irq()
 {
 	int hwirq;
 	int hart = CPU_TO_HART(0);
-	unsigned int claim_reg = base_address + PLIC_MCLAIM(hart);
+	unsigned long claim_reg = base_address + PLIC_MCLAIM(hart);
 
 	csr_clear(sie, SIE_SEIE);
 
