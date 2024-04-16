@@ -73,8 +73,9 @@ int user_mode_run(struct user *user, char *cmd)
 	}
 	user->user_code_pa = virt_to_phy(user->user_code_va);
 
-	print("user space user mode page mapping -- va: 0x%lx --> pa: 0x%lx\n",
-	      user->user_code_user_va, user->user_code_pa);
+	print
+	    ("user space user mode page mapping -- va: 0x%lx --> pa: 0x%lx, size:0x%x\n",
+	     user->user_code_user_va, user->user_code_pa, user_bin_size);
 	user_page_mapping(user->user_code_pa, user->user_code_user_va,
 			  user_bin_size);
 

@@ -16,7 +16,7 @@ const unsigned char hex_tab[] =
 	'f'
 };
 
-spinlock_t _lock = __SPINLOCK_INITIALIZER;
+spinlock_t _lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
 
 #define  MAX_NUMBER_BYTES  64
 #define va_start(v,l) __builtin_va_start(v,l)
