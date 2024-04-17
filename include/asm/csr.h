@@ -36,6 +36,42 @@
 #define SCAUSE_EC (0xf)
 
 //#define SATP_MODE_39 (1UL << 63)
+/* symbolic CSR names: */
+#define CSR_CYCLE               0xc00
+#define CSR_TIME                0xc01
+#define CSR_INSTRET             0xc02
+#define CSR_HPMCOUNTER3         0xc03
+#define CSR_HPMCOUNTER4         0xc04
+#define CSR_HPMCOUNTER5         0xc05
+#define CSR_HPMCOUNTER6         0xc06
+#define CSR_HPMCOUNTER7         0xc07
+#define CSR_HPMCOUNTER8         0xc08
+#define CSR_HPMCOUNTER9         0xc09
+#define CSR_HPMCOUNTER10        0xc0a
+#define CSR_HPMCOUNTER11        0xc0b
+#define CSR_HPMCOUNTER12        0xc0c
+#define CSR_HPMCOUNTER13        0xc0d
+#define CSR_HPMCOUNTER14        0xc0e
+#define CSR_HPMCOUNTER15        0xc0f
+#define CSR_HPMCOUNTER16        0xc10
+#define CSR_HPMCOUNTER17        0xc11
+#define CSR_HPMCOUNTER18        0xc12
+#define CSR_HPMCOUNTER19        0xc13
+#define CSR_HPMCOUNTER20        0xc14
+#define CSR_HPMCOUNTER21        0xc15
+#define CSR_HPMCOUNTER22        0xc16
+#define CSR_HPMCOUNTER23        0xc17
+#define CSR_HPMCOUNTER24        0xc18
+#define CSR_HPMCOUNTER25        0xc19
+#define CSR_HPMCOUNTER26        0xc1a
+#define CSR_HPMCOUNTER27        0xc1b
+#define CSR_HPMCOUNTER28        0xc1c
+#define CSR_HPMCOUNTER29        0xc1d
+#define CSR_HPMCOUNTER30        0xc1e
+#define CSR_HPMCOUNTER31        0xc1f
+#define CSR_MCOUNTEREN		0x306
+
+#define CSR_SSCOUNTOVF          0xda0
 
 /* Supervisor Trap Setup */
 #define CSR_SSTATUS			0x100

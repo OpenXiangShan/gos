@@ -340,6 +340,9 @@ void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 	sbi_get_hw_info(ctx);
 
 	write_csr(mie, MIP_MSIP | MIP_MEIP | MIP_MTIP);
+	sbi_print("==============>sbi_mcounter: 0x%x \n",read_csr(0x306));
+	write_csr(0x306, 0xffff);
+	sbi_print("==============<sbi_mcounter: 0x%x \n",read_csr(0x306));
 
 	delegate_traps();
 }

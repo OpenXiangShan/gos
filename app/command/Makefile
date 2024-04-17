@@ -11,3 +11,5 @@ obj-y += spinlock_test.o
 obj-y += vcpu_run.o
 obj-y += user_run.o
 obj-y += page_tlb_test.o
+obj-y += read_csr.o
+obj-y += write_csr.o

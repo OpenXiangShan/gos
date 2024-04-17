@@ -28,6 +28,7 @@ int do_user_exception(struct user *user)
 	unsigned long scause;
 
 	scause = read_csr(CSR_SCAUSE);
+	print("-----------< scause: 0x%lx \n", scause);
 
 	switch (scause) {
 	case EXC_SYSCALL:
