@@ -147,6 +147,15 @@ static int __mmu_page_mapping(unsigned long *_pgdp, unsigned long phy,
 	return 0;
 }
 
+unsigned long *mmu_get_pte(unsigned long virt_addr)
+{
+	unsigned long *pte;
+
+	pte = mmu_pt_walk_fetch(pgdp, virt_addr, PGDIR_SHIFT, 1);
+
+	return pte;
+}
+
 int mmu_page_mapping_lazy(unsigned long virt, unsigned int size,
 			  pgprot_t pgprot)
 {
@@ -317,6 +326,8 @@ int do_page_fault(unsigned long addr)
 	unsigned long phy_start;
 	unsigned long virt_start;
 	pgprot_t pgprot;
+
+	print("%s -- fault addr:0x%lx\n", __FUNCTION__, addr);
 
 	if (addr >= VMAP_START && addr <= VMAP_END) {
 		virt_start = addr;
