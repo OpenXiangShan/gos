@@ -63,6 +63,12 @@ struct user_memory_region {
 	unsigned long end;
 };
 
+struct user_run_params {
+	char command[64];
+	int argc;
+	char argv[16][64];
+};
+
 struct user {
 	struct user_mode_cpu_context cpu_context;
 	unsigned long user_code_va;
@@ -77,7 +83,7 @@ struct user {
 };
 
 struct user *user_create(void);
-int user_mode_run(struct user *user, char *cmd);
+int user_mode_run(struct user *user, struct user_run_params *params);
 void user_mode_switch_to(struct user_mode_cpu_context *ctx);
 int user_page_mapping(unsigned long phy, unsigned long virt, unsigned int size);
 

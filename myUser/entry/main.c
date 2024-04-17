@@ -2,8 +2,8 @@
 #include "malloc.h"
 #include "command.h"
 
-void start_user(char *cmd)
+void start_user(struct user_run_params *params)
 {
 	command_init();
-	do_command(cmd);
+	do_command(params);
 }

@@ -4,6 +4,12 @@
 #define COMMAND_INIT_TABLE __command_init_table
 #define COMMAND_INIT_TABLE_END __command_init_table_end
 
+struct user_run_params {
+	char command[64];
+	int argc;
+	char argv[16][64];
+};
+
 struct command {
 	char cmd[64];
 	int (*handler)(int argc, char *argv[], void *priv);
@@ -38,6 +44,6 @@ struct app_command_entry {
 void walk_and_print_command(void);
 int register_command(const struct command *command);
 int command_init(void);
-int do_command(char *cmd);
+int do_command(struct user_run_params *params);
 
 #endif

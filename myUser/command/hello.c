@@ -4,7 +4,10 @@
 
 static int user_cmd_hello_handler(int argc, char *argv[], void *priv)
 {
-	printf("Hello MyUesr!!\n");
+	printf("Hello MyUesr!! argc:%d\n", argc);
+
+	for (int i = 0; i < argc; i++)
+		printf("cmd%d: %s\n", i, argv[i]);
 
 	return 0;
 }

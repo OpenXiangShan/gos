@@ -46,7 +46,7 @@ struct user *user_create(void)
 	return user;
 }
 
-int user_mode_run(struct user *user, char *cmd)
+int user_mode_run(struct user *user, struct user_run_params *params)
 {
 	extern unsigned long __user_payload_start;
 	extern unsigned long __user_payload_end;
@@ -113,8 +113,9 @@ int user_mode_run(struct user *user, char *cmd)
 	}
 
 	memcpy((char *)user->user_code_va, user_bin_ptr, user_bin_size);
-	if (cmd)
-		strcpy((char *)user->user_share_memory_va, cmd);
+	if (params)
+		memcpy((char *)user->user_share_memory_va, (void *)params,
+		       sizeof(struct user_run_params));
 
 	/* Update user mode entry and param */
 	u_context->sepc = user->user_code_user_va;

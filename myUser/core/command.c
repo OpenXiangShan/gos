@@ -83,17 +83,24 @@ void walk_and_print_command()
 	}
 }
 
-int do_command(char *cmd)
+int do_command(struct user_run_params *params)
 {
 	int nr = _commands.avail, argc = 0;
 	struct command_info *entry;
 	char *argv[16];
+	char *command;
+
+	command = params->command;
+	argc = params->argc;
+
+	for (int i = 0; i < argc; i++)
+		argv[i] = params->argv[i];
 
 	for_each_command(entry, _commands.p_commands, nr) {
 		if (!entry->in_used)
 			continue;
 
-		if (!strncmp(entry->command->cmd, cmd, 64)) {
+		if (!strncmp(entry->command->cmd, command, 64)) {
 			if (entry->command->handler) {
 				entry->command->handler(argc, argv,
 							entry->command->priv);
