@@ -147,8 +147,7 @@ static int cmd_page_tlb_test_handler(int argc, char *argv[], void *priv)
 		page_table_access_bit_test();
 	} else if (!strncmp(argv[0], "sfence_all", sizeof("sfence_all"))) {
 		page_table_sfence_test();
-	}
-	else
+	} else
 		Usage();
 
 	return 0;

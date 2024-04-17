@@ -36,7 +36,8 @@ static void plic_enable_irq(int cpu, int hwirq, int enable)
 {
 	unsigned int hwirq_mask = 1 << (hwirq % 32);
 	int hart = CPU_TO_HART(cpu);
-	unsigned long reg = base_address + PLIC_MENABLE(hart) + 4 * (hwirq / 32);
+	unsigned long reg =
+	    base_address + PLIC_MENABLE(hart) + 4 * (hwirq / 32);
 
 	if (enable)
 		writel(reg, readl(reg) | hwirq_mask);
