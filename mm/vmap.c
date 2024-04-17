@@ -132,6 +132,7 @@ void *vmem_alloc(unsigned int size, int gfp)
 		if (-1 ==
 		    mmu_page_mapping(phys_addr, vmap_addr, PAGE_SIZE, pgprot)) {
 			print("%s -- page mapping failed\n", __FUNCTION__);
+			vmap_free((void *)vmap_addr, size);
 			return NULL;
 		}
 		vmap_addr += PAGE_SIZE;
@@ -143,4 +144,22 @@ void *vmem_alloc(unsigned int size, int gfp)
 void vmem_free(void *addr, unsigned int size)
 {
 	return iounmap(addr, size);
+}
+
+void *vmem_alloc_lazy(unsigned int size, int gfp)
+{
+	pgprot_t pgprot;
+	unsigned long vmap_addr;
+
+	vmap_addr = (unsigned long)vmap_alloc(size);
+	if (!vmap_addr) {
+		print("%s -- vmap out of memory!\n", __FUNCTION__);
+		return NULL;
+	}
+
+	pgprot = __pgprot(_PAGE_READ | _PAGE_WRITE);
+
+	mmu_page_mapping_lazy(vmap_addr, size, pgprot);
+
+	return (void *)vmap_addr;
 }

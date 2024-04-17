@@ -5,6 +5,7 @@
 #include <irq.h>
 #include "task.h"
 #include "asm/pgtable.h"
+#include "mm.h"
 
 extern void do_exception_vector(void);
 
@@ -56,9 +57,8 @@ static void do_trap_error(struct pt_regs *regs, const char *str)
 		      regs->sstatus, regs->sbadaddr, regs->scause);
 	else
 		print
-		    ("sstatus:0x%lx  sbadaddr:0x%lx sbadaddr(pa):0x%lx scause:0x%lx\n",
-		     regs->sstatus, regs->sbadaddr, virt_to_phy(regs->sbadaddr),
-		     regs->scause);
+		    ("sstatus:0x%lx  sbadaddr:0x%lx scause:0x%lx\n",
+		     regs->sstatus, regs->sbadaddr, regs->scause);
 
 	panic();
 }
@@ -70,36 +70,36 @@ int name(struct pt_regs *regs, const char *str)				\
 	return 0;            \
 }
 
-DO_ERROR_INFO(do_trap_unknown);
-DO_ERROR_INFO(do_trap_insn_misaligned);
-DO_ERROR_INFO(do_trap_insn_fault);
-DO_ERROR_INFO(do_trap_insn_illegal);
-DO_ERROR_INFO(do_trap_load_misaligned);
-DO_ERROR_INFO(do_trap_load_fault);
-DO_ERROR_INFO(do_trap_store_misaligned);
-DO_ERROR_INFO(do_trap_store_fault);
-DO_ERROR_INFO(do_trap_ecall_u);
-DO_ERROR_INFO(do_trap_ecall_s);
-DO_ERROR_INFO(do_trap_break);
-DO_ERROR_INFO(do_page_fault);
+DO_ERROR_INFO(do_trap_unknown_info);
+DO_ERROR_INFO(do_trap_insn_misaligned_info);
+DO_ERROR_INFO(do_trap_insn_fault_info);
+DO_ERROR_INFO(do_trap_insn_illegal_info);
+DO_ERROR_INFO(do_trap_load_misaligned_info);
+DO_ERROR_INFO(do_trap_load_fault_info);
+DO_ERROR_INFO(do_trap_store_misaligned_info);
+DO_ERROR_INFO(do_trap_store_fault_info);
+DO_ERROR_INFO(do_trap_ecall_u_info);
+DO_ERROR_INFO(do_trap_ecall_s_info);
+DO_ERROR_INFO(do_trap_break_info);
+DO_ERROR_INFO(do_page_fault_info);
 
 static struct fault_info fault_info[] = {
-	{ do_trap_insn_misaligned, "Instruction address misaligned" },
-	{ do_trap_insn_fault, "Instruction access fault" },
-	{ do_trap_insn_illegal, "Illegal instruction" },
-	{ do_trap_break, "Breakpoint" },
-	{ do_trap_load_misaligned, "Load address misaligned" },
-	{ do_trap_load_fault, "Load access fault" },
-	{ do_trap_store_misaligned, "Store/AMO address misaligned" },
-	{ do_trap_store_fault, "Store/AMO access fault" },
-	{ do_trap_ecall_u, "Environment call from U-mode" },
-	{ do_trap_ecall_s, "Environment call from S-mode" },
-	{ do_trap_unknown, "unknown 10" },
-	{ do_trap_unknown, "unknown 11" },
-	{ do_page_fault, "Instruction page fault" },
-	{ do_page_fault, "Load page fault" },
-	{ do_trap_unknown, "unknown 14" },
-	{ do_page_fault, "Store/AMO page fault" },
+	{ do_trap_insn_misaligned_info, "Instruction address misaligned" },
+	{ do_trap_insn_fault_info, "Instruction access fault" },
+	{ do_trap_insn_illegal_info, "Illegal instruction" },
+	{ do_trap_break_info, "Breakpoint" },
+	{ do_trap_load_misaligned_info, "Load address misaligned" },
+	{ do_trap_load_fault_info, "Load access fault" },
+	{ do_trap_store_misaligned_info, "Store/AMO address misaligned" },
+	{ do_trap_store_fault_info, "Store/AMO access fault" },
+	{ do_trap_ecall_u_info, "Environment call from U-mode" },
+	{ do_trap_ecall_s_info, "Environment call from S-mode" },
+	{ do_trap_unknown_info, "unknown 10" },
+	{ do_trap_unknown_info, "unknown 11" },
+	{ do_page_fault_info, "Instruction page fault" },
+	{ do_page_fault_info, "Load page fault" },
+	{ do_trap_unknown_info, "unknown 14" },
+	{ do_page_fault_info, "Store/AMO page fault" },
 };
 
 static inline struct fault_info *ec_to_fault_info(unsigned int scause)
@@ -126,6 +126,10 @@ static int handle_exception(struct pt_regs *regs, unsigned long cause)
 	struct fault_info *fi;
 
 	switch (cause) {
+	case EXC_STORE_PAGE_FAULT:
+	case EXC_LOAD_PAGE_FAULT:
+		do_page_fault(regs->sbadaddr);
+		break;
 	default:
 		fi = ec_to_fault_info(cause);
 		if (fi)

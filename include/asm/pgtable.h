@@ -6,6 +6,11 @@ extern int pgtable_l4_enabled;
 
 extern unsigned long va_pa_offset;
 
+#define PAGE_OFFSET 0xffffffd800000000
+
+#define VMAP_START 0xffffffc800000000
+#define VMAP_END 0xffffffd7ffffffff
+
 #define FIXMAP_START 0xffffffc6fea00000
 #define FIXMAP_LEN (6 * 1024 * 1024)
 

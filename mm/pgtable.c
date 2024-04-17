@@ -5,8 +5,6 @@
 #include "string.h"
 #include "print.h"
 
-#define PAGE_OFFSET 0xffffffd800000000
-
 static void *pgdp = NULL;
 
 int pgtable_l4_enabled = 0;
@@ -149,6 +147,32 @@ static int __mmu_page_mapping(unsigned long *_pgdp, unsigned long phy,
 	return 0;
 }
 
+int mmu_page_mapping_lazy(unsigned long virt, unsigned int size,
+			  pgprot_t pgprot)
+{
+	unsigned int page_nr = N_PAGE(size);
+	unsigned long *pte;
+	unsigned long pte_val;
+	unsigned long virt_addr = virt;
+
+	while (page_nr--) {
+		pte =
+		    riscv_pt_walk_alloc(pgdp,
+					virt_addr, PGDIR_SHIFT, PAGE_SIZE, 1,
+					alloc_zero_page, 0);
+		if (!pte)
+			return -1;
+
+		pte_val = pgprot_val(pgprot);
+
+		*pte = pte_val;
+
+		virt_addr += PAGE_SIZE;
+	}
+
+	return 0;
+}
+
 int mmu_user_page_mapping(unsigned long phy, unsigned long virt,
 			  unsigned int size, pgprot_t pgprot)
 {
@@ -285,4 +309,30 @@ int paging_init(struct device_init_entry *hw)
 	enable_mmu(1);
 
 	return 0;
+}
+
+int do_page_fault(unsigned long addr)
+{
+	int ret = 0;
+	unsigned long phy_start;
+	unsigned long virt_start;
+	pgprot_t pgprot;
+
+	if (addr >= VMAP_START && addr <= VMAP_END) {
+		virt_start = addr;
+		if (!mmu_is_on)
+			phy_start = (unsigned long)mm_alloc(PAGE_SIZE);
+		else
+			phy_start =
+			    virt_to_phy((unsigned long)mm_alloc(PAGE_SIZE));
+
+		pgprot =
+		    __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC
+			     | _PAGE_DIRTY);
+
+		ret =
+		    mmu_page_mapping(phy_start, virt_start, PAGE_SIZE, pgprot);
+	}
+
+	return ret;
 }

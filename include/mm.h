@@ -31,6 +31,8 @@ int mmu_user_page_mapping(unsigned long phy, unsigned long virt,
 int mmu_gstage_page_mapping(unsigned long *_pgdp, unsigned long phy,
 			    unsigned long virt, unsigned int size,
 			    pgprot_t pgprot);
+int mmu_page_mapping_lazy(unsigned long virt, unsigned int size,
+			  pgprot_t pgprot);
 void *walk_pt_va_to_pa(unsigned long va);
 void mm_init(struct device_init_entry *hw);
 void *mm_alloc(unsigned int size);
@@ -39,5 +41,6 @@ unsigned long alloc_zero_page(int gfp);
 unsigned long get_phy_start(void);
 unsigned long get_phy_end(void);
 struct memory_block *get_mm_blocks(void);
+int do_page_fault(unsigned long addr);
 
 #endif
