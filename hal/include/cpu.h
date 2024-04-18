@@ -45,7 +45,7 @@ static inline void set_online_cpumask(int cpu)
 #define cpu_is_online(cpu) ((online_cpu_mask >> cpu) & 1UL)
 
 #define for_each_online_cpu(cpu) \
-	for (cpu = -1; cpu = cpumask_next(cpu, online_cpu_mask, MAX_CPU_COUNT), cpu < MAX_CPU_COUNT;)
+	for (cpu = -1; cpu = cpumask_next(cpu, online_cpu_mask, MAX_CPU_COUNT), cpu < MAX_CPU_COUNT; cpu++)
 
 struct cpu_hotplug_notifier {
 	struct list_head list;

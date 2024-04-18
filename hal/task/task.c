@@ -7,6 +7,7 @@
 #include "percpu.h"
 #include "clock.h"
 #include "list.h"
+#include "cpu.h"
 
 static DEFINE_PER_CPU(struct task_ctrl, tasks);
 static DEFINE_PER_CPU(struct task_scheduler, schedulers);
@@ -28,6 +29,36 @@ static void task_fn_wrap(void)
 	list_del(&cur_task->list);
 	sc->current_task = NULL;
 	spin_unlock(&tsk_ctl->lock);
+}
+
+void walk_task_per_cpu(int cpu)
+{
+	struct task_ctrl *tsk_ctl = &per_cpu(tasks, cpu);
+	struct task *entry;
+	int n = 0;
+
+	if (!tsk_ctl)
+		return;
+
+	print("==============cpu%d==============\n", cpu);
+	spin_lock(&tsk_ctl->lock);
+	list_for_each_entry(entry, &tsk_ctl->head, list) {
+		print("---> task%d in cpu%d\n", n++, cpu);
+		print("name: %s\n", entry->name);
+		print("task_fn: 0x%lx\n", entry->task_fn);
+		print("stack: 0x%lx\n", entry->stack);
+	}
+	spin_unlock(&tsk_ctl->lock);
+	print("\n");
+}
+
+void walk_task_all_cpu(void)
+{
+	int cpu;
+
+	for_each_online_cpu(cpu) {
+		walk_task_per_cpu(cpu);
+	}
 }
 
 int create_task(char *name, int (*fn)(void *data), void *data, int cpu,

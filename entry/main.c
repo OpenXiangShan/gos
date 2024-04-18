@@ -48,6 +48,7 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 
 	enable_local_irq();
 
+	set_online_cpumask(0);
 	//shell_init(NULL);
 	create_task("shell_init", shell_init, NULL, 0, NULL, 0);
 }

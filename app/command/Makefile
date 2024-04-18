@@ -13,3 +13,4 @@ obj-y += user_run.o
 obj-y += page_tlb_test.o
 obj-y += read_csr.o
 obj-y += write_csr.o
+obj-y += task_info.o

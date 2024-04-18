@@ -33,6 +33,8 @@ struct task_scheduler {
 	int period_in_ms;
 };
 
+void walk_task_per_cpu(int cpu);
+void walk_task_all_cpu(void);
 int percpu_tasks_init(int cpu);
 int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 		unsigned long stack, unsigned int stack_size);
