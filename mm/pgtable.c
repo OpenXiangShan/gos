@@ -322,7 +322,7 @@ int paging_init(struct device_init_entry *hw)
 
 int do_page_fault(unsigned long addr)
 {
-	int ret = 0;
+	int ret = -1;
 	unsigned long phy_start;
 	unsigned long virt_start;
 	pgprot_t pgprot;

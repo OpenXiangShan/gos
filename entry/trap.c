@@ -124,11 +124,12 @@ static inline struct fault_info *ec_to_fault_info(unsigned int scause)
 static int handle_exception(struct pt_regs *regs, unsigned long cause)
 {
 	struct fault_info *fi;
+	int ret = 0;
 
 	switch (cause) {
 	case EXC_STORE_PAGE_FAULT:
 	case EXC_LOAD_PAGE_FAULT:
-		do_page_fault(regs->sbadaddr);
+		ret = do_page_fault(regs->sbadaddr);
 		break;
 	default:
 		fi = ec_to_fault_info(cause);
@@ -140,17 +141,23 @@ static int handle_exception(struct pt_regs *regs, unsigned long cause)
 		}
 	}
 
-	return 0;
+	return ret;
 }
 
 int do_exception(struct pt_regs *regs, unsigned long scause)
 {
+	struct fault_info *fi;
+
 	if (scause & (1UL << 63)) {
 		task_scheduler_enter(regs);
 		handle_irq(scause);
 		task_scheduler_exit(regs);
 	} else {
-		handle_exception(regs, scause);
+		if (handle_exception(regs, scause)) {
+			fi = ec_to_fault_info(scause);
+			if (fi)
+				fi->fn(regs, fi->name);
+		}
 	}
 
 	return 0;
