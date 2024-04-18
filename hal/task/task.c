@@ -20,7 +20,7 @@ static void task_fn_wrap(void)
 	struct task *cur_task;
 
 	cur_task = sc->current_task;
-	if (!cur_task->task_fn)
+	if (!cur_task || !cur_task->task_fn)
 		return;
 
 	cur_task->task_fn(cur_task->data);
