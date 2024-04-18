@@ -26,7 +26,7 @@ BSP_DIR   = bsp
 MYGUEST_DIR = myGuest
 MYUSER_DIR = myUser
 
-default: clean mysbi myUser myGuest gos pack.sh
+default: clean dtb mysbi myUser myGuest gos pack.sh
 	./pack.sh
 
 fpga:
@@ -243,6 +243,9 @@ clean:
 	rm -rf $(shell find -name "*.o")
 	rm -rf $(BUILD_DIR)
 	rm -rf out
+dtb:
+	mkdir -p build
+	dtc -O dtb -I dts -o build/input.dtb input.dts
 	
 run:
 	./qemu-system-riscv64 -nographic \

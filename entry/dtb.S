@@ -6,5 +6,5 @@
 .align 12
 __dtb_payload_start:
 dtb_bin:
-	.incbin "input.dtb"
+	.incbin "build/input.dtb"
 __dtb_payload_end:
