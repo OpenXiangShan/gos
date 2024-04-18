@@ -68,23 +68,23 @@ void walk_and_print_command()
 void exec_command(char *input)
 {
 	char *tmp = input;
+	char command[128] = { 0 };
+	char params[128] = { 0 };
 	char *cmd_tmp, *arg_tmp, **argv_tmp, *arg_start;
 	struct command_info *entry;
 	int nr = _commands.avail;
 	int argc = 0;
 	char *cmd;
 	char *args;
-	char *argv[16];
-	char *buffer;
+	char *argv[16] = { 0 };
 	int is_arg = 0;
+	int n_cmd = 0, n_par = 0;
 
 	if (*tmp == 0)
 		return;
 
-	buffer = (char *)mm_alloc(PAGE_SIZE);
-	memset(buffer, 0, PAGE_SIZE);
-	cmd = buffer;
-	args = buffer + 64;
+	cmd = command;
+	args = params;
 
 	cmd_tmp = cmd;
 	arg_tmp = args;
@@ -97,22 +97,34 @@ void exec_command(char *input)
 		arg_start = arg_tmp;
 		while (*tmp != ' ' && *tmp != 0) {
 			if (is_arg) {
+				if (n_par == 128) {
+					*(arg_tmp - 1) = 0;
+					goto next;
+				}
 				*arg_tmp++ = *tmp;
+				n_par++;
 			} else {
+				if (n_cmd == 128) {
+					*(cmd_tmp - 1) = 0;
+					goto next;
+				}
 				*cmd_tmp++ = *tmp;
 				*cmd_tmp = 0;
+				n_cmd++;
 			}
-
+next:
 			tmp++;
 		}
 
 		if (is_arg) {
+			if (argc == 16)
+				goto next_arg;
 			argc++;
 			*arg_tmp++ = 0;
 			*argv_tmp++ = arg_start;
 		} else
 			is_arg = 1;
-
+next_arg:
 		while (*tmp == ' ')
 			tmp++;
 	}
@@ -121,20 +133,18 @@ void exec_command(char *input)
 		if (!entry->in_used)
 			continue;
 
-		if (!strncmp(entry->command->cmd, cmd, 64)) {
+		if (!strncmp(entry->command->cmd, cmd, 128)) {
 			if (entry->command->handler) {
 				entry->command->handler(argc, argv,
 							entry->command->priv);
 				command_save_into_history(cmd);
 			}
-			goto free_mm;
+			return;
 		}
 	}
 
 	print("can not find command: %s\n", cmd);
 
-free_mm:
-	mm_free(buffer, PAGE_SIZE);
 	return;
 }
 

@@ -107,6 +107,9 @@ int strncmp(const char *cs, const char *ct, int count)
 {
 	unsigned char c1, c2;
 
+	if (!cs || !ct)
+		return -1;
+
 	while (count) {
 		c1 = *cs++;
 		c2 = *ct++;

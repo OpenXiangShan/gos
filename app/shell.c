@@ -73,6 +73,7 @@ run_shell:
 				exec_command(shell_command);
 				set_last_cmd_pos();
 				print("Shell >> ");
+				memset(shell_command, 0, PAGE_SIZE);
 				tmp = shell_command;
 			} else if (buf[i] == 127
 				   || buf[i] == 8 /* Backspace */ ) {
@@ -133,6 +134,7 @@ run_shell:
 	}
 
 	mm_free(shell_command, PAGE_SIZE);
+	shell_command = NULL;
 
 	return 0;
 }
