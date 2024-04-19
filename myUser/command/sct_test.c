@@ -2,6 +2,7 @@
 #include "command.h"
 #include "printf.h"
 #include <../asm/csr.h>
+#include "string.h"
 
 void scounter_test(int val)
 {
