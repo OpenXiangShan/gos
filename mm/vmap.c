@@ -20,6 +20,9 @@ void *vmap_alloc(unsigned int size)
 	void *addr = (void *)VMAP_START;
 	int per_mem_map = sizeof(vmem_maps[0]) * 8;
 
+	if (size == 0)
+		return NULL;
+
 	spin_lock(&vmem_lock);
 	while (index < VMAP_TOTAL_PAGE_NUM) {
 		mem_map = vmem_maps[(index / per_mem_map)];
@@ -152,7 +155,6 @@ void *vmem_alloc_lazy(unsigned int size, int gfp)
 
 	vmap_addr = (unsigned long)vmap_alloc(size);
 	if (!vmap_addr) {
-		print("%s -- vmap out of memory!\n", __FUNCTION__);
 		return NULL;
 	}
 
