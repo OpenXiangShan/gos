@@ -85,6 +85,13 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 	case SBI_HART_START:
 		ret = sbi_hart_start(regs->a0, regs->a1);
 		break;
+	case SBI_SET_MCOUNTEREN:
+		write_csr(CSR_MCOUNTEREN, regs->a0);
+		break;
+	case SBI_GET_CPU_MCOUNTEREN:
+		ret_value = read_csr(CSR_MCOUNTEREN);
+		break;
+
 	}
 
 	regs->a0 = ret_value;
@@ -340,9 +347,6 @@ void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 	sbi_get_hw_info(ctx);
 
 	write_csr(mie, MIP_MSIP | MIP_MEIP | MIP_MTIP);
-	sbi_print("==============>sbi_mcounter: 0x%x \n", read_csr(0x306));
-	write_csr(0x306, 0xffff);
-	sbi_print("==============<sbi_mcounter: 0x%x \n", read_csr(0x306));
 
 	delegate_traps();
 }

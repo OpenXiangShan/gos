@@ -6,8 +6,10 @@
 #define SBI_SET_TIMER 0
 #define SBI_CONSOLE_PUTCHAR 0x1
 #define SBI_CONSOLE_GETCHAR 0x2
+#define SBI_SET_MCOUNTEREN 0x3
 #define SBI_GET_CPU_CYCLE 0x200
 #define SBI_GET_CPU_ID 0x201
+#define SBI_GET_CPU_MCOUNTEREN 0x202
 #define SBI_HART_START 0x300
 #define SBI_EXIT_VM_TEST 0x100
 
@@ -53,6 +55,16 @@ static inline unsigned long sbi_get_cpu_cycles()
 static inline int sbi_get_cpu_id()
 {
 	return SBI_CALL_0(SBI_GET_CPU_ID);
+}
+
+static inline long sbi_get_cpu_mcounteren()
+{
+	return SBI_CALL_0(SBI_GET_CPU_MCOUNTEREN);
+}
+
+static inline void sbi_set_mcounteren(unsigned long m_value)
+{
+	SBI_CALL_1(SBI_SET_MCOUNTEREN, m_value);
 }
 
 #endif

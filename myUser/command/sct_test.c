@@ -1,50 +1,231 @@
 #include <print.h>
 #include "command.h"
-#include "print.h"
+#include "printf.h"
 #include <../asm/csr.h>
 
-#define  U_mode     (1 << 8)
-#define  en_SPIE    (1 << 5)
-
-void scounter_test(void)
+void scounter_test(int val)
 {
-	unsigned long value;
-	printf("=============== 1 \n");
-	value = read_csr(CSR_CYCLE);
-	printf("CSR_status value : 0x%lx\n", value);
-	printf("=============== 2 \n");
-	value = read_csr(CSR_TIME);
-	printf("CSR_status value : 0x%lx\n", value);
-	printf("=============== 3 \n");
-	//value = read_csr(CSR_INSTRET);
-	//printf("CSR_status value : 0x%lx\n",  value);
-#if 0
-	value = read_csr(CSR_SSTATUS);
-	printf("CSR_status value : 0x%lx\n", value);
+	switch (val) {
+	case 0xc00:
+		printf("CSR_CYCLE value : 0x%lx\n", read_csr(CSR_CYCLE));
+		break;
+	case 0xc01:
+		printf("CSR_TIME value : 0x%lx\n", read_csr(CSR_TIME));
+		break;
+	case 0xc02:
+		printf("CSR_INSTRET value : 0x%lx\n", read_csr(CSR_INSTRET));
+		break;
+	case 0xc03:
+		printf("CSR_HPMCOUNTER3 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER3));
+		break;
+	case 0xc04:
+		printf("CSR_HPMCOUNTER4 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER4));
+		break;
+	case 0xc05:
+		printf("CSR_HPMCOUNTER5 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER5));
+		break;
+	case 0xc06:
+		printf("CSR_HPMCOUNTER6 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER6));
+		break;
+	case 0xc07:
+		printf("CSR_HPMCOUNTER7 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER7));
+		break;
+	case 0xc08:
+		printf("CSR_HPMCOUNTER8 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER8));
+		break;
+	case 0xc09:
+		printf("CSR_HPMCOUNTER9 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER9));
+		break;
+	case 0xc0a:
+		printf("CSR_HPMCOUNTER10 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER10));
+		break;
+	case 0xc0b:
+		printf("CSR_HPMCOUNTER11 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER11));
+		break;
+	case 0xc0c:
+		printf("CSR_HPMCOUNTEr12 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER12));
+		break;
+	case 0xc0d:
+		printf("CSR_HPMCOUNTER13 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER13));
+		break;
+	case 0xc0e:
+		printf("CSR_HPMCOUNTER14 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER14));
+		break;
+	case 0xc0f:
+		printf("CSR_HPMCOUNTER15 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER15));
+		break;
+	case 0xc10:
+		printf("CSR_HPMCOUNTER16 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER16));
+		break;
+	case 0xc11:
+		printf("CSR_HPMCOUNTER17 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER17));
+		break;
+	case 0xc12:
+		printf("CSR_HPMCOUNTER18 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER18));
+		break;
+	case 0xc13:
+		printf("CSR_HPMCOUNTER19 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER19));
+		break;
+	case 0xc14:
+		printf("CSR_HPMCOUNTER20 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER20));
+		break;
+	case 0xc15:
+		printf("CSR_HPMCOUNTER21 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER21));
+		break;
+	case 0xc16:
+		printf("CSR_HPMCOUNTER22 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER22));
+		break;
+	case 0xc17:
+		printf("CSR_HPMCOUNTER23 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER23));
+		break;
+	case 0xc18:
+		printf("CSR_HPMCOUNTER24 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER24));
+		break;
+	case 0xc19:
+		printf("CSR_HPMCOUNTER25 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER25));
+		break;
+	case 0xc1a:
+		printf("CSR_HPMCOUNTER26 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER26));
+		break;
+	case 0xc1b:
+		printf("CSR_HPMCOUNTER27 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER27));
+		break;
+	case 0xc1c:
+		printf("CSR_HPMCOUNTER28 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER28));
+		break;
+	case 0xc1d:
+		printf("CSR_HPMCOUNTER29 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER29));
+		break;
+	case 0xc1e:
+		printf("CSR_HPMCOUNTER30 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER30));
+		break;
+	case 0xc1f:
+		printf("CSR_HPMCOUNTER31 value : 0x%lx\n",
+		       read_csr(CSR_HPMCOUNTER31));
+		break;
+	case 0xda0:
+		printf("CSR_SSCOUNTOVF value : 0x%lx\n",
+		       read_csr(CSR_SSCOUNTOVF));
+		break;
+	case 0x106:
+		printf("CSR_SCOUNTEREN value : 0x%lx\n",
+		       read_csr(CSR_SCOUNTEREN));
+		break;
+	case 0x100:
+		printf("CSR_SSTATUS value : 0x%lx\n", read_csr(CSR_SSTATUS));
+		break;
+	case 0x306:
+		printf("CSR_MCOUNTEREN value : 0x%lx\n",
+		       read_csr(CSR_MCOUNTEREN));
+		break;
+	default:
+		printf("-------> get csr not support, try again \n");
+		break;
+	}
 
-	printf("CSR_scounteren: 0x%lx \n", read_csr(CSR_SCOUNTEREN));
-	csr_write(CSR_SCOUNTEREN, 0xffff);
-	printf("CSR_scounteren: 0x%lx \n", read_csr(CSR_SCOUNTEREN));
-	printf("CSR_Satp: 0x%lx \n", read_csr(CSR_SATP));
+}
 
-	value &= ~U_mode;
-	printf(" == value :0x%lx \n", value);
-	csr_write(CSR_SSTATUS, value);
-	value = read_csr(CSR_SSTATUS);
-	printf("CSR_status value : 0x%lx\n", value);
-	//csr_write(CSR_SEPC, &kyo_test);
-#endif
-	//csr_read(CSR_SSCOUNTOVF);
-	//csr_read(CSR_CYCLE);
-	//csr_write(CSR_SEPC, &scounter_check);
-	//printf("CSR_Sepc: 0x%lx \n", read_csr(CSR_SEPC));
+static void read_Zicntr()
+{
+	printf("CSR_CYCLE value : 0x%lx\n", read_csr(CSR_CYCLE));
+	printf("CSR_TIME value : 0x%lx\n", read_csr(CSR_TIME));
+	printf("CSR_INSTRET value : 0x%lx\n", read_csr(CSR_INSTRET));
+}
 
+static void read_Zihpm()
+{
+
+	printf("CSR_HPMCOUNTER3 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER3));
+	printf("CSR_HPMCOUNTER4 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER4));
+	printf("CSR_HPMCOUNTER5 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER5));
+	printf("CSR_HPMCOUNTER6 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER6));
+	printf("CSR_HPMCOUNTER7 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER7));
+	printf("CSR_HPMCOUNTER8 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER8));
+	printf("CSR_HPMCOUNTER9 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER9));
+	printf("CSR_HPMCOUNTER10 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER10));
+	printf("CSR_HPMCOUNTER11 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER11));
+	printf("CSR_HPMCOUNTEr12 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER12));
+	printf("CSR_HPMCOUNTER13 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER13));
+	printf("CSR_HPMCOUNTER14 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER14));
+	printf("CSR_HPMCOUNTER15 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER15));
+	printf("CSR_HPMCOUNTER16 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER16));
+	printf("CSR_HPMCOUNTER17 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER17));
+	printf("CSR_HPMCOUNTER18 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER18));
+	printf("CSR_HPMCOUNTER19 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER19));
+	printf("CSR_HPMCOUNTER20 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER20));
+	printf("CSR_HPMCOUNTER21 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER21));
+	printf("CSR_HPMCOUNTER22 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER22));
+	printf("CSR_HPMCOUNTER23 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER23));
+	printf("CSR_HPMCOUNTER24 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER24));
+	printf("CSR_HPMCOUNTER25 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER25));
+	printf("CSR_HPMCOUNTER26 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER26));
+	printf("CSR_HPMCOUNTER27 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER27));
+	printf("CSR_HPMCOUNTER28 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER28));
+	printf("CSR_HPMCOUNTER29 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER29));
+	printf("CSR_HPMCOUNTER30 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER30));
+	printf("CSR_HPMCOUNTER31 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER31));
+}
+
+static void Usage(void)
+{
+	printf("Usage: sct_test [mode] [csr_num] \n");
+	printf("mode option:\n");
+	printf("    -- 0 (RAV23 profile Zicntr test)\n");
+	printf("         --> user_run sct_test 0\n");
+	printf("    -- 1 (RAV23 profile Zihpm test)\n");
+	printf("         --> user_run sct_test 1\n");
+	printf("    -- 2 (read csr register)\n");
+	printf("----------------------------------------------\n");
+	printf("csr_num option:\n");
+	printf("    -- csr register \n");
 }
 
 static int cmd_scounter_test_handler(int argc, char *argv[], void *priv)
 {
-
-	scounter_test();
+	if (argc < 1) {
+		Usage();
+		printf("invalid input param. \n");
+		return -1;
+	}
+#if DEBUG
+	int i;
+	for (i = 0; i < argc; i++)
+		printf("param is argv[%d]=%d \n", i, argv[i]);
+#endif
+	if (0 == atoi(argv[0]))
+		read_Zicntr();
+	else if (1 == atoi(argv[0]))
+		read_Zihpm();
+	else if (2 == atoi(argv[0]))
+		scounter_test(atoi(argv[1]));
 
 	return 0;
 }

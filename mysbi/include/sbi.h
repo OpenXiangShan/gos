@@ -4,9 +4,12 @@
 #define SBI_SET_TIMER 0
 #define SBI_CONSOLE_PUTCHAR 0x1
 #define SBI_CONSOLE_GETCHAR 0x2
+#define SBI_SET_MCOUNTEREN 0x3
 #define SBI_GET_CPU_CYCLE 0x200
 #define SBI_GET_CPU_ID 0x201
+#define SBI_GET_CPU_MCOUNTEREN 0x202
 #define SBI_HART_START 0x300
+#define CSR_MCOUNTEREN 0x306
 
 struct sbi_trap_hw_context;
 struct sbi_trap_regs;
