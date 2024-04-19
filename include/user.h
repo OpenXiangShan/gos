@@ -67,6 +67,7 @@ struct user_run_params {
 	char command[64];
 	int argc;
 	char argv[16][64];
+	int busy;
 };
 
 struct user {
@@ -80,6 +81,8 @@ struct user {
 	spinlock_t lock;
 	struct list_head memory_region;
 	int mapping;
+	struct user_run_params *run_params;
+	struct user_run_params s_run_params;
 };
 
 struct user *user_create(void);

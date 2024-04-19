@@ -5,5 +5,11 @@
 void start_user(struct user_run_params *params)
 {
 	command_init();
-	do_command(params);
+
+	while (1) {
+		if (params->busy) {
+			do_command(params);
+			params->busy = 0;
+		}
+	}
 }

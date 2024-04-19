@@ -18,6 +18,44 @@ extern char user_bin[];
 
 struct user *p_user = NULL;
 
+static void user_update_run_params(struct user *user)
+{
+	struct user_run_params *params = user->run_params;
+	struct user_run_params *s_params = &user->s_run_params;
+
+	if (!params)
+		return;
+
+	if (params->busy == 1)
+		return;
+
+	if (s_params->busy == 1) {
+		__smp_rmb();
+		memcpy((char *)params, (char *)s_params,
+		       sizeof(struct user_run_params));
+		__smp_wmb();
+		params->busy = 1;
+		s_params->busy = 0;
+	}
+}
+
+static int user_set_run_params(struct user *user, struct user_run_params *cmd)
+{
+	struct user_run_params *params = &user->s_run_params;
+
+	while (params->busy == 1) ;
+
+	__smp_rmb();
+
+	memcpy((char *)params, (char *)cmd, sizeof(struct user_run_params));
+
+	__smp_wmb();
+
+	params->busy = 1;
+
+	return 0;
+}
+
 struct user *user_create(void)
 {
 	struct user *user;
@@ -55,8 +93,9 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 	char *user_bin_ptr = user_bin;
 	struct user_cpu_context *u_context = &user->cpu_context.u_context;
 
-	if (user->mapping == 1)
-		goto running;
+	if (user->mapping == 1) {
+		return user_set_run_params(user, params);
+	}
 
 	/* map user code */
 	user->user_code_user_va = USER_SPACE_CODE_START;
@@ -113,9 +152,13 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 	}
 
 	memcpy((char *)user->user_code_va, user_bin_ptr, user_bin_size);
-	if (params)
+	if (params) {
 		memcpy((char *)user->user_share_memory_va, (void *)params,
 		       sizeof(struct user_run_params));
+		user->run_params =
+		    (struct user_run_params *)user->user_share_memory_va;
+		user->run_params->busy = 1;
+	}
 
 	/* Update user mode entry and param */
 	u_context->sepc = user->user_code_user_va;
@@ -123,8 +166,8 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 
 	user->mapping = 1;
 
-running:
 	while (1) {
+		user_update_run_params(user);
 		disable_local_irq();
 		user_mode_switch_to(&user->cpu_context);
 		do_user_exception(user);

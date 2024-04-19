@@ -8,6 +8,7 @@ struct user_run_params {
 	char command[64];
 	int argc;
 	char argv[16][64];
+	int busy;
 };
 
 struct command {
