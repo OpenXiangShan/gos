@@ -24,7 +24,7 @@ void *vmap_alloc(unsigned int size)
 	while (index < VMAP_TOTAL_PAGE_NUM) {
 		mem_map = vmem_maps[(index / per_mem_map)];
 		if (((mem_map >> (index % per_mem_map)) & 0x1) == 0) {
-			if (nr++ == page_nr)
+			if (++nr == page_nr)
 				goto success;
 		} else {
 			nr = 0;
@@ -40,10 +40,9 @@ void *vmap_alloc(unsigned int size)
 	return NULL;
 
 success:
-	index = index - 1;
 	for (index = index + 1 - page_nr; page_nr; index++, page_nr--) {
 		mem_map = vmem_maps[(index / per_mem_map)];
-		mem_map |= (1 << (index % per_mem_map));
+		mem_map |= (1UL << (index % per_mem_map));
 		vmem_maps[(index / per_mem_map)] = mem_map;
 	}
 
@@ -68,7 +67,7 @@ void vmap_free(void *addr, unsigned int size)
 	for (; page_nr; page_nr--, index++) {
 		mem_map = vmem_maps[(index / per_mem_map)];
 		mem_map &=
-		    ~(unsigned long)(((unsigned long)1) <<
+		    ~(unsigned long)(((unsigned long)(1UL)) <<
 				     (index % per_mem_map));
 		vmem_maps[(index / per_mem_map)] = mem_map;
 	}
