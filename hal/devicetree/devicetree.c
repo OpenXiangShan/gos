@@ -69,6 +69,8 @@ int dtb_scan_cpus(void *dtb_addr,
 				fn(dtb_addr, cpu_node, data);
 		}
 	}
+
+	return 0;
 }
 
 int dtb_scan_memory(void *dtb_addr,
