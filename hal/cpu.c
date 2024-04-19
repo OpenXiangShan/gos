@@ -10,7 +10,10 @@
 #include "list.h"
 #include "spinlocks.h"
 #include "cpu.h"
+#include "devicetree.h"
 
+extern char dtb_bin[];
+extern int mmu_is_on;
 extern void do_exception_vector(void);
 
 spinlock_t cpumask_lock = __SPINLOCK_INITIALIZER;
@@ -39,32 +42,40 @@ void switch_cpu_regs(struct pt_regs *prev, struct pt_regs *next,
 		memcpy((void *)irq_regs, (void *)next, sizeof(struct pt_regs));
 }
 
+static void scan_dtb_cpus_cb(void *dtb, int offset, void *data)
+{
+	int *n = (int *)data;
+	(*n)++;
+}
+
+static int get_cpu_count()
+{
+	void *dtb_ptr;
+	int ret = 0;
+
+	if (mmu_is_on)
+		dtb_ptr = (void *)FIXMAP_DTB_START;
+	else
+		dtb_ptr = (void *)dtb_bin;
+
+	dtb_scan_cpus(dtb_ptr, scan_dtb_cpus_cb, &ret);
+
+	return ret;
+}
+
 void bringup_secondary_cpus(struct device_init_entry *hw)
 {
-	int i, found = 0, cpu_nums = 0;
-	struct riscv_hart_info *info;
+	int i, cpu_count;
 
-	while (strncmp(hw->compatible, "THE END", sizeof("THE END"))) {
-		if (!strncmp
-		    (hw->compatible, "riscv-hart", sizeof("riscv-hart"))) {
-			found = 1;
-			break;
-		}
-		hw++;
-	}
+	cpu_count = get_cpu_count();
 
-	if (!found)
-		return;
-
-	info = (struct riscv_hart_info *)hw->data;
-	for (i = 1; i < info->hart_num; i++) {
+	for (i = 0; i < cpu_count; i++) {
 		if (!sbi_cpu_start(i)) {
 			set_online_cpumask(i);
-			cpu_nums++;
 		}
 	}
 
-	print("bringup %d cpus success\n", cpu_nums + 1);
+	print("bringup %d cpus success\n", cpu_count);
 }
 
 void cpu_regs_init(struct pt_regs *regs)

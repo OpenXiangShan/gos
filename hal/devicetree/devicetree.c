@@ -25,7 +25,7 @@ static bool of_fdt_device_is_available(const void *blob, unsigned long node)
 	return false;
 }
 
-static inline unsigned long of_read_number(unsigned int *cell, int size)
+static unsigned long of_read_number(unsigned int *cell, int size)
 {
 	unsigned long r = 0;
 
@@ -42,6 +42,33 @@ static unsigned long dt_mem_next_cell(int s, unsigned int **cellp)
 	*cellp = p + s;
 
 	return of_read_number(p, s);
+}
+
+int dtb_scan_cpus(void *dtb_addr,
+		  void (*fn)(void *dtb, int offset, void *data), void *data)
+{
+	int node;
+
+	fdt_for_each_subnode(node, dtb_addr, 0) {
+		int cpu_node;
+		char *name = (char *)fdt_get_name(dtb_addr, node, NULL);
+		if (name == NULL)
+			continue;
+
+		if (strcmp(name, "cpus"))
+			continue;
+
+		if (!of_fdt_device_is_available(dtb_addr, node))
+			continue;
+
+		print("cpus scan node %s\n", name);
+		fdt_for_each_subnode(cpu_node, dtb_addr, node) {
+			print(" -- %s\n",
+			      fdt_get_name(dtb_addr, cpu_node, NULL));
+			if (fn)
+				fn(dtb_addr, cpu_node, data);
+		}
+	}
 }
 
 int dtb_scan_memory(void *dtb_addr,
@@ -83,7 +110,7 @@ int dtb_scan_memory(void *dtb_addr,
 			if (size == 0)
 				continue;
 
-			print(" - %lx, %lx\n", base, size);
+			print(" -- %lx, %lx\n", base, size);
 			fn(base, size);
 		}
 	}
