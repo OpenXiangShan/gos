@@ -370,7 +370,8 @@ static int cmd_csr_ctl_handler(int argc, char *argv[], void *priv)
 	}
 	mode = atoi(argv[0]);
 	csr_num = atoi(argv[1]);
-	value = atoi(argv[2]);
+	if ((mode == 2) || (mode == 4))
+		value = atoi(argv[2]);
 #if DEBUG
 	print("-----> Modfiy mode:%d ,csr %d, value:0x%lx \n", mode, csr_num,
 	      value);
