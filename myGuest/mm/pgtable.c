@@ -5,6 +5,7 @@
 #include "string.h"
 #include "print.h"
 #include "asm/csr.h"
+#include "vmap.h"
 
 #define PAGE_OFFSET 0xffffffd800000000
 
@@ -230,6 +231,30 @@ static int mmu_code_page_mapping()
 	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
 }
 
+static unsigned long mmu_sram_page_mapping(struct device_init_entry *hw)
+{
+	pgprot_t pgprot;
+	struct device_init_entry *device_entry = hw;
+	unsigned long pa, va;
+	unsigned int size;
+
+	while (strncmp(device_entry->compatible, "THE END", sizeof("THE END"))) {
+		if (!strncmp(device_entry->compatible, "sram", 128)) {
+			pa = device_entry->start;
+			size = device_entry->len;
+			goto found;
+		}
+		device_entry++;
+	}
+
+	return -1;
+found:
+	va = pa;
+	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
+
+	return mmu_page_mapping(pa, va, size, pgprot);
+}
+
 void enable_mmu(int on)
 {
 	if (!on) {
@@ -253,6 +278,7 @@ int paging_init(struct device_init_entry *hw)
 	mmu_code_page_mapping();
 	mmu_direct_page_mapping();
 	mmu_hw_page_mapping(hw);
+	mmu_sram_page_mapping(hw);
 
 	print("mmu page mapping finish...\n");
 

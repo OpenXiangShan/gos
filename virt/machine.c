@@ -7,6 +7,7 @@
 #include "asm/pgtable.h"
 #include "uart_emulator.h"
 #include "memory_emulator.h"
+#include "memory_test_emulator.h"
 #include "asm/type.h"
 #include "device.h"
 
@@ -14,6 +15,7 @@ static struct virt_machine_memmap virt_memmap[] = {
 	[VIRT_MEMORY] = { 0x80000000, 0x1000000 },
 	[VIRT_UART] = { 0x310b0000, 0x10000 },
 	[VIRT_SRAM] = { 0x1000, 0x1000 },
+	[VIRT_TEST] = { 0x10000000, 0x1000 },
 };
 
 #define VIRT_MEMMAP_CNT (sizeof(virt_memmap)/sizeof(virt_memmap[0]))
@@ -154,7 +156,7 @@ find:
 
 int machine_finialize(struct virt_machine *machine)
 {
-	/* uart gstage ioremap */
+	/* uart gstage emulate */
 	uart_device_emulate(machine, "qemu-8250", 1);
 
 	return 0;
@@ -192,7 +194,6 @@ int machine_init(struct virt_machine *machine)
 	strcpy((char *)entry->compatible, "qemu-8250");
 	entry->start = virt_memmap[VIRT_UART].base;
 	entry->len = virt_memmap[VIRT_UART].size;
-	n++;
 	/* create uart device */
 	create_uart_device(machine, VIRT_UART, virt_memmap[VIRT_UART].base,
 			   virt_memmap[VIRT_UART].size);
@@ -202,16 +203,25 @@ int machine_init(struct virt_machine *machine)
 	strcpy((char *)entry->compatible, "sram");
 	entry->start = virt_memmap[VIRT_SRAM].base;
 	entry->len = virt_memmap[VIRT_SRAM].size;
-	n++;
 	/* cresate sram device */
 	create_sram_device(machine, VIRT_SRAM, virt_memmap[VIRT_SRAM].base,
 			   virt_memmap[VIRT_SRAM].size);
+
+	/* create test devices */
+	entry = &device_entry[n++];
+	strcpy((char *)entry->compatible, "memory-test");
+	entry->start = virt_memmap[VIRT_TEST].base;
+	entry->len = virt_memmap[VIRT_TEST].size;
+	create_memory_test_device(machine, VIRT_TEST,
+				  virt_memmap[VIRT_TEST].base,
+				  virt_memmap[VIRT_TEST].size);
+
 	/* end symbol */
 	entry = &device_entry[n];
 	strcpy((char *)entry->compatible, "THE END");
 
 	machine->device_entry = device_entry;
-	machine->device_entry_count = VIRT_MEMMAP_CNT;
+	machine->device_entry_count = VIRT_MEMMAP_CNT + 1;
 
 	return 0;
 }

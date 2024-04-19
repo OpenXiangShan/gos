@@ -3,6 +3,7 @@
 
 #include "asm/ptregs.h"
 #include "../virt/machine.h"
+#include "spinlocks.h"
 
 struct virt_cpu_context {
 	unsigned long zero;
@@ -49,6 +50,13 @@ struct cpu_context {
 	unsigned long host_stvec;
 };
 
+struct virt_run_params {
+	char command[64];
+	int argc;
+	char argv[16][64];
+	int busy;
+};
+
 struct vcpu {
 	struct cpu_context cpu_ctx;
 	struct virt_machine machine;
@@ -62,10 +70,20 @@ struct vcpu {
 	unsigned long host_sram_pa;
 	unsigned long guest_sram_pa;
 	unsigned int sram_size;
+	/* memory test */
+	unsigned long host_memory_test_va;
+	unsigned long host_memory_test_pa;
+	unsigned long guest_memory_test_pa;
+	unsigned int memory_test_size;
+
+	struct virt_run_params *run_params;
+	struct virt_run_params host_run_params;
+
+	int running;
 };
 
 struct vcpu *vcpu_create(void);
-int vcpu_run(struct vcpu *vcpu, char *cmd);
+int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params);
 void vcpu_switch_to(struct cpu_context *cpu_ctx);
 void __vcpu_switch_return(void);
 int gstage_page_mapping(unsigned long *pgdp, unsigned long hpa,

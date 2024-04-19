@@ -4,6 +4,13 @@
 #define COMMAND_INIT_TABLE __command_init_table
 #define COMMAND_INIT_TABLE_END __command_init_table_end
 
+struct run_params {
+	char command[64];
+	int argc;
+	char argv[16][64];
+	int busy;
+};
+
 struct command {
 	char cmd[64];
 	int (*handler)(int argc, char *argv[], void *priv);
@@ -21,7 +28,7 @@ struct commands {
 	int avail;
 };
 
-struct app_command_entry {
+struct command_entry {
 	int (*init)(void);
 };
 
@@ -29,7 +36,7 @@ struct app_command_entry {
 	for (entry = (struct command_info *)commands; n > 0; entry++, n--)
 
 #define APP_COMMAND_REGISTER(name, init_fn)                           \
-	static const struct app_command_entry __attribute__((used))   \
+	static const struct command_entry __attribute__((used))   \
 		__command_entry_##name                                \
 		__attribute__((section(".command_init_table"))) = {   \
 			.init = init_fn,                              \
@@ -38,6 +45,6 @@ struct app_command_entry {
 void walk_and_print_command(void);
 int register_command(const struct command *command);
 int command_init(void);
-int do_command(char *cmd);
+int do_command(struct run_params *params);
 
 #endif

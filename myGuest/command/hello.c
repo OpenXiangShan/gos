@@ -1,25 +1,25 @@
 #include "command.h"
 #include "print.h"
-#include "type.h"
+#include "asm/type.h"
 
-static int user_cmd_hello_handler(int argc, char *argv[], void *priv)
+static int cmd_hello_handler(int argc, char *argv[], void *priv)
 {
-	printf("Hello MyUesr!!\n");
+	print("Hello MyUesr!!\n");
 
 	return 0;
 }
 
-static const struct command user_cmd_hello = {
+static const struct command cmd_hello = {
 	.cmd = "hello",
-	.handler = user_cmd_hello_handler,
+	.handler = cmd_hello_handler,
 	.priv = NULL,
 };
 
-int user_cmd_hello_init()
+int cmd_hello_init()
 {
-	register_command(&user_cmd_hello);
+	register_command(&cmd_hello);
 
 	return 0;
 }
 
-APP_COMMAND_REGISTER(hello, user_cmd_hello_init);
+APP_COMMAND_REGISTER(hello, cmd_hello_init);

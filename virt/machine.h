@@ -9,6 +9,7 @@ enum {
 	VIRT_MEMORY = 0,
 	VIRT_UART,
 	VIRT_SRAM,
+	VIRT_TEST,
 };
 
 struct memory_region;
@@ -42,6 +43,34 @@ struct virt_machine {
 	unsigned int device_entry_count;
 	unsigned long gstage_pgdp;
 };
+
+static inline unsigned int machine_get_memory_test_size(struct virt_machine
+							*machine)
+{
+	struct memory_region *entry;
+	unsigned int ret = 0;
+
+	list_for_each_entry(entry, &machine->memory_region_list, list) {
+		if (entry->id == VIRT_TEST)
+			ret = entry->end - entry->start;
+	}
+
+	return ret;
+}
+
+static inline unsigned long machine_get_memory_test_start(struct virt_machine
+							  *machine)
+{
+	struct memory_region *entry;
+	unsigned long ret = (-1UL);
+
+	list_for_each_entry(entry, &machine->memory_region_list, list) {
+		if (entry->id == VIRT_TEST)
+			ret = entry->start;
+	}
+
+	return ret;
+}
 
 static inline unsigned int machine_get_sram_size(struct virt_machine *machine)
 {

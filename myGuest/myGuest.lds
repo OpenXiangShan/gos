@@ -13,6 +13,16 @@ SECTIONS
 	}
 	
 	.rodata : { *(.rodata) }
+
+	. = ALIGN(8);
+	__command_init_table = .;
+	.command_init_table : { *(.command_init_table) }
+	__command_init_table_end = .;
+	
+	. = ALIGN(8);
+	__driver_init_table = .;
+	.driver_init_table : { *(.driver_init_table) }
+	__driver_init_table_end = .;
 	
 	bss_begin = .;
         .bss : { *(.bss*) }
