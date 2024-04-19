@@ -5,6 +5,12 @@
 #include "../virt/machine.h"
 #include "spinlocks.h"
 
+enum {
+	VCPU_REQ_FENCE_GVMA_ALL,
+	VCPU_REQ_FENCE_VVMA_ALL,
+	VCPU_REQ_UPDATE_HGATP,
+};
+
 struct virt_cpu_context {
 	unsigned long zero;
 	unsigned long ra;
@@ -79,9 +85,17 @@ struct vcpu {
 	struct virt_run_params *run_params;
 	struct virt_run_params host_run_params;
 
+	unsigned long request;
+
 	int running;
 };
 
+static inline int vcpu_check_request(unsigned long req, unsigned int flag)
+{
+	return ((req >> flag) & (1UL));
+}
+
+void vcpu_set_request(struct vcpu *vcpu, unsigned int req);
 struct vcpu *vcpu_create(void);
 int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params);
 void vcpu_switch_to(struct cpu_context *cpu_ctx);

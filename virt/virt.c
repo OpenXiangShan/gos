@@ -23,6 +23,20 @@ static void enable_gstage_mmu(unsigned long pgdp, int on)
 	}
 }
 
+static void vcpu_fence_gvma_all()
+{
+	__hfence_gvma_all();
+}
+
+static void vcpu_do_request(struct vcpu *vcpu)
+{
+	if (!vcpu->request)
+		return;
+
+	if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_ALL))
+		vcpu_fence_gvma_all();
+}
+
 static void vcpu_update_run_params(struct vcpu *vcpu)
 {
 	struct virt_run_params *params = vcpu->run_params;
@@ -59,6 +73,11 @@ static int vcpu_set_run_params(struct vcpu *vcpu, struct virt_run_params *cmd)
 	params->busy = 1;
 
 	return 0;
+}
+
+void vcpu_set_request(struct vcpu *vcpu, unsigned int req)
+{
+	vcpu->request |= ((1UL) << req);
 }
 
 struct vcpu *vcpu_create(void)
@@ -203,7 +222,10 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 	vcpu->running = 1;
 
 	while (1) {
+		vcpu_do_request(vcpu);
+
 		vcpu_update_run_params(vcpu);
+
 		disable_local_irq();
 
 		vcpu_switch_to(&vcpu->cpu_ctx);
