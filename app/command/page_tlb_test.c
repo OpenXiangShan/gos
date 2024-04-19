@@ -6,6 +6,8 @@
 #include "asm/pgtable.h"
 #include "string.h"
 #include "mm.h"
+#include "virt.h"
+#include "../virt/machine.h"
 
 static void Usage(void)
 {
@@ -13,10 +15,52 @@ static void Usage(void)
 	print("cmd option:\n");
 	print("    -- Acc (page table access bit test)\n");
 	print("    -- Lazy (demanding page allocating test)\n");
-	print("    -- sfence_all (sfence.vma test)\n");
+	print("    -- sfence.vma_all (sfence.vma test)\n");
+	print("    -- sfence.gvma_all (sfence.gvma test)\n");
+	print("    -- remapping_gstage_memory_test\n");
 }
 
-static void page_table_sfence_test()
+static void page_table_remapping_gstage_memory_test()
+{
+	struct vcpu *vcpu;
+	unsigned long gpa;
+	unsigned int size;
+	unsigned long hpa, hva;
+
+	vcpu = vcpu_create();
+	if (!vcpu)
+		return;
+
+	gpa = machine_get_memory_test_start(&vcpu->machine);
+	size = machine_get_memory_test_size(&vcpu->machine);
+
+	hva = (unsigned long)mm_alloc(size);
+	if (!hva) {
+		print("%s -- Out of memory\n", __FUNCTION__);
+		return;
+	}
+	hpa = virt_to_phy(hva);
+
+	strcpy((char *)hva, "Hello this is memory test pa2!!!");
+	gstage_page_mapping((unsigned long *)vcpu->machine.gstage_pgdp, hpa,
+			    gpa, size);
+
+	mm_free((void *)hva, size);
+}
+
+static void page_table_sfence_gvma_all_test()
+{
+	struct vcpu *vcpu;
+
+	vcpu = vcpu_create();
+	if (!vcpu)
+		return;
+
+	print("Now, fence.gvma all...\n");
+	vcpu_set_request(vcpu, VCPU_REQ_FENCE_GVMA_ALL);
+}
+
+static void page_table_sfence_all_test()
 {
 	pgprot_t pgprot;
 	void *addr;
@@ -139,16 +183,24 @@ static int cmd_page_tlb_test_handler(int argc, char *argv[], void *priv)
 	if (argc != 1) {
 		print("Invalid input params\n");
 		Usage();
+		return -1;
 	}
 
 	if (!strncmp(argv[0], "Lazy", sizeof("Lazy"))) {
 		page_demanding_allocating_test();
 	} else if (!strncmp(argv[0], "Acc", sizeof("Acc"))) {
 		page_table_access_bit_test();
-	} else if (!strncmp(argv[0], "sfence_all", sizeof("sfence_all"))) {
-		page_table_sfence_test();
-	} else
+	} else if (!strncmp(argv[0], "sfence.vma_all", sizeof("sfence.vma_all"))) {
+		page_table_sfence_all_test();
+	} else if (!strncmp(argv[0], "sfence.gvma_all", sizeof("sfence.gvma_all"))) {
+		page_table_sfence_gvma_all_test();
+	} else if (!strncmp(argv[0], "remapping_gstage_memory_test", sizeof("remapping_gstage_memory_test"))) {
+		page_table_remapping_gstage_memory_test();
+	} else {
+		print("Unsupport command\n");
 		Usage();
+		return -1;
+	}
 
 	return 0;
 }
