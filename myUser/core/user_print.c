@@ -29,7 +29,13 @@ static void __putc(char c)
 		log_buf[MAX_PRINT_LENGTH - 1] = 0;
 		return;
 	}
-	log_buf[pos++] = c;
+
+	if (c == '\n'){
+		log_buf[pos++] = '\r';
+		log_buf[pos++] = '\n';
+	}
+	else
+		log_buf[pos++] = c;
 }
 
 static void __puts(char *str)
