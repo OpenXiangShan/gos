@@ -37,6 +37,7 @@
 			riscv,isa = "rv64imafdch_zicbom_zicboz_zicsr_zifencei_zihintpause_zawrs_zfa_zca_zcd_zba_zbb_zbc_zbs_smaia_ssaia_sstc_svadu";
 			mmu-type = "riscv,sv39";
 		};
+		/*
 		cpu@2 {
 			phandle = <0x03>;
 			device_type = "cpu";
@@ -58,6 +59,6 @@
 			riscv,cbom-block-size = <0x40>;
 			riscv,isa = "rv64imafdch_zicbom_zicboz_zicsr_zifencei_zihintpause_zawrs_zfa_zca_zcd_zba_zbb_zbc_zbs_smaia_ssaia_sstc_svadu";
 			mmu-type = "riscv,sv39";
-		};
+		};*/
 	};
 };
