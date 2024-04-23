@@ -83,6 +83,7 @@ static int __plic_init(unsigned long base, struct plic_priv_data *priv)
 		for (hwirq = 1; hwirq <= nr; hwirq++) {
 			plic_enable_irq(i, hwirq, 1);
 		}
+		plic_enable_irq(i, 2, 0);
 	}
 
 	csr_set(sie, SIE_SEIE);
@@ -101,7 +102,7 @@ int plic_init(char *name, unsigned long base, struct irq_domain *parent,
 		ndev = priv->ndev;
 	}
 
-	print("%s -- %s %d, name:%s, base:0x%x, max_priority: %d, ndev: %d\n",
+	print("%s -- %s %d, name:%s, base:0x%lx, max_priority: %d, ndev: %d\n",
 	      __FILE__, __FUNCTION__, __LINE__, name, base, max_priority, ndev);
 
 	__plic_init(base, priv);
