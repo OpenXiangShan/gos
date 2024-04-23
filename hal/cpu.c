@@ -16,11 +16,12 @@ extern char dtb_bin[];
 extern int mmu_is_on;
 extern void do_exception_vector(void);
 
-spinlock_t cpumask_lock = __SPINLOCK_INITIALIZER;
+spinlock_t cpumask_lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
 
-unsigned long online_cpu_mask = 0;
+static spinlock_t notifier_lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
 
-static DEFINE_SPINLOCK(notifier_lock);
+unsigned long online_cpu_mask __attribute__((section(".data"))) = 0;
+
 static LIST_HEAD(notifier_list);
 
 extern char secondary_start_sbi[];

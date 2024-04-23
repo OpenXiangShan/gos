@@ -16,7 +16,7 @@
 extern void do_exception_vector(void);
 extern char user_bin[];
 
-struct user *p_user = NULL;
+struct user *p_user __attribute__((section(".data"))) = NULL;
 
 static void user_update_run_params(struct user *user)
 {

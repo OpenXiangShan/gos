@@ -317,6 +317,7 @@ int irq_domain_init(struct irq_domain *domain, char *name,
 	list_add(&domain->list, &irq_domains);
 	domain->priv = priv;
 	domain->domain_ops = ops;
+	domain->link_domain = NULL;
 
 	return 0;
 }

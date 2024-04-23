@@ -12,7 +12,7 @@
 #include "virt_vm_exit.h"
 
 extern char guest_bin[];
-static struct vcpu *p_vcpu = NULL;
+static struct vcpu *p_vcpu __attribute__((section(".data"))) = NULL;
 
 static void enable_gstage_mmu(unsigned long pgdp, int on)
 {

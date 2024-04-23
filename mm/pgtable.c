@@ -5,13 +5,13 @@
 #include "string.h"
 #include "print.h"
 
-static void *pgdp = NULL;
+static void *pgdp __attribute__((section(".data"))) = NULL;
 
-int pgtable_l4_enabled = 0;
-int pgtable_l5_enabled = 0;
+int pgtable_l4_enabled __attribute__((section(".data"))) = 0;
+int pgtable_l5_enabled __attribute__((section(".data"))) = 0;
 
-int mmu_is_on = 0;
-unsigned long va_pa_offset = 0;
+int mmu_is_on __attribute__((section(".data"))) = 0;
+unsigned long va_pa_offset __attribute__((section(".data"))) = 0;
 
 extern unsigned long bss_end;
 extern unsigned long __start_gos;
@@ -305,8 +305,10 @@ unsigned long alloc_zero_page(int gfp)
 
 int paging_init(struct device_init_entry *hw)
 {
-	if (!pgdp)
+	if (!pgdp) {
 		pgdp = mm_alloc(PAGE_SIZE);
+		memset((char *)pgdp, 0, PAGE_SIZE);
+	}
 
 	mmu_code_page_mapping();
 	mmu_direct_page_mapping();
