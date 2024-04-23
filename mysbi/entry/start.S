@@ -2,7 +2,7 @@
 
 .section ".text.boot"
 .global _start
-_start:	
+_start:
 	li a3, 0
 	la a4, wake
 	sd a3, 0(a4)
@@ -75,8 +75,11 @@ other_hart_run:
 	csrr a0, mhartid
 	j sbi_exit	
 
+.align 4
 stack_bottom:
 	.skip 8192
+
+.align 4
 wake:
 	.skip 8
 

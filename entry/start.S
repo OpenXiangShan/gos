@@ -1,7 +1,9 @@
 .section ".text.boot"
 .global __start_gos
 __start_gos:
-	la sp, .stack_top
+	li t0, 4096
+        la sp, stack
+	add sp, sp, t0
 	jal start_gos
 1:
 	j 1b
