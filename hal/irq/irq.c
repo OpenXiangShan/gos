@@ -15,6 +15,14 @@ static LIST_HEAD(irq_domains);
 
 static struct irq_domain intc_domain;
 
+int irq_domain_set_affinity(struct irq_domain *domain, int hwirq, int cpu)
+{
+	if (!domain || !domain->domain_ops || !domain->domain_ops->set_affinity)
+		return -1;
+
+	return domain->domain_ops->set_affinity(hwirq, cpu);
+}
+
 struct irq_domain *find_irq_domain(char *name)
 {
 	struct irq_domain *domain;
@@ -170,6 +178,10 @@ out:
 		    && irq_domain->domain_ops->unmask_irq)
 			irq_domain->domain_ops->unmask_irq(irqs[i],
 							   irq_domain->priv);
+
+		if (irq_domain->domain_ops
+		    && irq_domain->domain_ops->unmask_irq)
+			irq_domain->domain_ops->set_affinity(irqs[i], 0);
 	}
 
 	return num;

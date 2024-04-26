@@ -27,4 +27,6 @@ struct plic {
 	unsigned char ndev;
 };
 
+struct irq_domain *plic_get_irq_domain(void);
+
 #endif

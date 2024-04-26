@@ -13,3 +13,4 @@ obj-y += user_run.o
 obj-y += page_tlb_test.o
 obj-y += task_info.o
 obj-y += csr_ctl.o
+obj-y += plic_set_affinity.o

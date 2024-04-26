@@ -82,5 +82,6 @@ int msi_domain_init_hierarchy(struct irq_domain *domain, char *name,
 			      struct irq_domain_ops *ops,
 			      struct irq_domain *base_domain,
 			      write_msi_msg_t write_msi_msg, void *priv);
+int irq_domain_set_affinity(struct irq_domain *domain, int hwirq, int cpu);
 
 #endif
