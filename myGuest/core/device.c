@@ -3,6 +3,7 @@
 #include "asm/pgtable.h"
 #include "asm/type.h"
 #include "string.h"
+#include "print.h"
 
 void create_devices(void)
 {
@@ -25,7 +26,8 @@ void create_devices(void)
 			if (!strncmp
 			    (tmp->compatible, device_entry->compatible, 128)) {
 				tmp->init(device_entry->start,
-					  device_entry->len, NULL);
+					  device_entry->len,
+					  device_entry->data);
 			}
 		}
 		device_entry++;

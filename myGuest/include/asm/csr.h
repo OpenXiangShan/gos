@@ -25,6 +25,19 @@
 #define SR_FS  0x6000UL		/* Floating-point Status */
 #define SR_XS  0x00018000UL	/* Extension Status */
 
+/* Interrupt causes */
+#define IRQ_S_SOFT     1
+#define IRQ_VS_SOFT    2
+#define IRQ_M_SOFT     3
+#define IRQ_S_TIMER    5
+#define IRQ_VS_TIMER   6
+#define IRQ_M_TIMER    7
+#define IRQ_S_EXT      9
+#define IRQ_VS_EXT     10
+#define IRQ_M_EXT      11
+#define IRQ_S_GEXT     12
+#define IRQ_PMU_OVF    13
+
 /* Interrupt enable */
 #define SIE_SSIE 0x2UL		/* IPI */
 #define SIE_STIE 0x20UL		/* TIMER */

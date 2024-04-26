@@ -201,6 +201,8 @@ static int mmu_direct_page_mapping()
 
 	va_pa_offset = PAGE_OFFSET - phy_start;
 
+	myGuest_print("%s -- pa:0x%lx va:0x%lx len:0x%x\n", __FUNCTION__,
+		      phy_start, virt_addr, size);
 	return mmu_page_mapping(phy_start, virt_addr, size, pgprot);
 }
 
@@ -213,6 +215,8 @@ static int mmu_hw_page_mapping(struct device_init_entry *hw)
 
 	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
 
+	myGuest_print("%s -- pa:0x%lx va:0x%lx len:0x%x\n", __FUNCTION__,
+		      phy_start, virt_start, size);
 	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
 }
 
@@ -228,6 +232,8 @@ static int mmu_code_page_mapping()
 	    __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC |
 		     _PAGE_DIRTY);
 
+	myGuest_print("%s -- pa:0x%lx va:0x%lx len:0x%x\n", __FUNCTION__,
+		      phy_start, virt_start, size);
 	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
 }
 
@@ -252,6 +258,8 @@ found:
 	va = pa;
 	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
 
+	myGuest_print("%s -- pa:0x%lx va:0x%lx len:0x%x\n", __FUNCTION__, pa,
+		      va, size);
 	return mmu_page_mapping(pa, va, size, pgprot);
 }
 

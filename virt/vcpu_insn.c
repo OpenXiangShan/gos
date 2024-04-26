@@ -6,13 +6,14 @@ int vcpu_mmio_load(struct vcpu *vcpu, unsigned long fault_addr,
 		   unsigned long htinst)
 {
 	unsigned long insn;
-	int len = 0, shift = 0;
+	int len = 0, shift = 0, insn_len = 0;
 	struct memory_region *region;
 	unsigned long data;
 
-	if (htinst & 0x1)
+	if (htinst & 0x1) {
 		insn = htinst | INSN_16BIT_MASK;
-	else
+		insn_len = (htinst & (1UL << 1)) ? INSN_LEN(insn) : 2;
+	} else
 		return -1;
 
 	if ((insn & INSN_MASK_LW) == INSN_MATCH_LW) {
@@ -59,6 +60,8 @@ int vcpu_mmio_load(struct vcpu *vcpu, unsigned long fault_addr,
 
 	SET_RD(insn, &vcpu->cpu_ctx.guest_context, data << shift >> shift);
 
+	vcpu->cpu_ctx.guest_context.sepc += insn_len;
+
 	return 0;
 }
 
@@ -66,14 +69,14 @@ int vcpu_mmio_store(struct vcpu *vcpu, unsigned long fault_addr,
 		    unsigned long htinst)
 {
 	unsigned long data;
-	int len = 0;
+	int len = 0, insn_len = 0;
 	//int insn_len = 0;
 	unsigned long insn;
 	struct memory_region *region;
 
 	if (htinst & 0x1) {
 		insn = htinst | INSN_16BIT_MASK;
-		//insn_len = (htinst & 0x2) ? INSN_LEN(insn) : 2;       
+		insn_len = (htinst & (1UL << 1)) ? INSN_LEN(insn) : 2;
 	} else
 		return -1;
 
@@ -114,6 +117,8 @@ int vcpu_mmio_store(struct vcpu *vcpu, unsigned long fault_addr,
 
 	if (region->ops && region->ops->write)
 		region->ops->write(region, fault_addr, data, len);
+
+	vcpu->cpu_ctx.guest_context.sepc += insn_len;
 
 	return 0;
 }

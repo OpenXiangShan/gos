@@ -54,6 +54,15 @@ struct cpu_context {
 	struct virt_cpu_context guest_context;
 	unsigned long host_scratch;
 	unsigned long host_stvec;
+	unsigned long vsscratch;
+	unsigned long vsstatus;
+	unsigned long vstvec;
+	unsigned long vsepc;
+	unsigned long vstval;
+	unsigned long hvip;
+	unsigned long vsie;
+	unsigned long vsip;
+	unsigned long vsatp;
 };
 
 struct virt_run_params {
@@ -61,6 +70,12 @@ struct virt_run_params {
 	int argc;
 	char argv[16][64];
 	int busy;
+};
+
+struct vcpu_timer {
+	void (*timer_handler)(void *data);
+	void (*next_event)(unsigned long next, void *data);
+	void *data;
 };
 
 struct vcpu {
@@ -81,14 +96,33 @@ struct vcpu {
 	unsigned long host_memory_test_pa;
 	unsigned long guest_memory_test_pa;
 	unsigned int memory_test_size;
-
+	/* vcpu run command params */
 	struct virt_run_params *run_params;
 	struct virt_run_params host_run_params;
-
+	/* vcpu timer */
+	struct vcpu_timer timer;
+	unsigned long time_delta;
+	/* vcpu state */
 	unsigned long request;
+	unsigned long irq_pending;
 
 	int running;
 };
+
+static inline void vcpu_clear_interrupt(struct vcpu *vcpu, int irq)
+{
+	vcpu->irq_pending &= ~(1UL << irq);
+}
+
+static inline void vcpu_set_interrupt(struct vcpu *vcpu, int irq)
+{
+	vcpu->irq_pending |= (1UL << irq);
+}
+
+static inline int vcpu_check_irq_pending(unsigned long pending, int irq)
+{
+	return ((pending >> irq) & (1UL));
+}
 
 static inline int vcpu_check_request(unsigned long req, unsigned int flag)
 {

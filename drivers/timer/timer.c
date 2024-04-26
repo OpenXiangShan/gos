@@ -32,7 +32,7 @@ static void timer_handle_irq(void *data)
 	do_clock_event_handler();
 }
 
-static void __timer_init()
+static void __timer_init(void)
 {
 	csr_set(sie, SIE_STIE);
 }

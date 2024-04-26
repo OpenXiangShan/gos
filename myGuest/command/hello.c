@@ -4,7 +4,10 @@
 
 static int cmd_hello_handler(int argc, char *argv[], void *priv)
 {
-	print("Hello MyUesr!!\n");
+	print("Hello MyGuest!! argc:%d\n", argc);
+
+	for (int i = 0; i < argc; i++)
+		print("cmd%d: %s\n", i, argv[i]);
 
 	return 0;
 }

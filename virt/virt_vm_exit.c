@@ -3,13 +3,13 @@
 #include "print.h"
 #include "machine.h"
 #include "vcpu_insn.h"
+#include "vcpu_sbi.h"
 
 static int gstage_page_fault(struct vcpu *vcpu, unsigned long reason)
 {
 	unsigned long fault_addr;
 	unsigned long htval, stval;
 	unsigned long htinst;
-	struct virt_cpu_context *guest_ctx = &vcpu->cpu_ctx.guest_context;
 
 	htval = read_csr(CSR_HTVAL);
 	stval = read_csr(CSR_STVAL);
@@ -22,11 +22,9 @@ static int gstage_page_fault(struct vcpu *vcpu, unsigned long reason)
 	switch (reason) {
 	case EXC_LOAD_GUEST_PAGE_FAULT:
 		vcpu_mmio_load(vcpu, fault_addr, htinst);
-		guest_ctx->sepc += 4;
 		return 1;
 	case EXC_STORE_GUEST_PAGE_FAULT:
 		vcpu_mmio_store(vcpu, fault_addr, htinst);
-		guest_ctx->sepc += 4;
 		return 1;
 	}
 
@@ -55,10 +53,17 @@ void vcpu_process_vm_exit(struct vcpu *vcpu)
 		if (guest_ctx->hstatus & HSTATUS_SPV)
 			gstage_page_fault(vcpu, scause);
 		else
-			print("%s -- hstatus state error! hstatus:0x%lx\n",
-			      guest_ctx->hstatus);
+			print
+			    ("%s -- hstatus state error! hstatus:0x%lx\n cause:0x%x",
+			     guest_ctx->hstatus, scause);
 		break;
 	case EXC_SUPERVISOR_SYSCALL:
+		if (guest_ctx->hstatus & HSTATUS_SPV)
+			vcpu_sbi_call(vcpu);
+		else
+			print
+			    ("%s -- hstatus state error! hstatus:0x%lx\n cause:0x%x",
+			     guest_ctx->hstatus, scause);
 		break;
 	default:
 		break;

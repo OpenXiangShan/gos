@@ -9,6 +9,11 @@
 static struct clock_source *clock_src;
 static DEFINE_PER_CPU(struct clock_event, clock_event);
 
+unsigned long get_clock_source_freq(void)
+{
+	return clock_src->freq;
+}
+
 unsigned long cycles_to_ms(unsigned long cycles, unsigned long freq_hz)
 {
 	return (cycles * 1000) / freq_hz;
@@ -96,6 +101,19 @@ void do_clock_event_handler(void)
 	spin_unlock_irqrestore(&event->lock, flags);
 
 	program_next_event(event, te->expiry_time);
+}
+
+unsigned long get_system_tick(void)
+{
+	struct clock_source *source = clock_src;
+	unsigned long cycle;
+
+	if (!source || !source->read)
+		return 0;
+
+	cycle = source->read(source);
+
+	return cycle;
 }
 
 unsigned long get_clocksource_counter(void)

@@ -5,14 +5,17 @@
 #include "spinlocks.h"
 #include "device.h"
 
+struct memory_region;
+struct virt_machine;
+
 enum {
 	VIRT_MEMORY = 0,
 	VIRT_UART,
 	VIRT_SRAM,
 	VIRT_TEST,
+	VIRT_CLINT,
 };
 
-struct memory_region;
 struct memory_region_ops {
 	void (*write)(struct memory_region * region, unsigned long addr,
 		      unsigned long val, unsigned int len);
@@ -34,12 +37,17 @@ struct memory_region {
 	unsigned long end;
 	unsigned long hpa_base;
 	const struct memory_region_ops *ops;
+	struct virt_machine *machine;
 };
 
 struct virt_machine {
 	struct list_head memory_region_list;
 	spinlock_t lock;
 	struct device_init_entry *device_entry;
+	struct device_init_entry *device_entry_host_va;
+	void *entry_data;
+	int entry_data_len;
+	void *entry_data_gpa;
 	unsigned int device_entry_count;
 	unsigned long gstage_pgdp;
 };
@@ -132,5 +140,6 @@ struct memory_region *find_memory_region_by_id(struct virt_machine *machine,
 					       int id);
 struct memory_region *find_memory_region(struct virt_machine *machine,
 					 unsigned long gpa);
+void device_entry_data_redirect(struct virt_machine *machine);
 
 #endif
