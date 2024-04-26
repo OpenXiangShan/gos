@@ -25,7 +25,7 @@ built-in.o: $(cur_objs) $(subdir_objs)
 	$(LD) -r -o $@ $^
 
 %.o: %.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_HAL_DIR)/include $(DEBUG) -c $< -o $@
+	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include $(DEBUG) -c $< -o $@
 
 
 .PHONY: $(PHONY)

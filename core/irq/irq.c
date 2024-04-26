@@ -180,7 +180,7 @@ out:
 							   irq_domain->priv);
 
 		if (irq_domain->domain_ops
-		    && irq_domain->domain_ops->unmask_irq)
+		    && irq_domain->domain_ops->set_affinity)
 			irq_domain->domain_ops->set_affinity(irqs[i], 0);
 	}
 

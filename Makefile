@@ -180,14 +180,14 @@ $(BSP_DIR)/%_c.o: $(BSP_DIR)/%.c
 # build gos
 GOS_ENTRY_DIR = entry
 GOS_LIB_DIR = lib
-GOS_HAL_DIR = $(TOPDIR)/hal
+GOS_CORE_DIR = $(TOPDIR)/core
 APP_DIR   = app
 GOS_FDT_DIR = fdt
 
 GOS_VIRT_DIR = virt
 GOS_USER_DIR = user
 
-export GOS_HAL_DIR
+export GOS_CORE_DIR
 
 GOS_TARGET := gos.elf
 GOS_TARGET_BIN := gos.bin
@@ -211,7 +211,7 @@ GOS_OBJ_FILES += $(GOS_USER_C_FILES:$(GOS_USER_DIR)/%.c=$(GOS_USER_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_FDT_C_FILES:$(GOS_FDT_DIR)/%.c=$(GOS_FDT_DIR)/%_c.o)
 
 obj-y += drivers/
-obj-y += hal/
+obj-y += core/
 obj-y += mm/
 obj-y += app/
 
@@ -225,22 +225,22 @@ $(GOS_ENTRY_DIR)/%_s.o: $(GOS_ENTRY_DIR)/%.S
 	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
 
 $(GOS_ENTRY_DIR)/%_c.o: $(GOS_ENTRY_DIR)/%.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_HAL_DIR)/include -I$(APP_DIR) -c $< -o $@
+	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -I$(APP_DIR) -c $< -o $@
 
 $(GOS_LIB_DIR)/%_c.o: $(GOS_LIB_DIR)/%.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_HAL_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -c $< -o $@
 
 $(GOS_VIRT_DIR)/%_s.o: $(GOS_VIRT_DIR)/%.S
 	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
 
 $(GOS_VIRT_DIR)/%_c.o: $(GOS_VIRT_DIR)/%.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_HAL_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -c $< -o $@
 
 $(GOS_USER_DIR)/%_s.o: $(GOS_USER_DIR)/%.S
 	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
 
 $(GOS_USER_DIR)/%_c.o: $(GOS_USER_DIR)/%.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_HAL_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -c $< -o $@
 
 $(GOS_FDT_DIR)/%_c.o: $(GOS_FDT_DIR)/%.c
 	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
