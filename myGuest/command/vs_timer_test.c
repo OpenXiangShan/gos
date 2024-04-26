@@ -19,6 +19,8 @@ static int cmd_timer_test_handler(int argc, char *argv[], void *priv)
 	while (count_down > 0) {
 		while (set_timer(do_timer_test, 1000, NULL)) ;
 	}
+
+	return 0;
 }
 
 static const struct command cmd_timer_test = {
