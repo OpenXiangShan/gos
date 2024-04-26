@@ -1,32 +1,30 @@
 #ifndef _PLIC_H
 #define _PLIC_H
 
-#define MAX_PLIC_IRQS 53
+#include "irq.h"
 
-#define UART0_IRQ (10)
+#define CONTEXT_BASE      0x200000
+#define CONTEXT_SIZE      0x1000
+#define CONTEXT_THRESHOLD 0x0
+#define CONTEXT_CLAIM     0x04
 
-#define PLIC_BASE 0xc000000UL
-#define PLIC_END 0x10000000UL
+#define CONTEXT_ENABLE_BASE  0x2000
+#define CONTEXT_ENABLE_SIZE  0x80
 
-#define PLIC_ENBL_OFF 0x2000UL
-#define PLIC_CLAIMCMPLT_OFF 0x200000UL
+#define PRIORITY_PER_ID  4
 
-/* 设置每个中断的优先级 */
-#define PLIC_PRIORITY(id) (PLIC_BASE + (id) * 4)
+#define CPU_TO_HART(cpu) (2 * cpu + 1)
 
-/* 每个中断的pending位，一个bit表示一个中断 */
-#define PLIC_PENDING(id) (PLIC_BASE + 0x1000 + ((id) / 32) * 4)
+struct plic_percpu_info {
+	unsigned long base;
+	unsigned long enable_base;
+};
 
-/* 中断使能位: 每个处理器核心都有对应的中断使能位*/
-#define PLIC_MENABLE(hart) (PLIC_BASE + 0x2000 + (hart) * 0x80)
-
-/* 设置每个处理器中每个中断的优先级threshold，当中断优先级大于threshold才会触发中断 */
-#define PLIC_MTHRESHOLD(hart) (PLIC_BASE + 0x200000 + (hart) * 0x1000)
-
-/* Interrupt Claim Process*/
-#define PLIC_MCLAIM(hart) (PLIC_BASE + 0x200004 + (hart) * 0x1000)
-
-/* Interrupt Completion*/
-#define PLIC_MCOMPLETE(hart) (PLIC_BASE + 0x200004 + (hart) * 0x1000)
+struct plic {
+	struct irq_domain irq_domain;
+	unsigned long base_address;
+	unsigned char max_priority;
+	unsigned char ndev;
+};
 
 #endif

@@ -5,20 +5,14 @@
 #include <asm/mmio.h>
 #include <irq.h>
 #include <asm/trap.h>
+#include "cpu.h"
+#include "plic.h"
+#include "percpu.h"
+#include "asm/sbi.h"
+#include "string.h"
 
-#define MAX_CPUS 1
-#define CPU_TO_HART(cpu) (2 * cpu + 1)
-
-#define PLIC_PRIORITY(id) (id * 4)
-#define PLIC_PENDING(id) (0x1000 + ((id) / 32) * 4)
-#define PLIC_MENABLE(hart) (0x2000 + (hart) * 0x80)
-#define PLIC_MTHRESHOLD(hart) (0x200000 + (hart) * 0x1000)
-#define PLIC_MCLAIM(hart) (0x200004 + (hart) * 0x1000)
-#define PLIC_MCOMPLETE(hart) (0x200004 + (hart) * 0x1000)
-
-unsigned long base_address;
-
-static struct irq_domain plic_irq_domain;
+static struct plic plic;
+static DEFINE_PER_CPU(struct plic_percpu_info, plic_info);
 
 struct plic_priv_data {
 	unsigned char max_priority;
@@ -27,7 +21,7 @@ struct plic_priv_data {
 
 static void plic_set_prority(int hwirq, int pro)
 {
-	unsigned long reg = base_address + PLIC_PRIORITY(hwirq);
+	unsigned long reg = plic.base_address + PRIORITY_PER_ID * hwirq;
 
 	writel(reg, 1);
 }
@@ -35,9 +29,8 @@ static void plic_set_prority(int hwirq, int pro)
 static void plic_enable_irq(int cpu, int hwirq, int enable)
 {
 	unsigned int hwirq_mask = 1 << (hwirq % 32);
-	int hart = CPU_TO_HART(cpu);
-	unsigned long reg =
-	    base_address + PLIC_MENABLE(hart) + 4 * (hwirq / 32);
+	struct plic_percpu_info *info = &per_cpu(plic_info, cpu);
+	unsigned long reg = info->enable_base + 4 * (hwirq / 32);
 
 	if (enable)
 		writel(reg, readl(reg) | hwirq_mask);
@@ -45,45 +38,56 @@ static void plic_enable_irq(int cpu, int hwirq, int enable)
 		writel(reg, readl(reg) & ~hwirq_mask);
 }
 
+static int plic_mask_irq(int hwirq, void *data)
+{
+	plic_enable_irq(0, hwirq, 0);
+
+	return 0;
+}
+
+static int plic_unmask_irq(int hwirq, void *data)
+{
+	plic_enable_irq(0, hwirq, 1);
+
+	return 0;
+}
+
 static void plic_handle_irq()
 {
 	int hwirq;
-	int hart = CPU_TO_HART(0);
-	unsigned long claim_reg = base_address + PLIC_MCLAIM(hart);
+	int cpu = sbi_get_cpu_id();
+	struct plic_percpu_info *info = &per_cpu(plic_info, cpu);
+	unsigned long claim_reg = info->base + CONTEXT_CLAIM;
 
 	csr_clear(sie, SIE_SEIE);
 
 	while ((hwirq = readl(claim_reg))) {
-		domain_handle_irq(&plic_irq_domain, hwirq, NULL);
+		domain_handle_irq(&plic.irq_domain, hwirq, NULL);
 		writel(claim_reg, hwirq);
 	}
 
 	csr_set(sie, SIE_SEIE);
 }
 
-static int __plic_init(unsigned long base, struct plic_priv_data *priv)
+static int __plic_init(struct plic *plic, int cpu)
 {
-	int i, hwirq;
-	unsigned int nr = priv->ndev;
-	unsigned char max_priority = priv->max_priority;
+	int hwirq;
+	unsigned int nr = plic->ndev;
+	unsigned char max_priority = plic->max_priority;
+	struct plic_percpu_info *info = &per_cpu(plic_info, cpu);
 
-	base_address = base;
+	info->base =
+	    plic->base_address + CONTEXT_BASE + CPU_TO_HART(cpu) * CONTEXT_SIZE;
+	info->enable_base =
+	    plic->base_address + CONTEXT_ENABLE_BASE +
+	    CPU_TO_HART(cpu) * CONTEXT_ENABLE_SIZE;
 
-	for (i = 0; i < MAX_CPUS; i++) {
-		writel(base_address + PLIC_MTHRESHOLD(CPU_TO_HART(i)), 0);
+	writel(info->base + CONTEXT_THRESHOLD, 0);
 
-		for (hwirq = 1; hwirq <= nr; hwirq++) {
-			plic_enable_irq(i, hwirq, 0);
+	for (hwirq = 1; hwirq <= nr; hwirq++) {
+		plic_enable_irq(cpu, hwirq, 0);
 
-			plic_set_prority(hwirq, max_priority);
-		}
-	}
-
-	for (i = 0; i < MAX_CPUS; i++) {
-		for (hwirq = 1; hwirq <= nr; hwirq++) {
-			plic_enable_irq(i, hwirq, 1);
-		}
-		plic_enable_irq(i, 2, 0);
+		plic_set_prority(hwirq, max_priority);
 	}
 
 	csr_set(sie, SIE_SEIE);
@@ -91,25 +95,46 @@ static int __plic_init(unsigned long base, struct plic_priv_data *priv)
 	return 0;
 }
 
+static int plic_cpuhp_startup(struct cpu_hotplug_notifier *notifier, int cpu)
+{
+	__plic_init(&plic, cpu);
+
+	return 0;
+}
+
+static struct cpu_hotplug_notifier plic_cpuhp_notifier = {
+	.startup = plic_cpuhp_startup,
+};
+
+static struct irq_domain_ops plic_irq_domain_ops = {
+	.mask_irq = plic_mask_irq,
+	.unmask_irq = plic_unmask_irq,
+};
+
 int plic_init(char *name, unsigned long base, struct irq_domain *parent,
 	      void *data)
 {
 	struct plic_priv_data *priv = (struct plic_priv_data *)data;
 	unsigned char max_priority = 0, ndev = 0;
 
+	memset((char *)&plic, 0, sizeof(struct plic));
+
+	plic.base_address = base;
 	if (priv) {
-		max_priority = priv->max_priority;
-		ndev = priv->ndev;
+		plic.max_priority = priv->max_priority;
+		plic.ndev = priv->ndev;
 	}
 
 	print("%s -- %s %d, name:%s, base:0x%lx, max_priority: %d, ndev: %d\n",
 	      __FILE__, __FUNCTION__, __LINE__, name, base, max_priority, ndev);
 
-	__plic_init(base, priv);
+	__plic_init(&plic, 0);
 
-	irq_domain_init_cascade(&plic_irq_domain, name, NULL, parent,
-				INTERRUPT_CAUSE_EXTERNAL, plic_handle_irq,
-				NULL);
+	cpu_hotplug_notify_register(&plic_cpuhp_notifier);
+
+	irq_domain_init_cascade(&plic.irq_domain, name, &plic_irq_domain_ops,
+				parent, INTERRUPT_CAUSE_EXTERNAL,
+				plic_handle_irq, NULL);
 
 	return 0;
 }
