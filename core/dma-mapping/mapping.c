@@ -6,7 +6,7 @@
 #include <print.h>
 #include "dma_mapping.h"
 
-static struct dma_map_ops *dma_mapping_ops = NULL;
+static struct dma_map_ops *dma_mapping_ops __attribute__((section(".data"))) = NULL;
 
 static LIST_HEAD(groups);
 
