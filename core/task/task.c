@@ -1,5 +1,6 @@
 #include <asm/type.h>
 #include <asm/sbi.h>
+#include <asm/csr.h>
 #include "task.h"
 #include "mm.h"
 #include "print.h"
@@ -8,9 +9,38 @@
 #include "clock.h"
 #include "list.h"
 #include "cpu.h"
+#include "tlbflush.h"
+#include "spinlocks.h"
 
 static DEFINE_PER_CPU(struct task_ctrl, tasks);
 static DEFINE_PER_CPU(struct task_scheduler, schedulers);
+static unsigned long task_id_bitmap __attribute__((section(".data"))) = 0;
+static spinlock_t task_id_lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
+
+static int alloc_task_id(void)
+{
+	unsigned long bitmap = task_id_bitmap;
+	int pos = 0;
+
+	spin_lock(&task_id_lock);
+	while (bitmap & 0x01) {
+		if (pos == 64)
+			return -1;
+		bitmap = bitmap >> 1;
+		pos++;
+	}
+
+	task_id_bitmap |= (1UL << pos);
+	spin_unlock(&task_id_lock);
+
+	return pos;
+}
+static void free_task_id(int id)
+{
+	spin_lock(&task_id_lock);
+	task_id_bitmap &= ~(1UL << id);
+	spin_unlock(&task_id_lock);
+}
 
 static void task_fn_wrap(void)
 {
@@ -27,6 +57,7 @@ static void task_fn_wrap(void)
 
 	spin_lock(&tsk_ctl->lock);
 	list_del(&cur_task->list);
+	free_task_id(cur_task->id);
 	sc->current_task = NULL;
 	spin_unlock(&tsk_ctl->lock);
 }
@@ -47,6 +78,7 @@ void walk_task_per_cpu(int cpu)
 		print("name: %s\n", entry->name);
 		print("task_fn: 0x%lx\n", entry->task_fn);
 		print("stack: 0x%lx\n", entry->stack);
+		print("task_id: %d\n", entry->id);
 	}
 	spin_unlock(&tsk_ctl->lock);
 	print("\n");
@@ -62,7 +94,7 @@ void walk_task_all_cpu(void)
 }
 
 int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
-		unsigned long stack, unsigned int stack_size)
+		unsigned long stack, unsigned int stack_size, void *pgd)
 {
 	struct task *new;
 	void *p_stack;
@@ -83,6 +115,7 @@ int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 	new->task_fn = fn;
 	new->data = data;
 	new->cpu = cpu;
+	new->id = alloc_task_id();
 
 	if (stack)
 		new->stack = stack + stack_size;
@@ -100,6 +133,15 @@ int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 	new->regs.ra = (unsigned long)task_fn_wrap;
 	new->regs.sp = (unsigned long)new->stack;
 
+	if (pgd)
+		new->regs.satp = (((unsigned long)pgd) >> PAGE_SHIFT) |
+					SATP_MODE |
+					(((unsigned long)new->id) << SATP_ASID_SHIFT);
+	else
+		new->regs.satp = (get_default_pgd() >> PAGE_SHIFT) |
+					SATP_MODE |
+					(((unsigned long)new->id) << SATP_ASID_SHIFT);
+
 	spin_lock(&tsk_ctl->lock);
 	list_add_tail(&new->list, &tsk_ctl->head);
 	spin_unlock(&tsk_ctl->lock);
@@ -109,6 +151,13 @@ int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 free_task:
 	mm_free(new, sizeof(struct task));
 	return -1;
+}
+
+static void switch_mm(struct task *task)
+{
+	int asid = task->id;
+
+	local_flush_tlb_all_asid(asid);
 }
 
 static void task_scheduler_event_handler(void *data)
@@ -139,6 +188,8 @@ static void task_scheduler_event_handler(void *data)
 		else
 			switch_cpu_regs(&ts->current_task->regs, &task->regs,
 					ts->irq_regs);
+
+		switch_mm(task);
 
 		ts->current_task = task;
 	}

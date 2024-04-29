@@ -349,3 +349,8 @@ int do_page_fault(unsigned long addr)
 
 	return ret;
 }
+
+unsigned long get_default_pgd(void)
+{
+	return (unsigned long)pgdp;
+}

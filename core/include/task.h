@@ -16,6 +16,7 @@ struct task {
 	struct task *self;
 	unsigned long stack;
 	int cpu;
+	int id;
 	struct pt_regs regs;
 };
 
@@ -37,7 +38,7 @@ void walk_task_per_cpu(int cpu);
 void walk_task_all_cpu(void);
 int percpu_tasks_init(int cpu);
 int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
-		unsigned long stack, unsigned int stack_size);
+		unsigned long stack, unsigned int stack_size, void *pgd);
 int do_idle(void *data);
 void task_scheduler_enter(struct pt_regs *regs);
 void task_scheduler_exit(struct pt_regs *regs);

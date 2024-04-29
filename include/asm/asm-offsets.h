@@ -1,7 +1,7 @@
 #ifndef __ASM_OFFSETS_H__
 #define __ASM_OFFSETS_H__
 
-#define PT_SIZE 288		/* sizeof(struct pt_regs) */
+#define PT_SIZE 296		/* sizeof(struct pt_regs) */
 #define PT_SEPC 0		/* offsetof(struct pt_regs, sepc) */
 #define PT_RA 8			/* offsetof(struct pt_regs, ra) */
 #define PT_FP 64		/* offsetof(struct pt_regs, s0) */
@@ -40,6 +40,7 @@
 #define PT_SBADADDR 264		/* offsetof(struct pt_regs, sbadaddr) */
 #define PT_SCAUSE 272		/* offsetof(struct pt_regs, scause) */
 #define PT_HSTATUS 280		/* offsetof(struct pt_regs, hstatus) */
+#define PT_SATP 288             /* offsetof(struct pt_regs, satp) */
 
 #define VIRT_CPU_HOST_ZERO 0	/* offsetof(struct cpu_context, host_context.zero) */
 #define VIRT_CPU_HOST_RA   8	/* offsetof(struct cpu_context, host_context.ra) */

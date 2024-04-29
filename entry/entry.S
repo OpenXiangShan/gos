@@ -56,6 +56,10 @@ do_exception_vector:
 	csrr s5, sscratch
 	sd s5, PT_TP(sp)
 
+	/* save satp */
+	csrr s5, satp
+	sd s5, PT_SATP(sp)
+
 	addi t0, sp, PT_SIZE
 	sd t0, PT_SP(sp)
 	/* 
@@ -106,9 +110,12 @@ do_exception_vector:
 	ld x29, PT_T4(sp)
 	ld x30, PT_T5(sp)
 	ld x31, PT_T6(sp)
-	
+
+	ld s5, PT_SATP(sp)
+	csrw satp, s5
+
 	ld sp,  PT_SP(sp)
-	
+
 	sret	
 
 .global task_do_exception_vector

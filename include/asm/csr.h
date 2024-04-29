@@ -103,6 +103,7 @@
 
 /* Supervisor Protection and Translation */
 #define CSR_SATP			0x180
+#define SATP_ASID_SHIFT                 44
 
 /* AIA csr */
 /* Virtual Interrupts and Interrupt Priorities (H-extension with AIA) */

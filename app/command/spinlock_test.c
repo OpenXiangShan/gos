@@ -35,7 +35,7 @@ static int cmd_spinlock_test_handler(int argc, char *argv[], void *priv)
 	for (i = 0; i < 2; i++) {
 		per_cpu_info[i] = i;
 		create_task("spinlock_test", spinlock_test, &per_cpu_info[i], i,
-			    NULL, 0);
+			    NULL, 0, NULL);
 	}
 
 	return 0;

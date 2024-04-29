@@ -39,6 +39,7 @@ struct pt_regs {
 	unsigned long sbadaddr;
 	unsigned long scause;
 	unsigned long hstatus;
+	unsigned long satp;
 };
 
 #endif /*__PTREGS_H__*/

@@ -53,7 +53,7 @@ static int cmd_vcpu_run_handler(int argc, char *argv[], void *priv)
 	for (i = 0; i < params->argc; i++)
 		strcpy(params->argv[i], argv[i + 1]);
 
-	create_task("vcpu", vcpu_start, (void *)params, 1, NULL, 0);
+	create_task("vcpu", vcpu_start, (void *)params, 1, NULL, 0, NULL);
 
 	return 0;
 }

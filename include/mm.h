@@ -43,5 +43,6 @@ unsigned long get_phy_end(void);
 struct memory_block *get_mm_blocks(void);
 int do_page_fault(unsigned long addr);
 unsigned long *mmu_get_pte(unsigned long virt_addr);
+unsigned long get_default_pgd(void);
 
 #endif
