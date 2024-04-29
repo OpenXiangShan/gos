@@ -12,7 +12,7 @@ DEBUG := -DUSE_QEMU
 DEBUG += -DUSE_AIA
 #DEBUG += -DIOMMU_PTWALK_TEST
 
-COPS := -g -O0 -Wall -nostdlib -mcmodel=medany -mabi=lp64 -march=rv64imafdc -fno-PIE -fomit-frame-pointer -Wno-builtin-declaration-mismatch
+COPS := -g -O0 -Wall -nostdlib -mcmodel=medany -mabi=lp64d -march=rv64imafdc -fno-PIE -fomit-frame-pointer -Wno-builtin-declaration-mismatch
 
 export TOPDIR
 export CC
