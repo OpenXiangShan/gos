@@ -5,8 +5,8 @@
  */
 #include "libfdt_env.h"
 
-#include <fdt.h>
-#include <libfdt.h>
+#include "fdt.h"
+#include "libfdt.h"
 #include "string.h"
 #include "asm/type.h"
 
