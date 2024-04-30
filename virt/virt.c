@@ -10,11 +10,18 @@
 #include "machine.h"
 #include "cpu_tlb.h"
 #include "virt_vm_exit.h"
-#include "../virt/vcpu_timer.h"
+#include "vcpu_timer.h"
 #include "uapi/align.h"
+#include "vcpu_aia.h"
 
 extern char guest_bin[];
 static struct vcpu *p_vcpu __attribute__((section(".data"))) = NULL;
+
+static void vcpu_update(struct vcpu *vcpu)
+{
+	vcpu->last_cpu = vcpu->cpu;
+	vcpu->cpu = sbi_get_cpu_id();
+}
 
 static void vcpu_save(struct vcpu *vcpu)
 {
@@ -312,6 +319,10 @@ struct vcpu *vcpu_create(void)
 
 	vcpu_timer_init(vcpu);
 
+	vcpu_aia_init(vcpu);
+
+	vcpu->cpu = -1;
+
 	p_vcpu = vcpu;
 
 	return vcpu;
@@ -341,14 +352,19 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 	vcpu->running = 1;
 
 	while (1) {
-		vcpu_do_request(vcpu);
-
-		vcpu_do_interrupt(vcpu);
-
 		vcpu_update_run_params(vcpu);
 
 		disable_local_irq();
 
+		vcpu_update(vcpu);
+
+		vcpu_do_request(vcpu);
+
+		vcpu_do_interrupt(vcpu);
+
+#ifdef USE_AIA
+		vcpu_interrupt_file_upadte(vcpu);
+#endif
 		vcpu_restore(vcpu);
 
 		vcpu_switch_to(&vcpu->cpu_ctx);

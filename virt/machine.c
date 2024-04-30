@@ -6,11 +6,12 @@
 #include "string.h"
 #include "list.h"
 #include "asm/pgtable.h"
+#include "container_of.h"
 #include "uart_emulator.h"
 #include "memory_emulator.h"
 #include "memory_test_emulator.h"
 #include "clint_emulator.h"
-#include "container_of.h"
+#include "imsic_emulator.h"
 
 static struct virt_machine_memmap virt_memmap[] = {
 	[VIRT_MEMORY] = { 0x80000000, 0x1000000 },
@@ -18,6 +19,9 @@ static struct virt_machine_memmap virt_memmap[] = {
 	[VIRT_SRAM] = { 0x1000, 0x10000 },
 	[VIRT_TEST] = { 0x10000000, 0x1000 },
 	[VIRT_CLINT] = { 0x38000000, 0x10000 },
+#ifdef USE_AIA
+	[VIRT_IMSIC] = { 0x20000000, 0x1000 },
+#endif
 };
 
 #define VIRT_MEMMAP_CNT (sizeof(virt_memmap)/sizeof(virt_memmap[0]))
@@ -78,6 +82,16 @@ struct memory_region *find_memory_region_by_id(struct virt_machine *machine,
 	return NULL;
 }
 
+unsigned long get_machine_memmap_base(int id)
+{
+	return virt_memmap[id].base;
+}
+
+unsigned int get_machine_memmap_size(int id)
+{
+	return virt_memmap[id].size;
+}
+
 int add_memory_region(struct virt_machine *machine, int id, unsigned long base,
 		      unsigned int size, const struct memory_region_ops *ops)
 {
@@ -113,50 +127,6 @@ int add_memory_region(struct virt_machine *machine, int id, unsigned long base,
 	return 0;
 }
 
-static int uart_device_emulate(struct virt_machine *machine, char *name, int pt)
-{
-	int nr, found = 0;
-	struct device *dev;
-	struct devices *p_devs = get_devices();
-	struct memory_region *region;
-	unsigned long gpa;
-	unsigned int size;
-
-	region = find_memory_region_by_id(machine, VIRT_UART);
-	gpa = virt_memmap[VIRT_UART].base;
-	size = virt_memmap[VIRT_UART].size;
-
-	if (!region)
-		return -1;
-
-	nr = p_devs->avail;
-	for_each_device(dev, p_devs->p_devices, nr) {
-		if (!strncmp(dev->compatible, name, 128)) {
-			found = 1;
-			goto find;
-		}
-	}
-
-find:
-	if (!found)
-		return -1;
-
-	region->hpa_base = dev->base;
-
-	if (pt) {
-		if (!region->ops->ioremap)
-			return -1;
-
-		if (!machine->gstage_pgdp)
-			return -1;
-
-		return region->ops->
-		    ioremap((unsigned long *)machine->gstage_pgdp, gpa, size);
-	}
-
-	return 0;
-}
-
 void device_entry_data_redirect(struct virt_machine *machine)
 {
 	struct device_init_entry *device_entry = machine->device_entry;
@@ -180,8 +150,11 @@ void device_entry_data_redirect(struct virt_machine *machine)
 
 int machine_finialize(struct virt_machine *machine)
 {
-	/* uart gstage emulate */
-	uart_device_emulate(machine, "qemu-8250", 1);
+	uart_device_finialize(machine, virt_memmap[VIRT_UART].base,
+			      virt_memmap[VIRT_UART].size, VIRT_UART, 1);
+
+	imsic_device_finialize(machine, virt_memmap[VIRT_IMSIC].base,
+			       virt_memmap[VIRT_IMSIC].size, VIRT_IMSIC, 1);
 
 	return 0;
 }
@@ -265,6 +238,17 @@ int machine_init(struct virt_machine *machine)
 	entry->data = (void *)((unsigned long)entry_data_len);
 	entry_data_len += len;
 
+#ifdef USE_AIA
+	/* create imsic device */
+	entry = &device_entry[n++];
+	strcpy((char *)entry->compatible, "imsic");
+	entry->start = virt_memmap[VIRT_IMSIC].base;
+	entry->len = virt_memmap[VIRT_IMSIC].size;
+	entry->data = (void *)-1;
+	create_imsic_device(machine, VIRT_IMSIC,
+			    virt_memmap[VIRT_IMSIC].base,
+			    virt_memmap[VIRT_IMSIC].size);
+#endif
 	/* end symbol */
 	entry = &device_entry[n];
 	strcpy((char *)entry->compatible, "THE END");

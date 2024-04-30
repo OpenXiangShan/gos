@@ -24,21 +24,32 @@ static void sbi_trap_error(struct sbi_trap_regs *regs, const char *msg, int rc)
 {
 	sbi_print("mhartid:%d:\n", read_csr(mhartid));
 	sbi_print("%s: %s (error %d)\n", __FUNCTION__, msg, rc);
-	sbi_print("mcause: %x  mtval: %x \n",
+	sbi_print("mcause: 0x%lx  mtval: 0x%lx \n",
 		  read_csr(mcause), read_csr(mtval));
+	sbi_print("stval: 0x%lx \n", read_csr(CSR_VSTVAL));
 
-	sbi_print("mepc: %x mstatus : %x\n", regs->mepc, regs->mstatus);
-	sbi_print(" gp : %x tp : %x t0 : %x\n", regs->gp, regs->tp, regs->t0);
-	sbi_print(" t1 : %x t2 : %x t3 : %x\n", regs->t1, regs->t2, regs->s0);
-	sbi_print(" s1 : %x a0 : %x a1 : %x\n", regs->s1, regs->a0, regs->a1);
-	sbi_print(" a2 : %x a3 : %x a4 : %x\n", regs->a2, regs->a3, regs->a4);
-	sbi_print(" a5 : %x a6 : %x a7 : %x\n", regs->a5, regs->a6, regs->a7);
-	sbi_print(" s2 : %x s3 : %x s4 : %x\n", regs->s2, regs->s3, regs->s4);
-	sbi_print(" s5 : %x s6 : %x s7 : %x\n", regs->s5, regs->s6, regs->s7);
-	sbi_print(" s8 : %x s9 : %x s10: %x\n", regs->s8, regs->s9, regs->s10);
-	sbi_print(" s11: %x t3 : %x t4: %x\n", regs->s11, regs->t3, regs->t4);
-	sbi_print(" t5 : %x t6 : %x sp: %x\n", regs->t5, regs->t6, regs->sp);
-	sbi_print(" ra: %x\n", regs->ra);
+	sbi_print("mepc: 0x%lx mstatus : 0x%lx\n", regs->mepc, regs->mstatus);
+	sbi_print(" gp : 0x%lx tp : 0x%lx t0 : 0x%lx\n", regs->gp, regs->tp,
+		  regs->t0);
+	sbi_print(" t1 : 0x%lx t2 : 0x%lx t3 : 0x%lx\n", regs->t1, regs->t2,
+		  regs->s0);
+	sbi_print(" s1 : 0x%lx a0 : 0x%lx a1 : 0x%lx\n", regs->s1, regs->a0,
+		  regs->a1);
+	sbi_print(" a2 : 0x%lx a3 : 0x%lx a4 : 0x%lx\n", regs->a2, regs->a3,
+		  regs->a4);
+	sbi_print(" a5 : 0x%lx a6 : 0x%lx a7 : 0x%lx\n", regs->a5, regs->a6,
+		  regs->a7);
+	sbi_print(" s2 : 0x%lx s3 : 0x%lx s4 : 0x%lx\n", regs->s2, regs->s3,
+		  regs->s4);
+	sbi_print(" s5 : 0x%lx s6 : 0x%lx s7 : 0x%lx\n", regs->s5, regs->s6,
+		  regs->s7);
+	sbi_print(" s8 : 0x%lx s9 : 0x%lx s10: 0x%lx\n", regs->s8, regs->s9,
+		  regs->s10);
+	sbi_print(" s11: 0x%lx t3 : 0x%lx t4: 0x%lx\n", regs->s11, regs->t3,
+		  regs->t4);
+	sbi_print(" t5 : 0x%lx t6 : 0x%lx sp: 0x%lx\n", regs->t5, regs->t6,
+		  regs->sp);
+	sbi_print(" ra: 0x%lx\n", regs->ra);
 
 	sbi_panic();
 }

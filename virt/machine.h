@@ -14,6 +14,7 @@ enum {
 	VIRT_SRAM,
 	VIRT_TEST,
 	VIRT_CLINT,
+	VIRT_IMSIC,
 };
 
 struct memory_region_ops {
@@ -21,8 +22,6 @@ struct memory_region_ops {
 		      unsigned long val, unsigned int len);
 	unsigned long (*read)(struct memory_region * region, unsigned long addr,
 			      unsigned int len);
-	int (*ioremap)(unsigned long *pgdp, unsigned long gpa,
-		       unsigned int size);
 };
 
 struct virt_machine_memmap {
@@ -141,5 +140,7 @@ struct memory_region *find_memory_region_by_id(struct virt_machine *machine,
 struct memory_region *find_memory_region(struct virt_machine *machine,
 					 unsigned long gpa);
 void device_entry_data_redirect(struct virt_machine *machine);
+unsigned long get_machine_memmap_base(int id);
+unsigned int get_machine_memmap_size(int id);
 
 #endif

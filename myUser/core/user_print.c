@@ -30,11 +30,10 @@ static void __putc(char c)
 		return;
 	}
 
-	if (c == '\n'){
+	if (c == '\n') {
 		log_buf[pos++] = '\r';
 		log_buf[pos++] = '\n';
-	}
-	else
+	} else
 		log_buf[pos++] = c;
 }
 

@@ -2,6 +2,7 @@
 #include "asm/csr.h"
 #include "print.h"
 #include "timer.h"
+#include "irq.h"
 
 #define SCAUSE_IRQ (1UL << 63)
 
@@ -17,7 +18,10 @@ int do_exception(struct pt_regs *regs, unsigned long scause)
 
 		if (cause == INTERRUPT_CAUSE_TIMER)
 			irq_do_timer_handler();
-	}
+		else if (cause == INTERRUPT_CAUSE_EXTERNAL)
+			irq_handler();
+	} else
+		print("scause:0x%lx\n", scause);
 
 	return 0;
 }

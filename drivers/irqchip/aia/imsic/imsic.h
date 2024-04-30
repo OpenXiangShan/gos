@@ -44,7 +44,7 @@ struct imsic {
 };
 
 struct irq_domain *imsic_get_irq_domain(void);
-unsigned long imsic_get_interrupt_file_base(void);
+unsigned long imsic_get_interrupt_file_base(int cpu, int guest_id);
 int imsic_get_hart_index_bits(void);
 int imsic_get_group_index_bits(void);
 

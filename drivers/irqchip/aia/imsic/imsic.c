@@ -37,9 +37,12 @@ struct irq_domain *imsic_get_irq_domain()
 	return &imsic.irq_domain;
 }
 
-unsigned long imsic_get_interrupt_file_base()
+unsigned long imsic_get_interrupt_file_base(int cpu, int guest_id)
 {
-	return imsic.interrupt_file_base[0][0];
+	if (guest_id > imsic.nr_guests - 1)
+		return -1;
+
+	return imsic.interrupt_file_base[cpu][guest_id];
 }
 
 int imsic_get_hart_index_bits()

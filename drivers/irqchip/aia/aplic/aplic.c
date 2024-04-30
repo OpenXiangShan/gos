@@ -98,7 +98,7 @@ static void aplic_m_mode_init(struct aplic *p_aplic)
 	unsigned int low_base_ppn, high_base_ppn, LHXS;
 	unsigned int val_smsicfgaddrh = 0, val_smsicfgaddr = 0;
 
-	imsic_base = imsic_get_interrupt_file_base();
+	imsic_base = imsic_get_interrupt_file_base(0, 0);
 	hart_index = imsic_get_hart_index_bits();
 
 	low_base_ppn = (imsic_base << 32) >> 32 >> 12;

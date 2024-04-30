@@ -1,8 +1,10 @@
 #include "machine.h"
 #include "print.h"
 #include "mm.h"
+#include "device.h"
 #include "../drivers/uart/qemu-8250.h"
 #include "asm/mmio.h"
+#include "string.h"
 
 extern int mmu_is_on;
 
@@ -43,18 +45,17 @@ static unsigned long uart_mmio_read(struct memory_region *region,
 	return 0;
 }
 
-int uart_gstage_ioremap(unsigned long *pgdp,
-			unsigned long gpa, unsigned int size)
+static int uart_gstage_ioremap(unsigned long *pgdp,
+			       unsigned long gpa, unsigned int size)
 {
 	unsigned long addr = qemu_8250_get_base();
 	unsigned long hpa;
+	pgprot_t pgprot;
 
 	if (!mmu_is_on)
 		hpa = addr;
 	else
 		hpa = (unsigned long)walk_pt_va_to_pa((unsigned long)addr);
-
-	pgprot_t pgprot;
 
 	pgprot =
 	    __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY |
@@ -68,13 +69,49 @@ int uart_gstage_ioremap(unsigned long *pgdp,
 static const struct memory_region_ops uart_memory_ops = {
 	.write = uart_mmio_write,
 	.read = uart_mmio_read,
-	.ioremap = uart_gstage_ioremap,
 };
 
 int create_uart_device(struct virt_machine *machine, int id, unsigned long base,
 		       unsigned int size)
 {
 	add_memory_region(machine, id, base, size, &uart_memory_ops);
+
+	return 0;
+}
+
+int uart_device_finialize(struct virt_machine *machine, unsigned long gpa,
+			  unsigned int size, int id, int pt)
+{
+	int nr, found = 0;
+	struct device *dev;
+	struct devices *p_devs = get_devices();
+	struct memory_region *region;
+
+	region = find_memory_region_by_id(machine, id);
+	if (!region)
+		return -1;
+
+	nr = p_devs->avail;
+	for_each_device(dev, p_devs->p_devices, nr) {
+		if (!strncmp(dev->compatible, "qemu-8250", 128)) {
+			found = 1;
+			goto find;
+		}
+	}
+
+find:
+	if (!found)
+		return -1;
+
+	region->hpa_base = dev->base;
+
+	if (pt) {
+		if (!machine->gstage_pgdp)
+			return -1;
+
+		return uart_gstage_ioremap((unsigned long *)
+					   machine->gstage_pgdp, gpa, size);
+	}
 
 	return 0;
 }

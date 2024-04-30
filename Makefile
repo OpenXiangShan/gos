@@ -234,7 +234,7 @@ $(GOS_VIRT_DIR)/%_s.o: $(GOS_VIRT_DIR)/%.S
 	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
 
 $(GOS_VIRT_DIR)/%_c.o: $(GOS_VIRT_DIR)/%.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include $(DEBUG) -c $< -o $@
 
 $(GOS_USER_DIR)/%_s.o: $(GOS_USER_DIR)/%.S
 	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
@@ -255,12 +255,12 @@ dtb:
 	
 run:
 	./qemu-system-riscv64 -nographic \
-	-machine virt -smp 8 -m 8G \
+	-machine virt -smp 2 -m 8G \
 	-bios out/Image.bin \
 
 run-aia:
 	./qemu-system-riscv64-debug -nographic \
-        -machine virt,aia=aplic-imsic -smp 4 \
+        -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
 	-cpu rv64,sv39=on -m 8G \
         -bios out/Image.bin \
 

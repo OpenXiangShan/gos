@@ -79,6 +79,8 @@ struct vcpu_timer {
 };
 
 struct vcpu {
+	int last_cpu;
+	int cpu;
 	struct cpu_context cpu_ctx;
 	struct virt_machine machine;
 	/* ddr */
@@ -105,6 +107,12 @@ struct vcpu {
 	/* vcpu state */
 	unsigned long request;
 	unsigned long irq_pending;
+#ifdef USE_AIA
+	/* aia */
+	unsigned long hgei;
+	unsigned long vs_interrupt_file_va;
+	unsigned long vs_interrupt_file_pa;
+#endif
 
 	int running;
 };
