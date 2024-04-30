@@ -153,8 +153,10 @@ int machine_finialize(struct virt_machine *machine)
 	uart_device_finialize(machine, virt_memmap[VIRT_UART].base,
 			      virt_memmap[VIRT_UART].size, VIRT_UART, 1);
 
+#ifdef USE_AIA
 	imsic_device_finialize(machine, virt_memmap[VIRT_IMSIC].base,
 			       virt_memmap[VIRT_IMSIC].size, VIRT_IMSIC, 1);
+#endif
 
 	return 0;
 }

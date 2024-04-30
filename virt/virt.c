@@ -319,8 +319,9 @@ struct vcpu *vcpu_create(void)
 
 	vcpu_timer_init(vcpu);
 
+#ifdef USE_AIA
 	vcpu_aia_init(vcpu);
-
+#endif
 	vcpu->cpu = -1;
 
 	p_vcpu = vcpu;
