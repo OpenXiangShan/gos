@@ -9,7 +9,7 @@ RISCV_COPY_FLAGS := --set-section-flags .bss=alloc,contents --set-section-flags 
 RISCV_DUMP := $(GNU)objdump
 
 DEBUG := -DUSE_QEMU
-DEBUG += -DUSE_AIA
+#DEBUG += -DUSE_AIA
 #DEBUG += -DIOMMU_PTWALK_TEST
 
 COPS := -g -O0 -Wall -nostdlib -mcmodel=medany -mabi=lp64d -march=rv64imafdc -fno-PIE -fomit-frame-pointer -Wno-builtin-declaration-mismatch
@@ -255,18 +255,26 @@ dtb:
 	
 run:
 	./qemu-system-riscv64 -nographic \
-	-machine virt -smp 2 -m 8G \
-	-bios out/Image.bin \
+        -machine virt -smp 2 \
+	-cpu rv64,sv39=on -m 8G \
+        -bios out/Image.bin \
 
 run-aia:
-	./qemu-system-riscv64-debug -nographic \
+	./qemu-system-riscv64 -nographic \
         -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
 	-cpu rv64,sv39=on -m 8G \
         -bios out/Image.bin \
 
 run-debug:
-	./qemu-system-riscv64-new2 -nographic \
-        -machine virt,aia=aplic-imsic -smp 4 \
+	./qemu-system-riscv64 -nographic \
+        -machine virt -smp 2 \
+	-cpu rv64,sv39=on -m 8G \
+        -bios out/Image.bin \
+	-S -s
+
+run-aia-debug:
+	./qemu-system-riscv64 -nographic \
+        -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
 	-cpu rv64,sv39=on -m 8G \
         -bios out/Image.bin \
 	-S -s
