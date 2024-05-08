@@ -9,7 +9,9 @@ RISCV_COPY_FLAGS := --set-section-flags .bss=alloc,contents --set-section-flags 
 RISCV_DUMP := $(GNU)objdump
 
 DEBUG := -DUSE_QEMU
-#DEBUG += -DUSE_AIA
+#DEBUG := -DUSE_FPGA
+
+DEBUG += -DUSE_AIA
 #DEBUG += -DIOMMU_PTWALK_TEST
 
 COPS := -g -O0 -Wall -nostdlib -mcmodel=medany -mabi=lp64d -march=rv64imafdc -fno-PIE -fomit-frame-pointer -Wno-builtin-declaration-mismatch
