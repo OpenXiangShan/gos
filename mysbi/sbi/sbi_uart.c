@@ -7,6 +7,7 @@
 #include "sbi_uart.h"
 #include "uart_qemu-8250.h"
 #include "uart_ns16550a.h"
+#include "uart_uartlite.h"
 
 static struct sbi_uart_ops ops = { 0, };
 
@@ -41,6 +42,11 @@ static int __sbi_uart_init(struct sbi_trap_hw_context *ctx)
 		if (!strncmp(device_entry->compatible, "ns16550a", 128)) {
 			ctx->uart_base = device_entry->start;
 			uart_ns16550a_init(device_entry->start, &ops);
+			return 0;
+		}
+		if (!strncmp(device_entry->compatible, "uartlite", 128)) {
+			ctx->uart_base = device_entry->start;
+			uart_uartlite_init(device_entry->start, &ops);
 			return 0;
 		}
 	}
