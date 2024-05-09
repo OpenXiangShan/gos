@@ -128,6 +128,9 @@ int get_hwirq(struct device *dev, int *ret_irq)
 	else
 		num = dev->irq_num;
 
+	if (num == 0)
+		return 0;
+
 	if (!irqs)
 		return -1;
 

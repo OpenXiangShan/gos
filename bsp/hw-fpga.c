@@ -27,7 +27,7 @@ static const struct device_init_entry __attribute__((used))
 	 1,
 	 0,
 	 0,
-	},
+	  },
 #ifndef USE_AIA
 	{
 	 "PLIC",
@@ -38,7 +38,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 0,
 	 &plic_hw_data,
-	},
+	  },
 #endif
 	{
 	 "clint",
@@ -49,7 +49,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 0,
 	 &clint_hw_data,
-	},
+	  },
 #if 0
 	{
 	 "dw,dmac",
@@ -60,7 +60,7 @@ static const struct device_init_entry __attribute__((used))
 	 1,
 	 0,
 	 0,
-	},
+	  },
 #endif
 #ifdef USE_AIA
 	{
@@ -72,7 +72,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 0,
 	 0,
-	},
+	  },
 #endif
 	{
 	 "THE END",
@@ -83,7 +83,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 0,
 	 0,
-	},
+	  },
 };
 
 #endif

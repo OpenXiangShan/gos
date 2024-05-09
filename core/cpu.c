@@ -16,9 +16,11 @@ extern char dtb_bin[];
 extern int mmu_is_on;
 extern void do_exception_vector(void);
 
-spinlock_t cpumask_lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
+spinlock_t cpumask_lock __attribute__((section(".data"))) =
+    __SPINLOCK_INITIALIZER;
 
-static spinlock_t notifier_lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
+static spinlock_t notifier_lock __attribute__((section(".data"))) =
+    __SPINLOCK_INITIALIZER;
 
 unsigned long online_cpu_mask __attribute__((section(".data"))) = 0;
 

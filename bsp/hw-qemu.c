@@ -27,7 +27,7 @@ static const struct device_init_entry __attribute__((used))
 	 1,
 	 0,
 	 0,
-	},
+	  },
 #ifdef IOMMU_PTEWALK_TEST
 	{
 	 "riscv,iommu",
@@ -38,7 +38,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 0,
 	 &riscv_iommu_data,
-	},
+	  },
 	{
 	 "riscv,iommu_test",
 	 0x10001000,
@@ -48,7 +48,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 0,
 	 0,
-	},
+	  },
 	{
 	 "riscv,iommu_test2",
 	 0x10001000,
@@ -58,7 +58,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 1,
 	 0,
-	},
+	  },
 	{
 	 "riscv,iommu_test3",
 	 0x10001000,
@@ -68,7 +68,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 1,
 	 0,
-	},
+	  },
 	{
 	 "riscv,iommu_test_two_stage",
 	 0x10001000,
@@ -78,7 +78,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 1,
 	 0,
-	},
+	  },
 	{
 	 "riscv,iommu_test_two_stage2",
 	 0x10001000,
@@ -88,7 +88,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 2,
 	 0,
-	},
+	  },
 #endif
 #ifndef USE_AIA
 	{
@@ -142,7 +142,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 0,
 	 &qemu_clint_hw_data,
-	},
+	  },
 #ifdef USE_AIA
 	{
 	 "imsic,test",
@@ -153,7 +153,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 0,
 	 0,
-	},
+	  },
 #endif
 	{
 	 "THE END",
@@ -164,7 +164,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 0,
 	 0,
-	},
+	  },
 };
 
 #endif
