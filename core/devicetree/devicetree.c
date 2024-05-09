@@ -61,10 +61,10 @@ int dtb_scan_cpus(void *dtb_addr,
 		if (!of_fdt_device_is_available(dtb_addr, node))
 			continue;
 
-		print("cpus scan node %s\n", name);
+		//print("cpus scan node %s\n", name);
 		fdt_for_each_subnode(cpu_node, dtb_addr, node) {
-			print(" -- %s\n",
-			      fdt_get_name(dtb_addr, cpu_node, NULL));
+		//	print(" -- %s\n",
+		//	      fdt_get_name(dtb_addr, cpu_node, NULL));
 			if (fn)
 				fn(dtb_addr, cpu_node, data);
 		}
