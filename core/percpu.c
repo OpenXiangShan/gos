@@ -15,11 +15,15 @@ int percpu_init()
 	unsigned long percpu_sec_base = (unsigned long)&__percpu_start;
 	unsigned int percpu_sec_size = &__percpu_end - &__percpu_start;
 	int i;
+	int n = get_cpu_count();
+
+	if (n > MAX_CPU_COUNT)
+		n = MAX_CPU_COUNT;
 
 	if (percpu_sec_size == 0)
 		return 0;
 
-	for (i = 0; i < MAX_CPU_COUNT; i++) {
+	for (i = 0; i < n; i++) {
 		percpu_buf[i] = (unsigned long)mm_alloc(percpu_sec_size);
 		memset((char *)percpu_buf[i], 0, percpu_sec_size);
 		percpu_offset[i] = percpu_buf[i] - percpu_sec_base;

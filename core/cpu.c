@@ -49,7 +49,7 @@ static void scan_dtb_cpus_cb(void *dtb, int offset, void *data)
 	(*n)++;
 }
 
-static int get_cpu_count()
+int get_cpu_count()
 {
 	void *dtb_ptr;
 	int ret = 0;

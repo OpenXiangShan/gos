@@ -7,7 +7,7 @@
 #include "spinlocks.h"
 #include "print.h"
 
-#define MAX_CPU_COUNT 8
+#define MAX_CPU_COUNT 512
 
 extern unsigned long online_cpu_mask;
 extern spinlock_t cpumask_lock;
@@ -59,5 +59,6 @@ void bringup_secondary_cpus(struct device_init_entry *hw);
 int cpu_hotplug_notify_register(struct cpu_hotplug_notifier *notifier);
 int cpu_hotplug_init(int cpu);
 void cpu_regs_init(struct pt_regs *regs);
+int get_cpu_count(void);
 
 #endif
