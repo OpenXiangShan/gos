@@ -177,9 +177,14 @@ static void task_scheduler_event_handler(void *data)
 		return;
 	}
 
+again:
 	task = list_entry(list_first(&task_ctl->head), struct task, list);
 	list_del(&task->list);
 	list_add_tail(&task->list, &task_ctl->head);
+	if (!strncmp(task->name, "idle", sizeof("idle"))) {
+		if (list_entry(list_first(&task_ctl->head), struct task, list) != task)
+			goto again;
+	}
 	spin_unlock(&task_ctl->lock);
 
 	if (task != ts->current_task) {
