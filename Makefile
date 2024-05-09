@@ -10,6 +10,8 @@ RISCV_DUMP := $(GNU)objdump
 
 DEBUG := -DUSE_QEMU
 #DEBUG := -DUSE_FPGA
+#DEBUG := -DUSE_ST_VCS
+#DEBUG := -DUSE_ST_CMN600
 
 DEBUG += -DUSE_AIA
 #DEBUG += -DIOMMU_PTWALK_TEST
@@ -280,6 +282,9 @@ run-aia-debug:
 	-cpu rv64,sv39=on -m 8G \
         -bios out/Image.bin \
 	-S -s
+
+run-nemu:
+	./riscv64-nemu-interpreter -b out/Image.bin
 
 format:
 	find . -name *.c |xargs ./Lindent
