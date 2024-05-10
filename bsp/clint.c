@@ -9,5 +9,5 @@ struct clint_data qemu_clint_hw_data = {
 };
 
 struct clint_data st_clint_hw_data = {
-	.clint_freq = 10000000,
+	.clint_freq = 1000000,
 };
