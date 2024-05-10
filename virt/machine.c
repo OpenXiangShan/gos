@@ -14,7 +14,7 @@
 #include "imsic_emulator.h"
 
 static struct virt_machine_memmap virt_memmap[] = {
-	[VIRT_MEMORY] = { 0x80000000, 0x1000000 },
+	[VIRT_MEMORY] = { 0x80000000, 0x200000 },
 	[VIRT_UART] = { 0x310b0000, 0x10000 },
 	[VIRT_SRAM] = { 0x1000, 0x10000 },
 	[VIRT_TEST] = { 0x10000000, 0x1000 },
