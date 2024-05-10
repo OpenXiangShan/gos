@@ -8,6 +8,8 @@
 #include "vmap.h"
 #include "asm/pgtable.h"
 
+extern int mmu_is_on;
+
 struct msi_msg {
 	unsigned long msi_addr;
 	unsigned long msi_data;
@@ -45,7 +47,10 @@ static void imsic_test_write_msi_msg(unsigned long msi_addr,
 	if (ii++ == 0)
 		base_hwirq = hwirq;
 
-	msi_addr_va = (unsigned long)ioremap((void *)msi_addr, PAGE_SIZE, 0);
+	if (mmu_is_on)
+		msi_addr_va = (unsigned long)ioremap((void *)msi_addr, PAGE_SIZE, 0);
+	else
+		msi_addr_va = msi_addr;
 
 	msi_msg[hwirq - base_hwirq].msi_addr = msi_addr_va;
 	msi_msg[hwirq - base_hwirq].msi_data = msi_data;

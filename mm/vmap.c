@@ -11,6 +11,7 @@
 #define VMAP_MAP_NR 8192	//2*1024*1024*1024/PAGE_SIZE/(sizeof(unsigned long)*8)
 #define VMAP_TOTAL_PAGE_NUM VMAP_MAP_NR * sizeof(unsigned long)
 
+extern int mmu_is_on;
 static spinlock_t vmem_lock __attribute__((section(".data"))) =
     __SPINLOCK_INITIALIZER;
 static unsigned long vmem_maps[VMAP_MAP_NR] __attribute__((section(".data"))) =
@@ -87,6 +88,9 @@ void *ioremap(void *addr, unsigned int size, int gfp)
 	unsigned long phys = (unsigned long)addr;
 	unsigned long virt;
 
+	if (!mmu_is_on)
+		return addr;
+
 	virt = (unsigned long)vmap_alloc(size);
 	if (!virt) {
 		print("%s -- vmap out of memory!\n", __FUNCTION__);
@@ -108,12 +112,15 @@ void iounmap(void *addr, unsigned int size)
 {
 	void *phys;
 
-	phys = walk_pt_va_to_pa((unsigned long)addr);
-	if (!phys)
-		return;
-
-	vmap_free(addr, size);
-	mm_free((void *)phy_to_virt((unsigned long)phys), size);
+	if (mmu_is_on) {
+		phys = walk_pt_va_to_pa((unsigned long)addr);
+		if (!phys)
+			return;
+		vmap_free(addr, size);
+		mm_free((void *)phy_to_virt((unsigned long)phys), size);
+	}
+	else
+		mm_free(addr, size);
 }
 
 void *vmem_map(void *addr, unsigned int size, int gfp)

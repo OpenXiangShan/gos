@@ -15,6 +15,7 @@ DEBUG := -DUSE_QEMU
 
 DEBUG += -DUSE_AIA
 #DEBUG += -DIOMMU_PTWALK_TEST
+#DEBUG += -DENABLE_MMU
 
 COPS := -g -O0 -Wall -nostdlib -mcmodel=medany -mabi=lp64d -march=rv64imafdc -fno-PIE -fomit-frame-pointer -Wno-builtin-declaration-mismatch
 
@@ -229,7 +230,7 @@ $(GOS_ENTRY_DIR)/%_s.o: $(GOS_ENTRY_DIR)/%.S
 	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
 
 $(GOS_ENTRY_DIR)/%_c.o: $(GOS_ENTRY_DIR)/%.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -I$(APP_DIR) -c $< -o $@
+	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -I$(APP_DIR) $(DEBUG)  -c $< -o $@
 
 $(GOS_LIB_DIR)/%_c.o: $(GOS_LIB_DIR)/%.c
 	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -c $< -o $@

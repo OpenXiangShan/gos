@@ -9,6 +9,7 @@
 #include "cpu.h"
 
 static struct imsic imsic;
+extern int mmu_is_on;
 
 static int imsic_id_get_target(struct imsic *p_imsic, int id)
 {
@@ -184,10 +185,14 @@ static int imsic_state_setup(struct imsic *p_imsic,
 			unsigned long per_hart_base;
 			unsigned long interrupt_file_base;
 
-			per_hart_base =
-			    (unsigned long)walk_pt_va_to_pa(p_imsic->base) +
-			    (1ULL << (p_imsic->guest_index_bits + 12)) *
-			    hart_id;
+			if (mmu_is_on)
+				per_hart_base =
+					(unsigned long)walk_pt_va_to_pa(p_imsic->base) +
+					(1ULL << (p_imsic->guest_index_bits + 12)) *
+					hart_id;
+			else
+				per_hart_base = p_imsic->base + (1ULL << (p_imsic->guest_index_bits + 12)) * hart_id;
+
 			interrupt_file_base =
 			    per_hart_base + (1ULL << 12) * guest_id;
 			p_imsic->interrupt_file_base[hart_id][guest_id] =

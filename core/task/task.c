@@ -12,6 +12,7 @@
 #include "tlbflush.h"
 #include "spinlocks.h"
 
+extern int mmu_is_on;
 static DEFINE_PER_CPU(struct task_ctrl, tasks);
 static DEFINE_PER_CPU(struct task_scheduler, schedulers);
 static unsigned long task_id_bitmap __attribute__((section(".data"))) = 0;
@@ -133,14 +134,16 @@ int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 	new->regs.ra = (unsigned long)task_fn_wrap;
 	new->regs.sp = (unsigned long)new->stack;
 
-	if (pgd)
-		new->regs.satp = (((unsigned long)pgd) >> PAGE_SHIFT) |
-					SATP_MODE |
-					(((unsigned long)new->id) << SATP_ASID_SHIFT);
-	else
-		new->regs.satp = (get_default_pgd() >> PAGE_SHIFT) |
-					SATP_MODE |
-					(((unsigned long)new->id) << SATP_ASID_SHIFT);
+	if (mmu_is_on) {
+		if (pgd)
+			new->regs.satp = (((unsigned long)pgd) >> PAGE_SHIFT) |
+						SATP_MODE |
+						(((unsigned long)new->id) << SATP_ASID_SHIFT);
+		else
+			new->regs.satp = (get_default_pgd() >> PAGE_SHIFT) |
+						SATP_MODE |
+						(((unsigned long)new->id) << SATP_ASID_SHIFT);
+	}
 
 	spin_lock(&tsk_ctl->lock);
 	list_add_tail(&new->list, &tsk_ctl->head);

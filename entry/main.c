@@ -19,15 +19,17 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 {
 	early_print_setup(hw);
 
+#ifndef USE_ST_CMN600
 	print(logo);
+#endif
 	print("Hello, gos!\n");
-
 	trap_init();
 
 	mm_init(hw);
 
+#ifdef ENABLE_MMU
 	paging_init(hw);
-
+#endif
 	early_print_setup(hw);
 
 	parse_dtb();
