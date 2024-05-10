@@ -55,8 +55,7 @@ void memory_block_add(unsigned long base, unsigned long size)
 		else
 			mm_blocks.memory_block_size[mm_blocks.avail] = size - i;
 		mm_blocks.maps[mm_blocks.avail].map_nr =
-		    mm_blocks.memory_block_size[mm_blocks.avail] /
-		    sizeof(unsigned long);
+		    mm_blocks.memory_block_size[mm_blocks.avail] / PAGE_SIZE;
 		mm_blocks.avail++;
 
 		i += MAX_BYTE_PER_MAPS;
@@ -68,7 +67,7 @@ void mm_init(struct device_init_entry *hw)
 	int i, n;
 	struct mem_maps *maps;
 
-	memset((char *)&mm_blocks, 0, sizeof(struct memory_block));
+	mm_blocks.avail = 0;
 	mm_blocks.max_byte_per_maps = MAX_BYTE_PER_MAPS;
 
 	dtb_scan_memory((void *)dtb_bin, memory_block_add);
@@ -90,7 +89,7 @@ void mm_init(struct device_init_entry *hw)
 		}
 		maps = &mm_blocks.maps[i];
 
-		memset((char *)maps->maps, 0, sizeof(maps->maps));
+		memset((char *)maps->maps, 0, maps->map_nr / 8);
 
 		print
 		    ("Available Memory: phy_start_address:0x%lx, phy_end_address:0x%lx, available size:%dKB, %d available pages, page_size:%d\n",
