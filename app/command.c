@@ -162,7 +162,7 @@ static void command_setup()
 		entry->init();
 }
 
-static void command_history_init()
+void command_history_init()
 {
 	struct cmd_name *p_cmds;
 
@@ -192,8 +192,6 @@ int command_init()
 	_commands.avail = 0;
 
 	command_setup();
-
-	command_history_init();
 
 	return 0;
 }

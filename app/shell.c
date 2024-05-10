@@ -12,6 +12,7 @@
 
 int shell_init(void *data)
 {
+#ifndef NO_SHELL
 	int i;
 	int left = 5;
 	int fd;
@@ -22,8 +23,13 @@ int shell_init(void *data)
 	int ret;
 	struct cmd_name *cmd;
 	int arrow_flag = 0;
-
+#endif
 	command_init();
+
+#ifdef NO_SHELL
+	test_cmd_auto_run();
+#else
+	command_history_init();
 
 	shell_command = (char *)mm_alloc(PAGE_SIZE);
 	if (!shell_command) {
@@ -135,6 +141,6 @@ run_shell:
 
 	mm_free(shell_command, PAGE_SIZE);
 	shell_command = NULL;
-
+#endif
 	return 0;
 }

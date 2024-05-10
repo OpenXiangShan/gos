@@ -17,6 +17,7 @@ DEBUG += -DUSE_AIA
 #DEBUG += -DIOMMU_PTWALK_TEST
 DEBUG += -DENABLE_MMU
 DEBUG += -DENABLE_MULTI_TASK
+#DEBUG += -DNO_SHELL
 
 COPS := -g -O0 -Wall -nostdlib -mcmodel=medany -mabi=lp64d -march=rv64imafdc -fno-PIE -fomit-frame-pointer -Wno-builtin-declaration-mismatch
 
