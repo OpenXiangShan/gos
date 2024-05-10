@@ -6,8 +6,8 @@
 
 #define GPA_MEM_MAP_NR 16384
 #define IOVA_MEM_MAP_NR 16384	//4*1024*1024*1024/PAGE_SIZE/(sizeof(unsigned long)*8) -- 4G
-#define TOTAL_IOVA_PAGE_NUM IOVA_MEM_MAP_NR * sizeof(unsigned long)
-#define TOTAL_GPA_PAGE_NUM GPA_MEM_MAP_NR * sizeof(unsigned long)
+#define TOTAL_IOVA_PAGE_NUM IOVA_MEM_MAP_NR * sizeof(unsigned long) * 8
+#define TOTAL_GPA_PAGE_NUM GPA_MEM_MAP_NR * sizeof(unsigned long) * 8
 
 struct dma_map_ops {
 	void *(*alloc)(struct device * dev, unsigned long iova,

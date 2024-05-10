@@ -6,7 +6,7 @@
 
 #define USER_MAP_START USER_SPACE_DYNAMIC_MMAP
 #define USER_MAP_MAP_NR USER_SPACE_DYNAMIC_MAP_NR
-#define USER_MAP_TOTAL_PAGE_NUM USER_MAP_MAP_NR * sizeof(unsigned long)
+#define USER_MAP_TOTAL_PAGE_NUM USER_MAP_MAP_NR * sizeof(unsigned long) * 8
 
 static spinlock_t vmem_lock __attribute__((section(".data"))) =
     __SPINLOCK_INITIALIZER;
