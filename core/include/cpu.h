@@ -7,7 +7,7 @@
 #include "spinlocks.h"
 #include "print.h"
 
-#define MAX_CPU_COUNT 512
+#define MAX_CPU_COUNT 64
 
 extern unsigned long online_cpu_mask;
 extern spinlock_t cpumask_lock;

@@ -72,7 +72,7 @@ void bringup_secondary_cpus(struct device_init_entry *hw)
 
 	cpu_count = get_cpu_count();
 
-	for (i = 0; i < cpu_count; i++) {
+	for (i = 0; i < cpu_count - 1; i++) {
 		if (!sbi_cpu_start(i)) {
 			set_online_cpumask(i);
 		}
