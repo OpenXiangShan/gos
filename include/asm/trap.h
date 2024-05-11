@@ -1,6 +1,8 @@
 #ifndef TRAP_H_
 #define TRAP_H_
 
+#include "asm/ptregs.h"
+
 /* ===== Trap/Exception Causes ===== */
 #define CAUSE_MISALIGNED_FETCH		0x0
 #define CAUSE_FETCH_ACCESS		0x1
@@ -39,4 +41,10 @@
 #define SBI_HW_CTX_SIZE   0x100
 #define SBI_HW_STACK_SIZE 0x400
 
+struct fault_info {
+        int (*fn)(struct pt_regs * regs, const char *name);
+        const char *name;
+};
+
+struct fault_info *ec_to_fault_info(unsigned int scause);
 #endif

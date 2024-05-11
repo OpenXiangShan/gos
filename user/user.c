@@ -9,6 +9,7 @@
 #include "asm/type.h"
 #include "user_memory.h"
 #include "user_exception.h"
+#include "asm/ptregs.h"
 
 #define USER_SPACE_SHARE_MEMORY 0x0
 #define USER_SPACE_SHARE_MEMORY_SIZE 0x1000
@@ -92,6 +93,7 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 	    (char *)&__user_payload_end - (char *)&__user_payload_start;
 	char *user_bin_ptr = user_bin;
 	struct user_cpu_context *u_context = &user->cpu_context.u_context;
+	struct pt_regs *regs;
 
 	if (user->mapping == 1) {
 		return user_set_run_params(user, params);
@@ -166,11 +168,18 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 
 	user->mapping = 1;
 
+	regs = mm_alloc(sizeof(struct pt_regs));
+	if (!regs) {
+		print("user space alloc pt_regs failed !\n");
+		return -1;
+	}
+        memset((char *)regs, 0, sizeof(struct pt_regs));
+
 	while (1) {
 		user_update_run_params(user);
 		disable_local_irq();
 		user_mode_switch_to(&user->cpu_context);
-		do_user_exception(user);
+		do_user_exception(user, regs);
 		enable_local_irq();
 	}
 

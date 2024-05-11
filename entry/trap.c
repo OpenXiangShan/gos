@@ -102,24 +102,10 @@ static struct fault_info fault_info[] = {
 	{ do_page_fault_info, "Store/AMO page fault" },
 };
 
-static inline struct fault_info *ec_to_fault_info(unsigned int scause)
+struct fault_info *ec_to_fault_info(unsigned int scause)
 {
 	return fault_info + (scause & SCAUSE_EC);
 }
-
-#define INTERRUPT_CAUSE_SOFTWARE    1
-#define INTERRUPT_CAUSE_TIMER       5
-#define INTERRUPT_CAUSE_EXTERNAL    9
-
-#define EXC_INST_MISALIGNED     0
-#define EXC_INST_ACCESS         1
-#define EXC_BREAKPOINT          3
-#define EXC_LOAD_ACCESS         5
-#define EXC_STORE_ACCESS        7
-#define EXC_SYSCALL             8
-#define EXC_INST_PAGE_FAULT     12
-#define EXC_LOAD_PAGE_FAULT     13
-#define EXC_STORE_PAGE_FAULT    15
 
 static int handle_exception(struct pt_regs *regs, unsigned long cause)
 {
