@@ -16,7 +16,7 @@ static const struct device_init_entry __attribute__((used))
 	{
 	 "uartlite",
 	 0x40600000,
-	 0x10000,
+	 0x1000,
 #ifndef USE_AIA
 	 "PLIC",
 #else
