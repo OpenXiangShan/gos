@@ -8,12 +8,12 @@ RISCV_COPY := $(GNU)objcopy
 RISCV_COPY_FLAGS := --set-section-flags .bss=alloc,contents --set-section-flags .sbss=alloc,contents -O binary
 RISCV_DUMP := $(GNU)objdump
 
-DEBUG := -DUSE_QEMU
-#DEBUG := -DUSE_FPGA
+#DEBUG := -DUSE_QEMU
+DEBUG := -DUSE_FPGA
 #DEBUG := -DUSE_ST_VCS
 #DEBUG := -DUSE_ST_CMN600
 
-DEBUG += -DUSE_AIA
+#DEBUG += -DUSE_AIA
 #DEBUG += -DIOMMU_PTWALK_TEST
 DEBUG += -DENABLE_MMU
 DEBUG += -DENABLE_MULTI_TASK
