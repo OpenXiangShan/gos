@@ -11,3 +11,9 @@ int user_page_mapping(unsigned long phy, unsigned long virt, unsigned int size)
 
 	return mmu_user_page_mapping(phy, virt, size, pgprot);
 }
+
+int user_page_mapping_pg(unsigned long phy, unsigned long virt, unsigned int size,
+		pgprot_t pgprot)
+{
+	return mmu_user_page_mapping(phy, virt, size, pgprot);
+}

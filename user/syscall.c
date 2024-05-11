@@ -3,6 +3,7 @@
 #include "uaccess.h"
 #include "print.h"
 #include "user_memory.h"
+#include "asm/pgtable.h"
 
 unsigned long sys_print(char *user_ptr, unsigned int pos)
 {
@@ -27,6 +28,15 @@ unsigned long sys_mmap(unsigned int size)
 	return (unsigned long)ptr;
 }
 
+unsigned long sys_mmap_pg(unsigned int size, pgprot_t pgprot)
+{
+	void *ptr;
+
+	ptr = user_space_mmap_pg(size, pgprot);
+
+	return (unsigned long)ptr;
+}
+
 unsigned long sys_unmap(void *addr, unsigned int size)
 {
 	user_space_unmap(addr, size);
@@ -46,5 +56,6 @@ const void *syscall_table[__NR_syscalls] = {
 	[0 ... __NR_syscalls - 1] = sys_ni_syscall,
 	__SYSCALL(__NR_print, sys_print)
 	    __SYSCALL(__NR_mmap, sys_mmap)
+	    __SYSCALL(__NR_mmap_pg, sys_mmap_pg)
 	    __SYSCALL(__NR_unmap, sys_unmap)
 };

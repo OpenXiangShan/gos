@@ -213,7 +213,7 @@ int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt, unsigned i
 	return __mmu_page_mapping((unsigned long *)pgdp, phy, virt, size, pgprot);
 }
 
-static int mmu_direct_page_mapping()
+int mmu_direct_page_mapping()
 {
 	pgprot_t pgprot;
 	unsigned long phy_start = get_phy_start();

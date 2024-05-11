@@ -6,6 +6,7 @@
 #include "asm/type.h"
 #include "asm/pgtable.h"
 #include "user_vmap.h"
+#include "user_memory.h"
 
 static int user_memory_region_is_overlay(unsigned long start, unsigned long end,
 					 unsigned long new_start,
@@ -90,6 +91,24 @@ void *user_space_mmap(unsigned int size)
 	}
 	pa = virt_to_phy(addr);
 	user_page_mapping(pa, va, alloc_size);
+
+	return (void *)va;
+}
+
+void *user_space_mmap_pg(unsigned int size, pgprot_t pgprot)
+{
+	int page_nr = N_PAGE(size);
+	int alloc_size = page_nr * PAGE_SIZE;
+	unsigned long va, pa, addr;
+
+	va = (unsigned long)user_vmap_alloc(alloc_size);
+	addr = (unsigned long)mm_alloc(alloc_size);
+	if (!addr) {
+		print("%s -- Out of memory\n", __FUNCTION__);
+		return NULL;
+	}
+	pa = virt_to_phy(addr);
+	user_page_mapping_pg(pa, va, alloc_size, pgprot);
 
 	return (void *)va;
 }

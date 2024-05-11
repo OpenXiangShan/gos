@@ -3,6 +3,7 @@
 
 #include "list.h"
 #include "spinlocks.h"
+#include "asm/pgtable.h"
 
 #define USER_SPACE_CODE_START 0x1000
 
@@ -89,5 +90,7 @@ struct user *user_create(void);
 int user_mode_run(struct user *user, struct user_run_params *params);
 void user_mode_switch_to(struct user_mode_cpu_context *ctx);
 int user_page_mapping(unsigned long phy, unsigned long virt, unsigned int size);
+int user_page_mapping_pg(unsigned long phy, unsigned long virt, unsigned int size,
+                pgprot_t pgprot);
 
 #endif
