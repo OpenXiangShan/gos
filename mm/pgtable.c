@@ -4,6 +4,7 @@
 #include "mm.h"
 #include "string.h"
 #include "print.h"
+#include "tlbflush.h"
 
 static void *pgdp __attribute__((section(".data"))) = NULL;
 
@@ -198,8 +199,18 @@ int mmu_gstage_page_mapping(unsigned long *_pgdp, unsigned long phy,
 int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 		     pgprot_t pgprot)
 {
-	return __mmu_page_mapping((unsigned long *)pgdp, phy, virt, size,
-				  pgprot);
+	if (__mmu_page_mapping((unsigned long *)pgdp, phy, virt, size, pgprot))
+		return -1;
+
+	local_flush_tlb_range(virt, size, PAGE_SIZE);
+
+	return 0;
+}
+
+int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt, unsigned int size,
+			       pgprot_t pgprot)
+{
+	return __mmu_page_mapping((unsigned long *)pgdp, phy, virt, size, pgprot);
 }
 
 static int mmu_direct_page_mapping()

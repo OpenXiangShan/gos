@@ -8,6 +8,7 @@
 #include "mm.h"
 #include "virt.h"
 #include "../virt/machine.h"
+#include "tlbflush.h"
 
 static void Usage(void)
 {
@@ -106,8 +107,8 @@ static void page_table_sfence_all_test()
 
 	print("Now map 0x%lx(pa) to the same va(0x%lx)\n", pa2, va);
 	if (-1 ==
-	    mmu_page_mapping((unsigned long)pa2, (unsigned long)va, PAGE_SIZE,
-			     pgprot)) {
+	    mmu_page_mapping_no_sfence((unsigned long)pa2, (unsigned long)va, PAGE_SIZE,
+					pgprot)) {
 		print("%s -- page mapping failed\n", __FUNCTION__);
 		goto ret4;
 	}
@@ -117,7 +118,8 @@ static void page_table_sfence_all_test()
 		print("0x%lx : %s\n", va, (char *)va);
 	}
 
-	__asm__ __volatile("sfence.vma":::"memory");
+	local_flush_tlb_all();
+
 	print("test start --> load 0x%lx(after sfence.vma)\n", va);
 	for (i = 0; i < 5; i++) {
 		print("0x%lx : %s\n", va, (char *)va);
