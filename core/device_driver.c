@@ -135,6 +135,22 @@ found:
 	return drv;
 }
 
+static int __NoNeed_create_device(struct device_init_entry *entry)
+{
+	if (!strncmp(entry->compatible, "clint", sizeof("clint")))
+		return 1;
+	if (!strncmp(entry->compatible, "PLIC", sizeof("PLIC")))
+		return 1;
+	if (!strncmp(entry->compatible, "IMSIC", sizeof("IMSIC")))
+		return 1;
+	if (!strncmp(entry->compatible, "APLIC_S", sizeof("APLIC_S")))
+		return 1;
+	if (!strncmp(entry->compatible, "APLIC_M", sizeof("APLIC_M")))
+		return 1;
+
+	return 0;
+}
+
 static int __probe_device_table(struct driver_init_entry *driver_head,
 				struct driver_init_entry *driver_end,
 				struct device_init_entry *hw)
@@ -147,9 +163,7 @@ static int __probe_device_table(struct driver_init_entry *driver_head,
 	int driver_nr_tmp;
 
 	while (strncmp(device_entry->compatible, "THE END", sizeof("THE END"))) {
-		if (!strncmp
-		    (device_entry->compatible, "memory-map",
-		     sizeof("memory-map")))
+		if (__NoNeed_create_device(device_entry))
 			goto next_device_entry;
 
 		driver_nr_tmp = driver_nr;
@@ -276,7 +290,7 @@ void walk_devices()
 	for_each_device(dev, _devices.p_devices, nr) {
 		print("device %d\n", id++);
 		print("    name: %s\n", dev->name);
-		print("    base address: 0x%x\n", dev->start);
+		print("    base address: 0x%lx\n", dev->start);
 		for (i = 0; i < dev->irq_num; i++)
 			print("    irq[i]: %d\n", dev->irqs[i]);
 		print("    probe: %d\n", dev->probe);
