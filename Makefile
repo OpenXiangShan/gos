@@ -150,21 +150,37 @@ run:
 		-machine virt -smp 2 \
 		-cpu rv64,sv39=on -m 8G \
 		-bios out/Image.bin
+run-debug:
+		./qemu-system-riscv64 -nographic \
+		-machine virt -smp 2 \
+		-cpu rv64,sv39=on -m 8G \
+		-bios out/Image.bin \
+		-S -s
 else ifeq ($(CONFIG_SELECT_AIA), y)
 run:
 	./qemu-system-riscv64 -nographic \
         -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
 	-cpu rv64,sv39=on -m 8G \
         -bios out/Image.bin
+run-debug:
+	./qemu-system-riscv64 -nographic \
+        -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
+	-cpu rv64,sv39=on -m 8G \
+        -bios out/Image.bin \
+	-S -s
 endif #CONFIG_SELECT_PLIC
 
 else ifeq ($(CONFIG_SELECT_VCS), y)
 ifeq ($(CONFIG_SELECT_PLIC), y)
 run:
 	./riscv64-nemu-interpreter -b out/Image.bin
+run-debug:
+	@echo "Do not support debug in NEMU..."
 else ifeq ($(CONFIG_SELECT_AIA), y)
 run:
 	@echo "Do not support aia in VCS..."
+run-debug:
+	@echo "Do not support debug in NEMU..."
 endif #CONFIG_SELECT_PLIC
 
 endif #CONFIG_SELECT_QEMU

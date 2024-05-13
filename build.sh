@@ -6,6 +6,11 @@ if [ "$#" -eq 1 ];then
 		exit 0
 	fi	
 	
+	if [ "$1" = "run-debug" ];then
+		make $1
+		exit 0
+	fi
+
 	if [ "$1" = "clean" ];then
 		make $1
 		exit 0
