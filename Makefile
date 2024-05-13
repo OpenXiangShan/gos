@@ -23,6 +23,8 @@ BUILD_DIR = build
 MYSBI_DIR = mysbi
 BSP_DIR   = bsp
 MYUSER_DIR = myUser
+CONFIGS_DIR = $(TOPDIR)/configs
+DTS_DIR = $(CONFIGS_DIR)/dts
 
 default: gos pack.sh
 	./pack.sh
@@ -132,16 +134,19 @@ myUser-clean:
 myGuest-clean:
 	make -C myGuest clean
 
+-include include/config/auto.conf
+
 clean: mysbi-clean myGuest-clean myUser-clean
 	rm -rf $(shell find -name "*.o")
 	rm -rf $(BUILD_DIR)
 	rm -rf out
 	rm -rf include/config
 	rm -rf include/gos
-dtb:
-	dtc -O dtb -I dts -o input.dtb input.dts
+	rm $(DTS_DIR)/*.dtb
 
--include include/config/auto.conf
+%.dtb: $(DTS_DIR)/$(patsubst %.dtb,%.dts,$@)
+	dtc -O dtb -I dts -o $(DTS_DIR)/$@ $(DTS_DIR)/$(patsubst %.dtb,%.dts,$@)
+	cp $(DTS_DIR)/$@ input.dtb
 
 ifeq ($(CONFIG_SELECT_QEMU), y)
 ifeq ($(CONFIG_SELECT_PLIC), y)

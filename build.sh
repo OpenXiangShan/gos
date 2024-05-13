@@ -4,24 +4,30 @@ if [ "$#" -eq 1 ];then
 	if [ "$1" = "run" ];then
 		make $1
 		exit 0
-	fi	
 	
-	if [ "$1" = "run-debug" ];then
+	elif [ "$1" = "run-debug" ];then
 		make $1
 		exit 0
-	fi
 
-	if [ "$1" = "clean" ];then
+	elif [ "$1" = "clean" ];then
 		make $1
 		exit 0
-	fi	
 	
-	if [ "$1" = "dtb" ];then
+	elif [ "$1" = "dtb" ];then
 		make $1
 		exit 0
-	fi	
-	
-	make $1
+
+	elif [ "$1" = "minimum" ];then
+		make gos-minimum.dtb
+		make minimum_defconfig
+
+	elif [ "$1" = "default" ];then
+		make gos-dualcore.dtb
+		make defconfig
+
+	else
+		make $1
+	fi
 fi
 
 make clean
