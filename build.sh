@@ -25,6 +25,10 @@ if [ "$#" -eq 1 ];then
 		make gos-dualcore.dtb
 		make defconfig
 
+	elif [ "$1" = "fpga" ];then
+		make gos-dualcore.dtb
+		make fpga_defconfig
+
 	else
 		make $1
 	fi
@@ -32,3 +36,7 @@ fi
 
 make clean
 make
+
+if [ "$1" = "fpga" ];then
+	make fpga
+fi
