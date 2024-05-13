@@ -11,6 +11,7 @@
 #include "cpu.h"
 #include "tlbflush.h"
 #include "spinlocks.h"
+#include "gos/autoconf.h"
 
 extern int mmu_is_on;
 static DEFINE_PER_CPU(struct task_ctrl, tasks);
@@ -104,7 +105,6 @@ int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 #ifndef CONFIG_ENABLE_MULTI_TASK
 	return fn(data);
 #endif
-
 	if (!tsk_ctl)
 		return -1;
 
