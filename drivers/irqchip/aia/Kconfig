@@ -1,0 +1,7 @@
+config AIA_APLIC
+	bool "aplic driver"
+	default y
+
+config AIA_IMSIC
+	bool "imsic driver"
+	default y

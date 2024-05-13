@@ -1,0 +1,4 @@
+config CLINT
+	bool "DRIVER_CLINT"
+	default y
+

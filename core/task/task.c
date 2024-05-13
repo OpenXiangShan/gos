@@ -101,7 +101,7 @@ int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 	void *p_stack;
 	struct task_ctrl *tsk_ctl = &per_cpu(tasks, cpu);
 
-#ifndef ENABLE_MULTI_TASK
+#ifndef CONFIG_ENABLE_MULTI_TASK
 	return fn(data);
 #endif
 

@@ -1,27 +1,34 @@
+-include include/config/auto.conf
+
+src := $(obj)
+
+kbuild-dir := $(if $(filter /%,$(src)),$(src),$(TOPDIR)/$(src))
+
 PHONY := __build
 __build:
 
 obj-y :=
 subdir-y :=
 
-include Makefile
+include $(kbuild-dir)/Makefile
 
 __subdir-y := $(patsubst %/, %, $(filter %/, $(obj-y)))
-
-subdir-y += $(__subdir-y)
+subdir-y += $(strip $(__subdir-y))
+subdir-y := $(addprefix $(obj)/,$(subdir-y))
 
 subdir_objs := $(foreach f, $(subdir-y), $(f)/built-in.o)
 
 cur_objs := $(filter-out %/, $(obj-y))
+cur_objs := $(addprefix $(obj)/,$(cur_objs))
 
 PHONY += $(subdir-y)
 
-__build: $(subdir-y) built-in.o
+__build: $(subdir-y) $(obj)/built-in.o
 
 $(subdir-y):
-	make -C $@ -f $(TOPDIR)/Makefile.build
+	make -f $(TOPDIR)/Makefile.build obj=$@
 
-built-in.o: $(cur_objs) $(subdir_objs)
+$(obj)/built-in.o: $(cur_objs) $(subdir_objs)
 	$(LD) -r -o $@ $^
 
 %.o: %.c

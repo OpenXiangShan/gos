@@ -1,0 +1,3 @@
+config DMAC_DW_AXI_DRIVER
+	bool "DRIVER_DMAC_DW_AXI"
+	default y

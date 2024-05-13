@@ -1,0 +1,11 @@
+config NS16550A
+	bool "DRIVER_UART_NS16550A"
+	default y
+
+config QEMU_8250
+	bool "DRIVER_UART_QEMU_8250"
+	default y
+
+config UARTLITE
+	bool "DRIVER_UART_UARTLITE"
+	default y

@@ -1,0 +1,5 @@
+menu "app"
+
+source "app/command/Kconfig"
+
+endmenu

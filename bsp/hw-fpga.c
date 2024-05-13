@@ -1,4 +1,5 @@
-#ifdef USE_FPGA
+#include "gos/autoconf.h"
+#ifdef CONFIG_SELECT_FPGA
 
 #include <device.h>
 #include "plic.h"
@@ -18,7 +19,7 @@ static const struct device_init_entry __attribute__((used))
 	 "ns16550a",
 	 0x310b0000,
 	 0x10000,
-#ifndef USE_AIA
+#ifndef CONFIG_SELECT_AIA
 	 "PLIC",
 #else
 	 "APLIC_S",
@@ -28,7 +29,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 0,
 	  },
-#ifndef USE_AIA
+#ifndef CONFIG_SELECT_AIA
 	{
 	 "PLIC",
 	 0x3c000000,
@@ -62,7 +63,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	  },
 #endif
-#ifdef USE_AIA
+#ifdef CONFIT_SELECT_AIA
 	{
 	 "imsic,test",
 	 0x70000000,

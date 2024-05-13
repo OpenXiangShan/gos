@@ -12,6 +12,7 @@
 #include <percpu.h>
 #include <task.h>
 #include <devicetree.h>
+#include "gos/autoconf.h"
 
 extern const char logo[];
 
@@ -19,7 +20,7 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 {
 	early_print_setup(hw);
 
-#ifndef USE_ST_CMN600
+#ifndef CONFIG_SELECT_VCS
 	print(logo);
 #endif
 	print("Hello, gos!\n");
@@ -27,7 +28,7 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 
 	mm_init(hw);
 
-#ifdef ENABLE_MMU
+#ifdef CONFIG_ENABLE_MMU
 	paging_init(hw);
 #endif
 	early_print_setup(hw);

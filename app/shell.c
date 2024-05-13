@@ -6,13 +6,14 @@
 #include <asm/type.h>
 #include "shell.h"
 #include "command.h"
+#include "gos/autoconf.h"
 
 #define ESC_ASCII 27
 #define SHELL_DEVICE_NAME "UART0"
 
 int shell_init(void *data)
 {
-#ifndef NO_SHELL
+#ifdef CONFIG_ENABLE_SHELL
 	int i;
 	int left = 5;
 	int fd;
@@ -26,7 +27,7 @@ int shell_init(void *data)
 #endif
 	command_init();
 
-#ifdef NO_SHELL
+#ifndef CONFIG_ENABLE_SHELL
 	test_cmd_auto_run();
 #else
 	command_history_init();

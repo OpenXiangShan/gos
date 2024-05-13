@@ -1,0 +1,43 @@
+source "app/Kconfig"
+source "bsp/Kconfig"
+source "drivers/Kconfig"
+
+choice
+	prompt "Select A Running Target"
+
+	config SELECT_QEMU
+		tristate "Select QEMU"
+	config SELECT_FPGA
+		tristate "Select FPGA"
+	config SELECT_VCS
+		tristate "Select VCS"
+endchoice
+
+choice
+	prompt "Select irqchip"
+
+	config SELECT_AIA
+		tristate "Select AIA"
+	config SELECT_PLIC
+		tristate "Select PLIC"
+endchoice
+
+config MYGUEST
+	bool "Guest OS bin"
+	default y
+
+config MYUSER
+	bool "User process bin"
+	default y
+
+config ENABLE_MMU
+	bool "Enable MMU"
+	default y
+
+config ENABLE_MULTI_TASK
+	bool "Enable Multi task"
+	default y
+
+config ENABLE_SHELL
+	bool "Enable Shell"
+	default y

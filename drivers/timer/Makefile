@@ -1,1 +1,1 @@
-obj-y += timer.o
+obj-$(CONFIG_CLINT) += timer.o

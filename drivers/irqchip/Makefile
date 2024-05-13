@@ -1,2 +1,2 @@
-obj-y += plic/
-obj-y += aia/
+obj-$(CONFIG_PLIC) += plic/
+obj-$(CONFIG_AIA) += aia/

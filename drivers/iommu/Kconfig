@@ -1,0 +1,3 @@
+config RISCV_IOMMU_DRIVER
+	bool "DRIVER_RISCV_IOMMU"
+	default y

@@ -1,0 +1,66 @@
+#build guest
+
+include $(TOPDIR)/include/config/auto.conf
+
+BUILD_DIR = $(TOPDIR)/build
+
+MYGUEST_DIR := $(shell pwd)
+GUEST_TARGET := myGuest.elf
+GUEST_TARGET_BIN := myGuest.bin
+
+MYGUEST_ENTRY_DIR = $(MYGUEST_DIR)/entry
+MYGUEST_CORE_DIR = $(MYGUEST_DIR)/core
+MYGUEST_DRIVERS_DIR = $(MYGUEST_DIR)/drivers
+MYGUEST_LIB_DIR = $(MYGUEST_DIR)/lib
+MYGUEST_MM_DIR = $(MYGUEST_DIR)/mm
+MYGUEST_COMMAND_DIR = $(MYGUEST_DIR)/command
+
+GUEST_ENTRY_C_FILES = $(wildcard $(MYGUEST_ENTRY_DIR)/*.c)
+GUEST_ENTRY_ASM_FILES = $(wildcard $(MYGUEST_ENTRY_DIR)/*.S)
+GUEST_CORE_C_FILES = $(wildcard $(MYGUEST_CORE_DIR)/*.c)
+GUEST_DRIVERS_C_FILES = $(wildcard $(MYGUEST_DRIVERS_DIR)/*.c)
+GUEST_LIB_C_FILES = $(wildcard $(MYGUEST_LIB_DIR)/*.c)
+GUEST_MM_C_FILES = $(wildcard $(MYGUEST_MM_DIR)/*.c)
+GUEST_COMMAND_C_FILES = $(wildcard $(MYGUEST_COMMAND_DIR)/*.c)
+
+MYGUEST_OBJ_FILES = $(GUEST_ENTRY_ASM_FILES:$(MYGUEST_ENTRY_DIR)/%.S=$(MYGUEST_ENTRY_DIR)/%_s.o)
+MYGUEST_OBJ_FILES += $(GUEST_ENTRY_C_FILES:$(MYGUEST_ENTRY_DIR)/%.c=$(MYGUEST_ENTRY_DIR)/%_c.o)
+MYGUEST_OBJ_FILES += $(GUEST_LIB_C_FILES:$(MYGUEST_LIB_DIR)/%.c=$(MYGUEST_LIB_DIR)/%_c.o)
+MYGUEST_OBJ_FILES += $(GUEST_CORE_C_FILES:$(MYGUEST_CORE_DIR)/%.c=$(MYGUEST_CORE_DIR)/%_c.o)
+MYGUEST_OBJ_FILES += $(GUEST_DRIVERS_C_FILES:$(MYGUEST_DRIVERS_DIR)/%.c=$(MYGUEST_DRIVERS_DIR)/%_c.o)
+MYGUEST_OBJ_FILES += $(GUEST_MM_C_FILES:$(MYGUEST_MM_DIR)/%.c=$(MYGUEST_MM_DIR)/%_c.o)
+MYGUEST_OBJ_FILES += $(GUEST_COMMAND_C_FILES:$(MYGUEST_COMMAND_DIR)/%.c=$(MYGUEST_COMMAND_DIR)/%_c.o)
+
+ifeq ($(CONFIG_MYGUEST), y)
+myGuest: $(MYGUEST_OBJ_FILES)
+	mkdir -p $(BUILD_DIR)
+	$(LD) -T $(MYGUEST_DIR)/myGuest.lds -o $(BUILD_DIR)/$(GUEST_TARGET) $(MYGUEST_OBJ_FILES) -Map $(BUILD_DIR)/myGuest.map
+	$(RISCV_COPY) $(BUILD_DIR)/$(GUEST_TARGET) -O binary $(BUILD_DIR)/$(GUEST_TARGET_BIN)
+else
+myGuest:
+	cp $(TOPDIR)/myGuest.bin $(TOPDIR)/build/myGuest.bin
+endif
+
+$(MYGUEST_ENTRY_DIR)/%_s.o: $(MYGUEST_ENTRY_DIR)/%.S
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+
+$(MYGUEST_ENTRY_DIR)/%_c.o: $(MYGUEST_ENTRY_DIR)/%.c
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+
+$(MYGUEST_CORE_DIR)/%_c.o: $(MYGUEST_CORE_DIR)/%.c
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+
+$(MYGUEST_DRIVERS_DIR)/%_c.o: $(MYGUEST_DRIVERS_DIR)/%.c
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+
+$(MYGUEST_LIB_DIR)/%_c.o: $(MYGUEST_LIB_DIR)/%.c
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+
+$(MYGUEST_MM_DIR)/%_c.o: $(MYGUEST_MM_DIR)/%.c
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+
+$(MYGUEST_COMMAND_DIR)/%_c.o: $(MYGUEST_COMMAND_DIR)/%.c
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+
+clean:
+	rm -rf $(shell find -name "*.o")

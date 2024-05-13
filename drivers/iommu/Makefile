@@ -1,4 +1,4 @@
-obj-y += iommu.o
-obj-y += io_pgtable.o
-obj-y += queue.o
-obj-y += iommu_test.o
+obj-$(CONFIG_RISCV_IOMMU_DRIVER) += iommu.o
+obj-$(CONFIG_RISCV_IOMMU_DRIVER) += io_pgtable.o
+obj-$(CONFIG_RISCV_IOMMU_DRIVER) += queue.o
+obj-$(CONFIG_RISCV_IOMMU_DRIVER) += iommu_test.o

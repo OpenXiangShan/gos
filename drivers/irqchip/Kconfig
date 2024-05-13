@@ -1,0 +1,14 @@
+menu "aia"
+config AIA
+	bool "AIA driver"
+	default y
+	if AIA
+		source "drivers/irqchip/aia/Kconfig"
+	endif
+endmenu
+
+menu "plic"
+config PLIC
+	bool "PLIC driver"
+	default y
+endmenu

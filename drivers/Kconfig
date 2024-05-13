@@ -1,0 +1,38 @@
+menu "drivers"
+menuconfig DMAC
+	bool "DMAC drivers"
+	default y
+	if DMAC
+		source "drivers/dmac/Kconfig"
+	endif
+menuconfig IMSIC_TEST
+	bool "IMISC test driver"
+	default y
+	if IMSIC_TEST
+		source "drivers/imsic-test/Kconfig"
+	endif
+menuconfig IOMMU
+	bool "IOMMU driver"
+	default y
+	if IOMMU
+		source "drivers/iommu/Kconfig"
+	endif
+menuconfig IRQCHIP
+	bool "IRQCHIP support"
+	default y
+	if IRQCHIP
+		source "drivers/irqchip/Kconfig"
+	endif
+menuconfig TIMER
+	bool "TIMER support"
+	default y
+	if TIMER
+		source "drivers/timer/Kconfig"
+	endif
+menuconfig UART
+	bool "UART drivers"
+	default y
+	if UART
+		source "drivers/uart/Kconfig"
+	endif
+endmenu

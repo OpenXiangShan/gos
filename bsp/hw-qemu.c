@@ -1,4 +1,5 @@
-#ifdef USE_QEMU
+#include "gos/autoconf.h"
+#ifdef CONFIG_SELECT_QEMU
 
 #include <device.h>
 #include "plic.h"
@@ -18,7 +19,7 @@ static const struct device_init_entry __attribute__((used))
 	 "qemu-8250",
 	 0x10000000,
 	 0x1000,
-#ifndef USE_AIA
+#ifndef CONFIG_SELECT_AIA
 	 "PLIC",
 #else
 	 "APLIC_S",
@@ -90,7 +91,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	  },
 #endif
-#ifndef USE_AIA
+#ifndef CONFIG_SELECT_AIA
 	{
 	 "PLIC",
 	 0xc000000,
@@ -143,7 +144,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 &qemu_clint_hw_data,
 	  },
-#ifdef USE_AIA
+#ifdef CONFIG_SELECT_AIA
 	{
 	 "imsic,test",
 	 0x70000000,

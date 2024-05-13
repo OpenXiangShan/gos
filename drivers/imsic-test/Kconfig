@@ -1,0 +1,4 @@
+config IMSIC_TEST_DIRVER
+	bool "DRIVER_IMSIC_TEST"
+	default y
+

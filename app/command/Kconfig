@@ -1,0 +1,32 @@
+config APP_CSR_CTL
+	bool "APP_CSR_CTL"
+config APP_DEVICES
+	bool "APP_DEVICES"
+config APP_DEVMEM
+	bool "APP_DEVMEM"
+config APP_DMA_TEST
+	bool "APP_DMA_TEST"
+config APP_DMA_TEST_EXT
+	bool "APP_DMA_TEST_EXT"
+config APP_HELLO
+	bool "APP_HELLO"
+config APP_HISTORY
+	bool "APP_HISTORY"
+config APP_IMSIC_TEST
+	bool "APP_IMSIC_TEST"
+config APP_LS
+	bool "APP_LS"
+config APP_MEM_READ
+	bool "APP_MEM_READ"
+config APP_PAGE_TLB_TEST
+	bool "APP_PAGE_TLB_TEST"
+config APP_PLIC_SET_AFFINITY
+	bool "APP_PLIC_SET_AFFINITY"
+config APP_SPINLOCK_TEST
+	bool "APP_SPINLOCK_TEST"
+config APP_TASK_INFO
+	bool "APP_TASK_INFO"
+config APP_USER_RUN
+	bool "APP_USER_RUN"
+config APP_VCPU_RUN
+	bool "APP_VCPU_RUN"

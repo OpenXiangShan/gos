@@ -1,4 +1,5 @@
-#ifdef USE_ST_CMN600
+#include "gos/autoconf.h"
+#ifdef CONFIG_SELECT_VCS
 
 #include <device.h>
 #include "plic.h"
@@ -17,7 +18,7 @@ static const struct device_init_entry __attribute__((used))
 	 "uartlite",
 	 0x40600000,
 	 0x1000,
-#ifndef USE_AIA
+#ifndef CONFIG_SELECT_AIA
 	 "PLIC",
 #else
 	 "APLIC_S",
@@ -27,7 +28,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 0,
 	  },
-#ifndef USE_AIA
+#ifndef CONFIG_SELECT_AIA
 	{
 	 "PLIC",
 	 0x3c000000,
@@ -73,7 +74,7 @@ static const struct device_init_entry __attribute__((used))
 #endif
 
 #endif
-#ifdef USE_AIA
+#ifdef CONFIG_SELECT_AIA
 	{
 	 "imsic,test",
 	 0x70000000,
