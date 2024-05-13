@@ -17,7 +17,7 @@ if [ "$#" -eq 1 ];then
 		make $1
 		exit 0
 
-	elif [ "$1" = "minimum" ];then
+	elif [ "$1" = "vcs-minimum" ];then
 		make gos-minimum.dtb
 		make minimum_defconfig
 
