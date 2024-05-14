@@ -40,6 +40,7 @@ extern unsigned long va_pa_offset;
 #define SATP_MODE_39    0x8000000000000000UL
 #define SATP_MODE_48    0x9000000000000000UL
 #define SATP_MODE_57    0xa000000000000000UL
+#define SATP_MODE_BARE  (0xfUL << 60)
 
 #define SATP_MODE (pgtable_l5_enabled ? SATP_MODE_57 : \
 		(pgtable_l4_enabled ? SATP_MODE_48 : SATP_MODE_39))

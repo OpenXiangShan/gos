@@ -165,6 +165,9 @@ void sbi_trap_handler(struct sbi_trap_regs *regs)
 	case CAUSE_STORE_ACCESS:
 		msg = "load store access failed";
 		break;
+	case CAUSE_FETCH_ACCESS:
+		msg = "Instruction access fault";
+		break;
 	default:
 		break;
 	}

@@ -125,6 +125,7 @@ static int handle_exception(struct pt_regs *regs, unsigned long cause)
 			print("unknown exception!! -- %d\n", cause);
 			panic();
 		}
+		break;
 	}
 
 	return ret;

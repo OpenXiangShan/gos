@@ -9,6 +9,8 @@
 #include "virt.h"
 #include "../virt/machine.h"
 #include "tlbflush.h"
+#include "task.h"
+
 
 static void Usage(void)
 {
@@ -19,6 +21,71 @@ static void Usage(void)
 	print("    -- sfence.vma_all (sfence.vma test)\n");
 	print("    -- sfence.gvma_all (sfence.gvma test)\n");
 	print("    -- remapping_gstage_memory_test\n");
+	print("    -- satp_bare_test (set satp is bare mode)\n");
+}
+
+unsigned long alloc_one_page(int size)
+{
+	void *ptr = mm_alloc(size);
+
+	if (!ptr) {
+		print("%s - %s -- Out of memory\n", __FUNCTION__, __LINE__);
+                return NULL;
+	}
+	memset(ptr, 0, size);
+
+	return(virt_to_phy(ptr));
+}
+
+/*
+ * satp mode is bare, then flash tlb is exception
+ */
+static int flush_satp(void)
+{
+	unsigned long satp;
+
+	void *va = mm_alloc(PAGE_SIZE);
+
+        if (!va) {
+		print("%s -- Out of memory\n", __FUNCTION__);
+		goto ret;
+	}
+	memset(va, 0, PAGE_SIZE);
+	strcpy((char *)	va, "===test===");
+	print("va value is : %s\n", (char *)va);
+
+	satp = read_csr(CSR_SATP);
+	print("read satp value:0x%lx \n", satp);
+	satp &=~ SATP_MODE_BARE;
+	print("write satp value:0x%lx, set satp is bare mode \n", satp);
+	write_csr(CSR_SATP, satp);
+
+	local_flush_tlb_all();
+	print("get va value again: %s\n", (char *)va);
+	while(1);
+
+ret:
+	vmap_free(va, PAGE_SIZE);
+	return 0;
+}
+
+void satp_mode_bare_test()
+{
+	pgprot_t pgprot;
+	unsigned long stack;
+
+	stack = alloc_one_page(PAGE_SIZE);
+	if (stack == NULL) {
+		goto ret;
+	}
+	pgprot =
+		__pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC |
+				_PAGE_DIRTY);
+	mmu_page_mapping(stack, stack, PAGE_SIZE, pgprot);
+
+	create_task("flush_satp_task", (void *)flush_satp, NULL, 0, stack, PAGE_SIZE, 0);
+ret:
+        mm_free((void *)stack, PAGE_SIZE);
 }
 
 static void page_table_remapping_gstage_memory_test()
@@ -182,7 +249,7 @@ static void page_demanding_allocating_test()
 
 static int cmd_page_tlb_test_handler(int argc, char *argv[], void *priv)
 {
-	if (argc != 1) {
+	if (argc < 1) {
 		print("Invalid input params\n");
 		Usage();
 		return -1;
@@ -198,6 +265,8 @@ static int cmd_page_tlb_test_handler(int argc, char *argv[], void *priv)
 		page_table_sfence_gvma_all_test();
 	} else if (!strncmp(argv[0], "remapping_gstage_memory_test", sizeof("remapping_gstage_memory_test"))) {
 		page_table_remapping_gstage_memory_test();
+	} else if (!strncmp(argv[0], "satp_bare_test", sizeof("satp_bare_test"))) {
+		satp_mode_bare_test();
 	} else {
 		print("Unsupport command\n");
 		Usage();
