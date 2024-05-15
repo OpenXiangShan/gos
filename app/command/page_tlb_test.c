@@ -11,10 +11,11 @@
 #include "tlbflush.h"
 #include "task.h"
 
+#define DIS_PAGE_TABLE  0x1FF
 
 static void Usage(void)
 {
-	print("Usage: page_tlb_test [cmd]\n");
+	print("Usage: page_tlb_test [cmd] [param] [control]\n");
 	print("cmd option:\n");
 	print("    -- Acc (page table access bit test)\n");
 	print("    -- Lazy (demanding page allocating test)\n");
@@ -22,7 +23,82 @@ static void Usage(void)
 	print("    -- sfence.gvma_all (sfence.gvma test)\n");
 	print("    -- remapping_gstage_memory_test\n");
 	print("    -- satp_bare_test (set satp is bare mode)\n");
+	print("    -- pte_flag_test (modify pte flag bit)\n");
+	print("param option:\n");
+	print("    -- cmd: pte_flag_test (modify pte flag bit)\n");
+	print("    param value is 0x1ff,display current pte value),the param flag bits are as follows\n");
+	print("     | 9             8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 \n");
+	print("       reserved for SW   D   A   G   U   X   W   R   V  \n");
+	print("control option:\n");
+	print("    -- cmd: pte_flag_test (modify pte flag bit)\n");
+	print("       value=1(After changing the page table, first access the page table and then flush the cache)\n");
+	print("       value=2(After changing the page table, first flush the cache and then access the page table)\n");
 }
+
+/*
+ * PTE format:
+ * | XLEN-1  10 | 9             8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0
+ *       PFN      reserved for SW   D   A   G   U   X   W   R   V
+ */
+//static void page_table_flag_test(int pte_flag, char fence_flag)
+static void page_table_flag_test(char *param, char *cflag)
+{
+	void *vaddr;
+	unsigned long *pte;
+	unsigned long pte_val;
+	int pte_flag, fence_flag;
+
+	if (strlen(param) == 0)  //param is empty
+		print("Please set pet flag value! \n");
+	else
+		pte_flag = atoi(param);
+
+
+	vaddr = mm_alloc(PAGE_SIZE);
+	if (!vaddr) {
+		goto ret;
+	}
+
+	print("vaddr:0x%lx\n", vaddr);
+	strcpy(vaddr, "Hello");
+	pte = mmu_get_pte((unsigned long)vaddr);
+	if (!pte)
+		return;
+	pte_val = *pte;
+
+	print("pte:0x%lx pte_val:0x%lx\n", pte, pte_val);
+	print("%s\n", vaddr);
+	/*
+         *
+         *   |PPN[2]|PPN[1]|PPN[0]|Page offset| >> _PAGE_PFN_SHIFT ==>  |PPN[2]|PPN[1]|PPN[0]|
+         *
+         *    |PPN[2]|PPN[1]|PPN[0]| << _PAGE_PFN_SHIFT ==> |PPN[2]|PPN[1]|PPN[0]|0... |
+         *
+         *    |PPN[2]|PPN[1]|PPN[0]|0... | | pte_fag  ==> |PPN[2]|PPN[1]|PPN[0]|pte_flag|
+         *
+         */
+	if (pte_flag != DIS_PAGE_TABLE) {
+		if (strlen(cflag) == 0)  //control is empty
+			print("Please set pet control! \n");
+		else
+			fence_flag = atoi(cflag);
+
+		pte_val = (((pte_val >> PAGE_SHIFT) << PAGE_SHIFT) | pte_flag);
+		print("remove bit -- pte_val:0x%lx\n", pte_val);
+
+		if (fence_flag == 1) {
+			*pte = pte_val;
+			local_flush_tlb_all();
+		}else if (fence_flag == 2) {
+			local_flush_tlb_all();
+			*pte = pte_val;
+		}
+		print("%s\n", vaddr);
+        }
+ret:
+	vmem_free(vaddr, PAGE_SIZE);
+}
+
 
 unsigned long alloc_one_page(int size)
 {
@@ -267,6 +343,8 @@ static int cmd_page_tlb_test_handler(int argc, char *argv[], void *priv)
 		page_table_remapping_gstage_memory_test();
 	} else if (!strncmp(argv[0], "satp_bare_test", sizeof("satp_bare_test"))) {
 		satp_mode_bare_test();
+	} else if (!strncmp(argv[0], "pte_flag_test", sizeof("pte_flag_test"))) {
+		page_table_flag_test(argv[1], argv[2]);
 	} else {
 		print("Unsupport command\n");
 		Usage();
