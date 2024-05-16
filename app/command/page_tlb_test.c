@@ -24,15 +24,111 @@ static void Usage(void)
 	print("    -- remapping_gstage_memory_test\n");
 	print("    -- satp_bare_test (set satp is bare mode)\n");
 	print("    -- pte_flag_test (modify pte flag bit)\n");
+	print("    -- sfence.addr (flush spec addr)\n");
 	print("param option:\n");
 	print("    -- cmd: pte_flag_test (modify pte flag bit)\n");
-	print("    param value is 0x1ff,display current pte value),the param flag bits are as follows\n");
+	print("    param value is 0x1ff, display current pte value, the param flag bits are as follows\n");
 	print("     | 9             8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 \n");
 	print("       reserved for SW   D   A   G   U   X   W   R   V  \n");
 	print("control option:\n");
 	print("    -- cmd: pte_flag_test (modify pte flag bit)\n");
 	print("       value=1(After changing the page table, first access the page table and then flush the cache)\n");
 	print("       value=2(After changing the page table, first flush the cache and then access the page table)\n");
+}
+
+static char *str[]={"sfence test -- This is pa1", "sfence test -- This is pa2",
+	"sfence test -- This is pa3", "sfence test -- This is pa4"};
+static int v_p_address_mapping(void *va, char *c1, char *c2, char flag)
+{
+	void *addr, *pa1, *pa2;
+	pgprot_t pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
+
+	addr = mm_alloc(PAGE_SIZE);
+	if (!addr) {
+		print("%s -- Out of memory\n", __FUNCTION__);
+		goto ret1;
+	}
+	pa1 = (void *)virt_to_phy(addr);
+	strcpy((char *)addr, (char *)c1);
+	print("print value in 0x%lx(pa1): %s\n", pa1, (char *)addr);
+
+	addr = mm_alloc(PAGE_SIZE);
+	if (!addr) {
+		print("%s -- Out of memory\n", __FUNCTION__);
+		goto ret2;
+	}
+	pa2 = (void *)virt_to_phy(addr);
+	strcpy((char *)addr, (char *)c2);
+	print("print value in 0x%lx(pa2): %s\n", pa2, (char *)addr);
+	print("pa1:0x%lx pa2:0x%lx va:0x%lx\n", pa1, pa2, va);
+
+
+	print("Now map 0x%lx(pa) to 0x%lx(va)\n", pa1, va);
+	if (-1 ==
+	    mmu_page_mapping((unsigned long)pa1, (unsigned long)va, PAGE_SIZE,
+			     pgprot)) {
+		print("%s -- page mapping failed\n", __FUNCTION__);
+		return -1;
+	}
+	print("load 0x%lx(--> 0x%lx)(make entry into tlb): %s\n", va, pa1, va);
+
+	print("Now map 0x%lx(pa) to the same va(0x%lx)\n", pa2, va);
+	if (-1 ==
+	    mmu_page_mapping_no_sfence((unsigned long)pa2, (unsigned long)va, PAGE_SIZE,
+					pgprot)) {
+		print("%s -- page mapping failed\n", __FUNCTION__);
+		return -1;
+	}
+
+	print("test start --> load 0x%lx,(before sfence.vma)\n", va);
+	print("0x%lx : %s\n", va, (char *)va);
+
+	if (flag == 1) {
+		print(" ============== Flush tlb ==============\n");
+		local_flush_tlb_page((unsigned long )va);
+	}else
+		print(" ============== Not flush tlb ============\n");
+	print("test start --> load 0x%lx(after sfence.vma)\n", va);
+	print("0x%lx : %s\n", va, (char *)va);
+
+ret2:
+	mm_free((void *)phy_to_virt(pa2), PAGE_SIZE);
+ret1:
+	mm_free((void *)phy_to_virt(pa1), PAGE_SIZE);
+
+	return 0;
+}
+
+static void sfence_addr_test()
+{
+	int ret = 0;
+	void *va, *va1;
+
+	va = vmap_alloc(PAGE_SIZE);
+	if (!va) {
+		print("%s -- Out of memory\n", __FUNCTION__);
+		goto err;
+	}
+
+	va1 = vmap_alloc(PAGE_SIZE);
+	if (!va1) {
+		print("%s -- Out of memory\n", __FUNCTION__);
+		goto err1;
+	}
+
+	ret =  v_p_address_mapping(va, str[0], str[1], 0);
+	if (ret == -1)
+		goto err;
+	print("-------------------------------------------------------- \n");
+	ret =  v_p_address_mapping(va1, str[2], str[3], 1);
+	if (ret == -1)
+		goto err1;
+
+
+err:
+	vmap_free(va, PAGE_SIZE);
+err1:
+	vmap_free(va1, PAGE_SIZE);
 }
 
 /*
@@ -345,6 +441,8 @@ static int cmd_page_tlb_test_handler(int argc, char *argv[], void *priv)
 		satp_mode_bare_test();
 	} else if (!strncmp(argv[0], "pte_flag_test", sizeof("pte_flag_test"))) {
 		page_table_flag_test(argv[1], argv[2]);
+	} else if (!strncmp(argv[0], "sfence.addr", sizeof("sfence.addr"))) {
+		sfence_addr_test();
 	} else {
 		print("Unsupport command\n");
 		Usage();
