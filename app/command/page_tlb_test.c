@@ -10,8 +10,11 @@
 #include "../virt/machine.h"
 #include "tlbflush.h"
 #include "task.h"
+#include "asm/csr.h"
 
 #define DIS_PAGE_TABLE  0x1FF
+static char *str[]={"sfence test -- This is pa1", "sfence test -- This is pa2",
+	"sfence test -- This is pa3", "sfence test -- This is pa4"};
 
 static void Usage(void)
 {
@@ -25,6 +28,7 @@ static void Usage(void)
 	print("    -- satp_bare_test (set satp is bare mode)\n");
 	print("    -- pte_flag_test (modify pte flag bit)\n");
 	print("    -- sfence.addr (flush spec addr)\n");
+	print("    -- sfence.asid (flush spec asid)\n");
 	print("param option:\n");
 	print("    -- cmd: pte_flag_test (modify pte flag bit)\n");
 	print("    param value is 0x1ff, display current pte value, the param flag bits are as follows\n");
@@ -36,8 +40,16 @@ static void Usage(void)
 	print("       value=2(After changing the page table, first flush the cache and then access the page table)\n");
 }
 
-static char *str[]={"sfence test -- This is pa1", "sfence test -- This is pa2",
-	"sfence test -- This is pa3", "sfence test -- This is pa4"};
+static void flush_tlb_asid()
+{
+	unsigned long old;
+	unsigned long asid_bits;
+
+	old = read_csr(CSR_SATP);
+	asid_bits = (old >> SATP_ASID_SHIFT)  & SATP_ASID_MASK;
+	local_flush_tlb_all_asid(asid_bits);
+}
+
 static int v_p_address_mapping(void *va, char *c1, char *c2, char flag)
 {
 	void *addr, *pa1, *pa2;
@@ -60,6 +72,7 @@ static int v_p_address_mapping(void *va, char *c1, char *c2, char flag)
 	pa2 = (void *)virt_to_phy(addr);
 	strcpy((char *)addr, (char *)c2);
 	print("print value in 0x%lx(pa2): %s\n", pa2, (char *)addr);
+
 	print("pa1:0x%lx pa2:0x%lx va:0x%lx\n", pa1, pa2, va);
 
 
@@ -84,9 +97,12 @@ static int v_p_address_mapping(void *va, char *c1, char *c2, char flag)
 	print("0x%lx : %s\n", va, (char *)va);
 
 	if (flag == 1) {
-		print(" ============== Flush tlb ==============\n");
+		print(" ============== sfence.va flush tlb ==============\n");
 		local_flush_tlb_page((unsigned long )va);
-	}else
+	}else if (flag == 2) {
+		print(" ============== sfence.asid flush tlb ==============\n");
+		flush_tlb_asid();
+	}else if (flag == 0)
 		print(" ============== Not flush tlb ============\n");
 	print("test start --> load 0x%lx(after sfence.vma)\n", va);
 	print("0x%lx : %s\n", va, (char *)va);
@@ -99,7 +115,13 @@ ret1:
 	return 0;
 }
 
-static void sfence_addr_test()
+/*
+ * flag=0, not flush all tlb
+ * flag=1, va not flush, using the sfence.addr command to refresh tlb
+ * flag=2, va1 not flush, using the sfence.asid command to refresh tlb
+ *
+ */
+static void sfence_param_test(char flag)
 {
 	int ret = 0;
 	void *va, *va1;
@@ -116,15 +138,23 @@ static void sfence_addr_test()
 		goto err1;
 	}
 
-	ret =  v_p_address_mapping(va, str[0], str[1], 0);
-	if (ret == -1)
-		goto err;
-	print("-------------------------------------------------------- \n");
-	ret =  v_p_address_mapping(va1, str[2], str[3], 1);
-	if (ret == -1)
-		goto err1;
-
-
+	if (flag == 1) {
+		ret =  v_p_address_mapping(va, str[0], str[1], 0);
+		if (ret == -1)
+			goto err;
+		print("-------------------------------------------------------- \n");
+		ret =  v_p_address_mapping(va1, str[2], str[3], 1);
+		if (ret == -1)
+			goto err1;
+	}else if (flag == 2) {
+		ret =  v_p_address_mapping(va, str[0], str[1], 2);
+		if (ret == -1)
+			goto err;
+		print("-------------------------------------------------------- \n");
+		ret =  v_p_address_mapping(va1, str[2], str[3], 0);
+		if (ret == -1)
+			goto err1;
+	}
 err:
 	vmap_free(va, PAGE_SIZE);
 err1:
@@ -136,7 +166,6 @@ err1:
  * | XLEN-1  10 | 9             8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0
  *       PFN      reserved for SW   D   A   G   U   X   W   R   V
  */
-//static void page_table_flag_test(int pte_flag, char fence_flag)
 static void page_table_flag_test(char *param, char *cflag)
 {
 	void *vaddr;
@@ -442,7 +471,9 @@ static int cmd_page_tlb_test_handler(int argc, char *argv[], void *priv)
 	} else if (!strncmp(argv[0], "pte_flag_test", sizeof("pte_flag_test"))) {
 		page_table_flag_test(argv[1], argv[2]);
 	} else if (!strncmp(argv[0], "sfence.addr", sizeof("sfence.addr"))) {
-		sfence_addr_test();
+		sfence_param_test(1);
+	} else if (!strncmp(argv[0], "sfence.asid", sizeof("sfence.asid"))) {
+		sfence_param_test(2);
 	} else {
 		print("Unsupport command\n");
 		Usage();
