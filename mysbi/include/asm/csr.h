@@ -6,6 +6,9 @@
 #define INSERT_FIELD(val, which, fieldval) \
 	(((val) & ~(which)) | ((fieldval) * ((which) & ~((which)-1))))
 
+#define MSTATUS_FS_SHIFT	13
+#define MSTATUS_FS	(3UL << MSTATUS_FS_SHIFT)
+
 #define PRV_U				(0UL)
 #define PRV_S				(1UL)
 #define PRV_M				(3UL)
