@@ -30,3 +30,5 @@ config APP_USER_RUN
 	bool "APP_USER_RUN"
 config APP_VCPU_RUN
 	bool "APP_VCPU_RUN"
+config APP_STREAM
+	bool "APP_STREAM"

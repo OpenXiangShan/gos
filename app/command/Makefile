@@ -14,3 +14,4 @@ obj-$(CONFIG_APP_PAGE_TLB_TEST) += page_tlb_test.o
 obj-$(CONFIG_APP_TASK_INFO) += task_info.o
 obj-$(CONFIG_APP_CSR_CTL) += csr_ctl.o
 obj-$(CONFIG_APP_PLIC_SET_AFFINITY) += plic_set_affinity.o
+obj-$(CONFIG_APP_STREAM) += stream.o
