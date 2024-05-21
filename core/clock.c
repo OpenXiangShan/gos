@@ -19,6 +19,11 @@ unsigned long cycles_to_ms(unsigned long cycles, unsigned long freq_hz)
 	return (cycles * 1000) / freq_hz;
 }
 
+unsigned long cycles_to_us(unsigned long cycles, unsigned long freq_hz)
+{
+	return (cycles * 1000000) / freq_hz;
+}
+
 unsigned long ms_to_cycles(unsigned long ms, unsigned long freq_hz)
 {
 	return (freq_hz / 1000) * ms;
@@ -128,6 +133,20 @@ unsigned long get_clocksource_counter(void)
 	ms = cycles_to_ms(cycle, source->freq);
 
 	return ms;
+}
+
+unsigned long get_clocksource_counter_us(void)
+{
+	struct clock_source *source = clock_src;
+	unsigned long cycle, us;
+
+	if (!source || !source->read)
+		return 0;
+
+	cycle = source->read(source);
+	us = cycles_to_us(cycle, source->freq);
+
+	return us;
 }
 
 int register_timer_event(struct timer_event_info *timer_event, int cpu)

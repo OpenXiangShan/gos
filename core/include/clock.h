@@ -30,6 +30,7 @@ int register_clock_event(struct clock_event *evt, int cpu);
 int register_timer_event(struct timer_event_info *timer_event, int cpu);
 void do_clock_event_handler(void);
 unsigned long get_clocksource_counter(void);
+unsigned long get_clocksource_counter_us(void);
 unsigned long cycles_to_ms(unsigned long cycles, unsigned long freq_hz);
 unsigned long ms_to_cycles(unsigned long ms, unsigned long freq_hz);
 unsigned long get_clock_source_freq(void);
