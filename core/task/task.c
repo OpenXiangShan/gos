@@ -139,6 +139,10 @@ int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 	new->regs.ra = (unsigned long)task_fn_wrap;
 	new->regs.sp = (unsigned long)new->stack;
 
+	/* Enable FPU in S-mode task context accordingly */
+	if (read_csr(sstatus) & SR_FS)
+		new->regs.sstatus |= SR_FS;
+
 	if (mmu_is_on) {
 		if (pgd)
 			new->regs.satp = (((unsigned long)pgd) >> PAGE_SHIFT) |
