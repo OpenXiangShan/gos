@@ -21,10 +21,11 @@ static spinlock_t task_id_lock __attribute__((section(".data"))) = __SPINLOCK_IN
 
 static int alloc_task_id(void)
 {
-	unsigned long bitmap = task_id_bitmap;
+	unsigned long bitmap;
 	int pos = 0;
 
 	spin_lock(&task_id_lock);
+	bitmap = task_id_bitmap;
 	while (bitmap & 0x01) {
 		if (pos == 64)
 			return -1;
