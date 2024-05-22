@@ -111,6 +111,7 @@ void *mm_alloc_align(unsigned long align, unsigned int size)
 	unsigned long align_addr;
 	int per_mem_map;
 	void *ret;
+	irq_flags_t flags;
 
 	if (align <= PAGE_SIZE)
 		return mm_alloc(size);
@@ -119,7 +120,7 @@ void *mm_alloc_align(unsigned long align, unsigned int size)
 
 	n = mm_blocks.avail;
 
-	spin_lock(&mem_lock);
+	spin_lock_irqsave(&mem_lock, flags);
 	for (i = 0; i < n; i++) {
 		unsigned long start;
 		unsigned int len;
@@ -160,7 +161,7 @@ void *mm_alloc_align(unsigned long align, unsigned int size)
 			index++;
 		}
 	}
-	spin_unlock(&mem_lock);
+	spin_unlock_irqrestore(&mem_lock, flags);
 	print("%s -- out of memory!!\n", __FUNCTION__);
 
 	return NULL;
@@ -172,7 +173,7 @@ success:
 		mem_map |= (1UL << (index % per_mem_map));
 		mem_maps->maps[(index / per_mem_map)] = mem_map;
 	}
-	spin_unlock(&mem_lock);
+	spin_unlock_irqrestore(&mem_lock, flags);
 
 	if (!mmu_is_on)
 		ret = (void *)align_addr;
@@ -191,6 +192,7 @@ void *mm_alloc(unsigned int size)
 	unsigned long mem_map;
 	int per_mem_map;
 	void *addr;
+	irq_flags_t flags;
 
 	n = mm_blocks.avail;
 	for (i = 0; i < n; i++) {
@@ -210,7 +212,7 @@ void *mm_alloc(unsigned int size)
 		 * index%per_mem_map indicates that the page represented by index is locate in which bit of its mem_map
 		 * If can find page_nr continuous bits in mem_maps, goto success and the addr is the start address of according continues this bits.
 		 */
-		spin_lock(&mem_lock);
+		spin_lock_irqsave(&mem_lock, flags);
 		while (index < total) {
 			mem_map = mem_maps->maps[(index / per_mem_map)];
 			if (((mem_map >> (index % per_mem_map)) & (1UL)) == 0) {
@@ -224,7 +226,7 @@ void *mm_alloc(unsigned int size)
 			index++;
 		}
 
-		spin_unlock(&mem_lock);
+		spin_unlock_irqrestore(&mem_lock, flags);
 	}
 	print("out of memory!!\n");
 
@@ -241,7 +243,7 @@ success:
 		mem_maps->maps[(index / per_mem_map)] = mem_map;
 	}
 
-	spin_unlock(&mem_lock);
+	spin_unlock_irqrestore(&mem_lock, flags);
 
 	if (!mmu_is_on)
 		ret = addr;
@@ -264,6 +266,7 @@ void mm_free(void *addr, unsigned int size)
 	unsigned long index;
 	unsigned long mem_map;
 	int per_mem_map;
+	irq_flags_t flags;
 
 	if (mmu_is_on)
 		addr = addr - va_pa_offset;
@@ -297,12 +300,12 @@ release:
 	if (index >= total)
 		return;
 
-	spin_lock(&mem_lock);
+	spin_lock_irqsave(&mem_lock, flags);
 	/* set bits in mem_maps according to [addr, addr + size) to 0 */
 	for (; page_nr; page_nr--, index++) {
 		mem_map = mem_maps->maps[(index / per_mem_map)];
 		mem_map &= ~(unsigned long)((1UL) << (index % per_mem_map));
 		mem_maps->maps[(index / per_mem_map)] = mem_map;
 	}
-	spin_unlock(&mem_lock);
+	spin_unlock_irqrestore(&mem_lock, flags);
 }
