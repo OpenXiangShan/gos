@@ -278,4 +278,13 @@
 	__v;							\
 })
 
+#define read_reg(reg)                             \
+({                                                \
+	unsigned long _v;                         \
+	__asm__ __volatile__ ("mv %0, ra\n\t"     \
+				: "=r" (_v) :     \
+				: "memory");      \
+	_v;                                       \
+})
+
 #endif
