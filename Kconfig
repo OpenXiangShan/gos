@@ -22,6 +22,17 @@ choice
 		tristate "Select PLIC"
 endchoice
 
+choice
+	prompt "Select satp mode"
+
+	config SELECT_SV39
+		tristate "Select Sv39"
+	config SELECT_SV48
+		tristate "Select Sv48"
+	config SELECT_SV57
+		tristate "Select Sv57"
+endchoice
+
 config MYGUEST
 	bool "Guest OS bin"
 	default y

@@ -29,6 +29,12 @@ if [ "$#" -eq 1 ];then
 		make gos-dualcore.dtb
 		make fpga_defconfig
 
+	elif [ "$1" = "default-Sv48" ];then
+		make gos-dualcore-Sv48.dtb
+		make Sv48_defconfig
+	elif [ "$1" = "default-Sv57" ];then
+		make gos-dualcore-Sv57.dtb
+		make Sv57_defconfig
 	else
 		make $1
 	fi

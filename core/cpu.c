@@ -11,10 +11,13 @@
 #include "spinlocks.h"
 #include "cpu.h"
 #include "devicetree.h"
+#include "../fdt/libfdt.h"
 
 extern char dtb_bin[];
 extern int mmu_is_on;
 extern void do_exception_vector(void);
+extern int pgtable_l4_enabled;
+extern int pgtable_l5_enabled;
 
 spinlock_t cpumask_lock __attribute__((section(".data"))) =
     __SPINLOCK_INITIALIZER;
@@ -51,6 +54,31 @@ static void scan_dtb_cpus_cb(void *dtb, int offset, void *data)
 	(*n)++;
 }
 
+static void scan_dtb_cpu_satp_mode(void *dtb, int offset, void *data)
+{
+	const char *mode;
+
+	mode = fdt_getprop((const void *)dtb, offset, "mmu-type", NULL);
+	print("%s -- mode:%s\n", __FUNCTION__, mode);
+	if (!strcmp(mode, "riscv,sv39")) {
+		pgtable_l4_enabled = 0;
+		pgtable_l5_enabled = 0;
+	}
+	else if (!strcmp(mode, "riscv,sv48")) {
+		pgtable_l4_enabled = 1;
+		pgtable_l5_enabled = 0;
+	}
+	else if (!strcmp(mode, "riscv,sv57")) {
+		pgtable_l4_enabled = 1;
+		pgtable_l5_enabled = 1;
+	}
+	else {
+		print("Unsupport satp mode.. default use sv39...\n");
+		pgtable_l4_enabled = 0;
+		pgtable_l5_enabled = 0;
+	}
+}
+
 int get_cpu_count()
 {
 	void *dtb_ptr;
@@ -64,6 +92,20 @@ int get_cpu_count()
 	dtb_scan_cpus(dtb_ptr, scan_dtb_cpus_cb, &ret);
 
 	return ret;
+}
+
+int get_cpu_satp_mode()
+{
+	void *dtb_ptr;
+
+	if (mmu_is_on)
+		return -1;
+
+	dtb_ptr = (void *)dtb_bin;
+
+	dtb_scan_cpus(dtb_ptr, scan_dtb_cpu_satp_mode, NULL);
+
+	return 0;
 }
 
 void bringup_secondary_cpus(struct device_init_entry *hw)

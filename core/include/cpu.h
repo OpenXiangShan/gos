@@ -60,5 +60,6 @@ int cpu_hotplug_notify_register(struct cpu_hotplug_notifier *notifier);
 int cpu_hotplug_init(int cpu);
 void cpu_regs_init(struct pt_regs *regs);
 int get_cpu_count(void);
+int get_cpu_satp_mode(void);
 
 #endif

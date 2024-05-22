@@ -28,6 +28,7 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 
 	mm_init(hw);
 
+	get_cpu_satp_mode();
 #ifdef CONFIG_ENABLE_MMU
 	paging_init(hw);
 #endif

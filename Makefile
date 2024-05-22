@@ -150,6 +150,7 @@ clean: mysbi-clean myGuest-clean myUser-clean
 
 ifeq ($(CONFIG_SELECT_QEMU), y)
 ifeq ($(CONFIG_SELECT_PLIC), y)
+ifeq ($(CONFIG_SELECT_SV39), y)
 run:
 		./qemu-system-riscv64 -nographic \
 		-machine virt -smp 2 \
@@ -161,7 +162,34 @@ run-debug:
 		-cpu rv64,sv39=on -m 8G \
 		-bios out/Image.bin \
 		-S -s
+else ifeq ($(CONFIG_SELECT_SV48), y)
+run:
+		./qemu-system-riscv64 -nographic \
+		-machine virt -smp 2 \
+		-cpu rv64,sv48=on -m 8G \
+		-bios out/Image.bin
+run-debug:
+		./qemu-system-riscv64 -nographic \
+		-machine virt -smp 2 \
+		-cpu rv64,sv48=on -m 8G \
+		-bios out/Image.bin \
+		-S -s
+else ifeq ($(CONFIG_SELECT_SV57), y)
+run:
+		./qemu-system-riscv64 -nographic \
+		-machine virt -smp 2 \
+		-cpu rv64,sv57=on -m 8G \
+		-bios out/Image.bin
+run-debug:
+		./qemu-system-riscv64 -nographic \
+		-machine virt -smp 2 \
+		-cpu rv64,sv57=on -m 8G \
+		-bios out/Image.bin \
+		-S -s
+
+endif #CONFIG_SELECT_SV39
 else ifeq ($(CONFIG_SELECT_AIA), y)
+ifeq ($(CONFIG_SELECT_SV39), y)
 run:
 	./qemu-system-riscv64 -nographic \
         -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
@@ -173,14 +201,51 @@ run-debug:
 	-cpu rv64,sv39=on -m 8G \
         -bios out/Image.bin \
 	-S -s
+else ifeq ($(CONFIG_SELECT_SV48), y)
+run:
+	./qemu-system-riscv64 -nographic \
+        -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
+	-cpu rv64,sv48=on -m 8G \
+        -bios out/Image.bin
+run-debug:
+	./qemu-system-riscv64 -nographic \
+        -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
+	-cpu rv64,sv48=on -m 8G \
+        -bios out/Image.bin \
+	-S -s
+else ifeq ($(CONFIG_SELECT_SV57), y)
+run:
+	./qemu-system-riscv64 -nographic \
+        -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
+	-cpu rv64,sv57=on -m 8G \
+        -bios out/Image.bin
+run-debug:
+	./qemu-system-riscv64 -nographic \
+        -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
+	-cpu rv64,sv57=on -m 8G \
+        -bios out/Image.bin \
+	-S -s
+endif #CONFIG_SELECT_SV39
 endif #CONFIG_SELECT_PLIC
 
 else ifeq ($(CONFIG_SELECT_VCS), y)
 ifeq ($(CONFIG_SELECT_PLIC), y)
+ifeq ($(CONFIG_SELECT_SV39), y)
 run:
 	./riscv64-nemu-interpreter -b out/Image.bin
 run-debug:
 	@echo "Do not support debug in NEMU..."
+else ifeq ($(CONFIG_SELECT_SV48), y)
+run:
+	@echo "Do not support sv48 in NEMU..."
+run-debug:
+	@echo "Do not support sv48 in NEMU..."
+else ifeq ($(CONFIG_SELECT_SV57), y)
+run:
+	@echo "Do not support sv57 in NEMU..."
+run-debug:
+	@echo "Do not support sv57 in NEMU..."
+endif
 else ifeq ($(CONFIG_SELECT_AIA), y)
 run:
 	@echo "Do not support aia in VCS..."
