@@ -32,3 +32,5 @@ config APP_VCPU_RUN
 	bool "APP_VCPU_RUN"
 config APP_STREAM
 	bool "APP_STREAM"
+config APP_HUGE_PAGE_TEST
+	bool "APP_HUGE_PAGE_TEST"
