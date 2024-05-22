@@ -101,6 +101,87 @@ void mm_init(struct device_init_entry *hw)
 	}
 }
 
+void *mm_alloc_align(unsigned long align, unsigned int size)
+{
+	int n, i;
+	int page_nr = N_PAGE(size);
+	struct mem_maps *mem_maps;
+	unsigned long index;
+	unsigned long mem_map;
+	unsigned long align_addr;
+	int per_mem_map;
+	void *ret;
+
+	if (align <= PAGE_SIZE)
+		return mm_alloc(size);
+
+	align = align / PAGE_SIZE * PAGE_SIZE;
+
+	n = mm_blocks.avail;
+
+	spin_lock(&mem_lock);
+	for (i = 0; i < n; i++) {
+		unsigned long start;
+		unsigned int len;
+		int total;
+		int nr = 0;
+
+		start = mm_blocks.memory_block_start[i];
+		len = mm_blocks.memory_block_size[i];
+		align_addr = ALIGN_SIZE(start, align);
+
+		if (!(align_addr >= start &&
+			align_addr < start + len))
+			continue;
+
+		if (!(align_addr + size >= start &&
+			align_addr < start + len))
+			continue;
+
+		mem_maps = &mm_blocks.maps[i];
+		per_mem_map = sizeof(mem_maps->maps[0]) * 8;
+		total = mem_maps->map_nr;
+		index = ((unsigned long)align_addr - start) / PAGE_SIZE;
+		if (index >= total)
+			continue;
+
+		while (index < total) {
+			mem_map = mem_maps->maps[(index / per_mem_map)];
+			if (((mem_map >> (index % per_mem_map)) & (1UL)) == 0) {
+				if (++nr == page_nr)
+					goto success;
+			} else {
+				nr = 0;
+				align_addr += align;
+				index = ((unsigned long)align_addr - start) / PAGE_SIZE;
+				continue;
+			}
+
+			index++;
+		}
+	}
+	spin_unlock(&mem_lock);
+	print("%s -- out of memory!!\n", __FUNCTION__);
+
+	return NULL;
+
+success:
+	for (index = index + 1 - page_nr; page_nr; index++, page_nr--) {
+		per_mem_map = sizeof(mem_maps->maps[0]) * 8;
+		mem_map = mem_maps->maps[(index / per_mem_map)];
+		mem_map |= (1UL << (index % per_mem_map));
+		mem_maps->maps[(index / per_mem_map)] = mem_map;
+	}
+	spin_unlock(&mem_lock);
+
+	if (!mmu_is_on)
+		ret = (void *)align_addr;
+	else
+		ret = (void *)((unsigned long)align_addr + va_pa_offset);
+
+	return ret;
+}
+
 void *mm_alloc(unsigned int size)
 {
 	int page_nr = N_PAGE(size), n, i;
@@ -152,7 +233,6 @@ void *mm_alloc(unsigned int size)
 success:
 	/* 
 	 * Set founded page_nr continues bits to 1 in mem_maps
-	 * n is the last index of allocated pages, it need to -1 because it is added 1 in end of while
 	 */
 	for (index = index + 1 - page_nr; page_nr; index++, page_nr--) {
 		per_mem_map = sizeof(mem_maps->maps[0]) * 8;
@@ -192,14 +272,14 @@ void mm_free(void *addr, unsigned int size)
 
 	for (i = 0; i < n; i++) {
 		unsigned long start;
-		unsigned int size;
+		unsigned int len;
 
 		start = mm_blocks.memory_block_start[i];
-		size = mm_blocks.memory_block_size[i];
+		len = mm_blocks.memory_block_size[i];
 
 		if (!
 		    ((unsigned long)addr >= start
-		     && (unsigned long)addr < start + size))
+		     && (unsigned long)addr < start + len))
 			continue;
 
 		mem_maps = &mm_blocks.maps[i];

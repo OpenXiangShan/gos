@@ -100,7 +100,7 @@ static unsigned long *mmu_pt_walk_fetch(unsigned long *ptp, unsigned long va,
 	return mmu_pt_walk_fetch(pte, va, shift - 9, 0);
 }
 
-void *walk_pt_va_to_pa(unsigned long va)
+static void *__walk_pt_va_to_pa(unsigned long va, int page_size)
 {
 	unsigned long *pte;
 
@@ -115,14 +115,25 @@ void *walk_pt_va_to_pa(unsigned long va)
 		return 0;
 	}
 
-	return (void *)((pfn_to_phys(pte_pfn(*pte)) | (va & (PAGE_SIZE - 1))));
+	return (void *)((pfn_to_phys(pte_pfn(*pte)) | (va & (page_size - 1))));
+}
+
+void *walk_pt_va_to_pa(unsigned long va)
+{
+	return __walk_pt_va_to_pa(va, PAGE_SIZE);
+}
+
+void *walk_pt_va_to_pa_huge(unsigned long va, int page_size)
+{
+	return __walk_pt_va_to_pa(va, page_size);
 }
 
 static int __mmu_page_mapping(unsigned long *_pgdp, unsigned long phy,
 			      unsigned long virt, unsigned int size,
-			      pgprot_t pgprot)
+			      pgprot_t pgprot, int page_shift)
 {
-	unsigned int page_nr = N_PAGE(size);
+	int page_size = 1UL << page_shift;
+	unsigned int page_nr = N_PAGE_EXT(size, page_size);
 	unsigned long *pte;
 	unsigned long pfn, pte_val;
 	unsigned long phy_addr = phy;
@@ -132,7 +143,7 @@ static int __mmu_page_mapping(unsigned long *_pgdp, unsigned long phy,
 		pfn = (unsigned long)phy_addr >> PAGE_SHIFT;
 		pte =
 		    riscv_pt_walk_alloc(_pgdp,
-					virt_addr, PGDIR_SHIFT, PAGE_SIZE, 1,
+					virt_addr, PGDIR_SHIFT, page_size, 1,
 					alloc_zero_page, 0);
 		if (!pte)
 			return -1;
@@ -141,11 +152,32 @@ static int __mmu_page_mapping(unsigned long *_pgdp, unsigned long phy,
 
 		*pte = pte_val;
 
-		virt_addr += PAGE_SIZE;
-		phy_addr += PAGE_SIZE;
+		virt_addr += page_size;
+		phy_addr += page_size;
 	}
 
 	return 0;
+}
+
+static int __mmu_page_mapping_4k(unsigned long *_pgdp, unsigned long phy,
+			      unsigned long virt, unsigned int size,
+			      pgprot_t pgprot)
+{
+	return __mmu_page_mapping(_pgdp, phy, virt, size, pgprot, PAGE_SHIFT);
+}
+
+static int __mmu_page_mapping_2M(unsigned long *_pgdp, unsigned long phy,
+			      unsigned long virt, unsigned int size,
+			      pgprot_t pgprot)
+{
+	return __mmu_page_mapping(_pgdp, phy, virt, size, pgprot, PAGE_2M_SHIFT);
+}
+
+static int __mmu_page_mapping_1G(unsigned long *_pgdp, unsigned long phy,
+			      unsigned long virt, unsigned int size,
+			      pgprot_t pgprot)
+{
+	return __mmu_page_mapping(_pgdp, phy, virt, size, pgprot, PAGE_1G_SHIFT);
 }
 
 unsigned long *mmu_get_pte(unsigned long virt_addr)
@@ -186,20 +218,20 @@ int mmu_page_mapping_lazy(unsigned long virt, unsigned int size,
 int mmu_user_page_mapping(unsigned long phy, unsigned long virt,
 			  unsigned int size, pgprot_t pgprot)
 {
-	return __mmu_page_mapping(pgdp, phy, virt, size, pgprot);
+	return __mmu_page_mapping_4k(pgdp, phy, virt, size, pgprot);
 }
 
 int mmu_gstage_page_mapping(unsigned long *_pgdp, unsigned long phy,
 			    unsigned long virt, unsigned int size,
 			    pgprot_t pgprot)
 {
-	return __mmu_page_mapping(_pgdp, phy, virt, size, pgprot);
+	return __mmu_page_mapping_4k(_pgdp, phy, virt, size, pgprot);
 }
 
 int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 		     pgprot_t pgprot)
 {
-	if (__mmu_page_mapping((unsigned long *)pgdp, phy, virt, size, pgprot))
+	if (__mmu_page_mapping_4k((unsigned long *)pgdp, phy, virt, size, pgprot))
 		return -1;
 
 	local_flush_tlb_range(virt, size, PAGE_SIZE);
@@ -207,10 +239,32 @@ int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 	return 0;
 }
 
+int mmu_page_mapping_2M(unsigned long phy, unsigned long virt, unsigned int size,
+		        pgprot_t pgprot)
+{
+	if (__mmu_page_mapping_2M((unsigned long *)pgdp, phy, virt, size, pgprot))
+		return -1;
+
+	local_flush_tlb_range(virt, size, PAGE_2M_SIZE);
+
+	return 0;
+}
+
+int mmu_page_mapping_1G(unsigned long phy, unsigned long virt, unsigned int size,
+		        pgprot_t pgprot)
+{
+	if (__mmu_page_mapping_1G((unsigned long *)pgdp, phy, virt, size, pgprot))
+		return -1;
+
+	local_flush_tlb_range(virt, size, PAGE_1G_SIZE);
+
+	return 0;
+}
+
 int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt, unsigned int size,
 			       pgprot_t pgprot)
 {
-	return __mmu_page_mapping((unsigned long *)pgdp, phy, virt, size, pgprot);
+	return __mmu_page_mapping_4k((unsigned long *)pgdp, phy, virt, size, pgprot);
 }
 
 int mmu_direct_page_mapping()
