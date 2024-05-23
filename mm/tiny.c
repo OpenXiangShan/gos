@@ -57,8 +57,8 @@ find:
 	}
 
 	/* need to grow */
-	wholesale = 1UL << tiny_array[i].order;
-	new = mm_alloc(wholesale);
+	wholesale = PAGE_SIZE * (1UL << tiny_array[i].order);
+	new = __mm_alloc(wholesale);
 	if (!new)
 		return NULL;
 
@@ -135,7 +135,7 @@ static void tiny_release_obj(struct tiny *tiny, void *addr)
 
 	list_del(&tiny->list);
 
-	mm_free((void *)tiny, tiny->size);
+	__mm_free((void *)tiny, tiny->size);
 	tiny = NULL;
 }
 

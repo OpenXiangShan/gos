@@ -7,6 +7,7 @@
 #include "devicetree.h"
 #include "vmap.h"
 #include "tiny_mm.h"
+#include "gos/autoconf.h"
 
 extern int mmu_is_on;
 extern unsigned long bss_end;
@@ -186,7 +187,7 @@ success:
 	return ret;
 }
 
-void *mm_alloc(unsigned int size)
+void *__mm_alloc(unsigned int size)
 {
 	int page_nr = N_PAGE(size), n, i;
 	int index = 0, nr = 0;
@@ -256,12 +257,23 @@ success:
 	return ret;
 }
 
+void *mm_alloc(unsigned int size)
+{
+#if CONFIG_ENABLE_TINY
+	if (mmu_is_on) {
+		if (size <= PAGE_SIZE / 2)
+			return tiny_alloc(size);
+	}
+#endif
+	return __mm_alloc(size);
+}
+
 struct memory_block *get_mm_blocks()
 {
 	return &mm_blocks;
 }
 
-void mm_free(void *addr, unsigned int size)
+void __mm_free(void *addr, unsigned int size)
 {
 	int page_nr = N_PAGE(size), n, total, i;
 	unsigned long phy_address_start;
@@ -311,4 +323,17 @@ release:
 		mem_maps->maps[(index / per_mem_map)] = mem_map;
 	}
 	spin_unlock_irqrestore(&mem_lock, flags);
+}
+
+void mm_free(void *addr, unsigned int size)
+{
+#if CONFIG_ENABLE_TINY
+	if (mmu_is_on) {
+		if (size <= PAGE_SIZE / 2) {
+			tiny_free(addr);
+			return;
+		}
+	}
+#endif
+	__mm_free(addr, size);
 }

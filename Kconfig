@@ -41,6 +41,10 @@ config MYUSER
 	bool "User process bin"
 	default y
 
+config ENABLE_TINY
+	bool "Enable Tiny mm"
+	default y
+
 config ENABLE_MMU
 	bool "Enable MMU"
 	default y
