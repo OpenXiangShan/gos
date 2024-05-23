@@ -6,6 +6,7 @@
 #include "spinlocks.h"
 #include "devicetree.h"
 #include "vmap.h"
+#include "tiny_mm.h"
 
 extern int mmu_is_on;
 extern unsigned long bss_end;
@@ -99,6 +100,8 @@ void mm_init(struct device_init_entry *hw)
 		     mm_blocks.memory_block_size[i] / 1024, nr_free_pages,
 		     PAGE_SIZE);
 	}
+
+	tiny_init();
 }
 
 void *mm_alloc_align(unsigned long align, unsigned int size)
