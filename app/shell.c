@@ -6,7 +6,7 @@
 #include <asm/type.h>
 #include "shell.h"
 #include "command.h"
-#include "gos/autoconf.h"
+#include "gos.h"
 
 #define ESC_ASCII 27
 #define SHELL_DEVICE_NAME "UART0"

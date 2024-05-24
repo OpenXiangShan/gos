@@ -1,4 +1,4 @@
-#include "gos/autoconf.h"
+#include "gos.h"
 #ifdef CONFIG_SELECT_FPGA
 
 #include <device.h>

@@ -12,7 +12,7 @@
 #include <percpu.h>
 #include <task.h>
 #include <devicetree.h>
-#include "gos/autoconf.h"
+#include "gos.h"
 
 extern const char logo[];
 

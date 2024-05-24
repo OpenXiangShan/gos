@@ -11,7 +11,7 @@
 #include "cpu.h"
 #include "tlbflush.h"
 #include "spinlocks.h"
-#include "gos/autoconf.h"
+#include "gos.h"
 
 extern int mmu_is_on;
 static DEFINE_PER_CPU(struct task_ctrl, tasks);

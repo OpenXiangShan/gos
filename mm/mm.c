@@ -7,7 +7,7 @@
 #include "devicetree.h"
 #include "vmap.h"
 #include "tiny_mm.h"
-#include "gos/autoconf.h"
+#include "gos.h"
 
 extern int mmu_is_on;
 extern unsigned long bss_end;
