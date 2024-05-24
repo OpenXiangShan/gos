@@ -1,0 +1,7 @@
+menu "Memory Management"
+
+config TINY
+	bool "Enable Tiny mm"
+	default y
+
+endmenu

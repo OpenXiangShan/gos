@@ -101,8 +101,9 @@ void mm_init(struct device_init_entry *hw)
 		     mm_blocks.memory_block_size[i] / 1024, nr_free_pages,
 		     PAGE_SIZE);
 	}
-
+#if CONFIG_TINY
 	tiny_init();
+#endif
 }
 
 void *mm_alloc_align(unsigned long align, unsigned int size)
@@ -259,7 +260,7 @@ success:
 
 void *mm_alloc(unsigned int size)
 {
-#if CONFIG_ENABLE_TINY
+#if CONFIG_TINY
 	if (mmu_is_on) {
 		if (size <= PAGE_SIZE / 2)
 			return tiny_alloc(size);
@@ -327,7 +328,7 @@ release:
 
 void mm_free(void *addr, unsigned int size)
 {
-#if CONFIG_ENABLE_TINY
+#if CONFIG_TINY
 	if (mmu_is_on) {
 		if (size <= PAGE_SIZE / 2) {
 			tiny_free(addr);

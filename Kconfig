@@ -1,6 +1,7 @@
 source "app/Kconfig"
 source "bsp/Kconfig"
 source "drivers/Kconfig"
+source "mm/Kconfig"
 
 choice
 	prompt "Select A Running Target"
@@ -39,10 +40,6 @@ config MYGUEST
 
 config MYUSER
 	bool "User process bin"
-	default y
-
-config ENABLE_TINY
-	bool "Enable Tiny mm"
 	default y
 
 config ENABLE_MMU
