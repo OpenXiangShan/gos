@@ -21,18 +21,20 @@ static struct list_head tiny_2048;
 struct tiny_entry {
 	struct list_head *list_head;
 	int order;
+	int reclaim_level;
+	int in_use;
 };
 
 static struct tiny_entry tiny_array[] = {
-	{ &tiny_8, 0 },
-	{ &tiny_16, 0 },
-	{ &tiny_32, 1 },
-	{ &tiny_64, 1 },
-	{ &tiny_128, 2 },
-	{ &tiny_256, 2 },
-	{ &tiny_512, 3 },
-	{ &tiny_1024, 3 },
-	{ &tiny_2048, 3 },
+	{ &tiny_8,    0, 1, 0 },
+	{ &tiny_16,   0, 1, 0 },
+	{ &tiny_32,   1, 1, 0 },
+	{ &tiny_64,   1, 1, 0 },
+	{ &tiny_128,  2, 1, 0 },
+	{ &tiny_256,  2, 1, 0 },
+	{ &tiny_512,  3, 1, 0 },
+	{ &tiny_1024, 3, 1, 0 },
+	{ &tiny_2048, 3, 1, 0 },
 };
 
 #define TINY_ARRAY_COUNT sizeof(tiny_array) / sizeof(tiny_array[0])
@@ -74,13 +76,14 @@ find:
 	meta->free = meta->total;
 
 	list_add_tail(&new->list, tiny_array[i].list_head);
+	tiny_array[i].in_use++;
 
 	goto find;
 
 	return NULL;
 }
 
-static struct tiny *get_tiny_by_addr(unsigned long addr)
+static struct tiny *get_tiny_by_addr(unsigned long addr, int* index)
 {
 	int i, size;
 	struct tiny *tiny;
@@ -89,8 +92,10 @@ static struct tiny *get_tiny_by_addr(unsigned long addr)
 		list_for_each_entry(tiny, tiny_array[i].list_head, list) {
 			size = tiny->meta.unit * tiny->meta.total;
 			if (addr >= (unsigned long)tiny->objs &&
-			    addr < (unsigned long)tiny->objs + size)
+			    addr < (unsigned long)tiny->objs + size) {
+				*index = i;
 				return tiny;
+			}
 		}
 	}
 
@@ -119,20 +124,22 @@ static void *tiny_get_free_obj(struct tiny *tiny)
 	return NULL;
 }
 
-static void tiny_release_obj(struct tiny *tiny, void *addr)
+static int tiny_release_obj(struct tiny *tiny, void *addr)
 {
 	int index =
 	    ((unsigned long)addr - (unsigned long)tiny->objs) / tiny->meta.unit;
 
 	if (!(tiny->meta.bitmap & (1UL << index)))
-		return;
+		return -1;
 
 	tiny->meta.bitmap &= ~(1UL << index);
 	tiny->meta.free += 1;
 
-	if (tiny->meta.bitmap != 0)
-		return;
+	return tiny->meta.free;
+}
 
+static void tiny_reclaim_obj(struct tiny *tiny)
+{
 	list_del(&tiny->list);
 
 	__mm_free((void *)tiny, tiny->size);
@@ -163,15 +170,21 @@ void tiny_free(void *addr)
 {
 	struct tiny *tiny;
 	irq_flags_t flags;
+	int free, index;
 
 	spin_lock_irqsave(&tiny_lock, flags);
-	tiny = get_tiny_by_addr((unsigned long)addr);
+	tiny = get_tiny_by_addr((unsigned long)addr, &index);
 	if (!tiny) {
 		spin_unlock_irqrestore(&tiny_lock, flags);
 		return;
 	}
 
-	tiny_release_obj(tiny, addr);
+	free = tiny_release_obj(tiny, addr);
+	if (tiny->meta.total == free &&
+	    tiny_array[index].reclaim_level < tiny_array[index].in_use) {
+		tiny_reclaim_obj(tiny);
+		tiny_array[index].in_use--;
+	}
 	spin_unlock_irqrestore(&tiny_lock, flags);
 }
 
