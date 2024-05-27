@@ -38,6 +38,10 @@ config VIRT
 	bool "Virt"
 	default y
 
+config USER
+	bool "User"
+	default y
+
 config MYGUEST
 	bool "Guest OS bin"
 	default y

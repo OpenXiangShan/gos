@@ -4,6 +4,8 @@
 #include "list.h"
 #include "spinlocks.h"
 #include "asm/pgtable.h"
+#include "gos.h"
+#include "asm/type.h"
 
 #define USER_SPACE_CODE_START 0x1000
 
@@ -86,11 +88,16 @@ struct user {
 	struct user_run_params s_run_params;
 };
 
+#if CONFIG_USER
 struct user *user_create(void);
 int user_mode_run(struct user *user, struct user_run_params *params);
 void user_mode_switch_to(struct user_mode_cpu_context *ctx);
 int user_page_mapping(unsigned long phy, unsigned long virt, unsigned int size);
 int user_page_mapping_pg(unsigned long phy, unsigned long virt, unsigned int size,
                 pgprot_t pgprot);
+#else
+struct user *user_create(void) {return NULL;}
+int user_mode_run(struct user *user, struct user_run_params *params) {return -1;}
+#endif
 
 #endif

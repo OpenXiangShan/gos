@@ -55,8 +55,6 @@ GOS_CORE_DIR = $(TOPDIR)/core
 APP_DIR   = app
 GOS_FDT_DIR = fdt
 
-GOS_USER_DIR = user
-
 export GOS_CORE_DIR
 
 GOS_TARGET := gos.elf
@@ -65,15 +63,11 @@ GOS_TARGET_BIN := gos.bin
 GOS_ENTRY_ASM_FILES = $(wildcard $(GOS_ENTRY_DIR)/*.S)
 GOS_ENTRY_C_FILES = $(wildcard $(GOS_ENTRY_DIR)/*.c)
 GOS_LIB_C_FILES = $(wildcard $(GOS_LIB_DIR)/*.c)
-GOS_USER_ASM_FILES = $(wildcard $(GOS_USER_DIR)/*.S)
-GOS_USER_C_FILES = $(wildcard $(GOS_USER_DIR)/*.c)
 GOS_FDT_C_FILES = $(wildcard $(GOS_FDT_DIR)/*.c)
 
 GOS_OBJ_FILES = $(GOS_ENTRY_ASM_FILES:$(GOS_ENTRY_DIR)/%.S=$(GOS_ENTRY_DIR)/%_s.o)
 GOS_OBJ_FILES += $(GOS_ENTRY_C_FILES:$(GOS_ENTRY_DIR)/%.c=$(GOS_ENTRY_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_LIB_C_FILES:$(GOS_LIB_DIR)/%.c=$(GOS_LIB_DIR)/%_c.o)
-GOS_OBJ_FILES += $(GOS_USER_ASM_FILES:$(GOS_USER_DIR)/%.S=$(GOS_USER_DIR)/%_s.o)
-GOS_OBJ_FILES += $(GOS_USER_C_FILES:$(GOS_USER_DIR)/%.c=$(GOS_USER_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_FDT_C_FILES:$(GOS_FDT_DIR)/%.c=$(GOS_FDT_DIR)/%_c.o)
 
 
@@ -83,10 +77,8 @@ obj-y += drivers/
 obj-y += core/
 obj-y += mm/
 obj-y += app/
-
-ifeq ($(CONFIG_VIRT), y)
-obj-y += virt/
-endif
+obj-$(CONFIG_VIRT) += virt/
+obj-$(CONFIG_USER) += user/
 
 gos: autoconf mysbi_bin myUser_bin myGuest_bin $(GOS_OBJ_FILES)
 	mkdir -p $(BUILD_DIR)
@@ -101,12 +93,6 @@ $(GOS_ENTRY_DIR)/%_c.o: $(GOS_ENTRY_DIR)/%.c
 	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -I$(APP_DIR) $(DEBUG)  -c $< -o $@
 
 $(GOS_LIB_DIR)/%_c.o: $(GOS_LIB_DIR)/%.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -c $< -o $@
-
-$(GOS_USER_DIR)/%_s.o: $(GOS_USER_DIR)/%.S
-	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
-
-$(GOS_USER_DIR)/%_c.o: $(GOS_USER_DIR)/%.c
 	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -c $< -o $@
 
 $(GOS_FDT_DIR)/%_c.o: $(GOS_FDT_DIR)/%.c
