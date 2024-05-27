@@ -34,6 +34,10 @@ choice
 		tristate "Select Sv57"
 endchoice
 
+config VIRT
+	bool "Virt"
+	default y
+
 config MYGUEST
 	bool "Guest OS bin"
 	default y

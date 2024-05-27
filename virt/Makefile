@@ -1,0 +1,15 @@
+obj-$(CONFIG_VIRT) += machine.o
+obj-$(CONFIG_VIRT) += clint_emulator.o
+obj-$(CONFIG_VIRT) += imsic_emulator.o
+obj-$(CONFIG_VIRT) += memory_emulator.o
+obj-$(CONFIG_VIRT) += uart_emulator.o
+obj-$(CONFIG_VIRT) += memory_test_emulator.o
+obj-$(CONFIG_VIRT) += vcpu_insn.o
+obj-$(CONFIG_VIRT) += vcpu_timer.o
+obj-$(CONFIG_VIRT) += virt_vm_exit.o
+obj-$(CONFIG_VIRT) += gstage_pgtable.o
+obj-$(CONFIG_VIRT) += vcpu_aia.o
+obj-$(CONFIG_VIRT) += vcpu_sbi.o
+obj-$(CONFIG_VIRT) += virt.o
+obj-$(CONFIG_VIRT) += cpu_tlb_s.o
+obj-$(CONFIG_VIRT) += vcpu_switch_s.o

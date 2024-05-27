@@ -55,7 +55,6 @@ GOS_CORE_DIR = $(TOPDIR)/core
 APP_DIR   = app
 GOS_FDT_DIR = fdt
 
-GOS_VIRT_DIR = virt
 GOS_USER_DIR = user
 
 export GOS_CORE_DIR
@@ -66,8 +65,6 @@ GOS_TARGET_BIN := gos.bin
 GOS_ENTRY_ASM_FILES = $(wildcard $(GOS_ENTRY_DIR)/*.S)
 GOS_ENTRY_C_FILES = $(wildcard $(GOS_ENTRY_DIR)/*.c)
 GOS_LIB_C_FILES = $(wildcard $(GOS_LIB_DIR)/*.c)
-GOS_VIRT_ASM_FILES = $(wildcard $(GOS_VIRT_DIR)/*.S)
-GOS_VIRT_C_FILES = $(wildcard $(GOS_VIRT_DIR)/*.c)
 GOS_USER_ASM_FILES = $(wildcard $(GOS_USER_DIR)/*.S)
 GOS_USER_C_FILES = $(wildcard $(GOS_USER_DIR)/*.c)
 GOS_FDT_C_FILES = $(wildcard $(GOS_FDT_DIR)/*.c)
@@ -75,16 +72,21 @@ GOS_FDT_C_FILES = $(wildcard $(GOS_FDT_DIR)/*.c)
 GOS_OBJ_FILES = $(GOS_ENTRY_ASM_FILES:$(GOS_ENTRY_DIR)/%.S=$(GOS_ENTRY_DIR)/%_s.o)
 GOS_OBJ_FILES += $(GOS_ENTRY_C_FILES:$(GOS_ENTRY_DIR)/%.c=$(GOS_ENTRY_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_LIB_C_FILES:$(GOS_LIB_DIR)/%.c=$(GOS_LIB_DIR)/%_c.o)
-GOS_OBJ_FILES += $(GOS_VIRT_ASM_FILES:$(GOS_VIRT_DIR)/%.S=$(GOS_VIRT_DIR)/%_s.o)
-GOS_OBJ_FILES += $(GOS_VIRT_C_FILES:$(GOS_VIRT_DIR)/%.c=$(GOS_VIRT_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_USER_ASM_FILES:$(GOS_USER_DIR)/%.S=$(GOS_USER_DIR)/%_s.o)
 GOS_OBJ_FILES += $(GOS_USER_C_FILES:$(GOS_USER_DIR)/%.c=$(GOS_USER_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_FDT_C_FILES:$(GOS_FDT_DIR)/%.c=$(GOS_FDT_DIR)/%_c.o)
+
+
+-include include/config/auto.conf
 
 obj-y += drivers/
 obj-y += core/
 obj-y += mm/
 obj-y += app/
+
+ifeq ($(CONFIG_VIRT), y)
+obj-y += virt/
+endif
 
 gos: autoconf mysbi_bin myUser_bin myGuest_bin $(GOS_OBJ_FILES)
 	mkdir -p $(BUILD_DIR)
@@ -100,12 +102,6 @@ $(GOS_ENTRY_DIR)/%_c.o: $(GOS_ENTRY_DIR)/%.c
 
 $(GOS_LIB_DIR)/%_c.o: $(GOS_LIB_DIR)/%.c
 	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -c $< -o $@
-
-$(GOS_VIRT_DIR)/%_s.o: $(GOS_VIRT_DIR)/%.S
-	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
-
-$(GOS_VIRT_DIR)/%_c.o: $(GOS_VIRT_DIR)/%.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include $(DEBUG) -c $< -o $@
 
 $(GOS_USER_DIR)/%_s.o: $(GOS_USER_DIR)/%.S
 	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
@@ -133,8 +129,6 @@ myUser-clean:
 
 myGuest-clean:
 	make -C myGuest clean
-
--include include/config/auto.conf
 
 clean: mysbi-clean myGuest-clean myUser-clean
 	rm -rf $(shell find -name "*.o")

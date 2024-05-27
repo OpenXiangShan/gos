@@ -11,6 +11,7 @@
 #include "tlbflush.h"
 #include "task.h"
 #include "asm/csr.h"
+#include "gos.h"
 
 #define DIS_PAGE_TABLE  0x1FF
 static char *str[]={"sfence test -- This is pa1", "sfence test -- This is pa2",
@@ -23,8 +24,10 @@ static void Usage(void)
 	print("    -- Acc (page table access bit test)\n");
 	print("    -- Lazy (demanding page allocating test)\n");
 	print("    -- sfence.vma_all (sfence.vma test)\n");
+#if CONFIG_VIRT
 	print("    -- sfence.gvma_all (sfence.gvma test)\n");
 	print("    -- remapping_gstage_memory_test\n");
+#endif
 	print("    -- satp_bare_test (set satp is bare mode)\n");
 	print("    -- pte_flag_test (modify pte flag bit)\n");
 	print("    -- sfence.addr (flush spec addr)\n");
@@ -289,6 +292,7 @@ ret:
         mm_free((void *)stack, PAGE_SIZE);
 }
 
+#if CONFIG_VIRT
 static void page_table_remapping_gstage_memory_test()
 {
 	struct vcpu *vcpu;
@@ -328,6 +332,7 @@ static void page_table_sfence_gvma_all_test()
 	print("Now, fence.gvma all...\n");
 	vcpu_set_request(vcpu, VCPU_REQ_FENCE_GVMA_ALL);
 }
+#endif
 
 static void page_table_sfence_all_test()
 {
@@ -462,11 +467,16 @@ static int cmd_page_tlb_test_handler(int argc, char *argv[], void *priv)
 		page_table_access_bit_test();
 	} else if (!strncmp(argv[0], "sfence.vma_all", sizeof("sfence.vma_all"))) {
 		page_table_sfence_all_test();
-	} else if (!strncmp(argv[0], "sfence.gvma_all", sizeof("sfence.gvma_all"))) {
+	}
+#if CONFIG_VIRT
+	else if (!strncmp(argv[0], "sfence.gvma_all", sizeof("sfence.gvma_all"))) {
 		page_table_sfence_gvma_all_test();
-	} else if (!strncmp(argv[0], "remapping_gstage_memory_test", sizeof("remapping_gstage_memory_test"))) {
+	}
+	else if (!strncmp(argv[0], "remapping_gstage_memory_test", sizeof("remapping_gstage_memory_test"))) {
 		page_table_remapping_gstage_memory_test();
-	} else if (!strncmp(argv[0], "satp_bare_test", sizeof("satp_bare_test"))) {
+	}
+#endif
+	else if (!strncmp(argv[0], "satp_bare_test", sizeof("satp_bare_test"))) {
 		satp_mode_bare_test();
 	} else if (!strncmp(argv[0], "pte_flag_test", sizeof("pte_flag_test"))) {
 		page_table_flag_test(argv[1], argv[2]);

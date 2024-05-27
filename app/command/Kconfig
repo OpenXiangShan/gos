@@ -20,6 +20,7 @@ config APP_MEM_READ
 	bool "APP_MEM_READ"
 config APP_PAGE_TLB_TEST
 	bool "APP_PAGE_TLB_TEST"
+	depends on ENABLE_MMU
 config APP_PLIC_SET_AFFINITY
 	bool "APP_PLIC_SET_AFFINITY"
 config APP_SPINLOCK_TEST
@@ -30,6 +31,7 @@ config APP_USER_RUN
 	bool "APP_USER_RUN"
 config APP_VCPU_RUN
 	bool "APP_VCPU_RUN"
+	depends on VIRT
 config APP_STREAM
 	bool "APP_STREAM"
 config APP_HUGE_PAGE_TEST
