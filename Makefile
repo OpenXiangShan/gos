@@ -20,9 +20,6 @@ export DEBUG
 export RISCV_COPY
 
 BUILD_DIR = build
-MYSBI_DIR = mysbi
-BSP_DIR   = bsp
-MYUSER_DIR = myUser
 CONFIGS_DIR = $(TOPDIR)/configs
 DTS_DIR = $(CONFIGS_DIR)/dts
 
@@ -49,9 +46,7 @@ menuconfig: scripts/kconfig/mconf
 	$< Kconfig
 
 # build gos
-GOS_LIB_DIR = lib
 GOS_CORE_DIR = $(TOPDIR)/core
-APP_DIR   = app
 GOS_FDT_DIR = fdt
 
 export GOS_CORE_DIR
@@ -59,15 +54,14 @@ export GOS_CORE_DIR
 GOS_TARGET := gos.elf
 GOS_TARGET_BIN := gos.bin
 
-GOS_LIB_C_FILES = $(wildcard $(GOS_LIB_DIR)/*.c)
 GOS_FDT_C_FILES = $(wildcard $(GOS_FDT_DIR)/*.c)
 
-GOS_OBJ_FILES += $(GOS_LIB_C_FILES:$(GOS_LIB_DIR)/%.c=$(GOS_LIB_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_FDT_C_FILES:$(GOS_FDT_DIR)/%.c=$(GOS_FDT_DIR)/%_c.o)
 
 -include include/config/auto.conf
 
 obj-y += entry/
+obj-y += lib/
 obj-y += drivers/
 obj-y += core/
 obj-y += mm/
