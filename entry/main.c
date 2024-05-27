@@ -7,12 +7,12 @@
 #include <trap.h>
 #include <asm/csr.h>
 #include <timer.h>
-#include <shell.h>
 #include <cpu.h>
 #include <percpu.h>
 #include <task.h>
 #include <devicetree.h>
 #include "gos.h"
+#include "../app/shell.h"
 
 extern const char logo[];
 

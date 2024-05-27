@@ -49,7 +49,6 @@ menuconfig: scripts/kconfig/mconf
 	$< Kconfig
 
 # build gos
-GOS_ENTRY_DIR = entry
 GOS_LIB_DIR = lib
 GOS_CORE_DIR = $(TOPDIR)/core
 APP_DIR   = app
@@ -60,19 +59,15 @@ export GOS_CORE_DIR
 GOS_TARGET := gos.elf
 GOS_TARGET_BIN := gos.bin
 
-GOS_ENTRY_ASM_FILES = $(wildcard $(GOS_ENTRY_DIR)/*.S)
-GOS_ENTRY_C_FILES = $(wildcard $(GOS_ENTRY_DIR)/*.c)
 GOS_LIB_C_FILES = $(wildcard $(GOS_LIB_DIR)/*.c)
 GOS_FDT_C_FILES = $(wildcard $(GOS_FDT_DIR)/*.c)
 
-GOS_OBJ_FILES = $(GOS_ENTRY_ASM_FILES:$(GOS_ENTRY_DIR)/%.S=$(GOS_ENTRY_DIR)/%_s.o)
-GOS_OBJ_FILES += $(GOS_ENTRY_C_FILES:$(GOS_ENTRY_DIR)/%.c=$(GOS_ENTRY_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_LIB_C_FILES:$(GOS_LIB_DIR)/%.c=$(GOS_LIB_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_FDT_C_FILES:$(GOS_FDT_DIR)/%.c=$(GOS_FDT_DIR)/%_c.o)
 
-
 -include include/config/auto.conf
 
+obj-y += entry/
 obj-y += drivers/
 obj-y += core/
 obj-y += mm/
@@ -85,12 +80,6 @@ gos: autoconf mysbi_bin myUser_bin myGuest_bin $(GOS_OBJ_FILES)
 	make -f $(TOPDIR)/Makefile.build obj=.
 	$(LD) -T ./gos.lds -o $(BUILD_DIR)/$(GOS_TARGET) $(GOS_OBJ_FILES) built-in.o -Map $(BUILD_DIR)/gos.map
 	$(RISCV_COPY) $(BUILD_DIR)/$(GOS_TARGET) -O binary $(BUILD_DIR)/$(GOS_TARGET_BIN)
-
-$(GOS_ENTRY_DIR)/%_s.o: $(GOS_ENTRY_DIR)/%.S
-	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
-
-$(GOS_ENTRY_DIR)/%_c.o: $(GOS_ENTRY_DIR)/%.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -I$(APP_DIR) $(DEBUG)  -c $< -o $@
 
 $(GOS_LIB_DIR)/%_c.o: $(GOS_LIB_DIR)/%.c
 	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -c $< -o $@
