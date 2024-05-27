@@ -47,21 +47,16 @@ menuconfig: scripts/kconfig/mconf
 
 # build gos
 GOS_CORE_DIR = $(TOPDIR)/core
-GOS_FDT_DIR = fdt
-
 export GOS_CORE_DIR
 
 GOS_TARGET := gos.elf
 GOS_TARGET_BIN := gos.bin
 
-GOS_FDT_C_FILES = $(wildcard $(GOS_FDT_DIR)/*.c)
-
-GOS_OBJ_FILES += $(GOS_FDT_C_FILES:$(GOS_FDT_DIR)/%.c=$(GOS_FDT_DIR)/%_c.o)
-
 -include include/config/auto.conf
 
 obj-y += entry/
 obj-y += lib/
+obj-y += fdt/
 obj-y += drivers/
 obj-y += core/
 obj-y += mm/
@@ -74,12 +69,6 @@ gos: autoconf mysbi_bin myUser_bin myGuest_bin $(GOS_OBJ_FILES)
 	make -f $(TOPDIR)/Makefile.build obj=.
 	$(LD) -T ./gos.lds -o $(BUILD_DIR)/$(GOS_TARGET) $(GOS_OBJ_FILES) built-in.o -Map $(BUILD_DIR)/gos.map
 	$(RISCV_COPY) $(BUILD_DIR)/$(GOS_TARGET) -O binary $(BUILD_DIR)/$(GOS_TARGET_BIN)
-
-$(GOS_LIB_DIR)/%_c.o: $(GOS_LIB_DIR)/%.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include -c $< -o $@
-
-$(GOS_FDT_DIR)/%_c.o: $(GOS_FDT_DIR)/%.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -c $< -o $@
 
 mysbi_bin: autoconf
 	make -C mysbi
