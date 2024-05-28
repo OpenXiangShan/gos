@@ -7,6 +7,7 @@
 #include "mm.h"
 #include "clock.h"
 #include "vmap.h"
+#include "asm/sbi.h"
 
 extern int mmu_is_on;
 
@@ -27,7 +28,8 @@ static void timer_del_handler(void *self)
 	mm_free(t, sizeof(struct timer_event_info));
 }
 
-int set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data)
+static int __set_timer(unsigned long ms, void (*timer_handler)(void *data),
+		       void *data, int restart, int cpu)
 {
 	struct timer_event_info *timer;
 
@@ -40,9 +42,34 @@ int set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data)
 	timer->del_cb = timer_del_handler;
 	timer->data = data;
 	timer->expiry_time = ms + get_system_time();
-	timer->restart = 0;
+	timer->restart = restart;
 
-	return register_timer_event(timer, 0);
+	if (restart)
+		timer->period = ms;
+
+	return register_timer_event(timer, cpu);
+}
+
+int set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data)
+{
+	return __set_timer(ms, timer_handler, data, 0, sbi_get_cpu_id());
+}
+
+int set_timer_restart(unsigned long ms, void (*timer_handler)(void *data), void *data)
+{
+	return __set_timer(ms, timer_handler, data, 1, sbi_get_cpu_id());
+}
+
+int set_timer_cpu(unsigned long ms, void (*timer_handler)(void *data),
+	      void *data, int cpu)
+{
+	return __set_timer(ms, timer_handler, data, 0, cpu);
+}
+
+int set_timer_restart_cpu(unsigned long ms, void (*timer_handler)(void *data),
+		      void *data, int cpu)
+{
+	return __set_timer(ms, timer_handler, data, 1, cpu);
 }
 
 static int timer_setup(struct device_init_entry *hw)
