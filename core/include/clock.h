@@ -28,6 +28,7 @@ struct clock_event {
 int register_clock_source(struct clock_source *src, int cpu);
 int register_clock_event(struct clock_event *evt, int cpu);
 int register_timer_event(struct timer_event_info *timer_event, int cpu);
+int unregister_timer_event(struct timer_event_info *timer, int cpu);
 void do_clock_event_handler(void);
 unsigned long get_clocksource_counter(void);
 unsigned long get_clocksource_counter_us(void);

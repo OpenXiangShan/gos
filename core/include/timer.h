@@ -18,11 +18,13 @@ struct timer_event_info {
 int init_timer(struct device_init_entry *hw);
 unsigned long get_system_time(void);
 unsigned long get_system_time_ms(void);
-int set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data);
-int set_timer_restart(unsigned long ms, void (*timer_handler)(void *data), void *data);
-int set_timer_cpu(unsigned long ms, void (*timer_handler)(void *data),
-	      void *data, int cpu);
-int set_timer_restart_cpu(unsigned long ms, void (*timer_handler)(void *data),
-		      void *data, int cpu);
+struct timer_event_info *set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data);
+struct timer_event_info *set_timer_restart(unsigned long ms, void (*timer_handler)(void *data), void *data);
+struct timer_event_info *set_timer_cpu(unsigned long ms,
+				void (*timer_handler)(void *data), void *data, int cpu);
+struct timer_event_info *set_timer_restart_cpu(unsigned long ms,
+				void (*timer_handler)(void *data), void *data, int cpu);
+int del_timer_cpu(struct timer_event_info *timer, int cpu);
+int del_timer(struct timer_event_info *timer);
 
 #endif

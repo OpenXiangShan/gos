@@ -149,6 +149,29 @@ unsigned long get_clocksource_counter_us(void)
 	return us;
 }
 
+int unregister_timer_event(struct timer_event_info *timer, int cpu)
+{
+	struct clock_event *event = &per_cpu(clock_event, cpu);
+	struct timer_event_info *te;
+	irq_flags_t flags;
+
+	if (!event)
+		return -1;
+
+	spin_lock_irqsave(&event->lock, flags);
+	list_for_each_entry(te, &event->timer_list, list) {
+		if (te == timer) {
+			if (te->restart == 1)
+				te->restart = 0;
+			else
+				break;
+		}
+	}
+	spin_unlock_irqrestore(&event->lock, flags);
+
+	return 0;
+}
+
 int register_timer_event(struct timer_event_info *timer_event, int cpu)
 {
 	int found = 0, first = 0;

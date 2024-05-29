@@ -28,15 +28,30 @@ static void timer_del_handler(void *self)
 	mm_free(t, sizeof(struct timer_event_info));
 }
 
-static int __set_timer(unsigned long ms, void (*timer_handler)(void *data),
-		       void *data, int restart, int cpu)
+static int __del_timer(struct timer_event_info *timer, int cpu)
+{
+	return unregister_timer_event(timer, cpu);
+}
+
+int del_timer_cpu(struct timer_event_info *timer, int cpu)
+{
+	return __del_timer(timer, cpu);
+}
+
+int del_timer(struct timer_event_info *timer)
+{
+	return __del_timer(timer, sbi_get_cpu_id());
+}
+
+static struct timer_event_info *__set_timer(unsigned long ms, void (*timer_handler)(void *data),
+					    void *data, int restart, int cpu)
 {
 	struct timer_event_info *timer;
 
 	timer = mm_alloc(sizeof(struct timer_event_info));
 
 	if (!timer)
-		return -1;
+		return NULL;
 
 	timer->handler = timer_handler;
 	timer->del_cb = timer_del_handler;
@@ -47,27 +62,32 @@ static int __set_timer(unsigned long ms, void (*timer_handler)(void *data),
 	if (restart)
 		timer->period = ms;
 
-	return register_timer_event(timer, cpu);
+	if (register_timer_event(timer, cpu))
+		return NULL;
+
+	return timer;
 }
 
-int set_timer(unsigned long ms, void (*timer_handler)(void *data), void *data)
+struct timer_event_info *set_timer(unsigned long ms,
+				void (*timer_handler)(void *data), void *data)
 {
 	return __set_timer(ms, timer_handler, data, 0, sbi_get_cpu_id());
 }
 
-int set_timer_restart(unsigned long ms, void (*timer_handler)(void *data), void *data)
+struct timer_event_info *set_timer_restart(unsigned long ms,
+				void (*timer_handler)(void *data), void *data)
 {
 	return __set_timer(ms, timer_handler, data, 1, sbi_get_cpu_id());
 }
 
-int set_timer_cpu(unsigned long ms, void (*timer_handler)(void *data),
-	      void *data, int cpu)
+struct timer_event_info *set_timer_cpu(unsigned long ms,
+				void (*timer_handler)(void *data), void *data, int cpu)
 {
 	return __set_timer(ms, timer_handler, data, 0, cpu);
 }
 
-int set_timer_restart_cpu(unsigned long ms, void (*timer_handler)(void *data),
-		      void *data, int cpu)
+struct timer_event_info *set_timer_restart_cpu(unsigned long ms,
+				void (*timer_handler)(void *data), void *data, int cpu)
 {
 	return __set_timer(ms, timer_handler, data, 1, cpu);
 }
