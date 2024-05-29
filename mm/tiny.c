@@ -64,15 +64,16 @@ find:
 	if (!new)
 		return NULL;
 
-	new->objs = (void *)ALIGN_SIZE((unsigned long)new->buffer, 8);
 	new->size = wholesale;
 
 	meta = &new->meta;
-	meta->bitmap = 0;
+	meta->bitmap = (unsigned long *)ALIGN_SIZE((unsigned long)new->buffer, 8);
 	meta->unit = 1UL << (i + 3);
+	meta->bitmap_cnt = (wholesale / meta->unit) / (8 * sizeof(unsigned long)) + 1;
+	new->objs = (void *)((unsigned long)meta->bitmap + meta->bitmap_cnt * sizeof(unsigned long));
+	new->objs = (void *)ALIGN_SIZE((unsigned long)new->objs, 8);
 	meta->total =
-	    ((unsigned long)new + wholesale -
-	     (unsigned long)new->objs) / meta->unit;
+	    ((unsigned long)new + wholesale - (unsigned long)new->objs) / meta->unit;
 	meta->free = meta->total;
 
 	list_add_tail(&new->list, tiny_array[i].list_head);
@@ -106,16 +107,30 @@ static void *tiny_get_free_obj(struct tiny *tiny)
 {
 	int index = 0;
 	int total = tiny->meta.total;
-	unsigned long bitmap = tiny->meta.bitmap;
+	unsigned long *bitmap = tiny->meta.bitmap;
+	int bitmap_cnt = tiny->meta.bitmap_cnt;
 	unsigned int unit = tiny->meta.unit;
 	unsigned long addr;
 
 	while (index < total) {
-		if (((bitmap >> index) & 0x1) == 0) {
-			bitmap |= 1UL << index;
-			tiny->meta.bitmap = bitmap;
+		int nr = index / (sizeof(unsigned long) * 8);
+		int per_id = index % (sizeof(unsigned long) * 8);
+		unsigned long b;
+
+		if (nr >= bitmap_cnt) {
+			print("warning!! %s tiny_%d -- total:%d index:%d bitmap_cnt:%d\n",
+			      __FUNCTION__, tiny->meta.unit, tiny->meta.total, index, bitmap_cnt);
+			return NULL;
+		}
+		b = bitmap[nr];
+
+		if (((b >> per_id) & 0x1) == 0) {
+			b |= 1UL << per_id;
+			tiny->meta.bitmap[nr] = b;
 			tiny->meta.free -= 1;
-			addr = (unsigned long)tiny->objs + index * unit;
+			addr = (unsigned long)tiny->objs +
+			       nr * 8 * sizeof(unsigned long) * unit +
+			       per_id * unit;
 			return (void *)addr;
 		}
 		index++;
@@ -128,11 +143,24 @@ static int tiny_release_obj(struct tiny *tiny, void *addr)
 {
 	int index =
 	    ((unsigned long)addr - (unsigned long)tiny->objs) / tiny->meta.unit;
+	int bitmap_cnt = tiny->meta.bitmap_cnt;
+	int per_id = index % (8 * sizeof(unsigned long));
+	int nr = index / (8 * sizeof(unsigned long));
+	unsigned long *bitmap = tiny->meta.bitmap;
+	unsigned long b;
 
-	if (!(tiny->meta.bitmap & (1UL << index)))
+	if (nr >= bitmap_cnt) {
+		print("warning!! %s tiny_%d -- total:%d index:%d\n",
+		      __FUNCTION__, tiny->meta.unit, tiny->meta.total, index);
+		return NULL;
+	}
+	b = bitmap[nr];
+
+	if (!(b & (1UL << per_id)))
 		return -1;
 
-	tiny->meta.bitmap &= ~(1UL << index);
+	b &= ~(1UL << per_id);
+	tiny->meta.bitmap[nr] = b;
 	tiny->meta.free += 1;
 
 	return tiny->meta.free;

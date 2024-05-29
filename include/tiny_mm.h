@@ -7,7 +7,8 @@
 
 struct tiny_meta {
 	unsigned int unit;
-	unsigned long bitmap;
+	unsigned long *bitmap;
+	unsigned char bitmap_cnt;
 	unsigned char total;
 	unsigned char free;
 };
