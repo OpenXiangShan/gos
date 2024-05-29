@@ -43,3 +43,6 @@ config APP_TINY_TEST
 config APP_PLANE
 	bool "A Plane Game"
 	default n
+config APP_GET_PTE_TEST
+	bool "Get Pte Test"
+	default n

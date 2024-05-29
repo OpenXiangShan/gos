@@ -63,6 +63,36 @@ static unsigned long *riscv_pt_walk_alloc(unsigned long *ptp,
 				   pg_alloc, gfp);
 }
 
+static unsigned long *mmu_pt_walk_fetch_one(unsigned long *ptp, unsigned long va,
+					    unsigned int shift, int root)
+{
+	unsigned long *pte;
+
+	if (root) {
+		if (!mmu_is_on)
+			pte = (unsigned long *)(ptp + ((va >> shift) & 0x1FF));
+		else
+			pte =
+			    (unsigned long *)phy_to_virt(ptp +
+							 ((va >> shift) &
+							  0x1FF));
+	} else {
+		if (!mmu_is_on)
+			pte =
+			    (unsigned long *)(pfn_to_phys(pte_pfn(*ptp)) +
+					      ((va >> shift) & 0x1FF));
+		else
+			pte = (unsigned long *)(phy_to_virt((unsigned long *)
+							    pfn_to_phys(pte_pfn
+									(*ptp))
+							    +
+							    ((va >> shift) &
+							     0x1FF)));
+	}
+
+	return pte;
+}
+
 static unsigned long *mmu_pt_walk_fetch(unsigned long *ptp, unsigned long va,
 					unsigned int shift, int root)
 {
@@ -185,6 +215,29 @@ unsigned long *mmu_get_pte(unsigned long virt_addr)
 	unsigned long *pte;
 
 	pte = mmu_pt_walk_fetch(pgdp, virt_addr, PGDIR_SHIFT, 1);
+
+	return pte;
+}
+
+unsigned long *mmu_get_pte_level(unsigned long virt_addr, int lvl)
+{
+	unsigned long *pte;
+	unsigned long *p = pgdp;
+	unsigned int shift = PGDIR_SHIFT;
+
+	pte = mmu_pt_walk_fetch_one(p, virt_addr, shift, 1);
+
+	while (lvl++ < 3) {
+		if (pmd_leaf(*pte))
+			return NULL;
+		else if (pmd_none(*pte))
+			return NULL;
+		else if (shift == PAGE_SHIFT)
+			return NULL;
+		p = pte;
+		shift -= 9;
+		pte = mmu_pt_walk_fetch_one(p, virt_addr, shift, 0);
+	}
 
 	return pte;
 }

@@ -18,3 +18,4 @@ obj-$(CONFIG_APP_STREAM) += stream.o
 obj-$(CONFIG_APP_HUGE_PAGE_TEST) += huge_page_test.o
 obj-$(CONFIG_APP_TINY_TEST) += tiny_test.o
 obj-$(CONFIG_APP_PLANE) += plane/
+obj-$(CONFIG_APP_GET_PTE_TEST) += get_pte_test.o
