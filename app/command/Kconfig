@@ -40,3 +40,6 @@ config APP_HUGE_PAGE_TEST
 config APP_TINY_TEST
 	bool "APP_TINY_TEST"
 	depends on TINY
+config APP_PLANE
+	bool "A Plane Game"
+	default n
