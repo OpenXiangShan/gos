@@ -95,6 +95,12 @@ typedef struct {
 
 #define pfn_to_phys(pfn)    (pfn << PAGE_SHIFT)
 
+/*
+ * when all of R/W/X are zero, the PTE is a pointer to the next level
+ * of the page table; otherwise, it is a leaf PTE.
+ */
+#define _PAGE_LEAF (_PAGE_READ | _PAGE_WRITE | _PAGE_EXEC)
+
 static inline unsigned long pfn_pte(unsigned long pfn, pgprot_t prot)
 {
 	unsigned long prot_val = pgprot_val(prot);

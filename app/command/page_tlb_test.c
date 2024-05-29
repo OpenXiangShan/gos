@@ -32,11 +32,18 @@ static void Usage(void)
 	print("    -- pte_flag_test (modify pte flag bit)\n");
 	print("    -- sfence.addr (flush spec addr)\n");
 	print("    -- sfence.asid (flush spec asid)\n");
+	print("    -- pte_g_test (pte global test)\n");
 	print("param option:\n");
 	print("    -- cmd: pte_flag_test (modify pte flag bit)\n");
 	print("    param value is 0x1ff, display current pte value, the param flag bits are as follows\n");
 	print("     | 9             8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 \n");
 	print("       reserved for SW   D   A   G   U   X   W   R   V  \n");
+	print("    -- cmd: pte_g_test (pte global test)\n");
+	print("       value=0(not flush the tlb)\n");
+	print("       value=1 (use sfence.va flush tlb)\n");
+	print("       value=2 (use sfence.asid flush tlb)\n");
+	print("       value=3 (use sfence.va and sfence.asid flush tlb)\n");
+	print("       value=4 (flush all tlb)\n");
 	print("control option:\n");
 	print("    -- cmd: pte_flag_test (modify pte flag bit)\n");
 	print("       value=1(After changing the page table, first access the page table and then flush the cache)\n");
@@ -53,10 +60,20 @@ static void flush_tlb_asid()
 	local_flush_tlb_all_asid(asid_bits);
 }
 
-static int v_p_address_mapping(void *va, char *c1, char *c2, char flag)
+static void flush_tlb_asid_addr(unsigned long addr)
+{
+	unsigned long old;
+	unsigned long asid_bits;
+
+	old = read_csr(CSR_SATP);
+	asid_bits = (old >> SATP_ASID_SHIFT)  & SATP_ASID_MASK;
+
+	local_flush_tlb_page_asid(addr, asid_bits);
+}
+
+static int v_p_address_mapping(void *va, char *c1, char *c2, char flag,  pgprot_t pgprot)
 {
 	void *addr, *pa1, *pa2;
-	pgprot_t pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
 
 	addr = mm_alloc(PAGE_SIZE);
 	if (!addr) {
@@ -105,6 +122,12 @@ static int v_p_address_mapping(void *va, char *c1, char *c2, char flag)
 	}else if (flag == 2) {
 		print(" ============== sfence.asid flush tlb ==============\n");
 		flush_tlb_asid();
+	}else if (flag == 3) {
+		print(" ========== sfence.asid and sfence.addr flush tlb ====\n");
+		flush_tlb_asid_addr((unsigned long)va);
+	}else if (flag == 4) {
+		print(" ========== sfence.asid and sfence.addr flush tlb ====\n");
+		local_flush_tlb_all();
 	}else if (flag == 0)
 		print(" ============== Not flush tlb ============\n");
 	print("test start --> load 0x%lx(after sfence.vma)\n", va);
@@ -128,6 +151,7 @@ static void sfence_param_test(char flag)
 {
 	int ret = 0;
 	void *va, *va1;
+	pgprot_t pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
 
 	va = vmap_alloc(PAGE_SIZE);
 	if (!va) {
@@ -142,19 +166,19 @@ static void sfence_param_test(char flag)
 	}
 
 	if (flag == 1) {
-		ret =  v_p_address_mapping(va, str[0], str[1], 0);
+		ret =  v_p_address_mapping(va, str[0], str[1], 0, pgprot);
 		if (ret == -1)
 			goto err;
 		print("-------------------------------------------------------- \n");
-		ret =  v_p_address_mapping(va1, str[2], str[3], 1);
+		ret =  v_p_address_mapping(va1, str[2], str[3], 1, pgprot);
 		if (ret == -1)
 			goto err1;
 	}else if (flag == 2) {
-		ret =  v_p_address_mapping(va, str[0], str[1], 2);
+		ret =  v_p_address_mapping(va, str[0], str[1], 2, pgprot);
 		if (ret == -1)
 			goto err;
 		print("-------------------------------------------------------- \n");
-		ret =  v_p_address_mapping(va1, str[2], str[3], 0);
+		ret =  v_p_address_mapping(va1, str[2], str[3], 0, pgprot);
 		if (ret == -1)
 			goto err1;
 	}
@@ -162,6 +186,45 @@ err:
 	vmap_free(va, PAGE_SIZE);
 err1:
 	vmap_free(va1, PAGE_SIZE);
+}
+
+static int sfence_g_test(char *param)
+{
+	int ret = 0;
+	void *va;
+	int pte_flag;
+	pgprot_t pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY | _PAGE_GLOBAL);
+
+	if (param == NULL){  //param is empty
+		print("Please set pet flag value! \n");
+		return -1;
+	}
+	else
+		pte_flag = atoi(param);
+
+	va = vmap_alloc(PAGE_SIZE);
+	if (!va) {
+		print("%s -- Out of memory\n", __FUNCTION__);
+		goto err;
+	}
+	if (pte_flag == 1) {
+		ret =  v_p_address_mapping(va, str[0], str[1], 1, pgprot);
+		if (ret == -1)
+			goto err;
+	}else if (pte_flag == 2) {
+		ret =  v_p_address_mapping(va, str[0], str[1], 2, pgprot);
+		if (ret == -1)
+			goto err;
+	}else if (pte_flag == 3) {
+		ret =  v_p_address_mapping(va, str[0], str[1], 2, pgprot);
+		if (ret == -1)
+			goto err;
+	}
+
+err:
+	vmap_free(va, PAGE_SIZE);
+
+	return 0;
 }
 
 /*
@@ -484,6 +547,8 @@ static int cmd_page_tlb_test_handler(int argc, char *argv[], void *priv)
 		sfence_param_test(1);
 	} else if (!strncmp(argv[0], "sfence.asid", sizeof("sfence.asid"))) {
 		sfence_param_test(2);
+	} else if (!strncmp(argv[0], "pte_g_test", sizeof("pte_g_test"))) {
+		sfence_g_test(argv[1]);
 	} else {
 		print("Unsupport command\n");
 		Usage();
