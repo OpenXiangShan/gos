@@ -37,8 +37,7 @@ static void render_clear_all(struct renderer *renderer)
 {
 	int i;
 
-	for (i = 0; i < 100; i++)
-		print("\n");
+	print("\033c");
 
 	memset(renderer->draw_board, ' ', renderer->width * renderer->height);
 	for (i = 0; i < renderer->height; i++)
