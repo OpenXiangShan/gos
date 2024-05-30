@@ -11,13 +11,24 @@
 static int cmd_svnapot_test_handler(int argc, char *argv[], void *priv)
 {
 	char *addr;
-	int size = PAGE_64K_SIZE;
+	int size = PAGE_64K_SIZE, i;
+	int pnum = PAGE_64K_SIZE / PAGE_SIZE;
+	unsigned long *pte;
 
 	addr = (char *)vmem_alloc_huge(size, PAGE_64K_SIZE, NULL);
 	addr[0] = 66;
 	addr[size - 1] = 88;
 
-	print("addr[0]:%d addr[%d]:%d\n", addr[0], size - 1, addr[size - 1]);
+	for (i = 0; i < pnum; i++) {
+		addr[i * PAGE_SIZE] = 66;
+		addr[i * PAGE_SIZE + PAGE_SIZE - 1] = 88;
+		pte = mmu_get_pte(addr + i * PAGE_SIZE);
+		print("pte:0x%lx\n", *pte);
+		print("addr[%d]:%d addr[%d]:%d\n",
+			i * PAGE_SIZE, addr[i * PAGE_SIZE],
+			i * PAGE_SIZE + PAGE_SIZE - 1,
+			addr[i * PAGE_SIZE + PAGE_SIZE - 1]);
+	}
 
 	return 0;
 }
