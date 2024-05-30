@@ -54,6 +54,11 @@ config ENABLE_MMU
 	bool "Enable MMU"
 	default y
 
+config SVNAPOT
+	bool "Enable svnapot"
+	depends on ENABLE_MMU
+	depends on SELECT_SV39
+
 config ENABLE_MULTI_TASK
 	bool "Enable Multi task"
 	default y

@@ -5,6 +5,7 @@
 #include "mm.h"
 #include "print.h"
 #include "string.h"
+#include "gos.h"
 
 #define VMAP_START 0xffffffc800000000
 
@@ -231,6 +232,32 @@ static void* __vmem_alloc(unsigned int size, int page_size, int gfp)
 			}
 			vmap_addr_tmp += PAGE_1G_SIZE;
 		}
+#if CONFIG_SVNAPOT
+		else if (page_size == PAGE_16K_SIZE) {
+			if (-1 == mmu_page_mapping_16k(phys_addr, vmap_addr_tmp, PAGE_16K_SIZE, pgprot)) {
+				print("%s -- page mapping failed\n", __FUNCTION__);
+				vmap_free((void *)vmap_addr, size);
+				return NULL;
+			}
+			vmap_addr_tmp += PAGE_16K_SIZE;
+		}
+		else if (page_size == PAGE_32K_SIZE) {
+			if (-1 == mmu_page_mapping_32k(phys_addr, vmap_addr_tmp, PAGE_32K_SIZE, pgprot)) {
+				print("%s -- page mapping failed\n", __FUNCTION__);
+				vmap_free((void *)vmap_addr, size);
+				return NULL;
+			}
+			vmap_addr_tmp += PAGE_32K_SIZE;
+		}
+		else if (page_size == PAGE_64K_SIZE) {
+			if (-1 == mmu_page_mapping_64k(phys_addr, vmap_addr_tmp, PAGE_64K_SIZE, pgprot)) {
+				print("%s -- page mapping failed\n", __FUNCTION__);
+				vmap_free((void *)vmap_addr, size);
+				return NULL;
+			}
+			vmap_addr_tmp += PAGE_32K_SIZE;
+		}
+#endif
 		else{
 			print("Unsupported page size\n");
 			return NULL;

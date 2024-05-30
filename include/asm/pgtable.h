@@ -44,6 +44,22 @@ extern unsigned long va_pa_offset;
 #define PAGE_1G_SIZE        (1UL << PAGE_1G_SHIFT)
 #define PAGE_1G_MASK        (~(PAGE_1G_SIZE - 1))
 
+#define PAGE_8K_SHIFT       13
+#define PAGE_8K_SIZE        (1UL << PAGE_8K_SHIFT)
+#define PAGE_8K_MASK        (~(PAGE_8K_SIZE - 1))
+
+#define PAGE_16K_SHIFT      14
+#define PAGE_16K_SIZE       (1UL << PAGE_16K_SHIFT)
+#define PAGE_16K_MASK       (~(PAGE_16K_SIZE - 1))
+
+#define PAGE_32K_SHIFT      15
+#define PAGE_32K_SIZE       (1UL << PAGE_32K_SHIFT)
+#define PAGE_32K_MASK       (~(PAGE_32K_SIZE - 1))
+
+#define PAGE_64K_SHIFT      16
+#define PAGE_64K_SIZE       (1UL << PAGE_64K_SHIFT)
+#define PAGE_64K_MASK       (~(PAGE_64K_SIZE - 1))
+
 #define _PAGE_PFN_SHIFT 10
 #define _PAGE_PFN_MASK (0xFFFFFC00ULL)
 
@@ -73,15 +89,16 @@ typedef struct {
 
 #define __pgprot(x)     ((pgprot_t) { (x) } )
 
-#define _PAGE_PRESENT   (1 << 0)
-#define _PAGE_READ      (1 << 1)	/* Readable */
-#define _PAGE_WRITE     (1 << 2)	/* Writable */
-#define _PAGE_EXEC      (1 << 3)	/* Executable */
-#define _PAGE_USER      (1 << 4)	/* User */
-#define _PAGE_GLOBAL    (1 << 5)	/* Global */
-#define _PAGE_ACCESSED  (1 << 6)	/* Set by hardware on any access */
-#define _PAGE_DIRTY     (1 << 7)	/* Set by hardware on any write */
-#define _PAGE_SOFT      (1 << 8)	/* Reserved for software */
+#define _PAGE_PRESENT   (1UL << 0)
+#define _PAGE_READ      (1UL << 1)	/* Readable */
+#define _PAGE_WRITE     (1UL << 2)	/* Writable */
+#define _PAGE_EXEC      (1UL << 3)	/* Executable */
+#define _PAGE_USER      (1UL << 4)	/* User */
+#define _PAGE_GLOBAL    (1UL << 5)	/* Global */
+#define _PAGE_ACCESSED  (1UL << 6)	/* Set by hardware on any access */
+#define _PAGE_DIRTY     (1UL << 7)	/* Set by hardware on any write */
+#define _PAGE_SOFT      (1UL << 8)	/* Reserved for software */
+#define _PAGE_NAPOT     (1UL << 63)     /* Svnapot */
 
 /* Page protection bits */
 #define _PAGE_BASE      (_PAGE_PRESENT | _PAGE_ACCESSED)
@@ -100,6 +117,16 @@ typedef struct {
  * of the page table; otherwise, it is a leaf PTE.
  */
 #define _PAGE_LEAF (_PAGE_READ | _PAGE_WRITE | _PAGE_EXEC)
+
+enum napot_order {
+	NAPOT_8K = 1,
+	NAPOT_16K,
+	NAPOT_32K,
+	NAPOT_64K,
+	NAPOT_MAX
+};
+#define for_each_napot_order(order) \
+	for (order = NAPOT_8K; order < NAPOT_MAX; order++)
 
 static inline unsigned long pfn_pte(unsigned long pfn, pgprot_t prot)
 {

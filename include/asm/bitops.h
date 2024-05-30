@@ -15,7 +15,6 @@
 #error "Unexpected BITS_PER_LONG"
 #endif
 
-
 #define BIT_MASK(nr)            ((1) << ((nr) % BITS_PER_LONG))
 #define BIT_WORD(nr)            ((nr) / BITS_PER_LONG)
 #define BIT_ULL_MASK(nr)        ((1) << ((nr) % BITS_PER_LONG_LONG))
@@ -51,6 +50,7 @@
 #define __NOP(x)        (x)
 #define __NOT(x)        (~(x))
 
+#define GENMASK(a, b) (a > b ? (((1UL << (a+1)) - 1) >> (b) << (b)) : (((1UL << (b+1)) - 1) >> (a) << (a)))
 
 /**
  * test_and_set_bit - Set a bit and return its old value

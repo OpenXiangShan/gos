@@ -106,7 +106,7 @@ ifeq ($(CONFIG_SELECT_SV39), y)
 run:
 		./qemu-system-riscv64 -nographic \
 		-machine virt -smp 2 \
-		-cpu rv64,sv39=on -m 8G \
+		-cpu rv64,sv39=on,svnapot=on -m 8G \
 		-bios out/Image.bin
 run-debug:
 		./qemu-system-riscv64 -nographic \
@@ -145,12 +145,12 @@ ifeq ($(CONFIG_SELECT_SV39), y)
 run:
 	./qemu-system-riscv64 -nographic \
         -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
-	-cpu rv64,sv39=on -m 8G \
+	-cpu rv64,sv39=on,svnapot=on -m 8G \
         -bios out/Image.bin
 run-debug:
 	./qemu-system-riscv64 -nographic \
         -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
-	-cpu rv64,sv39=on -m 8G \
+	-cpu rv64,sv39=on,svnapot=on -m 8G \
         -bios out/Image.bin \
 	-S -s
 else ifeq ($(CONFIG_SELECT_SV48), y)

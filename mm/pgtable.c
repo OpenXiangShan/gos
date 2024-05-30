@@ -5,6 +5,8 @@
 #include "string.h"
 #include "print.h"
 #include "tlbflush.h"
+#include "gos.h"
+#include "asm/bitops.h"
 
 static void *pgdp __attribute__((section(".data"))) = NULL;
 
@@ -313,6 +315,110 @@ int mmu_page_mapping_1G(unsigned long phy, unsigned long virt, unsigned int size
 
 	return 0;
 }
+
+#if CONFIG_SVNAPOT
+static int get_napot_order(unsigned int size)
+{
+	int order;
+
+	for_each_napot_order(order) {
+		if ((1UL << (order + PAGE_SHIFT)) == size)
+			return order;
+	}
+
+	return -1;
+}
+
+static int __mmu_page_mapping_napot(unsigned long phy, unsigned long virt, unsigned int size,
+			   pgprot_t pgprot, int page_size)
+{
+	int i, order;
+	int pte_num = page_size / PAGE_SIZE;
+	unsigned long pa = phy;
+	unsigned long va = virt;
+	unsigned int n = size;
+	unsigned long pg;
+	pgprot_t new_pg;
+	unsigned long napot_bits, napot_mask;
+	unsigned long *pte;
+
+	order = get_napot_order(page_size);
+	if (order == -1) {
+		print("%s -- Unsupport napot size\n", __FUNCTION__);
+		return -1;
+	}
+
+	pg = pgprot_val(pgprot);
+	pg |= _PAGE_NAPOT;
+	new_pg = __pgprot(pg);
+
+	napot_bits = 1UL << (order - 1 + _PAGE_PFN_SHIFT);
+	napot_mask = GENMASK(order - 1 + _PAGE_PFN_SHIFT, _PAGE_PFN_SHIFT);
+
+	while (n) {
+		for (i = 0; i < pte_num; i++) {
+			__mmu_page_mapping_4k((unsigned long *)pgdp, pa, va, PAGE_SIZE, new_pg);
+			pte = mmu_get_pte(va);
+			*pte = (*pte & (~napot_mask)) | ((napot_bits) & napot_mask);
+			pa += PAGE_SIZE;
+			va += PAGE_SIZE;
+		}
+		n -= PAGE_SIZE * pte_num;
+	}
+
+	local_flush_tlb_range(virt, size, PAGE_SIZE);
+
+	return 0;
+
+}
+
+int mmu_page_mapping_8k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot)
+{
+	return __mmu_page_mapping_napot(phy, virt, size, pgprot, PAGE_8K_SIZE);
+}
+
+int mmu_page_mapping_16k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot)
+{
+	return __mmu_page_mapping_napot(phy, virt, size, pgprot, PAGE_16K_SIZE);
+}
+
+int mmu_page_mapping_32k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot)
+{
+	return __mmu_page_mapping_napot(phy, virt, size, pgprot, PAGE_32K_SIZE);
+}
+
+int mmu_page_mapping_64k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot)
+{
+	return __mmu_page_mapping_napot(phy, virt, size, pgprot, PAGE_64K_SIZE);
+}
+#else
+int mmu_page_mapping_8k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot)
+{
+	return -1;
+}
+int mmu_page_mapping_16k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot)
+{
+	return -1;
+}
+
+int mmu_page_mapping_32k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot)
+{
+	return -1;
+}
+
+int mmu_page_mapping_64k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot)
+{
+	return -1;
+}
+#endif
 
 int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt, unsigned int size,
 			       pgprot_t pgprot)

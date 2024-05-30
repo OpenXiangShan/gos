@@ -28,6 +28,14 @@ int mmu_page_mapping_2M(unsigned long phy, unsigned long virt, unsigned int size
 		        pgprot_t pgprot);
 int mmu_page_mapping_1G(unsigned long phy, unsigned long virt, unsigned int size,
 		        pgprot_t pgprot);
+int mmu_page_mapping_8k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot);
+int mmu_page_mapping_16k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot);
+int mmu_page_mapping_32k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot);
+int mmu_page_mapping_64k(unsigned long phy, unsigned long virt, unsigned int size,
+			 pgprot_t pgprot);
 int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 		     pgprot_t pgprot);
 int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt, unsigned int size,
