@@ -46,3 +46,7 @@ config APP_PLANE
 config APP_GET_PTE_TEST
 	bool "Get Pte Test"
 	default n
+config APP_SVNAPOT_TEST
+	bool "APP_SVNAPOT_TEST"
+	depends on SVNAPOT
+	default n
