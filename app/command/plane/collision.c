@@ -5,12 +5,12 @@ int check_collision(int a_w, int a_h, int a_x, int a_y,
 {
 	if ((b_x >= a_x) &&
 	    ((b_x + b_w) <= (a_x + a_w)) &&
-	    (b_y >= a_y) && ((b_y + b_h) >= (a_y + a_h)))
+	    (b_y >= a_y) && ((b_y + b_h) <= (a_y + a_h)))
 		return 1;
 
 	if ((a_x >= b_x) &&
 	    ((a_x + a_w) <= (b_x + b_w)) &&
-	    (a_y >= b_y) && ((a_y + a_h) >= (b_y + b_h)))
+	    (a_y >= b_y) && ((a_y + a_h) <= (b_y + b_h)))
 		return 1;
 
 	return 0;

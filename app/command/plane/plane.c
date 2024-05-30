@@ -69,7 +69,7 @@ static int collision_update(struct layer *layer1, struct layer *layer2,
 			    struct layer **q1, struct layer **q2,
 			    int *n1, int *n2, void *data)
 {
-	int nn_bullet = *n1;
+	//int nn_bullet = *n1;
 	int nn_enemy = *n2;
 	struct layer *bullet = layer1;
 	struct layer *enemy = layer2;
@@ -78,10 +78,10 @@ static int collision_update(struct layer *layer1, struct layer *layer2,
 			    bullet->pos.X, bullet->pos.Y,
 			    enemy->width, enemy->height,
 			    enemy->pos.X, enemy->pos.Y)) {
-		q1[nn_bullet++] = bullet;
+		//q1[nn_bullet++] = bullet;
 		q2[nn_enemy++] = enemy;
 
-		*n1 = nn_bullet;
+		//*n1 = nn_bullet;
 		*n2 = nn_enemy;
 		return 1;
 	}
