@@ -4,13 +4,14 @@
 #include "../command.h"
 #include "mm.h"
 #include "asm/pgtable.h"
+#include "vmap.h"
 
 static int cmd_get_pte_handler(int argc, char *argv[], void *priv)
 {
 	void *addr;
 	unsigned long *pte;
 
-	addr = vmem_alloc(PAGE_SIZE);
+	addr = vmem_alloc(PAGE_SIZE, NULL);
 	if (!addr) {
 		print("%s -- Out of memory!!\n", __FUNCTION__);
 		return -1;
