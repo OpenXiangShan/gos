@@ -85,8 +85,8 @@ void *mm_alloc(unsigned int size)
 	 */
 	while (index < TOTAL_PAGE_NUM) {
 		mem_map = mem_maps[(index / per_mem_map)];
-		if (((mem_map >> (index % per_mem_map)) & 0x1) == 0) {
-			if (nr++ == page_nr)
+		if (((mem_map >> (index % per_mem_map)) & (1UL)) == 0) {
+			if (++nr == page_nr)
 				goto success;
 		} else {
 			nr = 0;
@@ -104,12 +104,10 @@ void *mm_alloc(unsigned int size)
 success:
 	/* 
 	 * Set founded page_nr continues bits to 1 in mem_maps
-	 * n is the last index of allocated pages, it need to -1 because it added 1 in end of while
 	 */
-	index = index - 1;
 	for (index = index + 1 - page_nr; page_nr; index++, page_nr--) {
 		mem_map = mem_maps[(index / per_mem_map)];
-		mem_map |= (1 << (index % per_mem_map));
+		mem_map |= (1UL << (index % per_mem_map));
 		mem_maps[(index / per_mem_map)] = mem_map;
 	}
 
@@ -141,9 +139,7 @@ void mm_free(void *addr, unsigned int size)
 	/* set bits in mem_maps according to [addr, addr + size) to 0 */
 	for (; page_nr; page_nr--, index++) {
 		mem_map = mem_maps[(index / per_mem_map)];
-		mem_map &=
-		    ~(unsigned long)(((unsigned long)1) <<
-				     (index % per_mem_map));
+		mem_map &= ~(unsigned long)((1UL) << (index % per_mem_map));
 		mem_maps[(index / per_mem_map)] = mem_map;
 	}
 	spin_unlock(&mem_lock);
