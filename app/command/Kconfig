@@ -50,3 +50,5 @@ config APP_SVNAPOT_TEST
 	bool "APP_SVNAPOT_TEST"
 	depends on SVNAPOT
 	default n
+config MULTICORE_TEST
+	bool "Multicore_test"
