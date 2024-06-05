@@ -207,19 +207,9 @@ static int sfence_g_test(char *param)
 		print("%s -- Out of memory\n", __FUNCTION__);
 		goto err;
 	}
-	if (pte_flag == 1) {
-		ret =  v_p_address_mapping(va, str[0], str[1], 1, pgprot);
-		if (ret == -1)
-			goto err;
-	}else if (pte_flag == 2) {
-		ret =  v_p_address_mapping(va, str[0], str[1], 2, pgprot);
-		if (ret == -1)
-			goto err;
-	}else if (pte_flag == 3) {
-		ret =  v_p_address_mapping(va, str[0], str[1], 2, pgprot);
-		if (ret == -1)
-			goto err;
-	}
+	ret =  v_p_address_mapping(va, str[0], str[1], pte_flag, pgprot);
+	if (ret == -1)
+		goto err;
 
 err:
 	vmap_free(va, PAGE_SIZE);
