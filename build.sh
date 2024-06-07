@@ -17,6 +17,10 @@ if [ "$#" -eq 1 ];then
 		make $1
 		exit 0
 
+	elif [ "$1" = "vcs-h" ];then
+		make gos-vcs-h.dtb
+		make vcs_h_defconfig
+
 	elif [ "$1" = "vcs-minimum" ];then
 		make gos-minimum.dtb
 		make minimum_defconfig
@@ -32,6 +36,7 @@ if [ "$#" -eq 1 ];then
 	elif [ "$1" = "default-Sv48" ];then
 		make gos-dualcore-Sv48.dtb
 		make Sv48_defconfig
+
 	elif [ "$1" = "default-Sv57" ];then
 		make gos-dualcore-Sv57.dtb
 		make Sv57_defconfig
