@@ -12,14 +12,17 @@
 #include "memory_test_emulator.h"
 #include "clint_emulator.h"
 #include "imsic_emulator.h"
+#include "gos.h"
 
 static struct virt_machine_memmap virt_memmap[] = {
 	[VIRT_MEMORY] = { 0x80000000, 0x200000 },
 	[VIRT_UART] = { 0x310b0000, 0x10000 },
 	[VIRT_SRAM] = { 0x1000, 0x10000 },
 	[VIRT_TEST] = { 0x10000000, 0x1000 },
+#if CONFIG_VIRT_ENABLE_TIMER
 	[VIRT_CLINT] = { 0x38000000, 0x10000 },
-#ifdef USE_AIA
+#endif
+#if CONFIG_VIRT_ENABLE_AIA
 	[VIRT_IMSIC] = { 0x20000000, 0x1000 },
 #endif
 };
@@ -153,7 +156,7 @@ int machine_finialize(struct virt_machine *machine)
 	uart_device_finialize(machine, virt_memmap[VIRT_UART].base,
 			      virt_memmap[VIRT_UART].size, VIRT_UART, 1);
 
-#ifdef USE_AIA
+#if CONFIG_VIRT_ENABLE_AIA
 	imsic_device_finialize(machine, virt_memmap[VIRT_IMSIC].base,
 			       virt_memmap[VIRT_IMSIC].size, VIRT_IMSIC, 1);
 #endif
@@ -167,7 +170,7 @@ int machine_init(struct virt_machine *machine)
 	struct device_init_entry *entry;
 	int n = 0;
 	void *entry_data_ptr;
-	int len, entry_data_len = 0;
+	int entry_data_len = 0;
 
 	device_entry = (struct device_init_entry *)
 	    mm_alloc(sizeof(struct device_init_entry) * (VIRT_MEMMAP_CNT + 1));
@@ -197,7 +200,7 @@ int machine_init(struct virt_machine *machine)
 	create_memory_device(machine, VIRT_MEMORY,
 			     virt_memmap[VIRT_MEMORY].base,
 			     virt_memmap[VIRT_MEMORY].size);
-
+#if CONFIG_VIRT_UART_8250
 	/* create uart device_init_entry */
 	entry = &device_entry[n++];
 	strcpy((char *)entry->compatible, "qemu-8250");
@@ -207,6 +210,19 @@ int machine_init(struct virt_machine *machine)
 	/* create uart device */
 	create_uart_device(machine, VIRT_UART, virt_memmap[VIRT_UART].base,
 			   virt_memmap[VIRT_UART].size);
+#endif
+
+#if CONFIG_VIRT_UART_UARTLITE
+	/* create uart device_init_entry */
+	entry = &device_entry[n++];
+	strcpy((char *)entry->compatible, "uartlite");
+	entry->start = virt_memmap[VIRT_UART].base;
+	entry->len = virt_memmap[VIRT_UART].size;
+	entry->data = (void *)-1;
+	/* create uart device */
+	create_uart_device(machine, VIRT_UART, virt_memmap[VIRT_UART].base,
+			   virt_memmap[VIRT_UART].size);
+#endif
 
 	/* create sram device_init_entry */
 	entry = &device_entry[n++];
@@ -227,7 +243,7 @@ int machine_init(struct virt_machine *machine)
 	create_memory_test_device(machine, VIRT_TEST,
 				  virt_memmap[VIRT_TEST].base,
 				  virt_memmap[VIRT_TEST].size);
-
+#if CONFIG_VIRT_ENABLE_TIMER
 	/* create clint device */
 	entry = &device_entry[n++];
 	strcpy((char *)entry->compatible, "clint");
@@ -236,11 +252,11 @@ int machine_init(struct virt_machine *machine)
 	create_clint_device(machine, VIRT_CLINT,
 			    virt_memmap[VIRT_CLINT].base,
 			    virt_memmap[VIRT_CLINT].size);
-	len = create_clint_priv_data(entry_data_ptr);
 	entry->data = (void *)((unsigned long)entry_data_len);
-	entry_data_len += len;
+	entry_data_len += create_clint_priv_data(entry_data_ptr);;
+#endif
 
-#ifdef USE_AIA
+#if CONFIG_VIRT_ENABLE_AIA
 	/* create imsic device */
 	entry = &device_entry[n++];
 	strcpy((char *)entry->compatible, "imsic");

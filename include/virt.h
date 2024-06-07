@@ -4,6 +4,7 @@
 #include "asm/ptregs.h"
 #include "../virt/machine.h"
 #include "spinlocks.h"
+#include "gos.h"
 
 enum {
 	VCPU_REQ_FENCE_GVMA_ALL,
@@ -107,7 +108,7 @@ struct vcpu {
 	/* vcpu state */
 	unsigned long request;
 	unsigned long irq_pending;
-#ifdef USE_AIA
+#if CONFIG_VIRT_ENABLE_AIA
 	/* aia */
 	unsigned long hgei;
 	unsigned long vs_interrupt_file_va;

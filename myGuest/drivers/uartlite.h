@@ -10,6 +10,6 @@
 #define UARTLITE_TX_FULL  0x08
 #define UARTLITE_RX_VALID 0x01
 
-unsigned long uartlite_get_base(void);
+void uart_uartlite_init(unsigned long base, struct myGuest_uart_ops *ops);
 
 #endif

@@ -13,6 +13,7 @@
 #include "vcpu_timer.h"
 #include "uapi/align.h"
 #include "vcpu_aia.h"
+#include "gos.h"
 
 extern char guest_bin[];
 static struct vcpu *p_vcpu __attribute__((section(".data"))) = NULL;
@@ -317,9 +318,11 @@ struct vcpu *vcpu_create(void)
 
 	machine_init(&vcpu->machine);
 
+#if CONFIG_VIRT_ENABLE_TIMER
 	vcpu_timer_init(vcpu);
+#endif
 
-#ifdef USE_AIA
+#if CONFIG_VIRT_ENABLE_AIA
 	vcpu_aia_init(vcpu);
 #endif
 	vcpu->cpu = -1;
@@ -348,8 +351,9 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 
 	machine_finialize(&vcpu->machine);
 
+#if CONFIG_VIRT_ENABLE_TIMER
 	vcpu_time_init(vcpu);
-
+#endif
 	vcpu->running = 1;
 
 	while (1) {
@@ -363,7 +367,7 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 
 		vcpu_do_interrupt(vcpu);
 
-#ifdef USE_AIA
+#if CONFIG_VIRT_ENABLE_AIA
 		vcpu_interrupt_file_upadte(vcpu);
 #endif
 		vcpu_restore(vcpu);

@@ -3,7 +3,6 @@
 #include "print.h"
 #include "mm.h"
 
-#ifdef USE_AIA
 static void imsic_mmio_write(struct memory_region *region,
 			     unsigned long addr, unsigned long val,
 			     unsigned int len)
@@ -66,4 +65,3 @@ int imsic_device_finialize(struct virt_machine *machine, unsigned long gpa,
 
 	return 0;
 }
-#endif

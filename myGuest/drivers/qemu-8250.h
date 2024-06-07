@@ -1,6 +1,8 @@
 #ifndef _QEMU_8250_UART_H
 #define _QEMU_8250_UART_H
 
+#include "uart.h"
+
 #define UART_DAT    0x00
 #define UART_IER    0x01
 #define UART_IIR    0x02

@@ -1,0 +1,20 @@
+menu "virt"
+menuconfig VIRT_ENABLE_TIMER
+	bool "VIRT_TIMER"
+	default y
+
+menuconfig VIRT_ENABLE_AIA
+	bool "VIRT_AIA"
+	depends on SELECT_AIA
+	default y
+
+choice
+	prompt "Select Virt uart"
+
+	config VIRT_UART_8250
+		tristate "Select qemu-8250"
+	config VIRT_UART_UARTLITE
+		tristate "Select uartlite"
+endchoice
+
+endmenu

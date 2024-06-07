@@ -9,7 +9,6 @@
 #include "imsic_emulator.h"
 #include "machine.h"
 
-#ifdef USE_AIA
 static DEFINE_PER_CPU(unsigned long, hgei_bitmap);
 
 static int find_free_hgei(unsigned long *hgei)
@@ -88,4 +87,3 @@ int vcpu_aia_init(struct vcpu *vcpu)
 
 	return 0;
 }
-#endif

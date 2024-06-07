@@ -8,6 +8,11 @@
 
 static unsigned long base_address;
 
+unsigned long uartlite_get_base(void)
+{
+	return base_address;
+}
+
 static void uartlite_putc(char c)
 {
 	while (readb(base_address + UARTLITE_STAT_REG) & UARTLITE_TX_FULL) ;

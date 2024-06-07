@@ -37,6 +37,9 @@ endchoice
 config VIRT
 	bool "Virt"
 	default y
+	if VIRT
+		source "virt/Kconfig"
+	endif
 
 config USER
 	bool "User"
