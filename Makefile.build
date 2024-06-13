@@ -32,9 +32,9 @@ $(obj)/built-in.o: $(cur_objs) $(subdir_objs)
 	$(LD) -r -o $@ $^
 
 %.o: %.c
-	$(CC) $(COPS) -I$(TOPDIR)/include -I$(GOS_CORE_DIR)/include $(DEBUG) -c $< -o $@
+	$(CC) $(COPS) -I$(TOPDIR)/include/ -I$(TOPDIR)/include/gos -I$(GOS_CORE_DIR)/include $(DEBUG) -c $< -o $@
 
 %_s.o: %.S
-	$(CC) $(COPS) -I$(TOPDIR)/include $(DEBUG) -c $< -o $@
+	$(CC) $(COPS) -I$(TOPDIR)/include/ -I$(TOPDIR)/include/gos $(DEBUG) -c $< -o $@
 
 .PHONY: $(PHONY)

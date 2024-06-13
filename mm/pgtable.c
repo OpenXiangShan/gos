@@ -4,7 +4,7 @@
 #include "mm.h"
 #include "string.h"
 #include "print.h"
-#include "tlbflush.h"
+#include "asm/tlbflush.h"
 #include "gos.h"
 #include "asm/bitops.h"
 

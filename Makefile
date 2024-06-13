@@ -39,8 +39,8 @@ autoconf: scripts/kconfig/conf FORCE
 	mkdir -p include/config
 	mkdir -p include/linux
 	$< -s Kconfig
-	rm -rf include/gos
-	mv include/linux include/gos
+	rm -rf include/gos-auto
+	mv include/linux include/gos-auto
 
 menuconfig: scripts/kconfig/mconf
 	$< Kconfig
@@ -93,7 +93,7 @@ clean: mysbi-clean myGuest-clean myUser-clean
 	rm -rf $(BUILD_DIR)
 	rm -rf out
 	rm -rf include/config
-	rm -rf include/gos
+	rm -rf include/gos-auto
 	rm $(DTS_DIR)/*.dtb
 
 %.dtb: $(DTS_DIR)/$(patsubst %.dtb,%.dts,$@)

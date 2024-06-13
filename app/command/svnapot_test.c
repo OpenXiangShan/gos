@@ -6,7 +6,7 @@
 #include "asm/pgtable.h"
 #include "string.h"
 #include "mm.h"
-#include "tlbflush.h"
+#include "asm/tlbflush.h"
 
 static int cmd_svnapot_test_handler(int argc, char *argv[], void *priv)
 {

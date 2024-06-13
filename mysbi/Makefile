@@ -47,7 +47,7 @@ $(MYSBI_LIB_DIR)/%_c.o: $(MYSBI_LIB_DIR)/%.c
 	$(CC) $(COPS) -I$(MYSBI_DIR)/include -c $< -o $@
 
 $(BSP_DIR)/%_c.o: $(BSP_DIR)/%.c
-	$(CC) $(COPS) -I$(MYSBI_DIR)/include -I$(TOPDIR)/include $(DEBUG) -c $< -o $@
+	$(CC) $(COPS) -I$(MYSBI_DIR)/include -I$(TOPDIR)/include/gos $(DEBUG) -c $< -o $@
 
 clean:
 	rm -rf $(shell find -name "*.o")

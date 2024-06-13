@@ -8,7 +8,7 @@
 #include "mm.h"
 #include "virt.h"
 #include "../virt/machine.h"
-#include "tlbflush.h"
+#include "asm/tlbflush.h"
 #include "task.h"
 #include "asm/csr.h"
 #include "gos.h"

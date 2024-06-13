@@ -2,7 +2,7 @@
 #define _H_LIST_H
 
 #include <asm/barrier.h>
-#include <container_of.h>
+#include "container_of.h"
 
 #define POISON_POINTER_DELTA 0xffffffffffff0000
 

@@ -9,7 +9,7 @@
 #include "clock.h"
 #include "list.h"
 #include "cpu.h"
-#include "tlbflush.h"
+#include "asm/tlbflush.h"
 #include "spinlocks.h"
 #include "gos.h"
 
