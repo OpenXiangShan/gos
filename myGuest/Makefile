@@ -3,6 +3,11 @@
 include $(TOPDIR)/include/config/auto.conf
 
 BUILD_DIR = $(TOPDIR)/build
+#INCLUDE_DIR = $(TOPDIR)/include
+CORE_INCLUDE_DIR = $(TOPDIR)/core
+USERINCLUDE	:= \
+		-I$(CORE_INCLUDE_DIR)/include \
+		-I$(TOPDIR)/include
 
 MYGUEST_DIR := $(shell pwd)
 GUEST_TARGET := myGuest.elf
@@ -42,25 +47,25 @@ myGuest:
 endif
 
 $(MYGUEST_ENTRY_DIR)/%_s.o: $(MYGUEST_ENTRY_DIR)/%.S
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_ENTRY_DIR)/%_c.o: $(MYGUEST_ENTRY_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_CORE_DIR)/%_c.o: $(MYGUEST_CORE_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_DRIVERS_DIR)/%_c.o: $(MYGUEST_DRIVERS_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_LIB_DIR)/%_c.o: $(MYGUEST_LIB_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_MM_DIR)/%_c.o: $(MYGUEST_MM_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_COMMAND_DIR)/%_c.o: $(MYGUEST_COMMAND_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 clean:
 	rm -rf $(shell find -name "*.o")

@@ -16,6 +16,9 @@ extern unsigned long va_pa_offset;
 
 #define FIXMAP_DTB_START FIXMAP_START
 
+#define FIXMAP_HW_START FIXMAP_START
+#define FIXMAP_HW_LEN   0x10000
+
 #define PAGE_ALIGN(addr) (((addr) + PAGE_SIZE - 1) & PAGE_MASK)
 #define PAGE_ALIGN_2M(addr) (((addr) + PAGE_2M_SIZE - 1) & PAGE_2M_MASK)
 #define PAGE_ALIGN_1G(addr) (((addr) + PAGE_1G_SIZE - 1) & PAGE_1G_MASK)

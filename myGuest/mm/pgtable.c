@@ -189,6 +189,41 @@ int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 				  pgprot);
 }
 
+unsigned long *mmu_get_pte(unsigned long virt_addr)
+{
+	unsigned long *pte;
+
+	pte = mmu_pt_walk_fetch(pgdp, virt_addr, PGDIR_SHIFT, 1);
+
+	return pte;
+}
+
+int mmu_page_mapping_lazy(unsigned long virt, unsigned int size,
+			  pgprot_t pgprot)
+{
+	unsigned int page_nr = N_PAGE(size);
+	unsigned long *pte;
+	unsigned long pte_val;
+	unsigned long virt_addr = virt;
+
+	while (page_nr--) {
+		pte =
+		    riscv_pt_walk_alloc(pgdp,
+					virt_addr, PGDIR_SHIFT, PAGE_SIZE, 1,
+					alloc_zero_page, 0);
+		if (!pte)
+			return -1;
+
+		pte_val = pgprot_val(pgprot);
+
+		*pte = pte_val;
+
+		virt_addr += PAGE_SIZE;
+	}
+
+	return 0;
+}
+
 static int mmu_direct_page_mapping()
 {
 	pgprot_t pgprot;
@@ -218,6 +253,12 @@ static int mmu_hw_page_mapping(struct device_init_entry *hw)
 	myGuest_print("%s -- pa:0x%lx va:0x%lx len:0x%x\n", __FUNCTION__,
 		      phy_start, virt_start, size);
 	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
+}
+
+int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt, unsigned int size,
+			       pgprot_t pgprot)
+{
+	return __mmu_page_mapping((unsigned long *)pgdp, phy, virt, size, pgprot);
 }
 
 static int mmu_code_page_mapping()
