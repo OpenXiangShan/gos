@@ -236,15 +236,15 @@ stream_main()
     printf("*****  WARNING: ******\n");
     printf("      It appears that you set the preprocessor variable N when compiling this code.\n");
     printf("      This version of the code uses the preprocesor variable STREAM_ARRAY_SIZE to control the array size\n");
-    printf("      Reverting to default value of STREAM_ARRAY_SIZE=%llu\n",(unsigned long long) STREAM_ARRAY_SIZE);
+    printf("      Reverting to default value of STREAM_ARRAY_SIZE=%l\n",(unsigned long long) STREAM_ARRAY_SIZE);
     printf("*****  WARNING: ******\n");
 #endif
 
-    printf("Array size = %llu (elements), Offset = %d (elements)\n" , (unsigned long long) STREAM_ARRAY_SIZE, OFFSET);
-    printf("Memory per array = %.1f MiB (= %.1f GiB).\n",
+    printf("Array size = %l (elements), Offset = %d (elements)\n" , (unsigned long long) STREAM_ARRAY_SIZE, OFFSET);
+    printf("Memory per array = %f MiB (= %f GiB).\n",
 	BytesPerWord * ( (double) STREAM_ARRAY_SIZE / 1024.0/1024.0),
 	BytesPerWord * ( (double) STREAM_ARRAY_SIZE / 1024.0/1024.0/1024.0));
-    printf("Total memory required = %.1f MiB (= %.1f GiB).\n",
+    printf("Total memory required = %f MiB (= %f GiB).\n",
 	(3.0 * BytesPerWord) * ( (double) STREAM_ARRAY_SIZE / 1024.0/1024.),
 	(3.0 * BytesPerWord) * ( (double) STREAM_ARRAY_SIZE / 1024.0/1024./1024.));
     printf("Each kernel will be executed %d times.\n", NTIMES);
@@ -345,7 +345,7 @@ stream_main()
     for (j=0; j<4; j++) {
 		avgtime[j] = avgtime[j]/(double)(NTIMES-1);
 
-		printf("%s%12.1f  %11.6f  %11.6f  %11.6f\n", label[j],
+		printf("%s%f  %f  %f  %f\n", label[j],
 	       1.0E-06 * bytes[j]/mintime[j],
 	       avgtime[j],
 	       mintime[j],
@@ -459,22 +459,22 @@ void checkSTREAMresults ()
 		epsilon = 1.e-13;
 	}
 	else {
-		printf("WEIRD: sizeof(STREAM_TYPE) = %lu\n",sizeof(STREAM_TYPE));
+		printf("WEIRD: sizeof(STREAM_TYPE) = %l\n",sizeof(STREAM_TYPE));
 		epsilon = 1.e-6;
 	}
 
 	err = 0;
 	if (abs(aAvgErr/aj) > epsilon) {
 		err++;
-		printf ("Failed Validation on array a[], AvgRelAbsErr > epsilon (%e)\n",epsilon);
-		printf ("     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n",aj,aAvgErr,abs(aAvgErr)/aj);
+		printf ("Failed Validation on array a[], AvgRelAbsErr > epsilon (%f)\n",epsilon);
+		printf ("     Expected Value: %f, AvgAbsErr: %f, AvgRelAbsErr: %f\n",aj,aAvgErr,abs(aAvgErr)/aj);
 		ierr = 0;
 		for (j=0; j<STREAM_ARRAY_SIZE; j++) {
 			if (abs(a[j]/aj-1.0) > epsilon) {
 				ierr++;
 #ifdef VERBOSE
 				if (ierr < 10) {
-					printf("         array a: index: %ld, expected: %e, observed: %e, relative error: %e\n",
+					printf("         array a: index: %d, expected: %f, observed: %f, relative error: %f\n",
 						j,aj,a[j],abs((aj-a[j])/aAvgErr));
 				}
 #endif
@@ -484,16 +484,16 @@ void checkSTREAMresults ()
 	}
 	if (abs(bAvgErr/bj) > epsilon) {
 		err++;
-		printf ("Failed Validation on array b[], AvgRelAbsErr > epsilon (%e)\n",epsilon);
-		printf ("     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n",bj,bAvgErr,abs(bAvgErr)/bj);
-		printf ("     AvgRelAbsErr > Epsilon (%e)\n",epsilon);
+		printf ("Failed Validation on array b[], AvgRelAbsErr > epsilon (%f)\n",epsilon);
+		printf ("     Expected Value: %f, AvgAbsErr: %f, AvgRelAbsErr: %f\n",bj,bAvgErr,abs(bAvgErr)/bj);
+		printf ("     AvgRelAbsErr > Epsilon (%f)\n",epsilon);
 		ierr = 0;
 		for (j=0; j<STREAM_ARRAY_SIZE; j++) {
 			if (abs(b[j]/bj-1.0) > epsilon) {
 				ierr++;
 #ifdef VERBOSE
 				if (ierr < 10) {
-					printf("         array b: index: %ld, expected: %e, observed: %e, relative error: %e\n",
+					printf("         array b: index: %l, expected: %f, observed: %f, relative error: %f\n",
 						j,bj,b[j],abs((bj-b[j])/bAvgErr));
 				}
 #endif
@@ -503,16 +503,16 @@ void checkSTREAMresults ()
 	}
 	if (abs(cAvgErr/cj) > epsilon) {
 		err++;
-		printf ("Failed Validation on array c[], AvgRelAbsErr > epsilon (%e)\n",epsilon);
-		printf ("     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n",cj,cAvgErr,abs(cAvgErr)/cj);
-		printf ("     AvgRelAbsErr > Epsilon (%e)\n",epsilon);
+		printf ("Failed Validation on array c[], AvgRelAbsErr > epsilon (%f)\n",epsilon);
+		printf ("     Expected Value: %f, AvgAbsErr: %f, AvgRelAbsErr: %f\n",cj,cAvgErr,abs(cAvgErr)/cj);
+		printf ("     AvgRelAbsErr > Epsilon (%f)\n",epsilon);
 		ierr = 0;
 		for (j=0; j<STREAM_ARRAY_SIZE; j++) {
 			if (abs(c[j]/cj-1.0) > epsilon) {
 				ierr++;
 #ifdef VERBOSE
 				if (ierr < 10) {
-					printf("         array c: index: %ld, expected: %e, observed: %e, relative error: %e\n",
+					printf("         array c: index: %d, expected: %f, observed: %f, relative error: %f\n",
 						j,cj,c[j],abs((cj-c[j])/cAvgErr));
 				}
 #endif
@@ -521,13 +521,13 @@ void checkSTREAMresults ()
 		printf("     For array c[], %d errors were found.\n",ierr);
 	}
 	if (err == 0) {
-		printf ("Solution Validates: avg error less than %e on all three arrays\n",epsilon);
+		printf ("Solution Validates: avg error less than %f on all three arrays\n",epsilon);
 	}
 #ifdef VERBOSE
 	printf ("Results Validation Verbose Results: \n");
 	printf ("    Expected a(1), b(1), c(1): %f %f %f \n",aj,bj,cj);
 	printf ("    Observed a(1), b(1), c(1): %f %f %f \n",a[1],b[1],c[1]);
-	printf ("    Rel Errors on a, b, c:     %e %e %e \n",abs(aAvgErr/aj),abs(bAvgErr/bj),abs(cAvgErr/cj));
+	printf ("    Rel Errors on a, b, c:     %f %f %f \n",abs(aAvgErr/aj),abs(bAvgErr/bj),abs(cAvgErr/cj));
 #endif
 }
 
