@@ -19,6 +19,7 @@ const unsigned char hex_tab[] =
 spinlock_t _lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
 
 #define  MAX_NUMBER_BYTES  64
+#define  F_PRECISION       8
 #define va_start(v,l) __builtin_va_start(v,l)
 #define va_end(v) __builtin_va_end(v)
 #define va_arg(v,l) __builtin_va_arg(v,l)
@@ -80,7 +81,30 @@ static void out_num(unsigned long n, int base, char lead, int maxwidth)
 
 	__puts(s);
 }
+static int my_round(double num)
+{
+	int int_part = (int)num;
+	double frac_part = num - int_part;
 
+	if(frac_part >= 0.5){
+		return int_part +1;
+	}else{
+		return int_part;
+	}
+}
+static void my_ftoc(double value, int base, char lead,  int maxwidth)
+{
+	int int_part = (int)value;
+	double frac_part = value - int_part;
+	out_num(int_part, base, lead, maxwidth);
+
+	__putc('.');
+	for(int i = 0; i < F_PRECISION; i++){
+		frac_part *=10;
+	}
+	int_part = my_round(frac_part);
+	out_num(int_part, base, lead, maxwidth);
+}
 static int my_vprintf(const char *fmt, va_list ap)
 {
 	char lead = ' ';
@@ -134,6 +158,10 @@ static int my_vprintf(const char *fmt, va_list ap)
 			break;
 		case 's':
 			__puts(va_arg(ap, char *));
+			break;
+		case 'f':
+			double value = va_arg(ap, double);
+			my_ftoc(value, 10, lead, maxwidth);
 			break;
 		default:
 			__putc(*fmt);
