@@ -39,7 +39,7 @@ MYGUEST_OBJ_FILES += $(GUEST_COMMAND_C_FILES:$(MYGUEST_COMMAND_DIR)/%.c=$(MYGUES
 ifeq ($(CONFIG_MYGUEST), y)
 myGuest: $(MYGUEST_OBJ_FILES)
 	mkdir -p $(BUILD_DIR)
-	$(LD) -T $(MYGUEST_DIR)/myGuest.lds -o $(BUILD_DIR)/$(GUEST_TARGET) $(MYGUEST_OBJ_FILES) -Map $(BUILD_DIR)/myGuest.map
+	$(LD) -T $(MYGUEST_DIR)/myGuest.lds -o $(BUILD_DIR)/$(GUEST_TARGET) $(MYGUEST_OBJ_FILES) -Map $(BUILD_DIR)/myGuest.map --no-warn-rwx-segments
 	$(RISCV_COPY) $(BUILD_DIR)/$(GUEST_TARGET) -O binary $(BUILD_DIR)/$(GUEST_TARGET_BIN)
 else
 myGuest:

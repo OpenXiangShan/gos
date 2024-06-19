@@ -67,7 +67,7 @@ obj-$(CONFIG_USER) += user/
 gos: autoconf mysbi_bin myUser_bin myGuest_bin $(GOS_OBJ_FILES)
 	mkdir -p $(BUILD_DIR)
 	make -f $(TOPDIR)/Makefile.build obj=.
-	$(LD) -T ./gos.lds -o $(BUILD_DIR)/$(GOS_TARGET) $(GOS_OBJ_FILES) built-in.o -Map $(BUILD_DIR)/gos.map
+	$(LD) -T ./gos.lds -o $(BUILD_DIR)/$(GOS_TARGET) $(GOS_OBJ_FILES) built-in.o -Map $(BUILD_DIR)/gos.map --no-warn-rwx-segments
 	$(RISCV_COPY) $(BUILD_DIR)/$(GOS_TARGET) -O binary $(BUILD_DIR)/$(GOS_TARGET_BIN)
 
 mysbi_bin: autoconf
