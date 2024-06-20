@@ -53,9 +53,46 @@ struct user_cpu_context {
 	unsigned long hstatus;
 };
 
+struct user_floating {
+	unsigned long f0;
+	unsigned long f1;
+	unsigned long f2;
+	unsigned long f3;
+	unsigned long f4;
+	unsigned long f5;
+	unsigned long f6;
+	unsigned long f7;
+	unsigned long f8;
+	unsigned long f9;
+	unsigned long f10;
+	unsigned long f11;
+	unsigned long f12;
+	unsigned long f13;
+	unsigned long f14;
+	unsigned long f15;
+	unsigned long f16;
+	unsigned long f17;
+	unsigned long f18;
+	unsigned long f19;
+	unsigned long f20;
+	unsigned long f21;
+	unsigned long f22;
+	unsigned long f23;
+	unsigned long f24;
+	unsigned long f25;
+	unsigned long f26;
+	unsigned long f27;
+	unsigned long f28;
+	unsigned long f29;
+	unsigned long f30;
+	unsigned long f31;
+};
+
 struct user_mode_cpu_context {
 	struct user_cpu_context s_context;
 	struct user_cpu_context u_context;
+	struct user_floating s_floating;
+	struct user_floating u_floating;
 	unsigned long host_scratch;
 	unsigned long host_stvec;
 };
