@@ -52,3 +52,5 @@ config APP_SVNAPOT_TEST
 	default n
 config MULTICORE_TEST
 	bool "Multicore_test"
+config APP_FLOAT_TEST
+	bool "APP_FLOAT_TEST"

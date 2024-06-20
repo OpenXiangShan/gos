@@ -21,3 +21,4 @@ obj-$(CONFIG_APP_PLANE) += plane/
 obj-$(CONFIG_APP_GET_PTE_TEST) += get_pte_test.o
 obj-$(CONFIG_APP_SVNAPOT_TEST) += svnapot_test.o
 obj-$(CONFIG_MULTICORE_TEST) += multicore/
+obj-$(CONFIG_APP_FLOAT_TEST) += float_test.o
