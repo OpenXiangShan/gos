@@ -315,6 +315,10 @@ struct vcpu *vcpu_create(void)
 	guest_ctx->hstatus |= HSTATUS_VTW;
 	guest_ctx->hstatus |= HSTATUS_SPVP;
 	guest_ctx->hstatus |= HSTATUS_SPV;
+	if(read_csr(sstatus) & SR_FS){
+		vcpu->cpu_ctx.vsstatus |= SR_FS;
+		guest_ctx->sstatus |= SR_FS;
+	}
 
 	machine_init(&vcpu->machine);
 
