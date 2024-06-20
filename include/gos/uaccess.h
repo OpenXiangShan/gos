@@ -6,7 +6,7 @@
 
 static inline int copy_from_user(void *user_ptr, void *addr, unsigned int size)
 {
-	write_csr(CSR_SSTATUS, SR_SUM);
+	csr_set(CSR_SSTATUS, SR_SUM);
 
 	memcpy((char *)addr, (char *)user_ptr, size);
 
@@ -17,7 +17,7 @@ static inline int copy_from_user(void *user_ptr, void *addr, unsigned int size)
 
 static inline int copy_to_user(void *user_ptr, void *addr, unsigned int size)
 {
-	write_csr(CSR_SSTATUS, SR_SUM);
+	csr_set(CSR_SSTATUS, SR_SUM);
 
 	memcpy((char *)user_ptr, (char *)addr, size);
 
