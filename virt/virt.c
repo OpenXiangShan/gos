@@ -374,7 +374,11 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 
 		vcpu_switch_to(&vcpu->cpu_ctx);
 
-		vcpu_process_vm_exit(vcpu);
+		if(vcpu_process_vm_exit(vcpu) == -1) {
+			enable_local_irq();
+			vcpu->running = 0;
+			break;
+		}
 
 		vcpu_save(vcpu);
 
