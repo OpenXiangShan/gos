@@ -40,6 +40,9 @@ if [ "$#" -eq 1 ];then
 	elif [ "$1" = "default-Sv57" ];then
 		make gos-dualcore-Sv57.dtb
 		make Sv57_defconfig
+	elif [ "$1" = "fpga-h" ];then
+		make gos-singlecore.dtb
+		make fpga_h_defconfig
 	else
 		make $1
 	fi
