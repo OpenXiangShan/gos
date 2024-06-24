@@ -1,5 +1,5 @@
-#ifndef NS16550A_H
-#define NS16550A_H
+#ifndef __MYGUEST_NS16550A_H
+#define __MYGUEST_NS16550A_H
 
 #define SYNC_ADDR 0xbc
 
@@ -42,6 +42,6 @@
 #define SIRE 0X40
 #define CTS  0X10
 
-unsigned long ns16550a_get_base(void);
+void uart_ns16550a_init(unsigned long base, struct myGuest_uart_ops *ops);
 
 #endif

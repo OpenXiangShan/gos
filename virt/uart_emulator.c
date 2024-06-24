@@ -4,6 +4,7 @@
 #include "device.h"
 #include "../drivers/uart/qemu-8250.h"
 #include "../drivers/uart/uartlite.h"
+#include "../drivers/uart/ns16550a.h"
 #include "asm/mmio.h"
 #include "string.h"
 #include "gos.h"
@@ -54,6 +55,8 @@ static int uart_gstage_ioremap(unsigned long *pgdp,
 	unsigned long addr = qemu_8250_get_base();
 #elif CONFIG_VIRT_UART_UARTLITE
 	unsigned long addr = uartlite_get_base();
+#elif CONFIG_VIRT_UART_NS16550A
+	unsigned long addr = ns16550a_get_base();
 #endif
 	unsigned long hpa;
 	pgprot_t pgprot;
@@ -104,6 +107,10 @@ int uart_device_finialize(struct virt_machine *machine, unsigned long gpa,
 			goto find;
 		}
 		if (!strncmp(dev->compatible, "uartlite", 128)) {
+			found = 1;
+			goto find;
+		}
+		if (!strncmp(dev->compatible, "ns16550a", 128)) {
 			found = 1;
 			goto find;
 		}

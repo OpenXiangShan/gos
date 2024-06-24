@@ -9,7 +9,9 @@ choice
 	config SELECT_QEMU
 		tristate "Select QEMU"
 	config SELECT_FPGA
-		tristate "Select FPGA"
+		tristate "Select NanHu FPGA"
+	config SELECT_KMH_FPGA
+		tristate "Select KunMingHu FPGA"
 	config SELECT_VCS
 		tristate "Select VCS"
 endchoice

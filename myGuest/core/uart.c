@@ -2,6 +2,7 @@
 #include "string.h"
 #include "../drivers/qemu-8250.h"
 #include "../drivers/uartlite.h"
+#include "../drivers/ns16550a.h"
 #include "vmap.h"
 #include "asm/type.h"
 
@@ -47,6 +48,18 @@ int myGuest_uart_init(struct device_init_entry *entry)
 				    ioremap((void *)device_entry->start,
 					    device_entry->len, NULL);
 				uart_uartlite_init((unsigned long)base, &ops);
+			}
+
+			return 0;
+		}
+		else if (!strncmp(device_entry->compatible, "ns16550a", 128)) {
+			if (!mmu_is_on)
+				uart_ns16550a_init(device_entry->start, &ops);
+			else {
+				void *base =
+				    ioremap((void *)device_entry->start,
+					    device_entry->len, NULL);
+				uart_ns16550a_init((unsigned long)base, &ops);
 			}
 
 			return 0;

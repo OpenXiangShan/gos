@@ -6,6 +6,8 @@
 #include "print.h"
 #include "asm/csr.h"
 #include "vmap.h"
+#include "asm/barrier.h"
+#include "asm/tlbflush.h"
 
 #define PAGE_OFFSET 0xffffffd800000000
 
@@ -185,8 +187,13 @@ int mmu_gstage_page_mapping(unsigned long *_pgdp, unsigned long phy,
 int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 		     pgprot_t pgprot)
 {
-	return __mmu_page_mapping((unsigned long *)pgdp, phy, virt, size,
-				  pgprot);
+	if (__mmu_page_mapping((unsigned long *)pgdp, phy, virt, size,
+				  pgprot))
+		return -1;
+
+	local_flush_tlb_range(virt, size, PAGE_SIZE);
+
+	return 0;
 }
 
 unsigned long *mmu_get_pte(unsigned long virt_addr)
@@ -311,10 +318,12 @@ void enable_mmu(int on)
 		mmu_is_on = 0;
 	} else {
 		__asm__ __volatile("sfence.vma":::"memory");
+		mb();
 
 		write_csr(satp,
 			  (((unsigned long)pgdp) >> PAGE_SHIFT) | SATP_MODE);
 
+		mb();
 		mmu_is_on = 1;
 	}
 }
@@ -324,12 +333,20 @@ int paging_init(struct device_init_entry *hw)
 	if (!pgdp)
 		pgdp = mm_alloc(PAGE_SIZE);
 
+	if (!pgdp) {
+		myGuest_print("alloc pgd failed...\n");
+		return -1;
+	}
+	memset((char *)pgdp, 0, PAGE_SIZE);
+
 	mmu_code_page_mapping();
 	mmu_direct_page_mapping();
 	mmu_hw_page_mapping(hw);
 	mmu_sram_page_mapping(hw);
 
 	print("mmu page mapping finish...\n");
+
+	mb();
 
 	enable_mmu(1);
 

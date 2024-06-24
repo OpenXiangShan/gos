@@ -13,6 +13,11 @@ static unsigned long base_address;
 static int wakeup = 0;
 static char ret_char;
 
+unsigned long ns16550a_get_base(void)
+{
+	return base_address;
+}
+
 static void ns16550a_delay(unsigned int loops)
 {
 	while (loops--) {

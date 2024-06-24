@@ -210,12 +210,20 @@ int machine_init(struct virt_machine *machine)
 	/* create uart device */
 	create_uart_device(machine, VIRT_UART, virt_memmap[VIRT_UART].base,
 			   virt_memmap[VIRT_UART].size);
-#endif
-
-#if CONFIG_VIRT_UART_UARTLITE
+#elif CONFIG_VIRT_UART_UARTLITE
 	/* create uart device_init_entry */
 	entry = &device_entry[n++];
 	strcpy((char *)entry->compatible, "uartlite");
+	entry->start = virt_memmap[VIRT_UART].base;
+	entry->len = virt_memmap[VIRT_UART].size;
+	entry->data = (void *)-1;
+	/* create uart device */
+	create_uart_device(machine, VIRT_UART, virt_memmap[VIRT_UART].base,
+			   virt_memmap[VIRT_UART].size);
+#elif CONFIG_VIRT_UART_NS16550A
+	/* create uart device_init_entry */
+	entry = &device_entry[n++];
+	strcpy((char *)entry->compatible, "ns16550a");
 	entry->start = virt_memmap[VIRT_UART].base;
 	entry->len = virt_memmap[VIRT_UART].size;
 	entry->data = (void *)-1;

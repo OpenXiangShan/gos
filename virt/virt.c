@@ -157,6 +157,7 @@ static int vcpu_create_gstage_mapping(struct vcpu *vcpu)
 		print("%s -- Out of memory\n");
 		return -1;
 	}
+	memset((char *)pgdp_va, 0, PAGE_SIZE * 4);
 	vcpu->machine.gstage_pgdp = virt_to_phy(pgdp_va);
 
 	print("gstage page mapping[ddr] -- gpa:0x%lx -> hpa:0x%lx size:0x%x\n",

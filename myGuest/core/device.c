@@ -18,7 +18,7 @@ void create_devices(void)
 	struct driver_init_entry *tmp;
 	int driver_nr = driver_entry_end - driver_entry;
 
-	//myGuest_uart_init(entry);
+	//myGuest_uart_init(device_entry);
 
 	while (strncmp(device_entry->compatible, "THE END", sizeof("THE END"))) {
 		driver_nr = driver_entry_end - driver_entry;
