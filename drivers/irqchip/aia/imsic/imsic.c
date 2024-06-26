@@ -169,13 +169,12 @@ static int imsic_state_setup(struct imsic *p_imsic,
 	p_imsic->nr_guests = data->nr_guests;
 	p_imsic->nr_ids = data->nr_ids;
 
-	if (1ULL << (p_imsic->guest_index_bits - 12) < p_imsic->nr_guests) {
+	if ((1ULL << p_imsic->guest_index_bits) < p_imsic->nr_guests) {
 		print("%s -- invalid guest param\n", __FUNCTION__);
 		return -1;
 	}
 
-	if (1ULL << (p_imsic->hart_index_bits - p_imsic->guest_index_bits - 12)
-	    < p_imsic->nr_harts) {
+	if ((1ULL << p_imsic->hart_index_bits) < p_imsic->nr_harts) {
 		print("%s -- invalid hart param\n", __FUNCTION__);
 		return -1;
 	}
