@@ -36,9 +36,18 @@ unsigned long get_phy_end(void)
 void memory_block_add(unsigned long base, unsigned long size)
 {
 	unsigned long i = 0;
+#if CONFIG_SELECT_4K_DIRECT_MAPPING
 	unsigned long ddr_start = PAGE_ALIGN((unsigned long)(&bss_end));
+#elif CONFIG_SELECT_2M_DIRECT_MAPPING
+	unsigned long ddr_start = PAGE_ALIGN_2M((unsigned long)(&bss_end));
+#elif CONFIG_SELECT_1G_DIRECT_MAPPING
+	unsigned long ddr_start = PAGE_ALIGN_1G((unsigned long)(&bss_end));
+#endif
 
 	if (mm_blocks.avail >= MAX_MEM_BLOCK_COUNT)
+		return;
+
+	if (base + size < ddr_start)
 		return;
 
 	if (base + size < ddr_start)

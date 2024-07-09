@@ -16,7 +16,7 @@ SECTIONS
 	.device_init_table : { *(.device_init_table) }
 	__device_init_table_end = .;
 
-	. = 0x80010000,
+	. = 0x80200000,
 	__payload_start = .;
 
 }

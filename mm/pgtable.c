@@ -444,7 +444,15 @@ int mmu_direct_page_mapping()
 
 		start = mm_blocks->memory_block_start[i];
 		size = mm_blocks->memory_block_size[i];
+
+		print("%s -- start:0x%lx size:0x%lx\n", __FUNCTION__, start, size);
+#if CONFIG_SELECT_4K_DIRECT_MAPPING
 		ret = mmu_page_mapping(start, phy_to_virt(start), size, pgprot);
+#elif CONFIG_SELECT_2M_DIRECT_MAPPING
+		ret = mmu_page_mapping_2M(start, phy_to_virt(start), size, pgprot);
+#elif CONFIG_SELECT_1G_DIRECT_MAPPING
+		ret = mmu_page_mapping_1G(start, phy_to_virt(start), size, pgprot);
+#endif
 		if (ret)
 			return ret;
 	}
@@ -456,13 +464,14 @@ static int mmu_hw_page_mapping(struct device_init_entry *hw)
 {
 	pgprot_t pgprot;
 	unsigned long phy_start = 0x80000000;
-	unsigned long phy_end = 0x80010000;
+	unsigned long phy_end = 0x80200000;
 	unsigned int size = phy_end - phy_start;
 	unsigned long virt_start = (unsigned long)0x80000000;
 
 	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
 
-	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
+	print("%s -- start:0x%lx size:0x%lx\n", __FUNCTION__, phy_start, size);
+	return mmu_page_mapping_2M(phy_start, virt_start, size, pgprot);
 }
 
 extern char dtb_bin[];
@@ -477,6 +486,7 @@ static int mmu_dtb_page_mapping()
 	unsigned long virt_start = (unsigned long)FIXMAP_DTB_START;
 	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
 
+	print("%s -- start:0x%lx size:0x%lx\n", __FUNCTION__, phy_start, size);
 	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
 }
 
@@ -492,6 +502,7 @@ static int mmu_code_page_mapping()
 	    __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC |
 		     _PAGE_DIRTY);
 
+	print("%s -- start:0x%lx size:0x%lx\n", __FUNCTION__, phy_start, size);
 	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
 }
 

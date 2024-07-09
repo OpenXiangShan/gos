@@ -36,6 +36,26 @@ choice
 		tristate "Select Sv57"
 endchoice
 
+choice
+	prompt "Use 4K/2M/1G in direct mapping"
+	config SELECT_4K_DIRECT_MAPPING
+		tristate "Select 4k mapping"
+	config SELECT_2M_DIRECT_MAPPING
+		tristate "Select 2m mapping"
+	config SELECT_1G_DIRECT_MAPPING
+		tristate "Select 1g mapping"
+endchoice
+
+choice
+	prompt "Use 4K/2M/1G in code mapping"
+	config SELECT_4K_CODE_MAPPING
+		tristate "Select 4k mapping"
+	config SELECT_2M_CODE_MAPPING
+		tristate "Select 2m mapping"
+	config SELECT_1G_CODE_MAPPING
+		tristate "Select 1g mapping"
+endchoice
+
 config VIRT
 	bool "Virt"
 	default y

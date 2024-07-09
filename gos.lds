@@ -2,7 +2,7 @@ OUTPUT_ARCH("riscv")
 ENTRY(__start_gos)
 SECTIONS
 {	
-	. = 0x80010000,
+	. = 0x80200000,
 	.text.boot : { *(.text.boot) }
 	.text : { *(.text) }
 	.data : { 

@@ -16,6 +16,6 @@ fi
 
 if [ -f "$FILE_SBI" -a -f "$FILE_GOS" ]; then
 	dd if=$FILE_SBI of=$FILE_OUT
-	dd if=$FILE_GOS of=$FILE_OUT bs=1024 seek=64
+	dd if=$FILE_GOS of=$FILE_OUT bs=1M seek=2
 	echo "pack success. $FILE_OUT"
 fi
