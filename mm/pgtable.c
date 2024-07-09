@@ -283,6 +283,20 @@ int mmu_gstage_page_mapping(unsigned long *_pgdp, unsigned long phy,
 	return __mmu_page_mapping_4k(_pgdp, phy, virt, size, pgprot);
 }
 
+int mmu_gstage_page_mapping_2M(unsigned long *_pgdp, unsigned long phy,
+			       unsigned long virt, unsigned int size,
+			       pgprot_t pgprot)
+{
+	return __mmu_page_mapping_2M(_pgdp, phy, virt, size, pgprot);
+}
+
+int mmu_gstage_page_mapping_1G(unsigned long *_pgdp, unsigned long phy,
+			       unsigned long virt, unsigned int size,
+			       pgprot_t pgprot)
+{
+	return __mmu_page_mapping_1G(_pgdp, phy, virt, size, pgprot);
+}
+
 int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 		     pgprot_t pgprot)
 {

@@ -182,5 +182,9 @@ void vcpu_switch_to(struct cpu_context *cpu_ctx);
 void __vcpu_switch_return(void);
 int gstage_page_mapping(unsigned long *pgdp, unsigned long hpa,
 			unsigned long gpa, unsigned int size);
+int gstage_page_mapping_2M(unsigned long *pgdp, unsigned long hpa,
+			   unsigned long gpa, unsigned int size);
+int gstage_page_mapping_1G(unsigned long *pgdp, unsigned long hpa,
+			   unsigned long gpa, unsigned int size);
 
 #endif

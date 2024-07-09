@@ -143,7 +143,16 @@ static int vcpu_create_gstage_mapping(struct vcpu *vcpu)
 	gpa = machine_get_ddr_start(&vcpu->machine);
 	guest_ddr_size = machine_get_ddr_size(&vcpu->machine);
 
+#if CONFIG_SELECT_4K_GUEST_MEM_MAPPING
 	vcpu->host_memory_va = (unsigned long)mm_alloc(guest_ddr_size);
+#elif CONFIG_SELECT_2M_GUEST_MEM_MAPPING
+	vcpu->host_memory_va =
+		(unsigned long)mm_alloc_align(2*1024*1024, guest_ddr_size);
+	print("%s -- vcpu->host_memory_va: 0x%lx\n", __FUNCTION__, vcpu->host_memory_va);
+#elif CONFIG_SELECT_1G_GUEST_MEM_MAPPING
+	vcpu->host_memory_va =
+		(unsigned long)mm_alloc_align(1*1024*1024*1024, guest_ddr_size);
+#endif
 	if (!vcpu->host_memory_va) {
 		print("%s -- Out of memory\n", __FUNCTION__);
 		return -1;
@@ -162,9 +171,19 @@ static int vcpu_create_gstage_mapping(struct vcpu *vcpu)
 
 	print("gstage page mapping[ddr] -- gpa:0x%lx -> hpa:0x%lx size:0x%x\n",
 	      vcpu->guest_memory_pa, vcpu->host_memory_pa, vcpu->memory_size);
+#if CONFIG_SELECT_4K_GUEST_MEM_MAPPING
 	gstage_page_mapping((unsigned long *)vcpu->machine.gstage_pgdp,
 			    vcpu->host_memory_pa,
 			    vcpu->guest_memory_pa, vcpu->memory_size);
+#elif CONFIG_SELECT_2M_GUEST_MEM_MAPPING
+	gstage_page_mapping_2M((unsigned long *)vcpu->machine.gstage_pgdp,
+				vcpu->host_memory_pa,
+				vcpu->guest_memory_pa, vcpu->memory_size);
+#elif CONFIG_SELECT_1G_GUEST_MEM_MAPPING
+	gstage_page_mapping_1G((unsigned long *)vcpu->machine.gstage_pgdp,
+				vcpu->host_memory_pa,
+				vcpu->guest_memory_pa, vcpu->memory_size);
+#endif
 
 	/* map sram gstage page table */
 	sram_gpa = machine_get_sram_start(&vcpu->machine);
@@ -339,6 +358,10 @@ struct vcpu *vcpu_create(void)
 
 int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 {
+	unsigned long start, end;
+
+	start = sbi_get_cpu_cycles();
+
 	if (vcpu->running == 1) {
 		return vcpu_set_run_params(vcpu, params);
 	}
@@ -361,6 +384,8 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 #endif
 	vcpu->running = 1;
 
+	end = sbi_get_cpu_cycles();
+	print("vcpu startup success, cost: %d(cycles)\n", end - start);
 	while (1) {
 		vcpu_update_run_params(vcpu);
 

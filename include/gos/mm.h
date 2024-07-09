@@ -45,6 +45,12 @@ int mmu_user_page_mapping(unsigned long phy, unsigned long virt,
 int mmu_gstage_page_mapping(unsigned long *_pgdp, unsigned long phy,
 			    unsigned long virt, unsigned int size,
 			    pgprot_t pgprot);
+int mmu_gstage_page_mapping_2M(unsigned long *_pgdp, unsigned long phy,
+			       unsigned long virt, unsigned int size,
+			       pgprot_t pgprot);
+int mmu_gstage_page_mapping_1G(unsigned long *_pgdp, unsigned long phy,
+			       unsigned long virt, unsigned int size,
+			       pgprot_t pgprot);
 int mmu_page_mapping_lazy(unsigned long virt, unsigned int size,
 			  pgprot_t pgprot);
 void *walk_pt_va_to_pa(unsigned long va);
