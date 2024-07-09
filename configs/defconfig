@@ -1,6 +1,7 @@
 #
-# Automatically generated file; DO NOT EDIT.
-# Main menu
+# Automatically generated make config: don't edit
+# Linux kernel version: 
+# Tue Jul  9 17:22:15 2024
 #
 
 #
@@ -30,12 +31,10 @@ CONFIG_APP_GET_PTE_TEST=y
 CONFIG_APP_SVNAPOT_TEST=y
 CONFIG_MULTICORE_TEST=y
 CONFIG_APP_FLOAT_TEST=y
-# end of app
 
 #
 # bsp
 #
-# end of bsp
 
 #
 # drivers
@@ -54,28 +53,22 @@ CONFIG_IRQCHIP=y
 CONFIG_AIA=y
 CONFIG_AIA_APLIC=y
 CONFIG_AIA_IMSIC=y
-# end of aia
 
 #
 # plic
 #
 CONFIG_PLIC=y
-# end of plic
-
 CONFIG_TIMER=y
 CONFIG_CLINT=y
 CONFIG_UART=y
 CONFIG_NS16550A=y
 CONFIG_QEMU_8250=y
 CONFIG_UARTLITE=y
-# end of drivers
 
 #
 # Memory Management
 #
 CONFIG_TINY=y
-# end of Memory Management
-
 CONFIG_SELECT_QEMU=y
 # CONFIG_SELECT_FPGA is not set
 # CONFIG_SELECT_KMH_FPGA is not set
@@ -101,8 +94,9 @@ CONFIG_VIRT_ENABLE_AIA=y
 CONFIG_VIRT_UART_8250=y
 # CONFIG_VIRT_UART_UARTLITE is not set
 # CONFIG_VIRT_UART_NS16550A is not set
-# end of virt
-
+# CONFIG_SELECT_4K_GUEST_MEM_MAPPING is not set
+CONFIG_SELECT_2M_GUEST_MEM_MAPPING=y
+# CONFIG_SELECT_1G_GUEST_MEM_MAPPING is not set
 CONFIG_USER=y
 CONFIG_MYGUEST=y
 CONFIG_MYUSER=y
