@@ -25,8 +25,10 @@ static int cmd_mem_walk_handler(int argc, char *argv[], void *priv)
 
 	unused_mem_walk(find_max_unused_mem_block);
 	addr = (void *)mm_alloc_fix(start, max_len);
-	if (!addr)
+	if (!addr) {
 		print("mm alloc from 0x%lx failed\n", max_len, start);
+		return -1;
+	}
 
 	print("alloc %d memory from 0x%lx success!!\n", max_len, start);
 
