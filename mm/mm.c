@@ -65,6 +65,7 @@ void memory_block_add(unsigned long base, unsigned long size)
 			    MAX_BYTE_PER_MAPS;
 		else
 			mm_blocks.memory_block_size[mm_blocks.avail] = size - i;
+		print("block size:0x%lx\n", mm_blocks.memory_block_size[mm_blocks.avail]);
 		mm_blocks.maps[mm_blocks.avail].map_nr =
 		    mm_blocks.memory_block_size[mm_blocks.avail] / PAGE_SIZE;
 		mm_blocks.avail++;
@@ -234,7 +235,7 @@ void *__mm_alloc(unsigned int size)
 					goto success;
 			} else {
 				nr = 0;
-				addr += PAGE_SIZE;
+				addr += (nr + 1) * PAGE_SIZE;
 			}
 
 			index++;
@@ -263,6 +264,75 @@ success:
 		ret = addr;
 	else
 		ret = (void *)((unsigned long)addr + va_pa_offset);
+
+	return ret;
+}
+
+void *mm_alloc_fix(unsigned long addr, unsigned int size)
+{
+	int page_nr = N_PAGE(size), n, total, i, tmp_nr;
+	void *ret;
+	unsigned long phy_address_start;
+	struct mem_maps *mem_maps;
+	unsigned long index, tmp_i;
+	unsigned long mem_map;
+	int per_mem_map;
+	irq_flags_t flags;
+
+	n = mm_blocks.avail;
+	spin_lock_irqsave(&mem_lock, flags);
+	for (i = 0; i < n; i++) {
+		unsigned long start;
+		unsigned int len;
+
+		start = mm_blocks.memory_block_start[i];
+		len = mm_blocks.memory_block_size[i];
+
+		if (!((unsigned long)addr >= start
+		    && (unsigned long)addr < start + len))
+			continue;
+
+		mem_maps = &mm_blocks.maps[i];
+		per_mem_map = sizeof(mem_maps->maps[0]) * 8;
+		total = mem_maps->map_nr;
+
+		phy_address_start = start;
+		goto check_and_alloc;
+	}
+
+	spin_unlock_irqrestore(&mem_lock, flags);
+	return NULL;
+
+check_and_alloc:
+	index = ((unsigned long)addr - phy_address_start) / PAGE_SIZE;
+	if (index >= total) {
+		spin_unlock_irqrestore(&mem_lock, flags);
+		return NULL;
+	}
+
+	tmp_i = index;
+	tmp_nr = page_nr;
+	for (; tmp_nr; tmp_nr--, tmp_i++) {
+		mem_map = mem_maps->maps[(tmp_i / per_mem_map)];
+		if (((mem_map >> (tmp_i % per_mem_map)) & (1UL)) != 0) {
+			spin_unlock_irqrestore(&mem_lock, flags);
+			return NULL;
+		}
+	}
+	tmp_i = index;
+	tmp_nr = page_nr;
+	for (; tmp_nr; tmp_nr--, tmp_i++) {
+		mem_map = mem_maps->maps[(tmp_i / per_mem_map)];
+		mem_map |= (1UL << (tmp_i % per_mem_map));
+		mem_maps->maps[(tmp_i / per_mem_map)] = mem_map;
+
+	}
+	spin_unlock_irqrestore(&mem_lock, flags);
+
+	if (mmu_is_on)
+		ret = (void *)phy_to_virt(addr);
+	else
+		ret = (void *)addr;
 
 	return ret;
 }
@@ -346,4 +416,55 @@ void mm_free(void *addr, unsigned int size)
 	}
 #endif
 	__mm_free(addr, size);
+}
+
+void unused_mem_walk(void (*fn)(unsigned long addr, unsigned int nr))
+{
+	int n, i;
+	irq_flags_t flags;
+	unsigned long mem_end;
+
+	n = mm_blocks.avail;
+	mem_end = get_phy_end();
+	spin_lock_irqsave(&mem_lock, flags);
+	for (i = 0; i < n; i++) {
+		int total, nr = 0, index = 0;
+		struct mem_maps *mem_maps;
+		unsigned long mem_map;
+		int per_mem_map;
+		void *addr, *addr_walk;
+
+		mem_maps = &mm_blocks.maps[i];
+
+		total = mem_maps->map_nr;
+		per_mem_map = sizeof(mem_maps->maps[0]) * 8;
+		addr = addr_walk = (void *)mm_blocks.memory_block_start[i];
+
+		while (index <= total) {
+			mem_map = mem_maps->maps[(index / per_mem_map)];
+			if ((((mem_map >> (index % per_mem_map)) & (1UL)) == 0)
+			    && ((unsigned long)addr_walk < mem_end)) {
+				nr++;
+			} else {
+				if (nr != 0)
+					fn((unsigned long)addr, PAGE_SIZE * nr);
+				nr = 0;
+				addr += (nr + 1) * PAGE_SIZE;
+			}
+
+			addr_walk += PAGE_SIZE;
+			index++;
+		}
+	}
+	spin_unlock_irqrestore(&mem_lock, flags);
+}
+
+static void print_unused_mem_info(unsigned long addr, unsigned int len)
+{
+	print("addr: 0x%lx len: 0x%x\n", addr, len);
+}
+
+void walk_unused_mem_and_print(void)
+{
+	unused_mem_walk(print_unused_mem_info);
 }

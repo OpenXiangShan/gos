@@ -54,3 +54,6 @@ config MULTICORE_TEST
 	bool "Multicore_test"
 config APP_FLOAT_TEST
 	bool "APP_FLOAT_TEST"
+config APP_MEM_WALK
+	bool "APP_MEM_WALK"
+	bool "APP_FLOAT_TEST"
