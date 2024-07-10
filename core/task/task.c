@@ -70,12 +70,13 @@ void walk_task_per_cpu(int cpu)
 	struct task_ctrl *tsk_ctl = &per_cpu(tasks, cpu);
 	struct task *entry;
 	int n = 0;
+	int flags;
 
 	if (!tsk_ctl)
 		return;
 
 	print("==============cpu%d==============\n", cpu);
-	spin_lock(&tsk_ctl->lock);
+	spin_lock_irqsave(&tsk_ctl->lock, flags);
 	list_for_each_entry(entry, &tsk_ctl->head, list) {
 		print("---> task%d in cpu%d\n", n++, cpu);
 		print("name: %s\n", entry->name);
@@ -83,7 +84,7 @@ void walk_task_per_cpu(int cpu)
 		print("stack: 0x%lx\n", entry->stack);
 		print("task_id: %d\n", entry->id);
 	}
-	spin_unlock(&tsk_ctl->lock);
+	spin_unlock_irqrestore(&tsk_ctl->lock, flags);
 	print("\n");
 }
 
