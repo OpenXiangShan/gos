@@ -39,6 +39,7 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 #endif
 	early_print_setup(hw);
 
+	print("satp:0x%lx\n", read_csr(satp));
 	parse_dtb();
 
 	percpu_init();

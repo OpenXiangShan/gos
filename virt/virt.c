@@ -61,6 +61,8 @@ static void enable_gstage_mmu(unsigned long pgdp, int on)
 	} else {
 		write_csr(CSR_HGATP, pgdp >> PAGE_SHIFT | HGATP_MODE);
 	}
+
+	print("hgatp:0x%lx\n", read_csr(CSR_HGATP));
 }
 
 static void vcpu_fence_gvma_all()
