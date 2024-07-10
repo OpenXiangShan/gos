@@ -43,6 +43,9 @@ if [ "$#" -eq 1 ];then
 	elif [ "$1" = "fpga-h" ];then
 		make gos-singlecore.dtb
 		make fpga_h_defconfig
+	elif [ "$1" = "vcs-minimum-sv48" ];then
+		make gos-minimum-sv48.dtb
+		make minimum_sv48_defconfig
 	else
 		make $1
 	fi
