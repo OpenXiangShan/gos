@@ -6,7 +6,7 @@
 #include "timer.h"
 #include "spinlocks.h"
 
-#define TASK_SCHEDULER_PERIOD 100
+#define TASK_SCHEDULER_PERIOD 10
 
 struct task {
 	char name[128];
