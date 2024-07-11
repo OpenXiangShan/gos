@@ -163,7 +163,7 @@ static int vcpu_create_gstage_mapping(struct vcpu *vcpu)
 	vcpu->memory_size = guest_ddr_size;
 	vcpu->host_memory_pa = virt_to_phy(vcpu->host_memory_va);
 
-	pgdp_va = (unsigned long)mm_alloc(PAGE_SIZE * 4);
+	pgdp_va = (unsigned long)mm_alloc_align(PAGE_SIZE * 4, PAGE_SIZE * 4);
 	if (!pgdp_va) {
 		print("%s -- Out of memory\n");
 		return -1;
