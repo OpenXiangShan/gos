@@ -28,6 +28,11 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 #ifndef CONFIG_SELECT_VCS
 	print(logo);
 #endif
+	print("complier info:\n");
+	print("    arch : %s\n", CONFIG_ARCH);
+	print("    uname: %s@%s\n", BUILD_USER, CONFIG_UNAME_RELEASE);
+	print("    time : %s\n", BUILD_TIME);
+
 	print("Hello, gos!\n");
 	trap_init();
 

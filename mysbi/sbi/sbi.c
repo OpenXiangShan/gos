@@ -8,6 +8,7 @@
 #include "sbi_clint.h"
 #include "sbi_uart.h"
 #include "sbi_trap.h"
+#include "autoconf.h"
 
 static struct sbi_trap_hw_context *h_context[8] = { 0 };
 
@@ -349,6 +350,7 @@ void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 	if (-1 == sbi_uart_init(hart_id, ctx))
 		return;
 
+	sbi_print("complier time : %s\n", BUILD_TIME);
 	sbi_print("sbi init... hartid: %d, ctx:%x\n", hart_id, ctx);
 
 	sbi_trap_init();

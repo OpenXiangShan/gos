@@ -41,6 +41,8 @@ autoconf: scripts/kconfig/conf FORCE
 	$< -s Kconfig
 	rm -rf include/gos-auto
 	mv include/linux include/gos-auto
+	echo "#define BUILD_TIME \"$(shell date '+%Y-%m-%d %H:%M:%S')\"" >> include/gos-auto/autoconf.h
+	echo "#define BUILD_USER \"$(shell id -un)\"" >> include/gos-auto/autoconf.h
 
 menuconfig: scripts/kconfig/mconf
 	$< Kconfig
