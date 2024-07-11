@@ -19,6 +19,7 @@ static spinlock_t mem_lock __attribute__((section(".data"))) =
 static unsigned long mem_maps[MEM_MAP_NR];
 static unsigned long phy_address_start;
 static unsigned long phy_address_end;
+static unsigned int map_nr;
 
 static unsigned long get_ddr_end(struct device_init_entry *hw)
 {
@@ -60,6 +61,7 @@ void mm_init(struct device_init_entry *hw)
 		nr_free_pages++;
 		start += PAGE_SIZE;
 	}
+	map_nr = nr_free_pages;
 
 	print
 	    ("Available Memory: phy_start_address:0x%lx, phy_end_address:0x%lx, available size:%dKB, %d available pages, page_size:%d\n",
@@ -84,14 +86,14 @@ void *mm_alloc(unsigned int size)
 	 * index%per_mem_map indicates that the page represented by index is locate in which bit of its mem_map
 	 * If can find page_nr continuous bits in mem_maps, goto success and the addr is the start address of according continues this bits.
 	 */
-	while (index < TOTAL_PAGE_NUM) {
+	while (index < map_nr) {
 		mem_map = mem_maps[(index / per_mem_map)];
 		if (((mem_map >> (index % per_mem_map)) & (1UL)) == 0) {
 			if (++nr == page_nr)
 				goto success;
 		} else {
 			nr = 0;
-			addr += PAGE_SIZE;
+			addr += (nr + 1) * PAGE_SIZE;
 		}
 
 		index++;
