@@ -183,10 +183,6 @@
 #define STREAM_TYPE double
 #endif
 
-static STREAM_TYPE	a[STREAM_ARRAY_SIZE+OFFSET],
-			b[STREAM_ARRAY_SIZE+OFFSET],
-			c[STREAM_ARRAY_SIZE+OFFSET];
-
 #define FLT_MAX 1E+37
 static double	avgtime[4] = {0}, maxtime[4] = {0},
 		mintime[4] = {FLT_MAX,FLT_MAX,FLT_MAX,FLT_MAX};
@@ -221,6 +217,28 @@ stream_main()
     long		j;
     STREAM_TYPE		scalar;
     double		t, times[4][NTIMES];
+    STREAM_TYPE		*a, *b, *c;
+
+    /* Allocate memory for test arrays dynamically */
+    a = mm_alloc(sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+    if (!a) {
+	    printf("No enouch memory for a[], skip test!!!\n");
+	    goto no_mem_a;
+    }
+    b = mm_alloc(sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+    if (!b) {
+	    printf("No enouch memory for b[], skip test!!!\n");
+	    goto no_mem_b;
+    }
+    c = mm_alloc(sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+    if (!c) {
+	    printf("No enouch memory for c[], skip test!!!\n");
+	    goto no_mem_c;
+    }
+
+    printf("Array a[] base address: 0x%lx\n", a);
+    printf("Array b[] base address: 0x%lx\n", b);
+    printf("Array c[] base address: 0x%lx\n", c);
 
     /* --- SETUP --- determine precision and check timing --- */
 
@@ -354,8 +372,15 @@ stream_main()
     printf(HLINE);
 
     /* --- Check Results --- */
-    checkSTREAMresults();
+    checkSTREAMresults(a, b, c);
     printf(HLINE);
+
+	    mm_free(c, sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+no_mem_c:
+	    mm_free(b, sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+no_mem_b:
+	    mm_free(a, sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+no_mem_a:
 
     return 0;
 }
@@ -413,7 +438,7 @@ double mysecond()
 #ifndef abs
 #define abs(a) ((a) >= 0 ? (a) : -(a))
 #endif
-void checkSTREAMresults ()
+void checkSTREAMresults (STREAM_TYPE *a, STREAM_TYPE *b, STREAM_TYPE *c)
 {
 	STREAM_TYPE aj,bj,cj,scalar;
 	STREAM_TYPE aSumErr,bSumErr,cSumErr;
