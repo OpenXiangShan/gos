@@ -3,6 +3,7 @@
 #include <device.h>
 #include "../command.h"
 #include "clock.h"
+#include "mm.h"
 
 /* Keep the original source code unchanged as much as possible:
  * https://github.com/OpenXiangShan/nexus-am/blob/master/apps/stream/src/stream.c
@@ -220,17 +221,17 @@ stream_main()
     STREAM_TYPE		*a, *b, *c;
 
     /* Allocate memory for test arrays dynamically */
-    a = mm_alloc(sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+    a = (STREAM_TYPE *)mm_alloc(sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
     if (!a) {
 	    printf("No enouch memory for a[], skip test!!!\n");
 	    goto no_mem_a;
     }
-    b = mm_alloc(sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+    b = (STREAM_TYPE *)mm_alloc(sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
     if (!b) {
 	    printf("No enouch memory for b[], skip test!!!\n");
 	    goto no_mem_b;
     }
-    c = mm_alloc(sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+    c = (STREAM_TYPE *)mm_alloc(sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
     if (!c) {
 	    printf("No enouch memory for c[], skip test!!!\n");
 	    goto no_mem_c;
