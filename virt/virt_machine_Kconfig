@@ -1,0 +1,40 @@
+menu "VIRT_MACHINE"
+
+config VIRT_MEMORY_BASE
+	hex "virt machine memory base"
+	default "0x80000000"
+config VIRT_MEMORY_LEN
+	hex "virt machine memory len"
+	default "0x4000000"
+config VIRT_UART_BASE
+	hex "virt machien uart base"
+	default "0x310b0000"
+config VIRT_UART_LEN
+	hex "virt machine uart len"
+	default "0x10000"
+config VIRT_SRAM_BASE
+	hex "virt machine sram base"
+	default "0x1000"
+config VIRT_SRAM_LEN
+	hex "virt machine sram len"
+	default "0x10000"
+config VIRT_MEMORY_TEST_BASE
+	hex "virt machine memory test base"
+	default "0x10000000"
+config VIRT_MEMORY_TEST_LEN
+	hex "virt machine memory test len"
+	default "0x1000"
+config VIRT_CLINT_BASE
+	hex "virt machine clint base"
+	default "0x38000000"
+config VIRT_CLINT_LEN
+	hex "virt machine clint len"
+	default "0x10000"
+config VIRT_IMSIC_BASE
+	hex "virt machine imsic base"
+	default "0x20000000"
+config VIRT_IMSIC_LEN
+	hex "virt machine imsic len"
+	default "0x1000"
+
+endmenu

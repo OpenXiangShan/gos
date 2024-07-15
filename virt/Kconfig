@@ -29,4 +29,6 @@ choice
 		tristate "Select 1g mapping"
 endchoice
 
+source "virt/virt_machine_Kconfig"
+
 endmenu
