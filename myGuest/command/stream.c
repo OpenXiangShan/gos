@@ -379,11 +379,11 @@ stream_main()
     printf(HLINE);
     printf(HLINE);
 
-	    mm_free(c, sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+	    mm_free((void *)c, sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
 no_mem_c:
-	    mm_free(b, sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+	    mm_free((void *)b, sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
 no_mem_b:
-	    mm_free(a, sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
+	    mm_free((void *)a, sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE+OFFSET));
 no_mem_a:
 
     return 0;
