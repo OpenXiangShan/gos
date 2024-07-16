@@ -5,6 +5,7 @@
 #include "../bsp/clint.h"
 #include "virt.h"
 #include "string.h"
+#include "clock.h"
 
 static void clint_mmio_write(struct memory_region *region,
 			     unsigned long addr, unsigned long val,
@@ -47,7 +48,7 @@ int create_clint_priv_data(void *ptr)
 	struct clint_data data;
 	int len = sizeof(data);
 
-	data.clint_freq = 10000000;
+	data.clint_freq = get_system_clock_freq();
 	memcpy((char *)ptr, (char *)&data, len);
 
 	return len;

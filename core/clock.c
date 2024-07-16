@@ -108,6 +108,14 @@ void do_clock_event_handler(void)
 	program_next_event(event, te->expiry_time);
 }
 
+unsigned long get_system_clock_freq(void)
+{
+	if (!clock_src)
+		return -1;
+
+	return clock_src->freq;
+}
+
 unsigned long get_system_tick(void)
 {
 	struct clock_source *source = clock_src;
