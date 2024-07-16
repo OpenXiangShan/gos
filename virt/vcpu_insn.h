@@ -108,6 +108,53 @@
 #define IMM_S(insn)		(((s32)(insn) >> 25 << 5) | \
 				 (s32)(((insn) >> 7) & 0x1f))
 
+#define RV_OPCODE(v)            __ASM_STR(v)
+#define RV_FUNC3(v)             __ASM_STR(v)
+#define RV_FUNC7(v)             __ASM_STR(v)
+#define RV_SIMM12(v)            __ASM_STR(v)
+#define RV_RD(v)                __ASM_STR(v)
+#define RV_RS1(v)               __ASM_STR(v)
+#define RV_RS2(v)               __ASM_STR(v)
+#define __RV_REG(v)             __ASM_STR(x ## v)
+#define RV___RD(v)              __RV_REG(v)
+#define RV___RS1(v)             __RV_REG(v)
+#define RV___RS2(v)             __RV_REG(v)
+
+#define RV_OPCODE_SYSTEM        RV_OPCODE(115)
+
+#define __INSN_R(opcode, func3, func7, rd, rs1, rs2)    \
+        ".insn  r " opcode ", " func3 ", " func7 ", " rd ", " rs1 ", " rs2 "\n"
+
+#define __INSN_I(opcode, func3, rd, rs1, simm12)        \
+        ".insn  i " opcode ", " func3 ", " rd ", " rs1 ", " simm12 "\n"
+
+#define INSN_R(opcode, func3, func7, rd, rs1, rs2)              \
+        __INSN_R(RV_##opcode, RV_##func3, RV_##func7,           \
+                 RV_##rd, RV_##rs1, RV_##rs2)
+#define HLV_W(dest, addr)                                       \
+        INSN_R(OPCODE_SYSTEM, FUNC3(4), FUNC7(52),              \
+               RD(dest), RS1(addr), __RS2(0))
+#define HLVX_HU(dest, addr)                                     \
+        INSN_R(OPCODE_SYSTEM, FUNC3(4), FUNC7(50),              \
+               RD(dest), RS1(addr), __RS2(3))
+#define HLV_D(dest, addr)                                       \
+        INSN_R(OPCODE_SYSTEM, FUNC3(4), FUNC7(54),              \
+               RD(dest), RS1(addr), __RS2(0))
+
+#define INSN_16BIT_MASK         0x3
+
+#define INSN_IS_16BIT(insn)     (((insn) & INSN_16BIT_MASK) != INSN_16BIT_MASK)
+
+#define INSN_LEN(insn)          (INSN_IS_16BIT(insn) ? 2 : 4)
+
+struct vcpu_trap {
+	unsigned long sepc;
+	unsigned long scause;
+	unsigned long stval;
+	unsigned long htval;
+	unsigned long htinst;
+};
+
 int vcpu_mmio_store(struct vcpu *vcpu, unsigned long fault_addr,
 		    unsigned long htinst);
 int vcpu_mmio_load(struct vcpu *vcpu, unsigned long fault_addr,

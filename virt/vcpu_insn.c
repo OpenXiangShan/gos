@@ -2,6 +2,71 @@
 #include "virt.h"
 #include "print.h"
 
+static unsigned long vcpu_unpriv_read(struct vcpu *vcpu,
+				      int read_insn,
+				      unsigned long guest_addr,
+				      struct vcpu_trap *trap)
+{
+	register unsigned long taddr asm("a0") = (unsigned long)trap;
+	register unsigned long ttmp asm("a1");
+	unsigned long flags, val, tmp, old_hstatus;
+
+	local_irq_save(flags);
+
+	old_hstatus = csr_swap(CSR_HSTATUS, vcpu->cpu_ctx.guest_context.hstatus);
+
+	if (read_insn) {
+		/*
+		 * HLVX.HU instruction
+		 * 0110010 00011 rs1 100 rd 1110011
+		 */
+		asm volatile ("\n"
+			".option push\n"
+			".option norvc\n"
+			"add %[ttmp], %[taddr], 0\n"
+			HLVX_HU(%[val], %[addr])
+			"andi %[tmp], %[val], 3\n"
+			"addi %[tmp], %[tmp], -3\n"
+			"bne %[tmp], zero, 2f\n"
+			"addi %[addr], %[addr], 2\n"
+			HLVX_HU(%[tmp], %[addr])
+			"sll %[tmp], %[tmp], 16\n"
+			"add %[val], %[val], %[tmp]\n"
+			"2:\n"
+			".option pop"
+		: [val] "=&r" (val), [tmp] "=&r" (tmp),
+		  [taddr] "+&r" (taddr), [ttmp] "+&r" (ttmp),
+		  [addr] "+&r" (guest_addr) : : "memory");
+
+		if (trap->scause == EXC_LOAD_PAGE_FAULT)
+			trap->scause = EXC_INST_PAGE_FAULT;
+	} else {
+		/*
+		 * HLV.D instruction
+		 * 0110110 00000 rs1 100 rd 1110011
+		 *
+		 * HLV.W instruction
+		 * 0110100 00000 rs1 100 rd 1110011
+		 */
+		asm volatile ("\n"
+			".option push\n"
+			".option norvc\n"
+			"add %[ttmp], %[taddr], 0\n"
+			HLV_D(%[val], %[addr])
+			".option pop"
+		: [val] "=&r" (val),
+		  [taddr] "+&r" (taddr), [ttmp] "+&r" (ttmp)
+		: [addr] "r" (guest_addr) : "memory");
+	}
+
+	write_csr(CSR_HSTATUS, old_hstatus);
+
+	local_irq_restore(flags);
+
+	return val;
+
+}
+
 int vcpu_mmio_load(struct vcpu *vcpu, unsigned long fault_addr,
 		   unsigned long htinst)
 {
@@ -9,12 +74,15 @@ int vcpu_mmio_load(struct vcpu *vcpu, unsigned long fault_addr,
 	int len = 0, shift = 0, insn_len = 0;
 	struct memory_region *region;
 	unsigned long data;
+	struct vcpu_trap trap = { 0 };
 
 	if (htinst & 0x1) {
 		insn = htinst | INSN_16BIT_MASK;
 		insn_len = (htinst & (1UL << 1)) ? INSN_LEN(insn) : 2;
-	} else
-		return -1;
+	} else {
+		insn = vcpu_unpriv_read(vcpu, 1, vcpu->cpu_ctx.guest_context.sepc, &trap);
+		insn_len = INSN_LEN(insn);
+	}
 
 	if ((insn & INSN_MASK_LW) == INSN_MATCH_LW) {
 		len = 4;
@@ -70,15 +138,17 @@ int vcpu_mmio_store(struct vcpu *vcpu, unsigned long fault_addr,
 {
 	unsigned long data;
 	int len = 0, insn_len = 0;
-	//int insn_len = 0;
 	unsigned long insn;
 	struct memory_region *region;
+	struct vcpu_trap trap = { 0 };
 
 	if (htinst & 0x1) {
 		insn = htinst | INSN_16BIT_MASK;
 		insn_len = (htinst & (1UL << 1)) ? INSN_LEN(insn) : 2;
-	} else
-		return -1;
+	} else {
+		insn = vcpu_unpriv_read(vcpu, 1, vcpu->cpu_ctx.guest_context.sepc, &trap);
+		insn_len = INSN_LEN(insn);
+	}
 
 	data = GET_RS2(insn, &vcpu->cpu_ctx.guest_context);
 
