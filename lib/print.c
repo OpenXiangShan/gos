@@ -111,14 +111,25 @@ static int my_vprintf(const char *fmt, va_list ap)
 			out_num(va_arg(ap, u64), 8, lead, maxwidth);
 			break;
 		case 'u':
-			out_num(va_arg(ap, u64), 10, lead, maxwidth);
+			out_num(va_arg(ap, u32), 10, lead, maxwidth);
 			break;
 		case 'x':
 		case 'X':
 			out_num(va_arg(ap, u32), 16, lead, maxwidth);
 			break;
 		case 'l':
-			if (*(fmt + 1) == 'x') {
+			if (*(fmt + 1) == 'l') {
+				if (*(fmt + 2) == 'u') {
+					fmt+=2;
+					out_num(va_arg(ap, u64), 10, lead, maxwidth);
+				} else if (*(fmt + 2) == 'x') {
+					fmt+=2;
+					out_num(va_arg(ap, u64), 16, lead, maxwidth);
+				}
+			} else if (*(fmt + 1) == 'u') {
+				fmt++;
+				out_num(va_arg(ap, u64), 10, lead, maxwidth);
+			} else if (*(fmt + 1) == 'x') {
 				fmt++;
 				out_num(va_arg(ap, u64), 16, lead, maxwidth);
 			}
