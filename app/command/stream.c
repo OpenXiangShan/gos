@@ -259,7 +259,7 @@ stream_main()
     printf("*****  WARNING: ******\n");
 #endif
 
-    printf("Array size = %l (elements), Offset = %d (elements)\n" , (unsigned long long) STREAM_ARRAY_SIZE, OFFSET);
+    printf("Array size = %lu (elements), Offset = %d (elements)\n" , (unsigned long long) STREAM_ARRAY_SIZE, OFFSET);
     printf("Memory per array = %f MiB (= %f GiB).\n",
 	BytesPerWord * ( (double) STREAM_ARRAY_SIZE / 1024.0/1024.0),
 	BytesPerWord * ( (double) STREAM_ARRAY_SIZE / 1024.0/1024.0/1024.0));
