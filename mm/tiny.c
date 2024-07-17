@@ -4,6 +4,7 @@
 #include "print.h"
 #include "asm/type.h"
 #include "asm/pgtable.h"
+#include "string.h"
 
 static spinlock_t tiny_lock __attribute__((section(".data"))) =
     __SPINLOCK_INITIALIZER;
@@ -63,6 +64,7 @@ find:
 	new = __mm_alloc(wholesale);
 	if (!new)
 		return NULL;
+	memset((char *)new, 0, wholesale);
 
 	new->size = wholesale;
 
