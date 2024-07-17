@@ -56,3 +56,6 @@ config APP_FLOAT_TEST
 	bool "APP_FLOAT_TEST"
 config APP_MEM_WALK
 	bool "APP_MEM_WALK"
+config APP_STVAL
+	bool "APP_STVAL"
+
