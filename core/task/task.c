@@ -249,8 +249,9 @@ int percpu_tasks_init(int cpu)
 
 	sc->cpu = cpu;
 	sc->current_task = NULL;
-	sc->period_in_ms = TASK_SCHEDULER_PERIOD;
-
+#ifdef CONFIG_TASK_SCHEDULER_PERIOD
+	sc->period_in_ms = CONFIG_TASK_SCHEDULER_PERIOD;
+#endif
 	task_scheduler_clock_event_init(sc);
 
 	return 0;

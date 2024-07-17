@@ -88,6 +88,11 @@ config ENABLE_MULTI_TASK
 	bool "Enable Multi task"
 	default y
 
+config TASK_SCHEDULER_PERIOD
+	int "Task scheduler period(ms)"
+	default "100"
+	depends on ENABLE_MULTI_TASK
+
 config ENABLE_SHELL
 	bool "Enable Shell"
 	default y
