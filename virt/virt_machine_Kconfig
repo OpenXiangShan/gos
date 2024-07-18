@@ -36,5 +36,14 @@ config VIRT_IMSIC_BASE
 config VIRT_IMSIC_LEN
 	hex "virt machine imsic len"
 	default "0x1000"
+choice
+	prompt "Select vsatp mode"
+	config VIRT_SELECT_SV39
+		tristate "Virt Select Sv39"
+	config VIRT_SELECT_SV48
+		tristate "Virt Select Sv48"
+	config VIRT_SELECT_SV57
+		tristate "Virt Select Sv57"
+endchoice
 
 endmenu

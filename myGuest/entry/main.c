@@ -22,6 +22,7 @@ void start_guest(struct device_init_entry *entry, struct run_params *params)
 	create_devices();
 
 	myGuest_print("guest mmu is on!\n");
+	print("satp:0x%lx\n", read_csr(satp));
 
 	command_init();
 

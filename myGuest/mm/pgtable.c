@@ -8,6 +8,7 @@
 #include "vmap.h"
 #include "asm/barrier.h"
 #include "asm/tlbflush.h"
+#include "gos-auto/autoconf.h"
 
 #define PAGE_OFFSET 0xffffffd800000000
 
@@ -338,6 +339,21 @@ int paging_init(struct device_init_entry *hw)
 		return -1;
 	}
 	memset((char *)pgdp, 0, PAGE_SIZE);
+
+#ifdef CONFIG_VIRT_SELECT_SV39
+	pgtable_l4_enabled = 0;
+	pgtable_l5_enabled = 0;
+#elif CONFIG_VIRT_SELECT_SV48
+	pgtable_l4_enabled = 1;
+	pgtable_l5_enabled = 0;
+#elif CONFIG_VIRT_SELECT_SV57
+	pgtable_l4_enabled = 1;
+	pgtable_l5_enabled = 1;
+#else
+	myGuest_print("Unsupport satp mode... default use sv39...\n");
+	pgtable_l4_enabled = 0;
+	pgtable_l5_enabled = 0;
+#endif
 
 	mmu_code_page_mapping();
 	mmu_direct_page_mapping();
