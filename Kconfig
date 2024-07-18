@@ -26,17 +26,6 @@ choice
 endchoice
 
 choice
-	prompt "Select satp mode"
-
-	config SELECT_SV39
-		tristate "Select Sv39"
-	config SELECT_SV48
-		tristate "Select Sv48"
-	config SELECT_SV57
-		tristate "Select Sv57"
-endchoice
-
-choice
 	prompt "Use 4K/2M/1G in direct mapping"
 	config SELECT_4K_DIRECT_MAPPING
 		tristate "Select 4k mapping"
