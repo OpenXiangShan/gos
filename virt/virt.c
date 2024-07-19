@@ -149,11 +149,13 @@ static int vcpu_create_gstage_mapping(struct vcpu *vcpu)
 	vcpu->host_memory_va = (unsigned long)mm_alloc(guest_ddr_size);
 #elif CONFIG_SELECT_2M_GUEST_MEM_MAPPING
 	vcpu->host_memory_va =
-		(unsigned long)mm_alloc_align(2*1024*1024, guest_ddr_size);
-	print("%s -- vcpu->host_memory_va: 0x%lx\n", __FUNCTION__, vcpu->host_memory_va);
+	    (unsigned long)mm_alloc_align(2 * 1024 * 1024, guest_ddr_size);
+	print("%s -- vcpu->host_memory_va: 0x%lx\n", __FUNCTION__,
+	      vcpu->host_memory_va);
 #elif CONFIG_SELECT_1G_GUEST_MEM_MAPPING
 	vcpu->host_memory_va =
-		(unsigned long)mm_alloc_align(1*1024*1024*1024, guest_ddr_size);
+	    (unsigned long)mm_alloc_align(1 * 1024 * 1024 * 1024,
+					  guest_ddr_size);
 #endif
 	if (!vcpu->host_memory_va) {
 		print("%s -- Out of memory\n", __FUNCTION__);
@@ -179,12 +181,12 @@ static int vcpu_create_gstage_mapping(struct vcpu *vcpu)
 			    vcpu->guest_memory_pa, vcpu->memory_size);
 #elif CONFIG_SELECT_2M_GUEST_MEM_MAPPING
 	gstage_page_mapping_2M((unsigned long *)vcpu->machine.gstage_pgdp,
-				vcpu->host_memory_pa,
-				vcpu->guest_memory_pa, vcpu->memory_size);
+			       vcpu->host_memory_pa,
+			       vcpu->guest_memory_pa, vcpu->memory_size);
 #elif CONFIG_SELECT_1G_GUEST_MEM_MAPPING
 	gstage_page_mapping_1G((unsigned long *)vcpu->machine.gstage_pgdp,
-				vcpu->host_memory_pa,
-				vcpu->guest_memory_pa, vcpu->memory_size);
+			       vcpu->host_memory_pa,
+			       vcpu->guest_memory_pa, vcpu->memory_size);
 #endif
 
 	/* map sram gstage page table */
@@ -291,7 +293,10 @@ static int vcpu_exception_delegation(void)
 
 	hedeleg = 0;
 	hedeleg |= (1UL << EXC_INST_MISALIGNED);
+	hedeleg |= (1UL << EXC_INST_ILLEGAL);
 	hedeleg |= (1UL << EXC_BREAKPOINT);
+	hedeleg |= (1UL << EXC_LOAD_MISALIGNED);
+	hedeleg |= (1UL << EXC_STORE_MISALIGNED);
 	hedeleg |= (1UL << EXC_SYSCALL);
 	hedeleg |= (1UL << EXC_INST_PAGE_FAULT);
 	hedeleg |= (1UL << EXC_LOAD_PAGE_FAULT);
@@ -337,7 +342,7 @@ struct vcpu *vcpu_create(void)
 	guest_ctx->hstatus |= HSTATUS_VTW;
 	guest_ctx->hstatus |= HSTATUS_SPVP;
 	guest_ctx->hstatus |= HSTATUS_SPV;
-	if(read_csr(sstatus) & SR_FS){
+	if (read_csr(sstatus) & SR_FS) {
 		vcpu->cpu_ctx.vsstatus |= SR_FS;
 		guest_ctx->sstatus |= SR_FS;
 	}
@@ -406,7 +411,7 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 
 		vcpu_switch_to(&vcpu->cpu_ctx);
 
-		if(vcpu_process_vm_exit(vcpu) == -1) {
+		if (vcpu_process_vm_exit(vcpu) == -1) {
 			enable_local_irq();
 			vcpu->running = 0;
 			break;

@@ -301,6 +301,7 @@ void delegate_traps(void)
 
 	interrupts = MIP_SSIP | MIP_STIP | MIP_SEIP;
 	exceptions =
+	    (1UL << CAUSE_MISALIGNED_LOAD) | (1UL << CAUSE_MISALIGNED_STORE) |
 	    (1UL << CAUSE_MISALIGNED_FETCH) | (1UL << CAUSE_FETCH_PAGE_FAULT) |
 	    (1UL << CAUSE_BREAKPOINT) | (1UL << CAUSE_LOAD_PAGE_FAULT) | (1UL <<
 									  CAUSE_STORE_PAGE_FAULT)
