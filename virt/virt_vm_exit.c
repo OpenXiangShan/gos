@@ -42,6 +42,7 @@ static void do_trap_error(struct vcpu *vcpu, unsigned long saus)
 
 	print("vsepc: 0x%lx  vstatus:0x%lx  vsatp:0x%lx\n", vcpu->cpu_ctx.vsepc,
 			vcpu->cpu_ctx.vsstatus, vcpu->cpu_ctx.vsatp);
+	print("htval: 0x%lx  stval:0x%lx\n", read_csr(CSR_HTVAL), read_csr(CSR_STVAL));
 	panic();
 }
 
