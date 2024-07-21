@@ -3,6 +3,7 @@
 #include "print.h"
 #include "timer.h"
 #include "irq.h"
+#include "mm.h"
 
 #define SCAUSE_IRQ (1UL << 63)
 
@@ -49,6 +50,9 @@ int do_exception(struct pt_regs *regs, unsigned long scause)
 			irq_handler();
 	} else {
 		print("scause:0x%lx\n", scause);
+		if (scause == EXC_STORE_PAGE_FAULT ||
+		    scause == EXC_LOAD_PAGE_FAULT)
+			dump_fault_addr_pt(read_csr(stval));
 		show_regs(regs);
 		while(1);
 	}

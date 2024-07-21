@@ -20,6 +20,12 @@ void mm_free(void *addr, unsigned int size);
 unsigned long alloc_zero_page(int gfp);
 unsigned long get_phy_start(void);
 unsigned long get_phy_end(void);
+void mmu_walk_and_print_pte(unsigned long virt_addr);
+
+static inline void dump_fault_addr_pt(unsigned long addr)
+{
+	return mmu_walk_and_print_pte(addr);
+}
 
 #endif
 

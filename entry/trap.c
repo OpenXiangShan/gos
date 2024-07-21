@@ -116,6 +116,8 @@ static int handle_exception(struct pt_regs *regs, unsigned long cause)
 	case EXC_STORE_PAGE_FAULT:
 	case EXC_LOAD_PAGE_FAULT:
 		ret = do_page_fault(regs->sbadaddr);
+		if (ret)
+			dump_fault_addr_pt(regs->sbadaddr);
 		break;
 	default:
 		fi = ec_to_fault_info(cause);

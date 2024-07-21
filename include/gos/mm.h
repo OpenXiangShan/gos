@@ -68,9 +68,15 @@ unsigned long get_phy_end(void);
 struct memory_block *get_mm_blocks(void);
 int do_page_fault(unsigned long addr);
 unsigned long *mmu_get_pte_level(unsigned long virt_addr, int lvl);
+void mmu_walk_and_print_pte(unsigned long virt_addr);
 unsigned long *mmu_get_pte(unsigned long virt_addr);
 unsigned long get_default_pgd(void);
 void walk_unused_mem_and_print(void);
 void unused_mem_walk(void (*fn)(unsigned long addr, unsigned int nr));
+
+static inline void dump_fault_addr_pt(unsigned long addr)
+{
+	return mmu_walk_and_print_pte(addr);
+}
 
 #endif

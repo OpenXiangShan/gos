@@ -106,6 +106,63 @@ static unsigned long *mmu_pt_walk_fetch(unsigned long *ptp, unsigned long va,
 	return mmu_pt_walk_fetch(pte, va, shift - 9, 0);
 }
 
+static unsigned long *mmu_pt_walk_fetch_one(unsigned long *ptp, unsigned long va,
+					    unsigned int shift, int root)
+{
+	unsigned long *pte;
+
+	if (root) {
+		if (!mmu_is_on)
+			pte = (unsigned long *)(ptp + ((va >> shift) & 0x1FF));
+		else
+			pte =
+			    (unsigned long *)phy_to_virt(ptp +
+							 ((va >> shift) &
+							  0x1FF));
+	} else {
+		if (!mmu_is_on)
+			pte =
+			    (unsigned long *)(pfn_to_phys(pte_pfn(*ptp)) +
+					      ((va >> shift) & 0x1FF));
+		else
+			pte = (unsigned long *)(phy_to_virt((unsigned long *)
+							    pfn_to_phys(pte_pfn
+									(*ptp))
+							    +
+							    ((va >> shift) &
+							     0x1FF)));
+	}
+
+	return pte;
+}
+
+void mmu_walk_and_print_pte(unsigned long virt_addr)
+{
+	unsigned long *pte;
+	unsigned long *p = pgdp;
+	unsigned int shift = PGDIR_SHIFT;
+
+	print("================= dump page table =================\n");
+	print("fault addr:0x%lx\n", virt_addr);
+	print("pgdp : 0x%lx\n", p);
+	pte = mmu_pt_walk_fetch_one(p, virt_addr, shift, 1);
+	while (1) {
+		print("0x%lx : 0x%lx\n", virt_to_phy(pte), *pte);
+		if (pmd_leaf(*pte))
+			goto _return;
+		else if (pmd_none(*pte))
+			goto _return;
+		else if (shift == PAGE_SHIFT)
+			goto _return;
+		p = pte;
+		shift -= 9;
+		pte = mmu_pt_walk_fetch_one(p, virt_addr, shift, 0);
+	}
+
+_return:
+	print("==================================================\n");
+}
+
 void *walk_pt_va_to_pa(unsigned long va)
 {
 	unsigned long *pte;
@@ -354,7 +411,6 @@ int paging_init(struct device_init_entry *hw)
 	pgtable_l4_enabled = 0;
 	pgtable_l5_enabled = 0;
 #endif
-
 	mmu_code_page_mapping();
 	mmu_direct_page_mapping();
 	mmu_hw_page_mapping(hw);

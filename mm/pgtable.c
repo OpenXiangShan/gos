@@ -221,6 +221,33 @@ unsigned long *mmu_get_pte(unsigned long virt_addr)
 	return pte;
 }
 
+void mmu_walk_and_print_pte(unsigned long virt_addr)
+{
+	unsigned long *pte;
+	unsigned long *p = pgdp;
+	unsigned int shift = PGDIR_SHIFT;
+
+	print("================= dump page table =================\n");
+	print("fault addr:0x%lx\n", virt_addr);
+	print("pgdp : 0x%lx\n", p);
+	pte = mmu_pt_walk_fetch_one(p, virt_addr, shift, 1);
+	while (1) {
+		print("0x%lx : 0x%lx\n", virt_to_phy(pte), *pte);
+		if (pmd_leaf(*pte))
+			goto _return;
+		else if (pmd_none(*pte))
+			goto _return;
+		else if (shift == PAGE_SHIFT)
+			goto _return;
+		p = pte;
+		shift -= 9;
+		pte = mmu_pt_walk_fetch_one(p, virt_addr, shift, 0);
+	}
+
+_return:
+	print("==================================================\n");
+}
+
 unsigned long *mmu_get_pte_level(unsigned long virt_addr, int lvl)
 {
 	unsigned long *pte;
