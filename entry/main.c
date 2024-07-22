@@ -29,7 +29,9 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 	print(logo);
 #endif
 	print("complier info:\n");
+#ifdef CONFIG_ARCH
 	print("    arch : %s\n", CONFIG_ARCH);
+#endif
 	print("    uname: %s@%s\n", BUILD_USER, CONFIG_UNAME_RELEASE);
 	print("    time : %s\n", BUILD_TIME);
 
