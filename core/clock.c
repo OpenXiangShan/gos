@@ -84,6 +84,17 @@ static int program_next_event(struct clock_event *event,
 	return event->set_next_event(value, event);
 }
 
+void clock_set_next_event(unsigned long expiry_time)
+{
+	int cpu = sbi_get_cpu_id();
+	struct clock_event *event = &per_cpu(clock_event, cpu);
+
+	if (!event)
+		return;
+
+	program_next_event(event, expiry_time);
+}
+
 void do_clock_event_handler(void)
 {
 	struct timer_event_info *te;

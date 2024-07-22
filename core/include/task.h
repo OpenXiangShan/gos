@@ -6,6 +6,11 @@
 #include "timer.h"
 #include "spinlocks.h"
 
+enum {
+	TASK_STATUS_READY = 0,
+	TASK_STATUS_SLEEP,
+};
+
 struct task {
 	char name[128];
 	struct list_head list;
@@ -16,6 +21,7 @@ struct task {
 	int cpu;
 	int id;
 	struct pt_regs regs;
+	int status;
 };
 
 struct task_ctrl {
@@ -40,5 +46,9 @@ int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 int do_idle(void *data);
 void task_scheduler_enter(struct pt_regs *regs);
 void task_scheduler_exit(struct pt_regs *regs);
+void schedule(void);
+void Sleep(void);
+void set_task_status(struct task *task, int status);
+void sleep_to_timeout(int ms);
 
 #endif

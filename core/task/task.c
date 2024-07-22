@@ -12,6 +12,7 @@
 #include "asm/tlbflush.h"
 #include "spinlocks.h"
 #include "gos.h"
+#include "timer.h"
 
 extern int mmu_is_on;
 static DEFINE_PER_CPU(struct task_ctrl, tasks);
@@ -83,6 +84,10 @@ void walk_task_per_cpu(int cpu)
 		print("task_fn: 0x%lx\n", entry->task_fn);
 		print("stack: 0x%lx\n", entry->stack);
 		print("task_id: %d\n", entry->id);
+		if (entry->status == TASK_STATUS_READY)
+			print("status: Ready\n");
+		else if (entry->status == TASK_STATUS_SLEEP)
+			print("status: Sleep\n");
 	}
 	spin_unlock_irqrestore(&tsk_ctl->lock, flags);
 	print("\n");
@@ -123,6 +128,7 @@ int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 	new->data = data;
 	new->cpu = cpu;
 	new->id = alloc_task_id();
+	new->status = TASK_STATUS_READY;
 
 	if (stack)
 		new->stack = stack + stack_size;
@@ -194,6 +200,8 @@ again:
 	task = list_entry(list_first(&task_ctl->head), struct task, list);
 	list_del(&task->list);
 	list_add_tail(&task->list, &task_ctl->head);
+	if (task->status == TASK_STATUS_SLEEP)
+		goto again;
 	if (!strncmp(task->name, "idle", sizeof("idle"))) {
 		if (list_entry(list_first(&task_ctl->head), struct task, list) != task)
 			goto again;
@@ -224,6 +232,61 @@ static int task_scheduler_clock_event_init(struct task_scheduler *ts)
 	register_timer_event(&ts->timer_evt, ts->cpu);
 
 	return 0;
+}
+
+static void _schedule(int status)
+{
+	int cpu = sbi_get_cpu_id();
+	struct task_scheduler *sc = &per_cpu(schedulers, cpu);
+
+	disable_local_irq();
+	if (!strncmp(sc->current_task->name, "idle", sizeof("idle"))) {
+		enable_local_irq();
+		return;
+	}
+	sc->current_task->status = status;
+	sc->timer_evt.expiry_time = get_system_time();
+	clock_set_next_event(sc->timer_evt.expiry_time);
+	enable_local_irq();
+}
+
+void schedule(void)
+{
+	_schedule(TASK_STATUS_READY);
+}
+
+void Sleep(void)
+{
+	_schedule(TASK_STATUS_SLEEP);
+}
+
+void set_task_status(struct task *task, int status)
+{
+	disable_local_irq();
+	if (!strncmp(task->name, "idle", sizeof("idle"))) {
+		enable_local_irq();
+		return;
+	}
+	task->status = status;
+	enable_local_irq();
+}
+
+static void task_sleep_timer(void *data)
+{
+	struct task *task = (struct task *)data;
+
+	set_task_status(task, TASK_STATUS_READY);
+}
+
+void sleep_to_timeout(int ms)
+{
+	int cpu = sbi_get_cpu_id();
+	struct task_scheduler *sc = &per_cpu(schedulers, cpu);
+
+	disable_local_irq();
+	set_timer(ms, task_sleep_timer, sc->current_task);
+	Sleep();
+	enable_local_irq();
 }
 
 void task_scheduler_enter(struct pt_regs *regs)

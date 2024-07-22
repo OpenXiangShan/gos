@@ -37,5 +37,6 @@ unsigned long ms_to_cycles(unsigned long ms, unsigned long freq_hz);
 unsigned long get_clock_source_freq(void);
 unsigned long get_system_tick(void);
 unsigned long get_system_clock_freq(void);
+void clock_set_next_event(unsigned long expiry_time);
 
 #endif
