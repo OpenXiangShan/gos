@@ -14,9 +14,45 @@
 #include "uapi/align.h"
 #include "vcpu_aia.h"
 #include "gos.h"
+#include "list.h"
+#include "percpu.h"
 
 extern char guest_bin[];
-static struct vcpu *p_vcpu __attribute__((section(".data"))) = NULL;
+static LIST_HEAD(vcpu_list);
+static DEFINE_PER_CPU(unsigned long, vmid_bitmap);
+
+static int find_free_vmid(unsigned long *vmid)
+{
+	unsigned long bitmap = *vmid;
+	int pos = 0;
+
+	while (bitmap & 0x01) {
+		if (pos == 64)
+			return -1;
+		bitmap = bitmap >> 1;
+		pos++;
+	}
+
+	*vmid |= (1UL) << pos;
+
+	return pos;
+}
+
+static int vcpu_alloc_vmid(int cpu)
+{
+	unsigned long *vmid;
+
+	vmid = &per_cpu(vmid_bitmap, cpu);
+	if (!vmid)
+		return -1;
+
+	return find_free_vmid(vmid);
+}
+
+static void vcpu_update_vmid(struct vcpu *vcpu)
+{
+	vcpu->vmid = vcpu_alloc_vmid(sbi_get_cpu_id());
+}
 
 static void vcpu_update(struct vcpu *vcpu)
 {
@@ -54,12 +90,15 @@ static void vcpu_restore(struct vcpu *vcpu)
 	write_csr(CSR_HVIP, ctx->hvip);
 }
 
-static void enable_gstage_mmu(unsigned long pgdp, int on)
+static void enable_gstage_mmu(unsigned long pgdp, int on, int vmid)
 {
 	if (!on) {
 		write_csr(CSR_HGATP, 0);
 	} else {
-		write_csr(CSR_HGATP, pgdp >> PAGE_SHIFT | HGATP_MODE);
+		write_csr(CSR_HGATP,
+			  pgdp >> PAGE_SHIFT |
+			  HGATP_MODE |
+			  HGATP_VMID(vmid));
 	}
 
 	print("hgatp:0x%lx\n", read_csr(CSR_HGATP));
@@ -326,9 +365,14 @@ struct vcpu *vcpu_create(void)
 	struct vcpu *vcpu;
 	struct virt_cpu_context *guest_ctx;
 
-	if (p_vcpu)
-		return p_vcpu;
+	if (list_empty(&vcpu_list))
+		goto create_vcpu;
 
+	vcpu = list_entry(list_first(&vcpu_list), struct vcpu, list);
+	if (vcpu)
+		return vcpu;
+
+create_vcpu:
 	vcpu = (struct vcpu *)mm_alloc(sizeof(struct vcpu));
 	if (!vcpu) {
 		print("%s -- Out of memory\n", __FUNCTION__);
@@ -358,7 +402,7 @@ struct vcpu *vcpu_create(void)
 #endif
 	vcpu->cpu = -1;
 
-	p_vcpu = vcpu;
+	list_add_tail(&vcpu->list, &vcpu_list);
 
 	return vcpu;
 }
@@ -377,7 +421,11 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 		print("vcpu create gstage failed...\n");
 		return -1;
 	}
-	enable_gstage_mmu(vcpu->machine.gstage_pgdp, 1);
+
+	vcpu_update_vmid(vcpu);
+	print("vmid: %d\n", vcpu->vmid);
+
+	enable_gstage_mmu(vcpu->machine.gstage_pgdp, 1, vcpu->vmid);
 	__hfence_gvma_all();
 
 	vcpu_load_guest_running_data(vcpu, params);
@@ -423,4 +471,15 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 	}
 
 	return 0;
+}
+
+void vcpu_init(void)
+{
+	int cpu;
+	unsigned long *vmid;
+
+	for_each_online_cpu(cpu) {
+		vmid = &per_cpu(vmid_bitmap, cpu);
+		*vmid = 1;
+	}
 }

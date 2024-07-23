@@ -84,6 +84,10 @@ extern unsigned long va_pa_offset;
 #define HGATP_MODE (pgtable_l5_enabled ? HGATP_MODE_57 : \
 		(pgtable_l4_enabled ? HGATP_MODE_48 : HGATP_MODE_39))
 
+#define HGATP_VMID_SHIFT 44
+#define HGATP_VMID_MASK 0x3FFF
+#define HGATP_VMID(vmid) ((((unsigned long)vmid) & HGATP_VMID_MASK) << 44)
+
 typedef struct {
 	unsigned long pgprot;
 } pgprot_t;

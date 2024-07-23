@@ -14,6 +14,7 @@
 #include "gos.h"
 #include "../app/shell.h"
 #include "asm/sbi.h"
+#include "virt.h"
 
 extern const char logo[];
 
@@ -66,6 +67,8 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 	percpu_tasks_init(0);
 
 	enable_local_irq();
+
+	vcpu_init();
 
 	end = sbi_get_cpu_cycles();
 	print("gos startup success, cost: %d(cycles)\n", end - start);

@@ -117,8 +117,10 @@ struct vcpu_timer {
 };
 
 struct vcpu {
+	struct list_head list;
 	int last_cpu;
 	int cpu;
+	int vmid;
 	struct cpu_context cpu_ctx;
 	struct virt_machine machine;
 	/* ddr */
@@ -186,5 +188,6 @@ int gstage_page_mapping_2M(unsigned long *pgdp, unsigned long hpa,
 			   unsigned long gpa, unsigned int size);
 int gstage_page_mapping_1G(unsigned long *pgdp, unsigned long hpa,
 			   unsigned long gpa, unsigned int size);
+void vcpu_init(void);
 
 #endif
