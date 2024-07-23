@@ -31,4 +31,6 @@ int scheduler_early_init(struct device_init_entry *entry)
 		}
 		device_entry++;
 	}
+
+	return 0;
 }

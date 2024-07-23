@@ -2,6 +2,7 @@
 #include "asm/mmio.h"
 #include "asm/type.h"
 #include "print.h"
+#include "vmap.h"
 
 #define REG_DO_WHAT 0x0
 #define REG_TIMEOUT 0x4
