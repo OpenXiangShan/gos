@@ -12,6 +12,7 @@
 #include "memory_test_emulator.h"
 #include "clint_emulator.h"
 #include "imsic_emulator.h"
+#include "scheduler_emulator.h"
 #include "gos.h"
 
 static struct virt_machine_memmap virt_memmap[] = {
@@ -25,6 +26,7 @@ static struct virt_machine_memmap virt_memmap[] = {
 #if CONFIG_VIRT_ENABLE_AIA
 	[VIRT_IMSIC]  = { CONFIG_VIRT_IMSIC_BASE, CONFIG_VIRT_IMSIC_LEN },
 #endif
+	[VIRT_SCHEDULER] = { CONFIG_VIRT_SCHEDULER_BASE, CONFIG_VIRT_SCHEDULER_LEN },
 };
 
 #define VIRT_MEMMAP_CNT (sizeof(virt_memmap)/sizeof(virt_memmap[0]))
@@ -270,6 +272,15 @@ int machine_init(struct virt_machine *machine)
 			    virt_memmap[VIRT_IMSIC].base,
 			    virt_memmap[VIRT_IMSIC].size);
 #endif
+	/* create scheduler device */
+	entry = &device_entry[n++];
+	strcpy((char *)entry->compatible, "scheduler");
+	entry->start = virt_memmap[VIRT_SCHEDULER].base;
+	entry->len = virt_memmap[VIRT_SCHEDULER].size;
+	entry->data = (void *)-1;
+	create_scheduler_device(machine, VIRT_SCHEDULER,
+				virt_memmap[VIRT_SCHEDULER].base,
+				virt_memmap[VIRT_SCHEDULER].size);
 	/* end symbol */
 	entry = &device_entry[n];
 	strcpy((char *)entry->compatible, "THE END");

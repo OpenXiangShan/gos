@@ -4,6 +4,7 @@ obj-$(CONFIG_VIRT_ENABLE_AIA) += imsic_emulator.o
 obj-$(CONFIG_VIRT) += memory_emulator.o
 obj-$(CONFIG_VIRT) += uart_emulator.o
 obj-$(CONFIG_VIRT) += memory_test_emulator.o
+obj-$(CONFIG_VIRT) += scheduler_emulator.o
 obj-$(CONFIG_VIRT) += vcpu_insn.o
 obj-$(CONFIG_VIRT_ENABLE_TIMER) += vcpu_timer.o
 obj-$(CONFIG_VIRT) += virt_vm_exit.o

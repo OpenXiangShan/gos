@@ -15,6 +15,7 @@ enum {
 	VIRT_TEST,
 	VIRT_CLINT,
 	VIRT_IMSIC,
+	VIRT_SCHEDULER,
 };
 
 struct memory_region_ops {
