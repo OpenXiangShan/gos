@@ -108,6 +108,7 @@ struct virt_run_params {
 	int argc;
 	char argv[16][64];
 	int busy;
+	int vmid;
 };
 
 struct vcpu_timer {
@@ -179,6 +180,7 @@ static inline int vcpu_check_request(unsigned long req, unsigned int flag)
 
 void vcpu_set_request(struct vcpu *vcpu, unsigned int req);
 struct vcpu *vcpu_create(void);
+struct vcpu *vcpu_create_force(void);
 int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params);
 void vcpu_switch_to(struct cpu_context *cpu_ctx);
 void __vcpu_switch_return(void);

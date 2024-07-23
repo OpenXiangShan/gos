@@ -3,7 +3,7 @@
 
 #include "virt.h"
 
-int vcpu_interrupt_file_upadte(struct vcpu *vcpu);
-int vcpu_aia_init(struct vcpu *vcpu);
+int vcpu_interrupt_file_update(struct vcpu *vcpu);
+int vcpu_aia_init(void);
 
 #endif

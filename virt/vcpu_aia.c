@@ -39,7 +39,7 @@ static int vcpu_alloc_hgei(int cpu)
 	return find_free_hgei(hgei);
 }
 
-int vcpu_interrupt_file_upadte(struct vcpu *vcpu)
+int vcpu_interrupt_file_update(struct vcpu *vcpu)
 {
 	int hgei;
 	int cpu = vcpu->cpu;
@@ -75,7 +75,7 @@ int vcpu_interrupt_file_upadte(struct vcpu *vcpu)
 	return 0;
 }
 
-int vcpu_aia_init(struct vcpu *vcpu)
+int vcpu_aia_init(void)
 {
 	int cpu;
 	unsigned long *hgei;

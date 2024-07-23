@@ -2,6 +2,8 @@
 #include <asm/type.h>
 #include "string.h"
 
+static int print_info_vmid;
+
 typedef __builtin_va_list __gnuc_va_list;
 typedef __gnuc_va_list va_list;
 
@@ -157,10 +159,10 @@ static int my_vprintf(const char *fmt, va_list ap)
 int myGuest_print(const char *fmt, ...)
 {
 	va_list ap;
-	char guest_log[32];
+	char guest_log[32] = { 0 };
 	char *tmp = guest_log;
 
-	strcpy(tmp, "[Guest log]");
+	sprintf(tmp, "[VM%d log]", print_info_vmid);
 
 	myGuest_uart_puts(tmp);
 
@@ -169,4 +171,9 @@ int myGuest_print(const char *fmt, ...)
 	va_end(ap);
 
 	return 0;
+}
+
+void myGuest_print_init(int vmid)
+{
+	print_info_vmid = vmid;
 }

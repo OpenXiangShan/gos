@@ -21,6 +21,17 @@ extern char guest_bin[];
 static LIST_HEAD(vcpu_list);
 static DEFINE_PER_CPU(unsigned long, vmid_bitmap);
 
+static void vcpu_vmid_init(void)
+{
+	int cpu;
+	unsigned long *vmid;
+
+	for_each_online_cpu(cpu) {
+		vmid = &per_cpu(vmid_bitmap, cpu);
+		*vmid = 1;
+	}
+}
+
 static int find_free_vmid(unsigned long *vmid)
 {
 	unsigned long bitmap = *vmid;
@@ -100,8 +111,16 @@ static void enable_gstage_mmu(unsigned long pgdp, int on, int vmid)
 			  HGATP_MODE |
 			  HGATP_VMID(vmid));
 	}
+}
 
-	print("hgatp:0x%lx\n", read_csr(CSR_HGATP));
+static void update_hgatp(struct vcpu *vcpu)
+{
+	write_csr(CSR_HGATP,
+		  (vcpu->machine.gstage_pgdp >> PAGE_SHIFT) |
+		  HGATP_MODE |
+		  HGATP_VMID(vcpu->vmid));
+
+	__hfence_gvma_all();
 }
 
 static void vcpu_fence_gvma_all()
@@ -304,6 +323,7 @@ static int vcpu_load_guest_running_data(struct vcpu *vcpu,
 
 	// 2. copy run_params to sram
 	if (params) {
+		params->vmid = vcpu->vmid;
 		memcpy((char *)ptr, (void *)params,
 		       sizeof(struct virt_run_params));
 		vcpu->run_params = (struct virt_run_params *)ptr;
@@ -360,19 +380,11 @@ void vcpu_set_request(struct vcpu *vcpu, unsigned int req)
 	vcpu->request |= ((1UL) << req);
 }
 
-struct vcpu *vcpu_create(void)
+static struct vcpu *__vcpu_create(void)
 {
 	struct vcpu *vcpu;
 	struct virt_cpu_context *guest_ctx;
 
-	if (list_empty(&vcpu_list))
-		goto create_vcpu;
-
-	vcpu = list_entry(list_first(&vcpu_list), struct vcpu, list);
-	if (vcpu)
-		return vcpu;
-
-create_vcpu:
 	vcpu = (struct vcpu *)mm_alloc(sizeof(struct vcpu));
 	if (!vcpu) {
 		print("%s -- Out of memory\n", __FUNCTION__);
@@ -396,15 +408,32 @@ create_vcpu:
 #if CONFIG_VIRT_ENABLE_TIMER
 	vcpu_timer_init(vcpu);
 #endif
-
-#if CONFIG_VIRT_ENABLE_AIA
-	vcpu_aia_init(vcpu);
-#endif
 	vcpu->cpu = -1;
 
 	list_add_tail(&vcpu->list, &vcpu_list);
 
 	return vcpu;
+
+}
+
+struct vcpu *vcpu_create_force(void)
+{
+	return __vcpu_create();
+}
+
+struct vcpu *vcpu_create(void)
+{
+	struct vcpu *vcpu;
+
+	if (list_empty(&vcpu_list))
+		goto create_vcpu;
+
+	vcpu = list_entry(list_first(&vcpu_list), struct vcpu, list);
+	if (vcpu)
+		return vcpu;
+
+create_vcpu:
+	return __vcpu_create();
 }
 
 int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
@@ -453,9 +482,11 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 		vcpu_do_interrupt(vcpu);
 
 #if CONFIG_VIRT_ENABLE_AIA
-		vcpu_interrupt_file_upadte(vcpu);
+		vcpu_interrupt_file_update(vcpu);
 #endif
 		vcpu_restore(vcpu);
+
+		update_hgatp(vcpu);
 
 		vcpu_switch_to(&vcpu->cpu_ctx);
 
@@ -475,11 +506,9 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 
 void vcpu_init(void)
 {
-	int cpu;
-	unsigned long *vmid;
+	vcpu_vmid_init();
 
-	for_each_online_cpu(cpu) {
-		vmid = &per_cpu(vmid_bitmap, cpu);
-		*vmid = 1;
-	}
+#if CONFIG_VIRT_ENABLE_AIA
+	vcpu_aia_init();
+#endif
 }

@@ -6,12 +6,16 @@
 #include "command.h"
 #include "trap.h"
 #include "asm/asm-irq.h"
+#include "sleep.h"
 
 void start_guest(struct device_init_entry *entry, struct run_params *params)
 {
 	myGuest_uart_init(entry);
+	myGuest_print_init(params->vmid);
 
 	myGuest_print("hello guest os!!\n");
+
+	scheduler_early_init(entry);
 
 	trap_init();
 
