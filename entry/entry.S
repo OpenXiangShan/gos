@@ -113,6 +113,9 @@ do_exception_vector:
 	ld s3, PT_SBADADDR(sp)
 	csrw sbadaddr, s3
 
+	ld s3, PT_SATP(sp)
+	csrw satp, s3
+
 	ld x1,  PT_RA(sp)
 	ld x3,  PT_GP(sp)
 	ld x4,  PT_TP(sp)
@@ -177,9 +180,7 @@ do_exception_vector:
 	fld f30, PT_F30(sp)
 	fld f31, PT_F31(sp)
 
-	ld s5, PT_SATP(sp)
 	ld sp,  PT_SP(sp)
-	csrw satp, s5
 
 	sret	
 
