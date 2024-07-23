@@ -126,7 +126,7 @@ static int v_p_address_mapping(void *va, char *c1, char *c2, char flag,  pgprot_
 		print(" ========== sfence.asid and sfence.addr flush tlb ====\n");
 		flush_tlb_asid_addr((unsigned long)va);
 	}else if (flag == 4) {
-		print(" ========== sfence.asid and sfence.addr flush tlb ====\n");
+		print(" ========== flush all tlb ====\n");
 		local_flush_tlb_all();
 	}else if (flag == 0)
 		print(" ============== Not flush tlb ============\n");
