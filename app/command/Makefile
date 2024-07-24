@@ -10,6 +10,7 @@ obj-$(CONFIG_APP_IMSIC_TEST) += imsic_test.o
 obj-$(CONFIG_APP_SPINLOCK_TEST) += spinlock_test.o
 obj-$(CONFIG_APP_VCPU_RUN) += vcpu_run.o
 obj-$(CONFIG_APP_VCPU_RUN_EXT) += vcpu_run_ext.o
+obj-$(CONFIG_APP_VCPU_INFO) += vcpu_info.o
 obj-$(CONFIG_APP_USER_RUN) += user_run.o
 obj-$(CONFIG_APP_PAGE_TLB_TEST) += page_tlb_test.o
 obj-$(CONFIG_APP_TASK_INFO) += task_info.o

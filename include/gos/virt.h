@@ -153,6 +153,8 @@ struct vcpu {
 	unsigned long hgei;
 	unsigned long vs_interrupt_file_va;
 	unsigned long vs_interrupt_file_pa;
+	unsigned long vs_interrupt_file_gpa;
+	unsigned int vs_interrupt_file_size;
 #endif
 
 	int running;
@@ -190,6 +192,8 @@ int gstage_page_mapping_2M(unsigned long *pgdp, unsigned long hpa,
 			   unsigned long gpa, unsigned int size);
 int gstage_page_mapping_1G(unsigned long *pgdp, unsigned long hpa,
 			   unsigned long gpa, unsigned int size);
+void dump_vcpu_info_on_all_cpu(void);
+void dump_vcpu_info_on_cpu(int cpu);
 struct vcpu *get_vcpu(int vmid);
 void vcpu_init(void);
 

@@ -67,6 +67,9 @@ int vcpu_interrupt_file_update(struct vcpu *vcpu)
 	guest_ctx->hstatus &= ~HSTATUS_VGEIN;
 	guest_ctx->hstatus |= hgei << HSTATUS_VGEIN_SHIFT;
 
+	vcpu->vs_interrupt_file_gpa = get_machine_memmap_base(VIRT_IMSIC);
+	vcpu->vs_interrupt_file_size = get_machine_memmap_size(VIRT_IMSIC);
+
 	imsic_gstage_ioremap((unsigned long *)vcpu->machine.gstage_pgdp,
 			     vcpu->vs_interrupt_file_pa,
 			     get_machine_memmap_base(VIRT_IMSIC),

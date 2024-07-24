@@ -36,6 +36,9 @@ config APP_VCPU_RUN
 config APP_VCPU_RUN_EXT
 	bool "APP_VCPU_RUN_EXT"
 	depends on VIRT
+config APP_VCPU_INFO
+	bool "VCPU_INFO"
+	depends on VIRT
 config APP_STREAM
 	bool "APP_STREAM"
 config APP_HUGE_PAGE_TEST

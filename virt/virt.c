@@ -18,7 +18,7 @@
 #include "percpu.h"
 
 extern char guest_bin[];
-static LIST_HEAD(vcpu_list);
+static DEFINE_PER_CPU(struct list_head, vcpu_list);
 static DEFINE_PER_CPU(unsigned long, vmid_bitmap);
 
 static void vcpu_vmid_init(void)
@@ -383,8 +383,11 @@ void vcpu_set_request(struct vcpu *vcpu, unsigned int req)
 struct vcpu *get_vcpu(int vmid)
 {
 	struct vcpu *vcpu;
+	struct list_head *vcpus;
 
-	list_for_each_entry(vcpu, &vcpu_list, list) {
+	vcpus = &per_cpu(vcpu_list, sbi_get_cpu_id());
+
+	list_for_each_entry(vcpu, vcpus, list) {
 		if (vcpu->vmid == vmid)
 			return vcpu;
 	}
@@ -392,10 +395,61 @@ struct vcpu *get_vcpu(int vmid)
 	return NULL;
 }
 
+static void __dump_vcpu_info(int cpu)
+{
+	struct vcpu *vcpu;
+	struct list_head *vcpus;
+
+	vcpus = &per_cpu(vcpu_list, cpu);
+	if (!vcpus) {
+		print("invalid hart id: %d\n", cpu);
+		return;
+	}
+
+	print("+++++++++++++ vcpu info on cpu%d +++++++++++++\n", cpu);
+	list_for_each_entry(vcpu, vcpus, list) {
+		print("@@@@@@@@@@@@@@ VM%d info: @@@@@@@@@@@@@@\n", vcpu->vmid);
+		print("- vmid : %d\n", vcpu->vmid);
+		print("- memory info:\n");
+		print("    host_memory_va : 0x%lx\n", vcpu->host_memory_va);
+		print("    host_memory_pa : 0x%lx\n", vcpu->host_memory_pa);
+		print("    guest_memory_pa : 0x%lx\n", vcpu->guest_memory_pa);
+		print("    memory_size : 0x%x\n", vcpu->memory_size);
+		print("- memory test info:\n");
+		print("    host_memory_test_va : 0x%lx\n", vcpu->host_memory_test_va);
+		print("    host_memory_test_pa : 0x%lx\n", vcpu->host_memory_test_pa);
+		print("    guest_memory_test_pa : 0x%lx\n", vcpu->guest_memory_test_pa);
+		print("    memory_test_size : 0x%x\n", vcpu->memory_test_size);
+#if CONFIG_VIRT_ENABLE_AIA
+		print("- aia info:\n");
+		print("    hgei : %d\n", vcpu->hgei);
+		print("    vs_interrupt_file_hva : 0x%lx\n", vcpu->vs_interrupt_file_va);
+		print("    vs_interrupt_file_hpa : 0x%lx\n", vcpu->vs_interrupt_file_pa);
+		print("    vs_interrupt_file_gpa : 0x%lx\n", vcpu->vs_interrupt_file_gpa);
+		print("    vs_interrupt_file_size : 0x%x\n", vcpu->vs_interrupt_file_size);
+#endif
+		print("\n");
+	}
+}
+
+void dump_vcpu_info_on_all_cpu(void)
+{
+	int cpu;
+
+	for_each_online_cpu(cpu)
+		__dump_vcpu_info(cpu);
+}
+
+void dump_vcpu_info_on_cpu(int cpu)
+{
+	__dump_vcpu_info(cpu);
+}
+
 static struct vcpu *__vcpu_create(void)
 {
 	struct vcpu *vcpu;
 	struct virt_cpu_context *guest_ctx;
+	struct list_head *vcpus;
 
 	vcpu = (struct vcpu *)mm_alloc(sizeof(struct vcpu));
 	if (!vcpu) {
@@ -422,7 +476,8 @@ static struct vcpu *__vcpu_create(void)
 #endif
 	vcpu->cpu = -1;
 
-	list_add_tail(&vcpu->list, &vcpu_list);
+	vcpus = &per_cpu(vcpu_list, sbi_get_cpu_id());
+	list_add_tail(&vcpu->list, vcpus);
 
 	return vcpu;
 }
@@ -435,11 +490,14 @@ struct vcpu *vcpu_create_force(void)
 struct vcpu *vcpu_create(void)
 {
 	struct vcpu *vcpu;
+	struct list_head *vcpus;
 
-	if (list_empty(&vcpu_list))
+	vcpus = &per_cpu(vcpu_list, sbi_get_cpu_id());
+
+	if (list_empty(vcpus))
 		goto create_vcpu;
 
-	vcpu = list_entry(list_first(&vcpu_list), struct vcpu, list);
+	vcpu = list_entry(list_first(vcpus), struct vcpu, list);
 	if (vcpu)
 		return vcpu;
 
@@ -517,6 +575,14 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 
 void vcpu_init(void)
 {
+	int cpu;
+	struct list_head *vcpus;
+
+	for_each_online_cpu(cpu) {
+		vcpus = &per_cpu(vcpu_list, cpu);
+		INIT_LIST_HEAD(vcpus);
+	}
+
 	vcpu_vmid_init();
 
 #if CONFIG_VIRT_ENABLE_AIA
