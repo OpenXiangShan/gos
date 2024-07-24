@@ -380,6 +380,18 @@ void vcpu_set_request(struct vcpu *vcpu, unsigned int req)
 	vcpu->request |= ((1UL) << req);
 }
 
+struct vcpu *get_vcpu(int vmid)
+{
+	struct vcpu *vcpu;
+
+	list_for_each_entry(vcpu, &vcpu_list, list) {
+		if (vcpu->vmid == vmid)
+			return vcpu;
+	}
+
+	return NULL;
+}
+
 static struct vcpu *__vcpu_create(void)
 {
 	struct vcpu *vcpu;
@@ -413,7 +425,6 @@ static struct vcpu *__vcpu_create(void)
 	list_add_tail(&vcpu->list, &vcpu_list);
 
 	return vcpu;
-
 }
 
 struct vcpu *vcpu_create_force(void)

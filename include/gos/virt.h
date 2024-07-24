@@ -190,6 +190,7 @@ int gstage_page_mapping_2M(unsigned long *pgdp, unsigned long hpa,
 			   unsigned long gpa, unsigned int size);
 int gstage_page_mapping_1G(unsigned long *pgdp, unsigned long hpa,
 			   unsigned long gpa, unsigned int size);
+struct vcpu *get_vcpu(int vmid);
 void vcpu_init(void);
 
 #endif
