@@ -195,7 +195,7 @@ int gstage_page_mapping_1G(unsigned long *pgdp, unsigned long hpa,
 			   unsigned long gpa, unsigned int size);
 void dump_vcpu_info_on_all_cpu(void);
 void dump_vcpu_info_on_cpu(int cpu);
-struct vcpu *get_vcpu(int vmid);
+struct vcpu *get_vcpu(int vmid, int cpu);
 void vcpu_init(void);
 
 #endif

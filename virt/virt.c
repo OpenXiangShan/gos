@@ -381,12 +381,12 @@ void vcpu_set_request(struct vcpu *vcpu, unsigned int req)
 	vcpu->request |= ((1UL) << req);
 }
 
-struct vcpu *get_vcpu(int vmid)
+struct vcpu *get_vcpu(int vmid, int cpu)
 {
 	struct vcpu *vcpu;
 	struct list_head *vcpus;
 
-	vcpus = &per_cpu(vcpu_list, sbi_get_cpu_id());
+	vcpus = &per_cpu(vcpu_list, cpu);
 
 	list_for_each_entry(vcpu, vcpus, list) {
 		if (vcpu->vmid == vmid)

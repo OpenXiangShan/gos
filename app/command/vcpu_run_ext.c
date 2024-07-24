@@ -10,12 +10,13 @@
 
 static void Usage_run_at()
 {
-	print("vcpu_run_ext_at [vmid] [cmd] [params1] [params2] ...\n");
+	print("vcpu_run_ext_at cpu=[cpu id] vmid=[vmid] [cmd] [params1] [params2] ...\n");
 }
 
 static void Usage()
 {
 	print("vcpu_run_ext [cmd] [params1] [params2] ...\n");
+	print("vcpu_run_ext cpu=[cpu id] [cmd] [params1] [params2] ...\n");
 }
 
 static int vcpu_start(void *data)
@@ -90,10 +91,15 @@ static int vcpu_start_at(void *data)
 	struct vcpu *vcpu;
 	struct virt_run_params *params = (struct virt_run_params *)data;
 
-	print("vmid:%d\n", params->vmid);
-	vcpu = get_vcpu(params->vmid);
-	if (!vcpu)
+	print("%s -- cpu:%d vmid:%d\n",
+	      __FUNCTION__, params->cpu, params->vmid);
+
+	vcpu = get_vcpu(params->vmid, params->cpu);
+	if (!vcpu) {
+		print("There is no vm(vmid=%d) is running on cpu%d\n",
+		      params->vmid, params->cpu);
 		return -1;
+	}
 
 	vcpu_run(vcpu, params);
 
@@ -104,10 +110,10 @@ static int vcpu_start_at(void *data)
 
 static int cmd_vcpu_run_ext_at_handler(int argc, char *argv[], void *priv)
 {
-	int i, cpu = 0;
+	int i, cpu = 0, vmid = 1;
 	struct virt_run_params *params;
 
-	if (argc < 2) {
+	if (argc < 3) {
 		Usage_run_at();
 		print("invalid input param.\n");
 		return -1;
@@ -116,19 +122,40 @@ static int cmd_vcpu_run_ext_at_handler(int argc, char *argv[], void *priv)
 		return -1;
 	}
 
+	if (!strncmp(argv[0], "cpu=", sizeof("cpu=") - 1)) {
+		char *tmp = argv[0];
+		tmp += sizeof("cpu=") - 1;
+		cpu = atoi(tmp);
+	}
+	else {
+		print("Invalid params...\n");
+		Usage_run_at();
+	}
+
+	if (!strncmp(argv[1], "vmid=", sizeof("vmid=") - 1)) {
+		char *tmp = argv[1];
+		tmp += sizeof("vmid=") - 1;
+		vmid = atoi(tmp);
+	}
+	else {
+		print("Invalid params...\n");
+		Usage_run_at();
+	}
+
 	params =
 	    (struct virt_run_params *)mm_alloc(sizeof(struct virt_run_params));
 	if (!params) {
 		print("%s -- Out of memory\n", __FUNCTION__);
 		return -1;
 	}
-	strcpy(params->command, argv[1]);
-	params->argc = argc - 2;
+	strcpy(params->command, argv[2]);
+	params->argc = argc - 3;
 	for (i = 0; i < params->argc; i++)
-		strcpy(params->argv[i], argv[i + 2]);
-	params->vmid = atoi(argv[0]);
+		strcpy(params->argv[i], argv[i + 3]);
+	params->cpu = cpu;
+	params->vmid = vmid;
 
-	if (create_task("vcpu", vcpu_start_at, (void *)params, cpu, NULL, 0, NULL)) {
+	if (create_task("vcpu", vcpu_start_at, (void *)params, 0, NULL, 0, NULL)) {
 		int n;
 		print("create task on cpu%d failed...\n", cpu);
 		print("online cpu info:\n");
