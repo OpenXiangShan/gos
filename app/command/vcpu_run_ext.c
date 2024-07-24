@@ -6,6 +6,7 @@
 #include "task.h"
 #include "string.h"
 #include "mm.h"
+#include "cpu.h"
 
 static void Usage_run_at()
 {
@@ -66,7 +67,14 @@ static int cmd_vcpu_run_ext_handler(int argc, char *argv[], void *priv)
 		strcpy(params->argv[i], argv[i + 1 + offset]);
 
 	print("vcpu_run_ext on cpu%d command:%s\n", cpu, params->command);
-	create_task("vcpu", vcpu_start, (void *)params, cpu, NULL, 0, NULL);
+	if (create_task("vcpu", vcpu_start, (void *)params, cpu, NULL, 0, NULL)) {
+		int n;
+		print("create task on cpu%d failed...\n", cpu);
+		print("online cpu info:\n");
+		for_each_online_cpu(n) {
+			print("  cpu%d\n", n);
+		}
+	}
 
 	return 0;
 }
@@ -120,7 +128,14 @@ static int cmd_vcpu_run_ext_at_handler(int argc, char *argv[], void *priv)
 		strcpy(params->argv[i], argv[i + 2]);
 	params->vmid = atoi(argv[0]);
 
-	create_task("vcpu", vcpu_start_at, (void *)params, cpu, NULL, 0, NULL);
+	if (create_task("vcpu", vcpu_start_at, (void *)params, cpu, NULL, 0, NULL)) {
+		int n;
+		print("create task on cpu%d failed...\n", cpu);
+		print("online cpu info:\n");
+		for_each_online_cpu(n) {
+			print("  cpu%d\n", n);
+		}
+	}
 
 	return 0;
 }
