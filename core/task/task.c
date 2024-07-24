@@ -107,11 +107,20 @@ int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 {
 	struct task *new;
 	void *p_stack;
-	struct task_ctrl *tsk_ctl = &per_cpu(tasks, cpu);
+	struct task_ctrl *tsk_ctl;
+	int online_cpu;
 
 #ifndef CONFIG_ENABLE_MULTI_TASK
 	return fn(data);
 #endif
+	for_each_online_cpu(online_cpu) {
+		if (online_cpu == cpu)
+			goto continue_to_run;
+	}
+
+	return -1;
+continue_to_run:
+	tsk_ctl = &per_cpu(tasks, cpu);
 	if (!tsk_ctl)
 		return -1;
 
