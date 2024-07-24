@@ -3,6 +3,7 @@
 #include "string.h"
 
 static int print_info_vmid;
+static int print_info_cpu;
 
 typedef __builtin_va_list __gnuc_va_list;
 typedef __gnuc_va_list va_list;
@@ -162,7 +163,7 @@ int myGuest_print(const char *fmt, ...)
 	char guest_log[32] = { 0 };
 	char *tmp = guest_log;
 
-	sprintf(tmp, "[VM%d log]", print_info_vmid);
+	sprintf(tmp, "[VM%d on cpu%d log]", print_info_vmid, print_info_cpu);
 
 	myGuest_uart_puts(tmp);
 
@@ -173,7 +174,8 @@ int myGuest_print(const char *fmt, ...)
 	return 0;
 }
 
-void myGuest_print_init(int vmid)
+void myGuest_print_init(int vmid, int cpu)
 {
 	print_info_vmid = vmid;
+	print_info_cpu = cpu;
 }

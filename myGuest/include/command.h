@@ -10,6 +10,7 @@ struct run_params {
 	char argv[16][64];
 	int busy;
 	int vmid;
+	int cpu;
 };
 
 struct command {

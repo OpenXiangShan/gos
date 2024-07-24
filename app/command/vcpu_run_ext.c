@@ -35,7 +35,7 @@ static int vcpu_start(void *data)
 
 static int cmd_vcpu_run_ext_handler(int argc, char *argv[], void *priv)
 {
-	int i;
+	int i, cpu = 0, offset = 0;
 	struct virt_run_params *params;
 
 	if (argc == 0) {
@@ -47,18 +47,26 @@ static int cmd_vcpu_run_ext_handler(int argc, char *argv[], void *priv)
 		return -1;
 	}
 
+	if (!strncmp(argv[0], "cpu=", sizeof("cpu=") - 1)) {
+		char *tmp = argv[0];
+		tmp += sizeof("cpu=") - 1;
+		cpu = atoi(tmp);
+		offset += 1;
+	}
+
 	params =
 	    (struct virt_run_params *)mm_alloc(sizeof(struct virt_run_params));
 	if (!params) {
 		print("%s -- Out of memory\n", __FUNCTION__);
 		return -1;
 	}
-	strcpy(params->command, argv[0]);
-	params->argc = argc - 1;
+	strcpy(params->command, argv[offset]);
+	params->argc = argc - 1 - offset;
 	for (i = 0; i < params->argc; i++)
-		strcpy(params->argv[i], argv[i + 1]);
+		strcpy(params->argv[i], argv[i + 1 + offset]);
 
-	create_task("vcpu", vcpu_start, (void *)params, 0, NULL, 0, NULL);
+	print("vcpu_run_ext on cpu%d command:%s\n", cpu, params->command);
+	create_task("vcpu", vcpu_start, (void *)params, cpu, NULL, 0, NULL);
 
 	return 0;
 }
@@ -88,7 +96,7 @@ static int vcpu_start_at(void *data)
 
 static int cmd_vcpu_run_ext_at_handler(int argc, char *argv[], void *priv)
 {
-	int i;
+	int i, cpu = 0;
 	struct virt_run_params *params;
 
 	if (argc < 2) {
@@ -112,7 +120,7 @@ static int cmd_vcpu_run_ext_at_handler(int argc, char *argv[], void *priv)
 		strcpy(params->argv[i], argv[i + 2]);
 	params->vmid = atoi(argv[0]);
 
-	create_task("vcpu", vcpu_start_at, (void *)params, 0, NULL, 0, NULL);
+	create_task("vcpu", vcpu_start_at, (void *)params, cpu, NULL, 0, NULL);
 
 	return 0;
 }

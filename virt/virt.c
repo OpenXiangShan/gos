@@ -324,6 +324,7 @@ static int vcpu_load_guest_running_data(struct vcpu *vcpu,
 	// 2. copy run_params to sram
 	if (params) {
 		params->vmid = vcpu->vmid;
+		params->cpu = sbi_get_cpu_id();
 		memcpy((char *)ptr, (void *)params,
 		       sizeof(struct virt_run_params));
 		vcpu->run_params = (struct virt_run_params *)ptr;
