@@ -300,4 +300,6 @@ int sprintf(char *out, const char *fmt, ...)
 	va_start(ap, fmt);
 	my_vsprintf(out, fmt, ap);
 	va_end(ap);
+
+	return 0;
 }
