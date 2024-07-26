@@ -500,8 +500,10 @@ static struct vcpu *__vcpu_create(void)
 	vcpu_timer_init(vcpu);
 #endif
 	vcpu->cpu = -1;
-	vcpu->hgei = -1;
 
+#if CONFIG_VIRT_ENABLE_AIA
+	vcpu->hgei = -1;
+#endif
 	vcpus = &per_cpu(vcpu_list, sbi_get_cpu_id());
 	list_add_tail(&vcpu->list, vcpus);
 
