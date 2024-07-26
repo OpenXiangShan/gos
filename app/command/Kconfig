@@ -14,6 +14,10 @@ config APP_HISTORY
 	bool "APP_HISTORY"
 config APP_IMSIC_TEST
 	bool "APP_IMSIC_TEST"
+	depends on SELECT_AIA
+config APP_VS_IMSIC_MULTI_TEST
+	bool "APP_VS_IMSIC_MULTI_TEST"
+	depends on SELECT_AIA
 config APP_LS
 	bool "APP_LS"
 config APP_MEM_READ
