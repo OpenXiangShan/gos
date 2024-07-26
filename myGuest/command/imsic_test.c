@@ -17,7 +17,7 @@ static int cmd_imsic_test_handler(int argc, char *argv[], void *priv)
 	if (hwirq == -1)
 		return -1;
 
-	if (compose_msi_msg(1, &msi_addr, &msi_data))
+	if (compose_msi_msg(hwirq, &msi_addr, &msi_data))
 		return -1;
 
 	myGuest_print("msi_addr:0x%lx msi_data:0x%lx\n", msi_addr, msi_data);

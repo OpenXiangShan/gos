@@ -24,7 +24,7 @@ int alloc_msi_irqs(int nr)
 			msi_ops->unmask_irq(hwirq + i);
 	}
 
-	return 0;
+	return hwirq;
 }
 
 int irq_handler(void)
