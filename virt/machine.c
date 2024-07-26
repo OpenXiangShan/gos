@@ -18,7 +18,7 @@
 static struct virt_machine_memmap virt_memmap[] = {
 	[VIRT_MEMORY] = { CONFIG_VIRT_MEMORY_BASE, CONFIG_VIRT_MEMORY_LEN },
 	[VIRT_UART]   = { CONFIG_VIRT_UART_BASE, CONFIG_VIRT_UART_LEN },
-	[VIRT_SRAM]   = { CONFIG_VIRT_SRAM_BASE, CONFIG_VIRT_MEMORY_TEST_LEN },
+	[VIRT_SRAM]   = { CONFIG_VIRT_SRAM_BASE, CONFIG_VIRT_SRAM_LEN },
 	[VIRT_TEST]   = { CONFIG_VIRT_MEMORY_TEST_BASE, CONFIG_VIRT_MEMORY_TEST_LEN },
 #if CONFIG_VIRT_ENABLE_TIMER
 	[VIRT_CLINT]  = { CONFIG_VIRT_CLINT_BASE, CONFIG_VIRT_CLINT_LEN },
@@ -119,9 +119,10 @@ int add_memory_region(struct virt_machine *machine, int id, unsigned long base,
 	list_for_each_entry(entry, &machine->memory_region_list, list) {
 		if (memory_region_is_overlay
 		    (entry->start, entry->end, region->start, region->end)
-		    || (entry->id == region->id)) {
-			spin_unlock(&machine->lock);
+		    || (region->id != 0xFF && (entry->id == region->id))) {
+			print("add memory region failed... start:0x%lx end:0x%lx\n", region->start, region->end);
 			mm_free(region, sizeof(struct memory_region));
+			spin_unlock(&machine->lock);
 			return -1;
 		}
 	}
@@ -161,16 +162,31 @@ int machine_finialize(struct virt_machine *machine)
 	return 0;
 }
 
+static int get_extern_device_entry_count(struct virt_machine *machine)
+{
+	struct extern_device_init_entry *entry;
+	int n = 0;
+
+	list_for_each_entry(entry, &machine->extern_device_entry_list, list) {
+		n++;
+	}
+
+	return n;
+}
+
 int machine_init(struct virt_machine *machine)
 {
+	struct extern_device_init_entry *extern_entry;
 	struct device_init_entry *device_entry;
 	struct device_init_entry *entry;
-	int n = 0;
+	int n = 0, n_extern = 0;
 	void *entry_data_ptr;
 	int entry_data_len = 0;
 
+	n_extern = get_extern_device_entry_count(machine);
+
 	device_entry = (struct device_init_entry *)
-	    mm_alloc(sizeof(struct device_init_entry) * (VIRT_MEMMAP_CNT + 1));
+	    mm_alloc(sizeof(struct device_init_entry) * (VIRT_MEMMAP_CNT + n_extern + 1));
 	if (!device_entry) {
 		print("%s -- Out of memory!\n", __FUNCTION__);
 		return -1;
@@ -281,6 +297,17 @@ int machine_init(struct virt_machine *machine)
 	create_scheduler_device(machine, VIRT_SCHEDULER,
 				virt_memmap[VIRT_SCHEDULER].base,
 				virt_memmap[VIRT_SCHEDULER].size);
+	/* create extern devices */
+	list_for_each_entry(extern_entry, &machine->extern_device_entry_list, list) {
+		struct device_init_entry *e = &extern_entry->entry;
+		entry = &device_entry[n++];
+		strcpy(entry->compatible, e->compatible);
+		entry->start = e->start;
+		entry->len = e->len;
+		entry->data = (void *)e->data;
+		add_memory_region(machine, 0xFF, entry->start, entry->len, extern_entry->ops);
+	}
+
 	/* end symbol */
 	entry = &device_entry[n];
 	strcpy((char *)entry->compatible, "THE END");
@@ -289,7 +316,13 @@ int machine_init(struct virt_machine *machine)
 	machine->device_entry = device_entry;
 	machine->entry_data = entry_data_ptr;
 	machine->entry_data_len = entry_data_len;
-	machine->device_entry_count = VIRT_MEMMAP_CNT + 1;
+	machine->device_entry_count = VIRT_MEMMAP_CNT + 1 + n_extern;
 
 	return 0;
+}
+
+void machine_extern_device_entry_register(struct list_head *l,
+					  struct extern_device_init_entry *entry)
+{
+	list_add_tail(&entry->list, l);
 }

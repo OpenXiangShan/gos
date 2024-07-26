@@ -161,6 +161,14 @@ struct vcpu {
 	int running;
 };
 
+struct vcpu_machine_device {
+	unsigned long base;
+	unsigned int size;
+	char compatible[128];
+	void *data;
+	struct memory_region_ops *ops;
+};
+
 static inline void vcpu_clear_interrupt(struct vcpu *vcpu, int irq)
 {
 	vcpu->irq_pending &= ~(1UL << irq);
@@ -196,6 +204,10 @@ int gstage_page_mapping_1G(unsigned long *pgdp, unsigned long hpa,
 void dump_vcpu_info_on_all_cpu(void);
 void dump_vcpu_info_on_cpu(int cpu);
 struct vcpu *get_vcpu(int vmid, int cpu);
+int vcpu_add_machine_device(struct vcpu *vcpu,
+			    struct vcpu_machine_device *device);
+void vcpu_enable_hgei(int hgei);
+void vcpu_disable_hgei(int hgei);
 void vcpu_init(void);
 
 #endif

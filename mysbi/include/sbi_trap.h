@@ -11,6 +11,7 @@
 #define IRQ_S_EXT   9
 #define IRQ_M_TIMER 7
 #define IRQ_M_EXT   11
+#define IRQ_S_GEXT   12
 
 #define MIP_SSIP  (1UL << IRQ_S_SOFT)
 #define MIP_STIP  (1UL << IRQ_S_TIMER)
@@ -18,6 +19,7 @@
 #define MIP_MTIP  (1UL << IRQ_M_TIMER)
 #define MIP_MEIP  (1UL << IRQ_M_EXT)
 #define MIP_MSIP  (1UL << IRQ_M_SOFT)
+#define MIP_SGEIP  (1UL << IRQ_S_GEXT)
 
 #define M_MODE 0
 #define S_MODE 1

@@ -369,6 +369,11 @@ int irq_domain_init_cascade(struct irq_domain *domain, char *name,
 	return irq_domain_init(domain, name, ops, parent, priv);
 }
 
+struct irq_domain *get_intc_domain(void)
+{
+	return &intc_domain;
+}
+
 int irq_init(void)
 {
 	memset((char *)&intc_domain, 0, sizeof(struct irq_domain));

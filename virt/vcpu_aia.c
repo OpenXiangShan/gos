@@ -8,6 +8,9 @@
 #include "vmap.h"
 #include "imsic_emulator.h"
 #include "machine.h"
+#include "asm/bitops.h"
+#include "irq.h"
+#include "asm/trap.h"
 
 static DEFINE_PER_CPU(unsigned long, hgei_bitmap);
 
@@ -39,12 +42,30 @@ static int vcpu_alloc_hgei(int cpu)
 	return find_free_hgei(hgei);
 }
 
+static void hgei_irq_handler(void *data)
+{
+	print("%s %d\n", __FUNCTION__, __LINE__);
+	print("hgeie: 0x%lx\n", read_csr(CSR_HGEIE));
+	print("hgeip: 0x%lx\n", read_csr(CSR_HGEIP));
+}
+
+void vcpu_enable_hgei(int hgei)
+{
+	csr_set(CSR_HGEIE, 1UL << hgei);
+}
+
+void vcpu_disable_hgei(int hgei)
+{
+	csr_clear(CSR_HGEIE, 1UL << hgei);
+}
+
 int vcpu_interrupt_file_update(struct vcpu *vcpu)
 {
 	int hgei;
 	int cpu = vcpu->cpu;
 	unsigned long interrupt_file_base;
 	struct virt_cpu_context *guest_ctx = &vcpu->cpu_ctx.guest_context;
+	struct irq_domain *intc;
 
 	if (cpu == vcpu->last_cpu)
 		return 0;
@@ -54,6 +75,17 @@ int vcpu_interrupt_file_update(struct vcpu *vcpu)
 		return -1;
 
 	print("%s %d hgei:%d\n", __FUNCTION__, __LINE__, hgei);
+	if (vcpu->hgei != -1)
+		vcpu_disable_hgei(vcpu->hgei);
+	vcpu_enable_hgei(vcpu->hgei);
+
+	intc = get_intc_domain();
+	if (!intc) {
+		print("get intc domain failed...\n");
+		return -1;
+	}
+	register_device_irq(intc, INTERRUPT_CAUSE_GEXTERNAL, hgei_irq_handler, NULL);
+
 	interrupt_file_base = imsic_get_interrupt_file_base(cpu, hgei);
 	if (!interrupt_file_base)
 		return -1;
@@ -80,12 +112,21 @@ int vcpu_interrupt_file_update(struct vcpu *vcpu)
 
 int vcpu_aia_init(void)
 {
-	int cpu;
+	int cpu, nr_hgei;
 	unsigned long *hgei;
+	unsigned long available_hgei;
+
+	write_csr(CSR_HGEIE, -1UL);
+	available_hgei = read_csr(CSR_HGEIE);
+	write_csr(CSR_HGEIE, 0);
+	nr_hgei = fls64(available_hgei);
+
+	print("%s -- nr_hgei:%d available_hgei:0x%lx\n",
+	      __FUNCTION__, nr_hgei, available_hgei);
 
 	for_each_online_cpu(cpu) {
 		hgei = &per_cpu(hgei_bitmap, cpu);
-		*hgei = 1UL;
+		*hgei = ~available_hgei;
 	}
 
 	return 0;

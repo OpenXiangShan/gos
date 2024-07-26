@@ -50,6 +50,13 @@ struct virt_machine {
 	void *entry_data_gpa;
 	unsigned int device_entry_count;
 	unsigned long gstage_pgdp;
+	struct list_head extern_device_entry_list;
+};
+
+struct extern_device_init_entry {
+	struct list_head list;
+	struct device_init_entry entry;
+	struct memory_region_ops *ops;
 };
 
 static inline unsigned int machine_get_memory_test_size(struct virt_machine
@@ -143,5 +150,7 @@ struct memory_region *find_memory_region(struct virt_machine *machine,
 void device_entry_data_redirect(struct virt_machine *machine);
 unsigned long get_machine_memmap_base(int id);
 unsigned int get_machine_memmap_size(int id);
+void machine_extern_device_entry_register(struct list_head *l,
+					  struct extern_device_init_entry *entry);
 
 #endif

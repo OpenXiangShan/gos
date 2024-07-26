@@ -16,6 +16,7 @@
 #include "gos.h"
 #include "list.h"
 #include "percpu.h"
+#include "device.h"
 
 extern char guest_bin[];
 static DEFINE_PER_CPU(struct list_head, vcpu_list);
@@ -446,6 +447,29 @@ void dump_vcpu_info_on_cpu(int cpu)
 	__dump_vcpu_info(cpu);
 }
 
+int vcpu_add_machine_device(struct vcpu *vcpu,
+			    struct vcpu_machine_device *device)
+{
+	struct extern_device_init_entry *entry;
+	struct device_init_entry *device_entry;
+
+	entry = (struct extern_device_init_entry *)mm_alloc(sizeof(struct extern_device_init_entry));
+	if (!entry) {
+		print("%s -- Out of memory!!\n");
+		return -1;
+	}
+	device_entry = &entry->entry;
+	strcpy(device_entry->compatible, device->compatible);
+	device_entry->start = device->base;
+	device_entry->len = device->size;
+	device_entry->data = device->data;
+	entry->ops = device->ops;
+
+	machine_extern_device_entry_register(&vcpu->machine.extern_device_entry_list, entry);
+
+	return 0;
+}
+
 static struct vcpu *__vcpu_create(void)
 {
 	struct vcpu *vcpu;
@@ -470,15 +494,18 @@ static struct vcpu *__vcpu_create(void)
 		guest_ctx->sstatus |= SR_FS;
 	}
 
-	machine_init(&vcpu->machine);
+	//machine_init(&vcpu->machine);
 
 #if CONFIG_VIRT_ENABLE_TIMER
 	vcpu_timer_init(vcpu);
 #endif
 	vcpu->cpu = -1;
+	vcpu->hgei = -1;
 
 	vcpus = &per_cpu(vcpu_list, sbi_get_cpu_id());
 	list_add_tail(&vcpu->list, vcpus);
+
+	INIT_LIST_HEAD(&vcpu->machine.extern_device_entry_list);
 
 	return vcpu;
 }
@@ -515,6 +542,8 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 	if (vcpu->running == 1) {
 		return vcpu_set_run_params(vcpu, params);
 	}
+
+	machine_init(&vcpu->machine);
 
 	if (vcpu_create_gstage_mapping(vcpu)) {
 		print("vcpu create gstage failed...\n");
