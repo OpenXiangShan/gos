@@ -7,12 +7,13 @@
 #include <sbi.h>
 #include "sbi_clint.h"
 #include "sbi_uart.h"
+#include "sbi_imsic.h"
 #include "sbi_trap.h"
 #include "autoconf.h"
 
 static struct sbi_trap_hw_context *h_context[8] = { 0 };
-
 extern void exception_vector(void);
+static do_ext_irq_t do_ext_irq __attribute__((section(".data"))) = 0;
 
 void sbi_panic()
 {
@@ -103,11 +104,15 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 	case SBI_GET_CPU_MCOUNTEREN:
 		ret_value = read_csr(CSR_MCOUNTEREN);
 		break;
-
+	case SBI_GET_M_MSI_DATA:
+		ret_value = sbi_imsic_alloc_irqs(regs->a0, ctx);
+		break;
+	case SBI_GET_M_MSI_ADDR:
+		ret_value = sbi_imsic_get_mmio(ctx);
+		break;
 	}
 
 	regs->a0 = ret_value;
-
 	regs->mepc += 4;
 
 	return ret;
@@ -115,13 +120,20 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 
 static void sbi_ext_process()
 {
-	csr_clear(mie, MIP_MEIP);
-	csr_set(mip, MIP_SEIP);
+	if (do_ext_irq)
+		do_ext_irq();
+	//csr_clear(mie, MIP_MEIP);
+	//csr_set(mip, MIP_SEIP);
 }
 
 static void sbi_soft_process()
 {
 
+}
+
+void sbi_register_ext_irq_handler(do_ext_irq_t fn)
+{
+	do_ext_irq = fn;
 }
 
 void sbi_trap_handler(struct sbi_trap_regs *regs)
@@ -359,6 +371,9 @@ void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 
 	if (-1 == sbi_clint_init(hart_id, ctx))
 		sbi_print("sbi clint init failed.\n");
+
+	if (-1 == sbi_imsic_init(hart_id, ctx))
+		sbi_print("sbi imsic init failed.\n");
 
 	sbi_set_next(ctx);
 	sbi_get_hw_info(ctx);

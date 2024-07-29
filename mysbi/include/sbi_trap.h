@@ -63,9 +63,15 @@ struct sbi_trap_regs {
 
 struct sbi_trap_hw_context {
 	unsigned int hart_id;
+	/* clint */
+	unsigned long uart_base;
 	unsigned long timer_cmp;
 	unsigned long ipi;
-	unsigned long uart_base;
+	/* imsic */
+	unsigned long imsic_base;
+	unsigned long imsic_ids_used_bits[2048 / (sizeof(unsigned long) * 8)];
+	int imsic_nr_ids;
+	/* context */
 	unsigned long next_addr;
 	char wait_var;
 	char next_mode[16];

@@ -9,6 +9,12 @@
 #define MSTATUS_FS_SHIFT	13
 #define MSTATUS_FS	(3UL << MSTATUS_FS_SHIFT)
 
+#define MENVCFG_STCE_SHIFT  63
+#define MENVCFG_STCE        (1UL << MENVCFG_STCE_SHIFT)
+
+#define MCOUNTEREN_TM_SHIFT  1
+#define MCOUNTEREN_TM       (1UL << MCOUNTEREN_TM_SHIFT)
+
 #define PRV_U				(0UL)
 #define PRV_S				(1UL)
 #define PRV_M				(3UL)
@@ -132,6 +138,15 @@
 	__asm__ __volatile__ ("csrc "__ASM_STR(csr)", %0"		\
 			      : : "rK" (__v)			\
 			      : "memory");			\
+})
+
+#define csr_swap(csr, val)                                      \
+({                                                              \
+        unsigned long __v = (unsigned long)(val);               \
+        __asm__ __volatile__ ("csrrw %0, " __ASM_STR(csr) ", %1"\
+                              : "=r" (__v) : "rK" (__v)         \
+                              : "memory");                      \
+        __v;                                                    \
 })
 
 #endif

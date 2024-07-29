@@ -10,5 +10,6 @@ struct imsic_priv_data {
 	int nr_guests;
 };
 extern struct imsic_priv_data imsic_hw_data;
+extern struct imsic_priv_data imsic_hw_data_m;
 
 #endif

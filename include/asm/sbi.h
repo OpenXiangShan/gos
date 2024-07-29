@@ -7,6 +7,8 @@
 #define SBI_CONSOLE_PUTCHAR 0x1
 #define SBI_CONSOLE_GETCHAR 0x2
 #define SBI_SET_MCOUNTEREN 0x3
+#define SBI_GET_M_MSI_DATA 0x500
+#define SBI_GET_M_MSI_ADDR 0x501
 #define SBI_GET_CPU_CYCLE 0x200
 #define SBI_GET_CPU_ID 0x201
 #define SBI_GET_CPU_MCOUNTEREN 0x202
@@ -67,4 +69,13 @@ static inline void sbi_set_mcounteren(unsigned long m_value)
 	SBI_CALL_1(SBI_SET_MCOUNTEREN, m_value);
 }
 
+static inline int sbi_get_m_msi_data(int nr)
+{
+	return SBI_CALL_1(SBI_GET_M_MSI_DATA, nr);
+}
+
+static inline unsigned long sbi_get_m_msi_addr()
+{
+	return SBI_CALL_0(SBI_GET_M_MSI_ADDR);
+}
 #endif

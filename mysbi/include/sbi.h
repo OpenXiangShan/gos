@@ -10,6 +10,10 @@
 #define SBI_GET_CPU_MCOUNTEREN 0x202
 #define SBI_HART_START 0x300
 #define CSR_MCOUNTEREN 0x306
+#define SBI_GET_M_MSI_DATA 0x500
+#define SBI_GET_M_MSI_ADDR 0x501
+
+typedef int (*do_ext_irq_t)(void);
 
 struct sbi_trap_hw_context;
 struct sbi_trap_regs;
@@ -18,5 +22,6 @@ void sbi_jump_to_next(struct sbi_trap_hw_context *ctx);
 void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx);
 void sbi_trap_handler(struct sbi_trap_regs *regs);
 void sbi_secondary_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx);
+void sbi_register_ext_irq_handler(do_ext_irq_t fn);
 
 #endif

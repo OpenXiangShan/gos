@@ -104,6 +104,16 @@ static const struct device_init_entry __attribute__((used))
 	  },
 #else
 	{
+	 "IMSIC_M",
+	 0x24000000,
+	 0x4000000,
+	 "INTC",
+	 { 0xFF,},
+	 0,
+	 0,
+	 &imsic_hw_data_m,
+	  },
+	{
 	 "IMSIC",
 	 0x28000000,
 	 0x4000000,
