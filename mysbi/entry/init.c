@@ -2,11 +2,27 @@
 #include <asm/csr.h>
 #include <sbi.h>
 #include "sbi_trap.h"
+#include "autoconf.h"
 
 void gos_init(unsigned int hart, struct sbi_trap_hw_context *ctx)
 {
 	sbi_init(hart, ctx);
 }
+
+#if CONFIG_ENABLE_SSTC
+static void sstc_init()
+{
+	unsigned long val;
+
+	val = read_csr(mcounteren);
+	val |= MCOUNTEREN_TM;
+	write_csr(mcounteren, val);
+
+	val = read_csr(menvcfg);
+	val |= MENVCFG_STCE;
+	write_csr(menvcfg, val);
+}
+#endif
 
 void fpu_init()
 {
@@ -26,7 +42,9 @@ void boot_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 	sbi_print("%s hartid: %d, ctx:%x\n", __FUNCTION__, hart, ctx);
 
 	fpu_init();
-
+#if CONFIG_ENABLE_SSTC
+	sstc_init();
+#endif
 	sbi_jump_to_next(ctx);
 }
 
@@ -37,6 +55,9 @@ void other_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 	sbi_print("%s hartid: %d, ctx:%x\n", __FUNCTION__, hart, ctx);
 
 	fpu_init();
+#if CONFIG_ENABLE_SSTC
+	sstc_init();
+#endif
 
 	sbi_secondary_init(hart, ctx);
 

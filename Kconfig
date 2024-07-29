@@ -68,6 +68,10 @@ config ENABLE_MMU
 	bool "Enable MMU"
 	default y
 
+config ENABLE_SSTC
+	bool "Enable Sstc"
+	default n
+
 config SVNAPOT
 	bool "Enable svnapot"
 	depends on ENABLE_MMU

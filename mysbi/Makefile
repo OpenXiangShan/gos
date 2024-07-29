@@ -35,7 +35,7 @@ $(MYSBI_ENTRY_DIR)/%_s.o: $(MYSBI_ENTRY_DIR)/%.S
 	$(CC) $(COPS) -I$(MYSBI_DIR)/include -c $< -o $@
 
 $(MYSBI_ENTRY_DIR)/%_c.o: $(MYSBI_ENTRY_DIR)/%.c
-	$(CC) $(COPS) -I$(MYSBI_DIR)/include -c $< -o $@
+	$(CC) $(COPS) -I$(MYSBI_DIR)/include -I$(TOPDIR)/include/gos-auto -c $< -o $@
 
 $(MYSBI_SBI_DIR)/%_s.o: $(MYSBI_SBI_DIR)/%.S
 	$(CC) $(COPS) -I$(MYSBI_DIR)/include -c $< -o $@

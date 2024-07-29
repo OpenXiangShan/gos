@@ -201,6 +201,8 @@
 
 #define CSR_HGEIP 0xE07
 
+#define CSR_STIMECMP 0x14D
+
 /* Machine Memory Protection */
 #define MAX_CSR_PMP     8
 

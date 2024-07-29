@@ -9,6 +9,7 @@
 #include <timer.h>
 #include "cpu.h"
 #include "clock.h"
+#include "gos.h"
 
 #define HZ 1000
 
@@ -39,8 +40,11 @@ static void __timer_init(void)
 
 static int timer_set_next_event(unsigned long next, struct clock_event *evt)
 {
-	//csr_clear(sie, SIE_STIE);
+#if CONFIG_ENABLE_SSTC
+	write_csr(CSR_STIMECMP, next);
+#else
 	sbi_set_timer(next);
+#endif
 	csr_set(sie, SIE_STIE);
 
 	return 0;
