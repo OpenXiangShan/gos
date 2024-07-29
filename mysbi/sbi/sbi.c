@@ -104,12 +104,14 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 	case SBI_GET_CPU_MCOUNTEREN:
 		ret_value = read_csr(CSR_MCOUNTEREN);
 		break;
+#if CONFIG_SELECT_AIA
 	case SBI_GET_M_MSI_DATA:
 		ret_value = sbi_imsic_alloc_irqs(regs->a0, ctx);
 		break;
 	case SBI_GET_M_MSI_ADDR:
 		ret_value = sbi_imsic_get_mmio(ctx);
 		break;
+#endif
 	}
 
 	regs->a0 = ret_value;
@@ -371,10 +373,10 @@ void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 
 	if (-1 == sbi_clint_init(hart_id, ctx))
 		sbi_print("sbi clint init failed.\n");
-
+#if CONFIG_SELECT_AIA
 	if (-1 == sbi_imsic_init(hart_id, ctx))
 		sbi_print("sbi imsic init failed.\n");
-
+#endif
 	sbi_set_next(ctx);
 	sbi_get_hw_info(ctx);
 
