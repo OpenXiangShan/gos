@@ -41,19 +41,29 @@ static const struct device_init_entry __attribute__((used))
 	  },
 #else
 	{
+	 "IMSIC_M",
+	 0x44000000,
+	 0x1000,
+	 "INTC",
+	 { 0xFF,},
+	 0,
+	 0,
+	 &imsic_hw_data_m,
+	  },
+	{
 	 "IMSIC",
-	 0x28000000,
-	 0x4000000,
+	 0x44200000,
+	 //0x4000000,
+	 0x2000,
 	 "INTC",
 	 { 0xFF,},
 	 0,
 	 0,
 	 &imsic_hw_data,
 	  },
-#if 0
 	{
 	 "APLIC_M",
-	 0xc000000,
+	 0x31100000,
 	 0x4000,
 	 "APLIC_S",
 	 { 0xFF,},
@@ -63,7 +73,7 @@ static const struct device_init_entry __attribute__((used))
 	  },
 	{
 	 "APLIC_S",
-	 0xd000000,
+	 0x31120000,
 	 0x4000,
 	 "IMSIC",
 	 { 0xFF,},
@@ -71,8 +81,6 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 &aplic_hw_data_s,
 	  },
-#endif
-
 #endif
 #ifdef CONFIG_SELECT_AIA
 	{
