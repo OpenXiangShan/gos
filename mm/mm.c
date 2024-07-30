@@ -468,7 +468,7 @@ static void mem_range_contain(unsigned long addr, unsigned int size, void *data)
 	};
 	struct mem_range_info *mem = (struct mem_range_info *)data;
 
-	if ((mem->addr >= addr) && (mem->addr + size <= addr + size))
+	if ((mem->addr >= addr) && ((mem->addr + mem->size) <= (addr + size)))
 		mem->contain = 1;
 }
 
