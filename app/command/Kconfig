@@ -68,4 +68,7 @@ config APP_MEM_WALK
 	bool "APP_MEM_WALK"
 config APP_STVAL
 	bool "APP_STVAL"
+config APP_CMD_LOADER
+	bool "APP_CMD_LOADER"
+	default y
 
