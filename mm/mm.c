@@ -418,7 +418,7 @@ void mm_free(void *addr, unsigned int size)
 	__mm_free(addr, size);
 }
 
-void unused_mem_walk(void (*fn)(unsigned long addr, unsigned int nr))
+void unused_mem_walk(void (*fn)(unsigned long addr, unsigned int nr, void *data), void *data)
 {
 	int n, i;
 	irq_flags_t flags;
@@ -447,7 +447,7 @@ void unused_mem_walk(void (*fn)(unsigned long addr, unsigned int nr))
 				nr++;
 			} else {
 				if (nr != 0)
-					fn((unsigned long)addr, PAGE_SIZE * nr);
+					fn((unsigned long)addr, PAGE_SIZE * nr, data);
 				nr = 0;
 				addr += (nr + 1) * PAGE_SIZE;
 			}
@@ -459,12 +459,42 @@ void unused_mem_walk(void (*fn)(unsigned long addr, unsigned int nr))
 	spin_unlock_irqrestore(&mem_lock, flags);
 }
 
-static void print_unused_mem_info(unsigned long addr, unsigned int len)
+static void mem_range_contain(unsigned long addr, unsigned int size, void *data)
+{
+	struct mem_range_info{
+		unsigned long addr;
+		unsigned int size;
+		int contain;
+	};
+	struct mem_range_info *mem = (struct mem_range_info *)data;
+
+	if ((mem->addr >= addr) && (mem->addr + size <= addr + size))
+		mem->contain = 1;
+}
+
+int mem_range_is_free(unsigned long addr, unsigned int size)
+{
+	struct {
+		unsigned long addr;
+		unsigned int size;
+		int contain;
+	} tmp = { 0 };
+
+	tmp.addr = addr;
+	tmp.size = size;
+	tmp.contain = 0;
+
+	unused_mem_walk(mem_range_contain, &tmp);
+
+	return tmp.contain;
+}
+
+static void print_unused_mem_info(unsigned long addr, unsigned int len, void *data)
 {
 	print("addr: 0x%lx len: 0x%x\n", addr, len);
 }
 
 void walk_unused_mem_and_print(void)
 {
-	unused_mem_walk(print_unused_mem_info);
+	unused_mem_walk(print_unused_mem_info, NULL);
 }

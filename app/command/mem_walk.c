@@ -8,7 +8,7 @@
 static unsigned long start;
 static unsigned int max_len;
 
-static void find_max_unused_mem_block(unsigned long addr, unsigned int len)
+static void find_max_unused_mem_block(unsigned long addr, unsigned int len, void *data)
 {
 	if (len > max_len) {
 		max_len = len;
@@ -23,7 +23,7 @@ static int cmd_mem_walk_handler(int argc, char *argv[], void *priv)
 	start = 0;
 	max_len = 0;
 
-	unused_mem_walk(find_max_unused_mem_block);
+	unused_mem_walk(find_max_unused_mem_block, NULL);
 	addr = (unsigned long)mm_alloc_fix(start, max_len);
 	if (!addr) {
 		print("mm alloc from 0x%lx failed\n", max_len, start);
