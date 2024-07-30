@@ -71,4 +71,6 @@ config APP_STVAL
 config APP_CMD_LOADER
 	bool "APP_CMD_LOADER"
 	default y
+config APP_MEM_TESTER
+	bool "APP_MEM_TESTER"
 
