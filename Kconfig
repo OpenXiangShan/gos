@@ -83,7 +83,7 @@ config ENABLE_MULTI_TASK
 
 config TASK_SCHEDULER_PERIOD
 	int "Task scheduler period(ms)"
-	default "100"
+	default "30"
 	depends on ENABLE_MULTI_TASK
 
 config ENABLE_SHELL
