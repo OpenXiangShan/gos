@@ -202,6 +202,13 @@
 #define CSR_HGEIP 0xE07
 
 #define CSR_STIMECMP 0x14D
+#define CSR_VSTIMECMP 0x24D
+
+#define HCOUNTEREN_TM_SHIFT  1
+#define HCOUNTEREN_TM       (1UL << HCOUNTEREN_TM_SHIFT)
+
+#define HENVCFG_STCE_SHIFT  63
+#define HENVCFG_STCE        (1UL << HENVCFG_STCE_SHIFT)
 
 /* Machine Memory Protection */
 #define MAX_CSR_PMP     8

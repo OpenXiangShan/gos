@@ -72,6 +72,11 @@ config ENABLE_SSTC
 	bool "Enable Sstc"
 	default n
 
+config ENABLE_VS_SSTC
+	bool "Enable Sstc in vs mode"
+	default y
+	depends on ENABLE_SSTC
+
 config SVNAPOT
 	bool "Enable svnapot"
 	depends on ENABLE_MMU

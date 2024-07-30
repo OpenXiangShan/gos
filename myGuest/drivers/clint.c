@@ -6,6 +6,7 @@
 #include "asm/type.h"
 #include "asm/mmio.h"
 #include "vmap.h"
+#include "gos-auto/autoconf.h"
 
 #define CLINT_TIMER_CMP 0x4000
 #define CLINT_TIMER_VAL 0xbff8
@@ -37,8 +38,11 @@ static unsigned long get_cycles(void)
 
 static int timer_set_next_event(unsigned long next)
 {
+#if CONFIG_ENABLE_VS_SSTC
+	write_csr(CSR_STIMECMP, next);
+#else
 	sbi_set_timer(next);
-
+#endif
 	return 0;
 }
 
