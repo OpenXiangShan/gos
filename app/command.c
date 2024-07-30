@@ -52,6 +52,27 @@ void test_cmd_auto_run()
 	}
 }
 
+int do_command(char *cmd, int argc, char *argv[], void *priv)
+{
+	struct command_info *entry;
+	int nr = _commands.avail;
+
+	for_each_command(entry, _commands.p_commands, nr) {
+		if (!entry->in_used)
+			continue;
+		if (!strcmp(entry->command->cmd, cmd)) {
+			if (entry->command->handler) {
+				entry->command->handler(argc, argv,
+							entry->command->priv);
+				command_save_into_history(cmd);
+			}
+			return 0;
+		}
+	}
+
+	return -1;
+}
+
 void walk_and_print_command()
 {
 	struct command_info *entry;

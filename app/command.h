@@ -60,5 +60,6 @@ void set_last_cmd_pos(void);
 struct cmd_name *get_last_cmd_pos(void);
 struct cmd_name *get_last_next_cmd_pos(void);
 void command_history_init(void);
+int do_command(char *cmd, int argc, char *argv[], void *priv);
 
 #endif
