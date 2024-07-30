@@ -8,6 +8,9 @@
 
 enum {
 	VCPU_REQ_FENCE_GVMA_ALL,
+	VCPU_REQ_FENCE_GVMA_GPA,
+	VCPU_REQ_FENCE_GVMA_VMID,
+	VCPU_REQ_FENCE_GVMA_VMID_GPA,
 	VCPU_REQ_FENCE_VVMA_ALL,
 	VCPU_REQ_UPDATE_HGATP,
 };
@@ -118,6 +121,11 @@ struct vcpu_timer {
 	void *data;
 };
 
+struct vcpu_gpa {
+	unsigned long gpa;
+	struct list_head v_list;
+};
+
 struct vcpu {
 	struct list_head list;
 	int last_cpu;
@@ -140,6 +148,11 @@ struct vcpu {
 	unsigned long host_memory_test_pa;
 	unsigned long guest_memory_test_pa;
 	unsigned int memory_test_size;
+
+	unsigned long host_memory_test_va1;
+	unsigned long host_memory_test_pa1;
+	unsigned long guest_memory_test_pa1;
+
 	/* vcpu run command params */
 	struct virt_run_params *run_params;
 	struct virt_run_params host_run_params;
@@ -157,9 +170,11 @@ struct vcpu {
 	unsigned long vs_interrupt_file_gpa;
 	unsigned int vs_interrupt_file_size;
 #endif
-
+	struct vcpu_gpa *v_gpa;
 	int running;
 };
+
+static LIST_HEAD(vgpa_list);
 
 struct vcpu_machine_device {
 	unsigned long base;

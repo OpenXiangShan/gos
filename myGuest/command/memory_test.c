@@ -6,9 +6,22 @@
 
 static int cmd_memory_test_handler(int argc, char *argv[], void *priv)
 {
-	unsigned long addr = get_memory_test_addr();
+	unsigned long addr = get_memory_test_addr(FIRST_MAPPING_ADDR);
+	unsigned long addr1 = get_memory_test_addr(SECOND_MAPPING_ADDR);
 
-	print("addr:0x%lx -- %s\n", addr, addr);
+	print("addr:0x%lx -- %s, 0x%lx\n", addr, addr, &addr);
+	print("addr1:0x%lx -- %s, 0x%lx\n", addr1, addr1, &addr1);
+
+	if (argv[0] != NULL)
+		if (atoi(argv[0]) == 1) {
+			if(!strncmp((char *)addr, "The host memory pa1!",strlen("The host memory pa1!")) &&
+				!strncmp((char *)addr1, "The host memory pa2!",strlen("The host memory pa2!")))
+					print(" hfence_gvma.all is success! \n");
+			else {
+				if (atoi(argv[1]) == 1)
+					print(" hfence_gvma.all is failed! \n");
+			}
+		}
 
 	return 0;
 }

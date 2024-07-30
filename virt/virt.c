@@ -120,8 +120,6 @@ static void update_hgatp(struct vcpu *vcpu)
 		  (vcpu->machine.gstage_pgdp >> PAGE_SHIFT) |
 		  HGATP_MODE |
 		  HGATP_VMID(vcpu->vmid));
-
-	__hfence_gvma_all();
 }
 
 static void vcpu_fence_gvma_all()
@@ -149,11 +147,26 @@ static void vcpu_do_interrupt(struct vcpu *vcpu)
 
 static void vcpu_do_request(struct vcpu *vcpu)
 {
+	struct vcpu_gpa *n;
+
 	if (!vcpu->request)
 		return;
 
 	if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_ALL))
 		vcpu_fence_gvma_all();
+	else if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_GPA)) {
+		list_for_each_entry(n, &vgpa_list, v_list) {
+			if (n->gpa)
+				__hfence_gvma_gpa(n->gpa);
+		}
+	}else if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_VMID))
+		__hfence_gvma_vmid(vcpu->vmid);
+	else if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_VMID_GPA)) {
+		list_for_each_entry(n, &vgpa_list, v_list) {
+			if (n->gpa)
+				__hfence_gvma_vmid_gpa(n->gpa, vcpu->vmid);
+		}
+	}
 }
 
 static void vcpu_update_run_params(struct vcpu *vcpu)
@@ -197,7 +210,7 @@ static int vcpu_set_run_params(struct vcpu *vcpu, struct virt_run_params *cmd)
 static int vcpu_create_gstage_mapping(struct vcpu *vcpu)
 {
 	int guest_ddr_size, guest_sram_size, guest_memory_test_size;
-	unsigned long gpa, sram_gpa, memory_test_gpa;
+	unsigned long gpa, sram_gpa, memory_test_gpa, memory_test_gpa1;
 	unsigned long pgdp_va;
 
 	/* map ddr gstage page table */
@@ -247,7 +260,6 @@ static int vcpu_create_gstage_mapping(struct vcpu *vcpu)
 			       vcpu->host_memory_pa,
 			       vcpu->guest_memory_pa, vcpu->memory_size);
 #endif
-
 	/* map sram gstage page table */
 	sram_gpa = machine_get_sram_start(&vcpu->machine);
 	guest_sram_size = machine_get_sram_size(&vcpu->machine);
@@ -281,13 +293,28 @@ static int vcpu_create_gstage_mapping(struct vcpu *vcpu)
 	vcpu->host_memory_test_pa = virt_to_phy(vcpu->host_memory_test_va);
 	vcpu->memory_test_size = guest_memory_test_size;
 
+	memory_test_gpa1 = memory_test_gpa + 64; /*the next cacheline*/
+	vcpu->host_memory_test_va1 =  vcpu->host_memory_test_va + 64;
+
+	strcpy((char *)vcpu->host_memory_test_va1,
+			"Hello this is memory test pa2!!!");
+	vcpu->guest_memory_test_pa1 = memory_test_gpa1;
+	vcpu->host_memory_test_pa1 = virt_to_phy(vcpu->host_memory_test_va1);
+
 	print
 	    ("gstage page mapping[memory test] -- gpa:0x%lx -> hpa:0x%lx size:0x%x\n",
 	     vcpu->guest_memory_test_pa, vcpu->host_memory_test_pa,
 	     vcpu->memory_test_size);
+	print
+	    ("gstage page mapping[memory test] -- gpa1:0x%lx -> hpa1:0x%lx size:0x%x\n",
+	     vcpu->guest_memory_test_pa1, vcpu->host_memory_test_pa1,
+	     vcpu->memory_test_size);
 	gstage_page_mapping((unsigned long *)vcpu->machine.gstage_pgdp,
 			    vcpu->host_memory_test_pa,
 			    vcpu->guest_memory_test_pa, vcpu->memory_test_size);
+	gstage_page_mapping((unsigned long *)vcpu->machine.gstage_pgdp,
+			    vcpu->host_memory_test_pa1,
+			    vcpu->guest_memory_test_pa1, vcpu->memory_test_size);
 
 	return 0;
 }

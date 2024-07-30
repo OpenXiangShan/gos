@@ -73,4 +73,6 @@ config APP_CMD_LOADER
 	default y
 config APP_MEM_TESTER
 	bool "APP_MEM_TESTER"
-
+config APP_G_STAGE_TEST
+	bool "APP_G_STAGE_TEST"
+	default y

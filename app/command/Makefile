@@ -29,4 +29,4 @@ obj-$(CONFIG_APP_MEM_WALK) += mem_walk.o
 obj-$(CONFIG_APP_STVAL) += stval.o
 obj-$(CONFIG_APP_CMD_LOADER) += cmd_loader.o
 obj-$(CONFIG_APP_MEM_TESTER) += mem_tester.o
-
+obj-$(CONFIG_APP_G_STAGE_TEST) += g_stage.o
