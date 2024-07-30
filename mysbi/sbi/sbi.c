@@ -111,6 +111,14 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 	case SBI_GET_M_MSI_ADDR:
 		ret_value = sbi_imsic_get_mmio(ctx);
 		break;
+	case SBI_GET_M_MSI_DATA_IPI:
+		ctx = h_context[regs->a0];
+		ret_value = sbi_imsic_alloc_irqs(regs->a0, ctx);
+		break;
+	case SBI_GET_M_MSI_ADDR_IPI:
+		ctx = h_context[regs->a0];
+		ret_value = sbi_imsic_get_mmio(ctx);
+		break;
 #endif
 	}
 
@@ -317,8 +325,7 @@ void delegate_traps(void)
 	exceptions =
 	    (1UL << CAUSE_MISALIGNED_LOAD) | (1UL << CAUSE_MISALIGNED_STORE) |
 	    (1UL << CAUSE_MISALIGNED_FETCH) | (1UL << CAUSE_FETCH_PAGE_FAULT) |
-	    (1UL << CAUSE_BREAKPOINT) | (1UL << CAUSE_LOAD_PAGE_FAULT) | (1UL <<
-									  CAUSE_STORE_PAGE_FAULT)
+	    (1UL << CAUSE_LOAD_PAGE_FAULT) | (1UL << CAUSE_STORE_PAGE_FAULT)
 	    | (1UL << CAUSE_USER_ECALL) | (1UL << CAUSE_LOAD_ACCESS) | (1UL <<
 									CAUSE_STORE_ACCESS)
 	    | (1UL << CAUSE_ILLEGAL_INSTRUCTION) | (1UL <<

@@ -12,6 +12,8 @@
 #define CSR_MCOUNTEREN 0x306
 #define SBI_GET_M_MSI_DATA 0x500
 #define SBI_GET_M_MSI_ADDR 0x501
+#define SBI_GET_M_MSI_DATA_IPI 0x502
+#define SBI_GET_M_MSI_ADDR_IPI 0x503
 
 typedef int (*do_ext_irq_t)(void);
 
