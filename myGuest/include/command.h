@@ -12,6 +12,7 @@ struct run_params {
 	int ready;
 	int vmid;
 	int cpu;
+	int bg;
 };
 
 struct command {

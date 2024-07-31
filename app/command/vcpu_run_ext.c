@@ -37,7 +37,7 @@ static int vcpu_start(void *data)
 
 static int cmd_vcpu_run_ext_handler(int argc, char *argv[], void *priv)
 {
-	int i, cpu = 0, offset = 0;
+	int i, cpu = 0, bg = 0, offset = 0;
 	struct virt_run_params *params;
 
 	if (argc == 0) {
@@ -49,10 +49,17 @@ static int cmd_vcpu_run_ext_handler(int argc, char *argv[], void *priv)
 		return -1;
 	}
 
-	if (!strncmp(argv[0], "cpu=", sizeof("cpu=") - 1)) {
-		char *tmp = argv[0];
+	if (!strncmp(argv[offset], "cpu=", sizeof("cpu=") - 1)) {
+		char *tmp = argv[offset];
 		tmp += sizeof("cpu=") - 1;
 		cpu = atoi(tmp);
+		offset += 1;
+	}
+
+	if (!strncmp(argv[offset], "bg=", sizeof("bg=") - 1)) {
+		char *tmp = argv[offset];
+		tmp += sizeof("bg=") - 1;
+		bg = atoi(tmp);
 		offset += 1;
 	}
 
@@ -62,6 +69,7 @@ static int cmd_vcpu_run_ext_handler(int argc, char *argv[], void *priv)
 		print("%s -- Out of memory\n", __FUNCTION__);
 		return -1;
 	}
+	params->bg = bg;
 	strcpy(params->command, argv[offset]);
 	params->argc = argc - 1 - offset;
 	for (i = 0; i < params->argc; i++)

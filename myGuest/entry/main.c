@@ -11,7 +11,7 @@
 void start_guest(struct device_init_entry *entry, struct run_params *params)
 {
 	myGuest_uart_init(entry);
-	myGuest_print_init(params->vmid, params->cpu);
+	myGuest_print_init(params->vmid, params->cpu, params->bg);
 
 	myGuest_print("hello guest os!!\n");
 
