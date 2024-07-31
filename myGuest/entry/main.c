@@ -32,6 +32,7 @@ void start_guest(struct device_init_entry *entry, struct run_params *params)
 
 	__enable_local_irq();
 
+	params->ready = 1;
 	while (1) {
 		if (params->busy) {
 			do_command(params);
