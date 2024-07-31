@@ -32,8 +32,9 @@ unsigned long ms_to_cycles(unsigned long ms, unsigned long freq_hz)
 static int clock_event_do_timer_list(struct clock_event *event)
 {
 	struct timer_event_info *te;
+	struct timer_event_info *freeze_te[16];
 	irq_flags_t flags;
-	int restart = 0, i;
+	int restart = 0, i, freeze_nr = 0;
 	unsigned long restart_ptr[16];
 
 	spin_lock_irqsave(&event->lock, flags);
@@ -41,6 +42,15 @@ static int clock_event_do_timer_list(struct clock_event *event)
 	while (!list_empty(&event->timer_list)) {
 		te = list_entry(list_first(&event->timer_list),
 				struct timer_event_info, list);
+
+		if (te->freeze == 1) {
+			list_del(&te->list);
+			freeze_te[freeze_nr++] = te;
+			if (freeze_nr >= 16)
+				break;
+			continue;
+		}
+
 		if (te->expiry_time <= get_clocksource_counter()) {
 			list_del(&te->list);
 
@@ -59,6 +69,10 @@ static int clock_event_do_timer_list(struct clock_event *event)
 			}
 		} else
 			break;
+	}
+	if (freeze_nr > 0) {
+		for (i = 0; i < freeze_nr; i++)
+			list_add_tail(&freeze_te[i]->list, &event->timer_list);
 	}
 	spin_unlock_irqrestore(&event->lock, flags);
 

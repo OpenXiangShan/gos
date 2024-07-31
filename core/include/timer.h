@@ -13,6 +13,7 @@ struct timer_event_info {
 	unsigned long expiry_time;
 	unsigned long period;
 	int restart;
+	int freeze;
 };
 
 int init_timer(struct device_init_entry *hw);
@@ -26,5 +27,6 @@ struct timer_event_info *set_timer_restart_cpu(unsigned long ms,
 				void (*timer_handler)(void *data), void *data, int cpu);
 int del_timer_cpu(struct timer_event_info *timer, int cpu);
 int del_timer(struct timer_event_info *timer);
+void set_timer_freeze(struct timer_event_info *timer, int freeze);
 
 #endif

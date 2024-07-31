@@ -58,6 +58,7 @@ static struct timer_event_info *__set_timer(unsigned long ms, void (*timer_handl
 	timer->data = data;
 	timer->expiry_time = ms + get_system_time();
 	timer->restart = restart;
+	timer->freeze = 0;
 
 	if (restart)
 		timer->period = ms;
@@ -66,6 +67,14 @@ static struct timer_event_info *__set_timer(unsigned long ms, void (*timer_handl
 		return NULL;
 
 	return timer;
+}
+
+void set_timer_freeze(struct timer_event_info *timer, int freeze)
+{
+	if (!timer->restart)
+		return;
+
+	timer->freeze = freeze;
 }
 
 struct timer_event_info *set_timer(unsigned long ms,
