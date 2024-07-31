@@ -120,6 +120,8 @@ struct vcpu_timer {
 	void (*timer_handler)(void *data);
 	void (*next_event)(unsigned long next, void *data);
 	void *data;
+	unsigned long timecmp;
+	unsigned long htimedelta;
 };
 
 struct vcpu_gpa {

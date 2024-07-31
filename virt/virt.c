@@ -85,6 +85,10 @@ static void vcpu_save(struct vcpu *vcpu)
 	ctx->vsatp = read_csr(CSR_VSATP);
 	ctx->vsepc = read_csr(CSR_VSEPC);
 	ctx->hvip = read_csr(CSR_HVIP);
+
+#if CONFIG_VIRT_ENABLE_TIMER
+	vcpu_timer_save(vcpu);
+#endif
 }
 
 static void vcpu_restore(struct vcpu *vcpu)
@@ -100,6 +104,10 @@ static void vcpu_restore(struct vcpu *vcpu)
 	write_csr(CSR_VSATP, ctx->vsatp);
 	write_csr(CSR_VSEPC, ctx->vsepc);
 	write_csr(CSR_HVIP, ctx->hvip);
+
+#if CONFIG_VIRT_ENABLE_TIMER
+	vcpu_timer_restore(vcpu);
+#endif
 }
 
 static void enable_gstage_mmu(unsigned long pgdp, int on, int vmid)
