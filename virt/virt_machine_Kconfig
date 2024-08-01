@@ -52,4 +52,14 @@ choice
 		tristate "Virt Select Sv57"
 endchoice
 
+choice
+	prompt "Use 4K/2M/1G in guest vs-stage mapping"
+	config SELECT_4K_GUEST_VS_STAGE_MEM_MAPPING
+		tristate "Select 4k mapping"
+	config SELECT_2M_GUEST_VS_STAGE_MEM_MAPPING
+		tristate "Select 2m mapping"
+	config SELECT_1G_GUEST_VS_STAGE_MEM_MAPPING
+		tristate "Select 1g mapping"
+endchoice
+
 endmenu

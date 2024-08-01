@@ -4,6 +4,7 @@
 #include <asm/type.h>
 #include "spinlocks.h"
 #include <string.h>
+#include "gos-auto/autoconf.h"
 
 extern int mmu_is_on;
 extern unsigned long bss_end;
@@ -48,7 +49,13 @@ unsigned long get_phy_end(void)
 
 void mm_init(struct device_init_entry *hw)
 {
+#if CONFIG_SELECT_4K_GUEST_VS_STAGE_MEM_MAPPING
 	unsigned long start = PAGE_ALIGN((unsigned long)(&bss_end));
+#elif CONFIG_SELECT_2M_GUEST_VS_STAGE_MEM_MAPPING
+	unsigned long start = PAGE_ALIGN_2M((unsigned long)(&bss_end));
+#elif CONFIG_SELECT_1G_GUEST_VS_STAGE_MEM_MAPPING
+	unsigned long start = PAGE_ALIGN_1G((unsigned long)(&bss_end));
+#endif
 	unsigned long end = get_ddr_end(hw);
 	unsigned long nr_free_pages = 0;
 
