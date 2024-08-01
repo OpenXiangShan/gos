@@ -481,13 +481,12 @@ static void page_table_access_bit_test()
 	print("pte:0x%lx pte_val:0x%lx\n", pte, pte_val);
 	print("%s\n", vaddr);
 
+	print("%s -- addr:0x%lx\n", __FUNCTION__, walk_pt_va_to_pa(vaddr));
 	pte_val &= ~(1UL << 6);	//Access bit
 	print("remove access bit -- pte_val:0x%lx\n", pte_val);
 	*pte = pte_val;
 
 	__asm__ __volatile("sfence.vma":::"memory");
-
-	print("%s\n", vaddr);
 
 	vmem_free(vaddr, PAGE_SIZE);
 }
