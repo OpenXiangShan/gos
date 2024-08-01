@@ -13,6 +13,11 @@
 #include "asm/csr.h"
 #include "gos.h"
 
+enum test_opt {
+	ACCESS = 1,
+	DIRTY,
+};
+
 #define DIS_PAGE_TABLE  0x1FF
 static char *str[]={"sfence test -- This is pa1", "sfence test -- This is pa2",
 	"sfence test -- This is pa3", "sfence test -- This is pa4"};
@@ -22,6 +27,7 @@ static void Usage(void)
 	print("Usage: page_tlb_test [cmd] [param] [control]\n");
 	print("cmd option:\n");
 	print("    -- Acc (page table access bit test)\n");
+	print("    -- Dirt (page table dirty bit test)\n");
 	print("    -- Lazy (demanding page allocating test)\n");
 	print("    -- sfence.vma_all (sfence.vma test)\n");
 #if CONFIG_VIRT
@@ -460,8 +466,9 @@ ret:
 	return;
 }
 
-static void page_table_access_bit_test()
+static void page_table_access_dirty_bit_test(enum test_opt opt)
 {
+	char c [[gnu::unused]];
 	void *vaddr;
 	unsigned long *pte;
 	unsigned long pte_val;
@@ -480,13 +487,32 @@ static void page_table_access_bit_test()
 
 	print("pte:0x%lx pte_val:0x%lx\n", pte, pte_val);
 	print("%s\n", vaddr);
+	print("%s -- addr:0x%lx\n", __FUNCTION__, walk_pt_va_to_pa((unsigned long)vaddr));
 
-	print("%s -- addr:0x%lx\n", __FUNCTION__, walk_pt_va_to_pa(vaddr));
-	pte_val &= ~(1UL << 6);	//Access bit
-	print("remove access bit -- pte_val:0x%lx\n", pte_val);
+	if (opt == ACCESS) {
+		pte_val &= ~(1UL << 6);	//Access bit
+		print("clear access bit -- pte_val:0x%lx\n", pte_val);
+	} else if (opt == DIRTY) {
+		pte_val &= ~(1UL << 7);	//Dirty bit
+		print("clear dirty bit -- pte_val:0x%lx\n", pte_val);
+
+	} else {
+		print(" ERROR: %s():%d: Option invalid: %d\n", __func__, __LINE__, opt);
+		return;
+	}
+
 	*pte = pte_val;
 
 	__asm__ __volatile("sfence.vma":::"memory");
+
+	if (opt == ACCESS){
+		print("try reading virtual memory [0x%lx]\n\n", vaddr);
+		c = *(char*)vaddr;
+	}
+	else if (opt == DIRTY) {
+		print("try writing virtual memory [0x%lx]\n\n", vaddr);
+		*(char*)vaddr = '1';
+	}
 
 	vmem_free(vaddr, PAGE_SIZE);
 }
@@ -516,7 +542,9 @@ static int cmd_page_tlb_test_handler(int argc, char *argv[], void *priv)
 	if (!strncmp(argv[0], "Lazy", sizeof("Lazy"))) {
 		page_demanding_allocating_test();
 	} else if (!strncmp(argv[0], "Acc", sizeof("Acc"))) {
-		page_table_access_bit_test();
+		page_table_access_dirty_bit_test(ACCESS);
+	} else if (!strncmp(argv[0], "Dirt", sizeof("Dirt"))) {
+		page_table_access_dirty_bit_test(DIRTY);
 	} else if (!strncmp(argv[0], "sfence.vma_all", sizeof("sfence.vma_all"))) {
 		page_table_sfence_all_test();
 	}
