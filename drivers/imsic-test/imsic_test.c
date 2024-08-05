@@ -27,12 +27,13 @@
 extern int mmu_is_on;
 
 struct msi_msg {
+	unsigned long msi_addr_pa;
 	unsigned long msi_addr;
 	unsigned long msi_data;
 };
 
 static struct msi_msg msi_msg[3];
-static int base_hwirq;
+static int base_hwirq = 0;
 
 static void imsic_test_irq_handler0(void *data)
 {
@@ -60,6 +61,7 @@ static void imsic_test_write_msi_msg(unsigned long msi_addr,
 	    ("##### %s %d base_hwirq:%d hwirq:%d msi_addr:0x%x msi_data:0x%x\n",
 	     __FUNCTION__, __LINE__, base_hwirq, hwirq, msi_addr, msi_data);
 
+	base_hwirq = 2;
 	if (ii++ == 0)
 		base_hwirq = hwirq;
 
@@ -68,24 +70,29 @@ static void imsic_test_write_msi_msg(unsigned long msi_addr,
 	else
 		msi_addr_va = msi_addr;
 
+	print("hwirq:%d base_hwirq:%d\n", hwirq, base_hwirq);
+	msi_msg[hwirq - base_hwirq].msi_addr_pa = msi_addr;
 	msi_msg[hwirq - base_hwirq].msi_addr = msi_addr_va;
 	msi_msg[hwirq - base_hwirq].msi_data = msi_data;
 }
 
 static int imsic_test_ioctl(unsigned int cmd, void *arg)
 {
-	unsigned long msi_addr, msi_data;
+	unsigned long msi_addr, msi_data, msi_addr_pa;
 
 	switch (cmd) {
 	case 0:
+		msi_addr_pa = msi_msg[0].msi_addr_pa;
 		msi_addr = msi_msg[0].msi_addr;
 		msi_data = msi_msg[0].msi_data;
 		break;
 	case 1:
+		msi_addr_pa = msi_msg[1].msi_addr_pa;
 		msi_addr = msi_msg[1].msi_addr;
 		msi_data = msi_msg[1].msi_data;
 		break;
 	case 2:
+		msi_addr_pa = msi_msg[1].msi_addr_pa;
 		msi_addr = msi_msg[2].msi_addr;
 		msi_data = msi_msg[2].msi_data;
 		break;
@@ -93,6 +100,7 @@ static int imsic_test_ioctl(unsigned int cmd, void *arg)
 		return -1;
 	}
 
+	print("write 0x%lx to 0x%lx\n", msi_data, msi_addr_pa);
 	writel(msi_addr, msi_data);
 
 	return 0;
@@ -107,7 +115,7 @@ int imsic_test_init(struct device *dev, void *data)
 	int hwirq;
 	struct driver *drv;
 
-	hwirq = msi_get_hwirq_affinity(dev, 3, imsic_test_write_msi_msg, 1);
+	hwirq = msi_get_hwirq_affinity(dev, 3, imsic_test_write_msi_msg, 0);
 	if (hwirq == -1) {
 		print("%s -- msi_get_hwirq failed\n", __FUNCTION__);
 		return -1;
