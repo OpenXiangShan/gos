@@ -63,6 +63,9 @@ if [ "$#" -eq 1 ];then
 	elif [ "$1" = "vcs-vs-multi-test" ];then
 		make gos-vcs-h.dtb
 		make multi_imsic_defconfig
+	elif [ "$1" = "cmn-fpga-imsic-multi-test" ];then
+		make gos-singlecore.dtb
+		make multi_imsic_cmn_fpga_defconfig
 	else
 		make $1
 	fi
