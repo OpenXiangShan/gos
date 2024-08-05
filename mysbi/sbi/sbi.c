@@ -136,6 +136,12 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 		ret_value = sbi_imsic_get_mmio(ctx);
 		break;
 #endif
+	case SBI_SET_CSR_MIE:
+		write_csr(mie, regs->a0);
+		break;
+	case SBI_GET_CSR_MIE:
+		ret_value = read_csr(mie);
+		break;
 	}
 
 	regs->a0 = ret_value;

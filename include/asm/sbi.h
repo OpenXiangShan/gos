@@ -23,15 +23,17 @@
 #define SBI_CONSOLE_PUTCHAR 0x1
 #define SBI_CONSOLE_GETCHAR 0x2
 #define SBI_SET_MCOUNTEREN 0x3
-#define SBI_GET_M_MSI_DATA 0x500
-#define SBI_GET_M_MSI_ADDR 0x501
-#define SBI_GET_M_MSI_DATA_IPI 0x502
-#define SBI_GET_M_MSI_ADDR_IPI 0x503
+#define SBI_EXIT_VM_TEST 0x100
 #define SBI_GET_CPU_CYCLE 0x200
 #define SBI_GET_CPU_ID 0x201
 #define SBI_GET_CPU_MCOUNTEREN 0x202
 #define SBI_HART_START 0x300
-#define SBI_EXIT_VM_TEST 0x100
+#define SBI_SET_CSR_MIE 0x400
+#define SBI_GET_CSR_MIE 0x401
+#define SBI_GET_M_MSI_DATA 0x500
+#define SBI_GET_M_MSI_ADDR 0x501
+#define SBI_GET_M_MSI_DATA_IPI 0x502
+#define SBI_GET_M_MSI_ADDR_IPI 0x503
 
 #define SBI_CALL(which, arg0, arg1, arg2) ({                    \
         register unsigned long a0 asm ("a0") = (unsigned long)(arg0);   \
@@ -95,5 +97,15 @@ static inline int sbi_get_m_msi_data(int nr)
 static inline unsigned long sbi_get_m_msi_addr()
 {
 	return SBI_CALL_0(SBI_GET_M_MSI_ADDR);
+}
+
+static inline void sbi_set_csr_mie(unsigned long val)
+{
+	SBI_CALL_1(SBI_SET_CSR_MIE, val);
+}
+
+static inline unsigned long sbi_get_csr_mie()
+{
+	return SBI_CALL_0(SBI_GET_CSR_MIE);
 }
 #endif

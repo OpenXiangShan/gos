@@ -59,6 +59,8 @@
 #define SIE_STIE 0x20UL		/* TIMER */
 #define SIE_SEIE 0x200UL	/* EXTERN IRQ */
 
+#define MIE_MEIE 0x800
+
 #define SCAUSE_INT (1UL << 63)
 #define is_interrupt_fault(reg) (reg & SCAUSE_INT)
 
@@ -101,6 +103,8 @@
 #define CSR_MCOUNTEREN		0x306
 
 #define CSR_SSCOUNTOVF          0xda0
+
+#define CSR_MIE                 0x304
 
 /* Supervisor Trap Setup */
 #define CSR_SSTATUS			0x100
