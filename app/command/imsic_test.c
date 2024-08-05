@@ -151,9 +151,9 @@ static void msi_dev_send(struct msi_device *msi)
 {
 	unsigned long offset = msi->msi_addr - msi->interrupt_file_mmio_gpa;
 
-	print("%s -- msi_addr:0x%lx msi_data:%d\n",
+	print("%s -- write %d to 0x%lx\n",
 	      __FUNCTION__,
-	      msi->interrupt_file_mmio_hpa + offset, msi->msi_data);
+	      msi->msi_data, msi->interrupt_file_mmio_hpa + offset);
 	writel(msi->interrupt_file_mmio_hva + offset, msi->msi_data);
 }
 
@@ -217,6 +217,7 @@ static struct memory_region_ops __msi_dev_ops = {
 
 static int cmd_imsic_multi_test_handler(int argc, char *argv[], void *priv)
 {
+	unsigned long mie;
 	int fd;
 	int i, nr_irqs = 1;
 	int msi_data;
@@ -242,6 +243,8 @@ static int cmd_imsic_multi_test_handler(int argc, char *argv[], void *priv)
 	msi_device_init(&device[1], MSI_DEVICE_MMIO_BASE, MSI_DEVICE_MMIO_LEN,
 			&__msi_dev_ops);
 
+	vcpu1 = 0;
+	vcpu2 = 0;
 	if (create_task
 	    ("vs imsic test vcpu1", vcpu_start1, NULL, 0, NULL, 0, NULL)) {
 		int n;
@@ -280,6 +283,14 @@ static int cmd_imsic_multi_test_handler(int argc, char *argv[], void *priv)
 	device[1].interrupt_file_mmio_gpa = vcpu2->vs_interrupt_file_gpa;
 
 	print("start to send msi!!!!!!!!!!!!!!!!!!!\n");
+
+	/* disable external interrupt */
+
+	mie = sbi_get_csr_mie();
+	mie &= ~MIE_MEIE;
+	sbi_set_csr_mie(mie);
+	disable_local_irq();
+
 	/* send m */
 	for (i = 0; i < nr_irqs; i++) {
 		print("write %d to 0x%lx\n", msi_data, msi_addr);
@@ -291,6 +302,12 @@ static int cmd_imsic_multi_test_handler(int argc, char *argv[], void *priv)
 
 	msi_dev_send(&device[0]);
 	msi_dev_send(&device[1]);
+
+	/* enable external interrupt */
+	mie = sbi_get_csr_mie();
+	mie |= MIE_MEIE;
+	sbi_set_csr_mie(mie);
+	enable_local_irq();
 
 	wait_for_ms(100);
 
