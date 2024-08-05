@@ -67,6 +67,8 @@ int do_exception(struct pt_regs *regs, unsigned long scause)
 	} else {
 		print("scause:0x%lx\n", scause);
 		if (scause == EXC_STORE_PAGE_FAULT ||
+		    scause == EXC_LOAD_PAGE_FAULT  ||
+		    scause == EXC_INST_PAGE_FAULT  ||
 		    scause == EXC_LOAD_PAGE_FAULT)
 			dump_fault_addr_pt(read_csr(stval));
 		show_regs(regs);
