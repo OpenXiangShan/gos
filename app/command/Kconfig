@@ -78,6 +78,5 @@ config APP_G_STAGE_TEST
 	default y
 config APP_SVPBMT_TEST
 	bool "APP_SVPBMT_TEST"
-	default y
-	bool "APP_SVPBMT_TEST"
+	depends on ENABLE_SVPBMT
 	default y
