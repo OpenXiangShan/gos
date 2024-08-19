@@ -76,3 +76,8 @@ config APP_MEM_TESTER
 config APP_G_STAGE_TEST
 	bool "APP_G_STAGE_TEST"
 	default y
+config APP_SVPBMT_TEST
+	bool "APP_SVPBMT_TEST"
+	default y
+	bool "APP_SVPBMT_TEST"
+	default y
