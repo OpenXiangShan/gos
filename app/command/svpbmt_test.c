@@ -21,6 +21,7 @@
 #include "mm.h"
 #include "vmap.h"
 #include "clock.h"
+#include "asm/sbi.h"
 
 static int cmd_svpbmt_test_handler(int argc, char *argv[], void *priv)
 {
@@ -31,6 +32,8 @@ static int cmd_svpbmt_test_handler(int argc, char *argv[], void *priv)
 
 	addr = (char *)vmem_alloc(4096, GFP_NOCACHE);
 	pte = mmu_get_pte((unsigned long)addr);
+
+	print("menvcfg: 0x%lx\n", sbi_get_csr_menvcfg());
 
 	print("svpbmt nocache test...\n");
 	print("addr:0x%lx pte:0x%lx\n", addr, *pte);
