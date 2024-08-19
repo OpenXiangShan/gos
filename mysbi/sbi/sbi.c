@@ -142,6 +142,9 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 	case SBI_GET_CSR_MIE:
 		ret_value = read_csr(mie);
 		break;
+	case SBI_GET_CSR_MENVCFG:
+		ret_value = read_csr(menvcfg);
+		break;
 	}
 
 	regs->a0 = ret_value;

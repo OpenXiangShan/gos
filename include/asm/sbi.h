@@ -30,6 +30,7 @@
 #define SBI_HART_START 0x300
 #define SBI_SET_CSR_MIE 0x400
 #define SBI_GET_CSR_MIE 0x401
+#define SBI_GET_CSR_MENVCFG 0x402
 #define SBI_GET_M_MSI_DATA 0x500
 #define SBI_GET_M_MSI_ADDR 0x501
 #define SBI_GET_M_MSI_DATA_IPI 0x502
@@ -107,5 +108,10 @@ static inline void sbi_set_csr_mie(unsigned long val)
 static inline unsigned long sbi_get_csr_mie()
 {
 	return SBI_CALL_0(SBI_GET_CSR_MIE);
+}
+
+static inline unsigned long sbi_get_csr_menvcfg()
+{
+	return SBI_CALL_0(SBI_GET_CSR_MENVCFG);
 }
 #endif
