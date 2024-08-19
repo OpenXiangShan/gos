@@ -25,6 +25,17 @@ void gos_init(unsigned int hart, struct sbi_trap_hw_context *ctx)
 	sbi_init(hart, ctx);
 }
 
+#if CONFIG_ENABLE_SVPBMT
+static void svpbmt_init()
+{
+	unsigned long val;
+
+	val = read_csr(menvcfg);
+	val |= MENVCFG_PBMTE;
+	write_csr(menvcfg, val);
+}
+#endif
+
 #if CONFIG_ENABLE_SSTC
 static void sstc_init()
 {
@@ -72,6 +83,11 @@ void boot_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 #else
 	sstc_disable();
 #endif
+
+#if CONFIG_ENABLE_SVPBMT
+	svpbmt_init();
+#endif
+
 	sbi_jump_to_next(ctx);
 }
 
@@ -88,6 +104,9 @@ void other_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 	sstc_disable();
 #endif
 
+#if CONFIG_ENABLE_SVPBMT
+	svpbmt_init();
+#endif
 	sbi_secondary_init(hart, ctx);
 
 	while (ctx->wait_var == 0) {

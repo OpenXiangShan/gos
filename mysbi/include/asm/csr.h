@@ -31,6 +31,9 @@
 #define MCOUNTEREN_TM_SHIFT  1
 #define MCOUNTEREN_TM       (1UL << MCOUNTEREN_TM_SHIFT)
 
+#define MENVCFG_PBMTE_SHIFT 62
+#define MENVCFG_PBMTE       (1UL << MENVCFG_PBMTE_SHIFT)
+
 #define PRV_U				(0UL)
 #define PRV_S				(1UL)
 #define PRV_M				(3UL)
