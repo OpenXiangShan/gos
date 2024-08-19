@@ -218,6 +218,11 @@ static void* __vmem_alloc(unsigned int size, int page_size, int gfp)
 
 	vmap_addr_tmp = vmap_addr;
 	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
+	if (gfp & GFP_NOCACHE)
+		pgprot_val(pgprot) |=  _PAGE_SVPBMT_NOCACHE;
+	if (gfp & GFP_IO)
+		pgprot_val(pgprot) |=  _PAGE_SVPBMT_IO;
+
 	while (page_nr--) {
 		if (!mmu_is_on)
 			phys_addr = (unsigned long)mm_alloc_align(page_size, page_size);

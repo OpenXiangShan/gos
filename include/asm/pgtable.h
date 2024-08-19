@@ -126,6 +126,18 @@ typedef struct {
 /* Page protection bits */
 #define _PAGE_BASE      (_PAGE_PRESENT | _PAGE_ACCESSED)
 
+/*
+ * [62:61] Svpbmt Memory Type definitions:
+ *
+ *  00 - PMA    Normal Cacheable, No change to implied PMA memory type
+ *  01 - NC     Non-cacheable, idempotent, weakly-ordered Main Memory
+ *  10 - IO     Non-cacheable, non-idempotent, strongly-ordered I/O memory
+ *  11 - Rsvd   Reserved for future standard use
+ */
+#define _PAGE_SVPBMT_NOCACHE     (1UL << 61)
+#define _PAGE_SVPBMT_IO          (1UL << 62)
+#define _PAGE_SVPBMT_MTMASK      (_PAGE_SVPBMT_NOCACHE | _PAGE_SVPBMT_IO)
+
 #define PAGE_READ               __pgprot(_PAGE_BASE | _PAGE_READ)
 #define PAGE_WRITE              __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE)
 #define PAGE_EXEC               __pgprot(_PAGE_BASE | _PAGE_EXEC)

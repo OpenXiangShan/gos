@@ -20,6 +20,10 @@
 #include <device.h>
 #include <asm/pgtable.h>
 
+
+#define GFP_NOCACHE (1UL << 0)
+#define GFP_IO      (1UL << 1)
+
 #define MAX_BYTE_PER_MAPS (2*1024*1024*1024UL)
 struct mem_maps {
 	unsigned long maps[8192];	//2G
