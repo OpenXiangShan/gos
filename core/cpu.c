@@ -126,17 +126,18 @@ int get_cpu_satp_mode()
 
 void bringup_secondary_cpus(struct device_init_entry *hw)
 {
-	int i, cpu_count;
+	int i, cpu_count, online = 1;
 
 	cpu_count = get_cpu_count();
 
 	for (i = 1; i < cpu_count; i++) {
 		if (!sbi_cpu_start(i)) {
 			set_online_cpumask(i);
+			online++;
 		}
 	}
 
-	print("bringup %d cpus success\n", cpu_count);
+	print("bringup %d cpus success\n", online);
 }
 
 void cpu_regs_init(struct pt_regs *regs)

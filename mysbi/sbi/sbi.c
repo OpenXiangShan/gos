@@ -112,7 +112,7 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 		ret_value = read_csr(mhartid);
 		break;
 	case SBI_HART_START:
-		ret = sbi_hart_start(regs->a0, regs->a1);
+		ret_value = sbi_hart_start(regs->a0, regs->a1);
 		break;
 	case SBI_SET_MCOUNTEREN:
 		write_csr(CSR_MCOUNTEREN, regs->a0);
