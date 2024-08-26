@@ -83,4 +83,7 @@ config APP_SVPBMT_TEST
 config APP_SCAN_MEM_TEST
 	bool "APP_SCAN_MEM_TEST"
 	default y
+config APP_RESV_MEM_INFO
+	bool "APP_RESV_MEM_INFO"
+	default y
 
