@@ -45,3 +45,4 @@ obj-$(CONFIG_APP_CMD_LOADER) += cmd_loader.o
 obj-$(CONFIG_APP_MEM_TESTER) += mem_tester.o
 obj-$(CONFIG_APP_G_STAGE_TEST) += g_stage.o
 obj-$(CONFIG_APP_SVPBMT_TEST) += svpbmt_test.o
+obj-$(CONFIG_APP_SCAN_MEM_TEST) += scan_mem_test.o

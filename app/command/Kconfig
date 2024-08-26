@@ -80,3 +80,7 @@ config APP_SVPBMT_TEST
 	bool "APP_SVPBMT_TEST"
 	depends on ENABLE_SVPBMT
 	default y
+config APP_SCAN_MEM_TEST
+	bool "APP_SCAN_MEM_TEST"
+	default y
+
