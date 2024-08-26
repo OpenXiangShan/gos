@@ -10,6 +10,11 @@
 		reg = <0x00 0x80000000 0x0 0x80000000>;
 	};
 
+	reserved-memory@0xc0000000 {
+		device_type = "reserved-memory";
+		reg = <0x00 0xc0000000 0x0 0x100000>;
+	};
+
 	cpus {
 		#address-cells = <0x01>;
 		#size-cells = <0x00>;
