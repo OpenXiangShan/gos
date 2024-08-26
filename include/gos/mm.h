@@ -31,12 +31,16 @@ struct mem_maps {
 };
 
 #define MAX_MEM_BLOCK_COUNT 16
+#define MAX_MEM_BLOCK_RESV_COUNT 16
 struct memory_block {
 	unsigned long memory_block_start[MAX_MEM_BLOCK_COUNT];
 	unsigned int memory_block_size[MAX_MEM_BLOCK_COUNT];
 	int avail;
 	struct mem_maps maps[MAX_MEM_BLOCK_COUNT];
 	int max_byte_per_maps;
+	unsigned long memory_block_resv_start[MAX_MEM_BLOCK_RESV_COUNT];
+	unsigned int memory_block_resv_size[MAX_MEM_BLOCK_RESV_COUNT];
+	int reserved_cnt;
 };
 
 #define for_each_memory_block(entry, blocks, n)      \
@@ -94,6 +98,7 @@ unsigned long get_default_pgd(void);
 void walk_unused_mem_and_print(void);
 void unused_mem_walk(void (*fn)(unsigned long addr, unsigned int nr, void *data), void *data);
 int mem_range_is_free(unsigned long addr, unsigned int size);
+void reserved_mem_walk(void (*fn)(unsigned long addr, unsigned int nr, void *data), void *data);
 
 static inline void dump_fault_addr_pt(unsigned long addr)
 {

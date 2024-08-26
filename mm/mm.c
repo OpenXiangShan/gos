@@ -123,7 +123,9 @@ static void mm_reserved(unsigned long base, unsigned long size)
 			mem_maps->maps[(index / per_mem_map)] = mem_map;
 		}
 
-		print("Reserved Memory : start:0x%lx, end:0x%lx\n", base, base + page_nr * PAGE_SIZE);
+		mm_blocks.memory_block_resv_start[mm_blocks.reserved_cnt] = base;
+		mm_blocks.memory_block_resv_size[mm_blocks.reserved_cnt] = page_nr * PAGE_SIZE;
+		mm_blocks.reserved_cnt++;
 	}
 }
 
@@ -165,7 +167,14 @@ void mm_init(struct device_init_entry *hw)
 		     PAGE_SIZE);
 	}
 
+	mm_blocks.reserved_cnt = 0;
 	dtb_scan_reserved_memory((void *)dtb_bin, mm_reserved);
+
+	print("Reserved Memory info --\n");
+	for (i = 0; i < mm_blocks.reserved_cnt; i++)
+		print("  start:0x%lx, size:0x%lx\n",
+		      mm_blocks.memory_block_resv_start[i],
+		      mm_blocks.memory_block_resv_size[i]);
 
 #if CONFIG_TINY
 	tiny_init();
@@ -472,6 +481,17 @@ void mm_free(void *addr, unsigned int size)
 	}
 #endif
 	__mm_free(addr, size);
+}
+
+void reserved_mem_walk(void (*fn)(unsigned long addr, unsigned int nr, void *data), void *data)
+{
+	int i;
+
+	for (i = 0; i < mm_blocks.reserved_cnt; i++) {
+		fn(mm_blocks.memory_block_resv_start[i],
+		   mm_blocks.memory_block_resv_size[i],
+		   data);
+	}
 }
 
 void unused_mem_walk(void (*fn)(unsigned long addr, unsigned int nr, void *data), void *data)
