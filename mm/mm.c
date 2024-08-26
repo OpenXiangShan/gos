@@ -90,6 +90,43 @@ void memory_block_add(unsigned long base, unsigned long size)
 	}
 }
 
+static void mm_reserved(unsigned long base, unsigned long size)
+{
+	int i ,n;
+
+	n = mm_blocks.avail;
+	for (i = 0; i < n; i++) {
+		unsigned long block_start;
+		unsigned int block_size;
+		unsigned long mem_map;
+		int index, nr;
+		int page_nr;
+		struct mem_maps *mem_maps = &mm_blocks.maps[i];
+		int per_mem_map = sizeof(mem_maps->maps[0]) * 8;
+
+		page_nr = size % PAGE_SIZE == 0 ? size / PAGE_SIZE : size / PAGE_SIZE + 1;
+
+		block_start = mm_blocks.memory_block_start[i];
+		block_size = mm_blocks.memory_block_size[i];
+
+		if (!(base >= block_start &&
+		    (base + size <= block_start + block_size))) {
+			if (size != 0)
+				print("Invalid Reserved Memory params... Please check dts..\n");
+			continue;
+		}
+
+		index = (base - block_start) / PAGE_SIZE;
+		for (nr = 0; nr < page_nr; nr++, index++) {
+			mem_map = mem_maps->maps[(index / per_mem_map)];
+			mem_map |= (1UL << (index % per_mem_map));
+			mem_maps->maps[(index / per_mem_map)] = mem_map;
+		}
+
+		print("Reserved Memory : start:0x%lx, end:0x%lx\n", base, base + page_nr * PAGE_SIZE);
+	}
+}
+
 void mm_init(struct device_init_entry *hw)
 {
 	int i, n;
@@ -127,6 +164,9 @@ void mm_init(struct device_init_entry *hw)
 		     mm_blocks.memory_block_size[i] / 1024, nr_free_pages,
 		     PAGE_SIZE);
 	}
+
+	dtb_scan_reserved_memory((void *)dtb_bin, mm_reserved);
+
 #if CONFIG_TINY
 	tiny_init();
 #endif
