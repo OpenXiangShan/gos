@@ -9,9 +9,7 @@ jobs:
     runs-on: e5platform
 
     steps:
-    - uses: actions/checkout@v4
-
-    - name: install riscv64 toolchain package
+    - name: set-env
       run: export PATH=$PATH:/opt/riscv-gcv-230425/bin
 
     - name: make
