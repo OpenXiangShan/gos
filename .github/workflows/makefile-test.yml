@@ -10,12 +10,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
-    - name: set-env
+
+    - name: make
       run: |
         export PATH=$PATH:/opt/riscv-gcv-230425/bin
         export CROSS_COMPILE=riscv64-unknown-linux-gnu-
         export ARCH=riscv
+        ./build.sh default
 
-    - name: make
-      run: ./build.sh fpga-h
+    - name: running
+      run: ./build.sh run
