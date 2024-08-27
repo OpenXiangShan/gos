@@ -1,0 +1,18 @@
+name: Makefile CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: install riscv64 toolchain package
+      run: sudo apt install gcc-riscv64-linux-gnu
+
+    - name: make
+      run: ./build.sh fpga-h
