@@ -446,7 +446,7 @@ void vcpu_set_request(struct vcpu *vcpu, unsigned int req)
 
 void vcpu_clear_request(struct vcpu *vcpu, unsigned int req)
 {
-    vcpu->request &=~ ((1UL) << req);
+	vcpu->request &=~ ((1UL) << req);
 }
 
 struct vcpu *get_vcpu(int vmid, int cpu)
