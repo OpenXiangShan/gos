@@ -6,7 +6,7 @@ on:
 jobs:
   build:
 
-    runs-on: e5platform
+    runs-on: [self-hosted,linux]
 
     steps:
     - name: set-env
