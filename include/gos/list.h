@@ -113,3 +113,9 @@ static inline struct list_head *list_first(struct list_head *head)
 	     pos = list_next_entry(pos, member))
 
 #endif
+
+#define list_for_each_entry_safe(pos, n, head, member)          \
+    for (pos = list_first_entry(head, typeof(*pos), member),    \
+		n = list_next_entry(pos, member);           \
+		 !list_entry_is_head(pos, head, member);            \
+		 pos = n, n = list_next_entry(n, member))

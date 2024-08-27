@@ -194,7 +194,7 @@ struct vcpu {
 	int running;
 };
 
-static LIST_HEAD(vgpa_list);
+void append_to_list(struct vcpu_gpa *t);
 
 struct vcpu_machine_device {
 	unsigned long base;
@@ -225,6 +225,7 @@ static inline int vcpu_check_request(unsigned long req, unsigned int flag)
 }
 
 void vcpu_set_request(struct vcpu *vcpu, unsigned int req);
+void vcpu_clear_request(struct vcpu *vcpu, unsigned int req);
 struct vcpu *vcpu_create(void);
 struct vcpu *vcpu_create_force(void);
 int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params);

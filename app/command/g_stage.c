@@ -30,18 +30,26 @@
 #include "gos.h"
 #include "gos/cpu_tlb.h"
 
+/* 1. flush all display
+*  2. gpa display
+*/
+static char c_flag = 0;
+static char d_flag = 0;
+
 static void Usage(void)
 {
 	print("Usage: g_stage_test [cmd] \n");
 	print("cmd option:\n");
 	print("    -- hfence_gvma.all\n");
+	print("    -- hfence_gvma.gpa\n");
 }
 
 static void memory_test(struct vcpu *vcpu)
 {
 	struct virt_run_params *params;
 
-	params = (struct virt_run_params *)mm_alloc(sizeof(struct virt_run_params));
+	params =
+	    (struct virt_run_params *)mm_alloc(sizeof(struct virt_run_params));
 	if (!params) {
 		print("%s -- Out of memory\n", __FUNCTION__);
 		return;
@@ -49,8 +57,16 @@ static void memory_test(struct vcpu *vcpu)
 
 	strcpy((char *)params->command, "memory_test");
 	params->argc = 2;
-	strcpy(params->argv[0],  "1");	/*flush all dispaly*/
-	strcpy(params->argv[1],  "0");	/*not display process print*/
+	if (c_flag == 1)
+		strcpy(params->argv[0], "1");	/*flush all dispaly */
+	else if (c_flag == 2)
+		strcpy(params->argv[0], "2");	/*flush gva dispaly */
+
+	if (d_flag == 0)
+		strcpy(params->argv[1], "0");	/*not display process print */
+	else if (d_flag == 1)
+		strcpy(params->argv[1], "1");	/*display test result */
+
 	vcpu_run(vcpu, params);
 
 	mm_free((void *)params, sizeof(struct virt_run_params));
@@ -69,7 +85,7 @@ static void page_table_remapping_gstage_memory(struct vcpu *vcpu)
 		return;
 	}
 	hpa = virt_to_phy(hva);
-	hva1 = hva + 64;/*the next cache line*/
+	hva1 = hva + 64;	/*the next cache line */
 	hpa1 = virt_to_phy(hva1);
 
 	strcpy((char *)hva, "The host memory pa1!");
@@ -80,7 +96,6 @@ static void page_table_remapping_gstage_memory(struct vcpu *vcpu)
 			    vcpu->guest_memory_test_pa1, size);
 }
 
-
 static void hfence_gvma_all()
 {
 	struct vcpu *vcpu;
@@ -88,19 +103,58 @@ static void hfence_gvma_all()
 	vcpu = vcpu_create();
 	if (!vcpu)
 		return;
-	create_task("memory_test1", (void *)memory_test, (void *)vcpu, 0, NULL, 0, NULL);
+	c_flag = 1;
+	create_task("memory_test1", (void *)memory_test, (void *)vcpu, 0, NULL,
+		    0, NULL);
 	sleep_to_timeout(1000);
 
 	page_table_remapping_gstage_memory(vcpu);
 	print("----->before fence_gvma.all va value:\n");
-	create_task("memory_test2", (void *)memory_test, (void *)vcpu, 0, NULL, 0, NULL);
+	create_task("memory_test2", (void *)memory_test, (void *)vcpu, 0, NULL,
+		    0, NULL);
 	sleep_to_timeout(1000);
 	vcpu_set_request(vcpu, VCPU_REQ_FENCE_GVMA_ALL);
 
-
+	d_flag = 1;
 	print("----->after fence_gvma.all va value:\n");
-	create_task("memory_test2", (void *)memory_test, (void *)vcpu, 0, NULL, 0, NULL);
+	create_task("memory_test2", (void *)memory_test, (void *)vcpu, 0, NULL,
+		    0, NULL);
 
+}
+
+static void hfence_gvma_gpa()
+{
+	struct vcpu *vcpu;
+
+	vcpu = vcpu_create();
+	if (!vcpu)
+		return;
+	c_flag = 2;
+
+	create_task("memory_test1", (void *)memory_test, (void *)vcpu, 0, NULL,
+		    0, NULL);
+	sleep_to_timeout(1000);
+
+	page_table_remapping_gstage_memory(vcpu);
+	vcpu->v_gpa = (struct vcpu_gpa *)mm_alloc(sizeof(struct vcpu_gpa));
+	if (!vcpu->v_gpa) {
+		print("%s -- Out of memory\n", __FUNCTION__);
+		return;
+	}
+
+	vcpu->v_gpa->gpa = vcpu->host_memory_test_pa;
+	append_to_list(vcpu->v_gpa);
+	print("----->before fence_gvma.all va value:\n");
+	create_task("memory_test2", (void *)memory_test, (void *)vcpu, 0, NULL,
+		    0, NULL);
+	sleep_to_timeout(1000);
+
+	vcpu_set_request(vcpu, VCPU_REQ_FENCE_GVMA_GPA);
+
+	d_flag = 1;
+	print("----->after fence_gvma.all va value:\n");
+	create_task("memory_test2", (void *)memory_test, (void *)vcpu, 0, NULL,
+		    0, NULL);
 }
 
 static int cmd_g_stage_test_handler(int argc, char *argv[], void *priv)
@@ -111,9 +165,12 @@ static int cmd_g_stage_test_handler(int argc, char *argv[], void *priv)
 		return -1;
 	}
 
-	if (!strncmp(argv[0], "hfence_gvma.all", sizeof("hfence_gvma.all"))) {
+	if (!strncmp(argv[0], "hfence_gvma.all", sizeof("hfence_gvma.all")))
 		hfence_gvma_all();
-	} else {
+	else if (!strncmp
+		 (argv[0], "hfence_gvma.gpa", sizeof("hfence_gvma.gpa")))
+		hfence_gvma_gpa();
+	else {
 		print("Unsupport command\n");
 		Usage();
 		return -1;

@@ -37,6 +37,15 @@
 extern char guest_bin[];
 static DEFINE_PER_CPU(struct list_head, vcpu_list);
 static DEFINE_PER_CPU(unsigned long, vmid_bitmap);
+static LIST_HEAD(vgpa_list);
+static spinlock_t vcpu_req_lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
+
+void append_to_list(struct vcpu_gpa *t)
+{
+	spin_lock(&vcpu_req_lock);
+	list_add(&t->v_list, &vgpa_list);
+	spin_unlock(&vcpu_req_lock);
+}
 
 static void vcpu_vmid_init(void)
 {
@@ -171,26 +180,28 @@ static void vcpu_do_interrupt(struct vcpu *vcpu)
 
 static void vcpu_do_request(struct vcpu *vcpu)
 {
-	struct vcpu_gpa *n;
+	struct vcpu_gpa *n, *pos;
 
+	spin_lock(&vcpu_req_lock);
 	if (!vcpu->request)
 		return;
 
-	if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_ALL))
+	if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_ALL)) {
+		vcpu_clear_request(vcpu, VCPU_REQ_FENCE_GVMA_ALL);
 		vcpu_fence_gvma_all();
-	else if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_GPA)) {
-		list_for_each_entry(n, &vgpa_list, v_list) {
-			if (n->gpa)
-				__hfence_gvma_gpa(n->gpa);
+	}else if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_GPA)) {
+		vcpu_clear_request(vcpu, VCPU_REQ_FENCE_GVMA_GPA);
+		list_for_each_entry_safe(pos, n, &vgpa_list, v_list) {
+			if (pos->gpa) {
+				__hfence_gvma_gpa(pos->gpa);
+				list_del(&pos->v_list);
+			}
 		}
-	}else if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_VMID))
+	}else if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_VMID)) {
+		vcpu_clear_request(vcpu, VCPU_REQ_FENCE_GVMA_VMID);
 		__hfence_gvma_vmid(vcpu->vmid);
-	else if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_VMID_GPA)) {
-		list_for_each_entry(n, &vgpa_list, v_list) {
-			if (n->gpa)
-				__hfence_gvma_vmid_gpa(n->gpa, vcpu->vmid);
-		}
 	}
+	spin_unlock(&vcpu_req_lock);
 }
 
 static void vcpu_update_run_params(struct vcpu *vcpu)
@@ -431,6 +442,11 @@ static int vcpu_exception_delegation(void)
 void vcpu_set_request(struct vcpu *vcpu, unsigned int req)
 {
 	vcpu->request |= ((1UL) << req);
+}
+
+void vcpu_clear_request(struct vcpu *vcpu, unsigned int req)
+{
+    vcpu->request &=~ ((1UL) << req);
 }
 
 struct vcpu *get_vcpu(int vmid, int cpu)
