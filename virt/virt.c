@@ -182,10 +182,10 @@ static void vcpu_do_request(struct vcpu *vcpu)
 {
 	struct vcpu_gpa *n, *pos;
 
-	spin_lock(&vcpu_req_lock);
 	if (!vcpu->request)
 		return;
 
+	spin_lock(&vcpu_req_lock);
 	if (vcpu_check_request(vcpu->request, VCPU_REQ_FENCE_GVMA_ALL)) {
 		vcpu_clear_request(vcpu, VCPU_REQ_FENCE_GVMA_ALL);
 		vcpu_fence_gvma_all();
