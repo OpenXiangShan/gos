@@ -92,6 +92,7 @@ struct sbi_trap_hw_context {
 	char wait_var;
 	char next_mode[16];
 	unsigned long hw_info;
+	unsigned long boot_option;
 };
 
 void sbi_trap_handler(struct sbi_trap_regs *regs);

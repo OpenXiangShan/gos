@@ -31,10 +31,12 @@
 #include "../app/shell.h"
 #include "asm/sbi.h"
 #include "virt.h"
+#include "../app/command.h"
 
 extern const char logo[];
 
-void start_gos(unsigned int hart_id, struct device_init_entry *hw)
+void start_gos(unsigned int hart_id,
+	       struct device_init_entry *hw, char *boot_option)
 {
 	unsigned long start, end;
 
@@ -53,6 +55,8 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 	print("    time : %s\n", BUILD_TIME);
 
 	print("Hello, gos!\n");
+	print("boot option:\n%s\n", boot_option);
+
 	trap_init();
 
 	mm_init(hw);
@@ -64,6 +68,9 @@ void start_gos(unsigned int hart_id, struct device_init_entry *hw)
 	early_print_setup(hw);
 
 	print("satp:0x%lx\n", read_csr(satp));
+
+	set_test_cmd_ptr(boot_option);
+
 	parse_dtb();
 
 	percpu_init();

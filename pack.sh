@@ -15,6 +15,7 @@
 
 FILE_SBI=./build/mysbi.bin
 FILE_GOS=./build/gos.bin
+FILE_BOOT_OPTION=./auto_run.bin
 FILE_OUT=./out/Image.bin
 
 mkdir -p out
@@ -27,8 +28,13 @@ if [ ! -f "$FILE_GOS" ]; then
 	echo "$FILE_GOS does not exit!!"
 fi
 
+if [ ! -f "$FILE_BOOT_OPTION" ]; then
+	echo "$FILE_BOOT_OPTION does not exit!!"
+fi
+
 if [ -f "$FILE_SBI" -a -f "$FILE_GOS" ]; then
 	dd if=$FILE_SBI of=$FILE_OUT
+	dd if=$FILE_BOOT_OPTION of=$FILE_OUT bs=1K seek=1984
 	dd if=$FILE_GOS of=$FILE_OUT bs=1M seek=2
 	echo "pack success. $FILE_OUT"
 fi

@@ -274,8 +274,8 @@ static inline int next_is_m_mode(char *MODE)
 	return !strncmp(MODE, "M_MODE", 16);
 }
 
-static void sbi_jump_to_supervisor(unsigned int hart_id,
-				   unsigned long hw_info, unsigned long addr)
+static void sbi_jump_to_supervisor(unsigned int hart_id, unsigned long hw_info,
+				   unsigned long addr, unsigned long option)
 {
 	unsigned long val;
 
@@ -289,9 +289,13 @@ static void sbi_jump_to_supervisor(unsigned int hart_id,
 	write_csr(satp, 0);
 	//write_csr(sie, 0);
 
+	sbi_print("Ready to jump to S mode. hart_id:%d next_addr:0x%lx boot_optoin:0x%lx\n",
+		  hart_id, addr, option);
+
 	register unsigned long a0 asm("a0") = hart_id;
 	register unsigned long a1 asm("a1") = hw_info;
-	asm volatile ("mret"::"r" (a0), "r"(a1));
+	register unsigned long a2 asm("a2") = option;
+	asm volatile ("mret"::"r" (a0), "r"(a1), "r"(a2));
 }
 
 static void sbi_jump_to_machine(unsigned long addr)
@@ -309,11 +313,18 @@ void sbi_jump_to_next(struct sbi_trap_hw_context *ctx)
 {
 	if (next_is_s_mode(ctx->next_mode)) {
 		sbi_jump_to_supervisor(ctx->hart_id, ctx->hw_info,
-				       ctx->next_addr);
+				       ctx->next_addr, ctx->boot_option);
 	} else if (next_is_m_mode(ctx->next_mode)) {
 		sbi_jump_to_machine(ctx->next_addr);
 	} else
 		sbi_print("unsupported mode.\n");
+}
+
+static void sbi_get_boot_option(struct sbi_trap_hw_context *ctx)
+{
+	extern unsigned long __boot_option_start;
+
+	ctx->boot_option = (unsigned long)&__boot_option_start;
 }
 
 static void sbi_get_hw_info(struct sbi_trap_hw_context *ctx)
@@ -411,6 +422,7 @@ void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 #endif
 	sbi_set_next(ctx);
 	sbi_get_hw_info(ctx);
+	sbi_get_boot_option(ctx);
 
 	write_csr(mie, MIP_MSIP | MIP_MEIP | MIP_MTIP);
 

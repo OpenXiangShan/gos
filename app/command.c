@@ -19,10 +19,12 @@
 #include <string.h>
 #include <asm/type.h>
 #include "command.h"
+#include "vmap.h"
+#include "asm/pgtable.h"
 
 static struct cmd_history history;
 static struct commands _commands;
-extern char test_cmd[];
+static char *test_cmd;
 
 static int command_save_into_history(char *cmd)
 {
@@ -327,4 +329,14 @@ void set_last_cmd_pos()
 		history.last = history.max_index;
 	else
 		history.last = history.tail;
+}
+
+void set_test_cmd_ptr(char *boot_option)
+{
+	extern int mmu_is_on;
+
+	if (mmu_is_on)
+		test_cmd = (char *)ioremap((void *)boot_option, PAGE_SIZE, NULL);
+	else
+		test_cmd = boot_option;
 }

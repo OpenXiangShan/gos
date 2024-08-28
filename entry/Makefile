@@ -14,7 +14,6 @@
 
 obj-y += main.o
 obj-y += trap.o
-obj-y += auto_run_s.o
 obj-y += dtb_s.o
 obj-y += entry_s.o
 obj-y += guest_bin_s.o
