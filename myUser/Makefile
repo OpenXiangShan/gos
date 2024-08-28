@@ -43,31 +43,37 @@ MYUSER_OBJ_FILES += $(USER_COMMAND_C_FILES:$(MYUSER_COMMAND_DIR)/%.c=$(MYUSER_CO
 
 ifeq ($(CONFIG_MYUSER), y)
 myUser: $(MYUSER_OBJ_FILES)
-	mkdir -p $(BUILD_DIR)
-	$(LD) -T $(MYUSER_DIR)/myUser.lds -o $(BUILD_DIR)/$(USER_TARGET) $(MYUSER_OBJ_FILES) -Map $(BUILD_DIR)/myUser.map --no-warn-rwx-segments
-	$(RISCV_COPY) $(BUILD_DIR)/$(USER_TARGET) -O binary $(BUILD_DIR)/$(USER_TARGET_BIN)
+	@mkdir -p $(BUILD_DIR)
+	@$(LD) -T $(MYUSER_DIR)/myUser.lds -o $(BUILD_DIR)/$(USER_TARGET) $(MYUSER_OBJ_FILES) -Map $(BUILD_DIR)/myUser.map --no-warn-rwx-segments
+	@$(RISCV_COPY) $(BUILD_DIR)/$(USER_TARGET) -O binary $(BUILD_DIR)/$(USER_TARGET_BIN)
 else
 myUser:
-	cp $(TOPDIR)/myUser.bin $(TOPDIR)/build/myUser.bin
+	@cp $(TOPDIR)/myUser.bin $(TOPDIR)/build/myUser.bin
 endif
 
 $(MYUSER_ENTRY_DIR)/%_s.o: $(MYUSER_ENTRY_DIR)/%.S
-	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
 
 $(MYUSER_ENTRY_DIR)/%_c.o: $(MYUSER_ENTRY_DIR)/%.c
-	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
 
 $(MYUSER_CORE_DIR)/%_s.o: $(MYUSER_CORE_DIR)/%.S
-	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
 
 $(MYUSER_CORE_DIR)/%_c.o: $(MYUSER_CORE_DIR)/%.c
-	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
 
 $(MYUSER_LIB_DIR)/%_c.o: $(MYUSER_LIB_DIR)/%.c
-	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
 
 $(MYUSER_COMMAND_DIR)/%_c.o: $(MYUSER_COMMAND_DIR)/%.c
-	$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
 
 clean:
-	rm -rf $(shell find -name "*.o")
+	@rm -rf $(shell find -name "*.o")

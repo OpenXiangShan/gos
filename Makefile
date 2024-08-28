@@ -38,7 +38,8 @@ CONFIGS_DIR = $(TOPDIR)/configs
 DTS_DIR = $(CONFIGS_DIR)/dts
 
 default: gos pack.sh
-	./pack.sh
+	@echo "Packing..."
+	@./pack.sh
 
 fpga:
 	./bin2fpgadata -i out/Image.bin
@@ -50,13 +51,13 @@ defconfig: scripts/kconfig/conf FORCE
 	scripts/kconfig/conf -D configs/$@ Kconfig
 
 autoconf: scripts/kconfig/conf FORCE
-	mkdir -p include/config
-	mkdir -p include/linux
-	$< -s Kconfig
-	rm -rf include/gos-auto
-	mv include/linux include/gos-auto
-	echo "#define BUILD_TIME \"$(shell date '+%Y-%m-%d %H:%M:%S')\"" >> include/gos-auto/autoconf.h
-	echo "#define BUILD_USER \"$(shell id -un)\"" >> include/gos-auto/autoconf.h
+	@mkdir -p include/config
+	@mkdir -p include/linux
+	@$< -s Kconfig
+	@rm -rf include/gos-auto
+	@mv include/linux include/gos-auto
+	@echo "#define BUILD_TIME \"$(shell date '+%Y-%m-%d %H:%M:%S')\"" >> include/gos-auto/autoconf.h
+	@echo "#define BUILD_USER \"$(shell id -un)\"" >> include/gos-auto/autoconf.h
 
 menuconfig: scripts/kconfig/mconf
 	$< Kconfig
@@ -81,36 +82,36 @@ obj-$(CONFIG_VIRT) += virt/
 obj-$(CONFIG_USER) += user/
 
 gos: autoconf mysbi_bin myUser_bin myGuest_bin $(GOS_OBJ_FILES)
-	mkdir -p $(BUILD_DIR)
-	make -f $(TOPDIR)/Makefile.build obj=.
-	$(LD) -T ./gos.lds -o $(BUILD_DIR)/$(GOS_TARGET) $(GOS_OBJ_FILES) built-in.o -Map $(BUILD_DIR)/gos.map --no-warn-rwx-segments
-	$(RISCV_COPY) $(BUILD_DIR)/$(GOS_TARGET) -O binary $(BUILD_DIR)/$(GOS_TARGET_BIN)
+	@mkdir -p $(BUILD_DIR)
+	@make -f $(TOPDIR)/Makefile.build obj=. --no-print-directory
+	@$(LD) -T ./gos.lds -o $(BUILD_DIR)/$(GOS_TARGET) $(GOS_OBJ_FILES) built-in.o -Map $(BUILD_DIR)/gos.map --no-warn-rwx-segments
+	@$(RISCV_COPY) $(BUILD_DIR)/$(GOS_TARGET) -O binary $(BUILD_DIR)/$(GOS_TARGET_BIN)
 
 mysbi_bin: autoconf
-	make -C mysbi
+	@make -C mysbi --no-print-directory
 
 myUser_bin: autoconf
-	make -C myUser
+	@make -C myUser --no-print-directory
 
 myGuest_bin: autoconf
-	make -C myGuest
+	@make -C myGuest --no-print-directory
 
 mysbi-clean:
-	make -C mysbi clean
+	@make -C mysbi clean --no-print-directory
 
 myUser-clean:
-	make -C myUser clean
+	@make -C myUser clean --no-print-directory
 
 myGuest-clean:
-	make -C myGuest clean
+	@make -C myGuest clean --no-print-directory
 
 clean: mysbi-clean myGuest-clean myUser-clean
-	rm -rf $(shell find -name "*.o")
-	rm -rf $(BUILD_DIR)
-	rm -rf out
-	rm -rf include/config
-	rm -rf include/gos-auto
-	rm $(DTS_DIR)/*.dtb
+	@rm -rf $(shell find -name "*.o")
+	@rm -rf $(BUILD_DIR)
+	@rm -rf out
+	@rm -rf include/config
+	@rm -rf include/gos-auto
+	@rm -f $(DTS_DIR)/*.dtb
 
 %.dtb: $(DTS_DIR)/$(patsubst %.dtb,%.dts,$@)
 	dtc -O dtb -I dts -o $(DTS_DIR)/$@ $(DTS_DIR)/$(patsubst %.dtb,%.dts,$@)

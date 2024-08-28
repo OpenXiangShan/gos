@@ -52,34 +52,41 @@ MYGUEST_OBJ_FILES += $(GUEST_COMMAND_C_FILES:$(MYGUEST_COMMAND_DIR)/%.c=$(MYGUES
 
 ifeq ($(CONFIG_MYGUEST), y)
 myGuest: $(MYGUEST_OBJ_FILES)
-	mkdir -p $(BUILD_DIR)
-	$(LD) -T $(MYGUEST_DIR)/myGuest.lds -o $(BUILD_DIR)/$(GUEST_TARGET) $(MYGUEST_OBJ_FILES) -Map $(BUILD_DIR)/myGuest.map --no-warn-rwx-segments
-	$(RISCV_COPY) $(BUILD_DIR)/$(GUEST_TARGET) -O binary $(BUILD_DIR)/$(GUEST_TARGET_BIN)
+	@mkdir -p $(BUILD_DIR)
+	@$(LD) -T $(MYGUEST_DIR)/myGuest.lds -o $(BUILD_DIR)/$(GUEST_TARGET) $(MYGUEST_OBJ_FILES) -Map $(BUILD_DIR)/myGuest.map --no-warn-rwx-segments
+	@$(RISCV_COPY) $(BUILD_DIR)/$(GUEST_TARGET) -O binary $(BUILD_DIR)/$(GUEST_TARGET_BIN)
 else
 myGuest:
-	cp $(TOPDIR)/myGuest.bin $(TOPDIR)/build/myGuest.bin
+	@cp $(TOPDIR)/myGuest.bin $(TOPDIR)/build/myGuest.bin
 endif
 
 $(MYGUEST_ENTRY_DIR)/%_s.o: $(MYGUEST_ENTRY_DIR)/%.S
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_ENTRY_DIR)/%_c.o: $(MYGUEST_ENTRY_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_CORE_DIR)/%_c.o: $(MYGUEST_CORE_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_DRIVERS_DIR)/%_c.o: $(MYGUEST_DRIVERS_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_LIB_DIR)/%_c.o: $(MYGUEST_LIB_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_MM_DIR)/%_c.o: $(MYGUEST_MM_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_COMMAND_DIR)/%_c.o: $(MYGUEST_COMMAND_DIR)/%.c
-	$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
 
 clean:
-	rm -rf $(shell find -name "*.o")
+	@rm -rf $(shell find -name "*.o")
