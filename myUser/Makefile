@@ -14,8 +14,6 @@
 
 #build user
 
-include $(TOPDIR)/include/config/auto.conf
-
 BUILD_DIR = $(TOPDIR)/build
 MYUSER_DIR := $(shell pwd)
 
@@ -41,15 +39,10 @@ MYUSER_OBJ_FILES += $(USER_CORE_C_FILES:$(MYUSER_CORE_DIR)/%.c=$(MYUSER_CORE_DIR
 MYUSER_OBJ_FILES += $(USER_LIB_C_FILES:$(MYUSER_LIB_DIR)/%.c=$(MYUSER_LIB_DIR)/%_c.o)
 MYUSER_OBJ_FILES += $(USER_COMMAND_C_FILES:$(MYUSER_COMMAND_DIR)/%.c=$(MYUSER_COMMAND_DIR)/%_c.o)
 
-ifeq ($(CONFIG_MYUSER), y)
 myUser: $(MYUSER_OBJ_FILES)
 	@mkdir -p $(BUILD_DIR)
 	@$(LD) -T $(MYUSER_DIR)/myUser.lds -o $(BUILD_DIR)/$(USER_TARGET) $(MYUSER_OBJ_FILES) -Map $(BUILD_DIR)/myUser.map --no-warn-rwx-segments
 	@$(RISCV_COPY) $(BUILD_DIR)/$(USER_TARGET) -O binary $(BUILD_DIR)/$(USER_TARGET_BIN)
-else
-myUser:
-	@cp $(TOPDIR)/myUser.bin $(TOPDIR)/build/myUser.bin
-endif
 
 $(MYUSER_ENTRY_DIR)/%_s.o: $(MYUSER_ENTRY_DIR)/%.S
 	@echo "CC $@"

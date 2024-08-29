@@ -14,8 +14,6 @@
 
 #build guest
 
-include $(TOPDIR)/include/config/auto.conf
-
 BUILD_DIR = $(TOPDIR)/build
 #INCLUDE_DIR = $(TOPDIR)/include
 CORE_INCLUDE_DIR = $(TOPDIR)/core
@@ -50,15 +48,10 @@ MYGUEST_OBJ_FILES += $(GUEST_DRIVERS_C_FILES:$(MYGUEST_DRIVERS_DIR)/%.c=$(MYGUES
 MYGUEST_OBJ_FILES += $(GUEST_MM_C_FILES:$(MYGUEST_MM_DIR)/%.c=$(MYGUEST_MM_DIR)/%_c.o)
 MYGUEST_OBJ_FILES += $(GUEST_COMMAND_C_FILES:$(MYGUEST_COMMAND_DIR)/%.c=$(MYGUEST_COMMAND_DIR)/%_c.o)
 
-ifeq ($(CONFIG_MYGUEST), y)
 myGuest: $(MYGUEST_OBJ_FILES)
 	@mkdir -p $(BUILD_DIR)
 	@$(LD) -T $(MYGUEST_DIR)/myGuest.lds -o $(BUILD_DIR)/$(GUEST_TARGET) $(MYGUEST_OBJ_FILES) -Map $(BUILD_DIR)/myGuest.map --no-warn-rwx-segments
 	@$(RISCV_COPY) $(BUILD_DIR)/$(GUEST_TARGET) -O binary $(BUILD_DIR)/$(GUEST_TARGET_BIN)
-else
-myGuest:
-	@cp $(TOPDIR)/myGuest.bin $(TOPDIR)/build/myGuest.bin
-endif
 
 $(MYGUEST_ENTRY_DIR)/%_s.o: $(MYGUEST_ENTRY_DIR)/%.S
 	@echo "CC $@"
