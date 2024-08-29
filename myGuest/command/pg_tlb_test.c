@@ -229,29 +229,38 @@ err:
  * | XLEN-1  10 | 9             8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0
  *       PFN      reserved for SW   D   A   G   U   X   W   R   V
  */
-static void page_table_flag_test(char *param, char *cflag)
+static int page_table_flag_test(char *param, char *cflag)
 {
-	void *vaddr;
+	void *vaddr, *pa;
 	unsigned long *pte;
 	unsigned long pte_val;
 	int pte_flag, fence_flag;
+	pgprot_t pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY | _PAGE_GLOBAL);
 
 	if (strlen(param) == 0)  //param is empty
 		print("Please set pet flag value! \n");
 	else
 		pte_flag = atoi(param);
 
-
-	vaddr = mm_alloc(PAGE_SIZE);
+	vaddr = vmap_alloc(PAGE_SIZE);
 	if (!vaddr) {
+		print("%s -- Out of memory\n", __FUNCTION__);
 		goto ret;
+	}
+
+	pa = (void *)virt_to_phy(mm_alloc(PAGE_SIZE));
+	if (-1 ==
+	    mmu_page_mapping((unsigned long)pa, (unsigned long)vaddr, PAGE_SIZE,
+			     pgprot)) {
+		print("%s -- page mapping failed\n", __FUNCTION__);
+		return -1;
 	}
 
 	print("vaddr:0x%lx\n", vaddr);
 	strcpy(vaddr, "Hello");
 	pte = mmu_get_pte((unsigned long)vaddr);
 	if (!pte)
-		return;
+		return 0;
 	pte_val = *pte;
 
 	print("pte:0x%lx pte_val:0x%lx\n", pte, pte_val);
@@ -285,6 +294,8 @@ static void page_table_flag_test(char *param, char *cflag)
     }
 ret:
 	vmem_free(vaddr, PAGE_SIZE);
+
+	return 0;
 }
 
 
