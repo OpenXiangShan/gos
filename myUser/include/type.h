@@ -54,4 +54,8 @@ typedef unsigned long long u64;
 typedef signed long long s64;
 typedef unsigned char u8;
 
+typedef struct test_riscv {
+	char *name;
+	int (*fp)();
+} rtests;
 #endif

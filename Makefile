@@ -22,7 +22,7 @@ RISCV_COPY := $(GNU)objcopy
 RISCV_COPY_FLAGS := --set-section-flags .bss=alloc,contents --set-section-flags .sbss=alloc,contents -O binary
 RISCV_DUMP := $(GNU)objdump
 
-COPS := -g -O0 -Wall -nostdlib -mcmodel=medany -mabi=lp64d -march=rv64imafdc -fno-PIE -fomit-frame-pointer -Wno-builtin-declaration-mismatch
+COPS := -g -O0 -Wall -nostdlib -mcmodel=medany -mabi=lp64d -march=rv64imafdc_zba_zbb_zbc_zbs -fno-PIE -fomit-frame-pointer -Wno-builtin-declaration-mismatch
 
 .PHONY: FORCE
 
