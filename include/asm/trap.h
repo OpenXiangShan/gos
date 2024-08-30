@@ -63,5 +63,4 @@ struct fault_info {
         const char *name;
 };
 
-struct fault_info *ec_to_fault_info(unsigned int scause);
 #endif

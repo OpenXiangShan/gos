@@ -118,7 +118,7 @@ static struct fault_info fault_info[] = {
 	{ do_page_fault_info, "Store/AMO page fault" },
 };
 
-struct fault_info *ec_to_fault_info(unsigned int scause)
+static struct fault_info *ec_to_fault_info(unsigned int scause)
 {
 	return fault_info + (scause & SCAUSE_EC);
 }

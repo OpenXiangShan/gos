@@ -317,7 +317,10 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 		user_update_run_params(user);
 		disable_local_irq();
 		user_mode_switch_to(&user->cpu_context);
-		do_user_exception(user, regs);
+		if (do_user_exception(user, regs) == -1) {
+			enable_local_irq();
+			break;
+		}
 		enable_local_irq();
 	}
 
