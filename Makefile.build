@@ -26,7 +26,7 @@ PHONY += $(subdir-y)
 __build: $(subdir-y) $(obj)/built-in.o
 
 $(subdir-y):
-	@make -f $(TOPDIR)/Makefile.build obj=$@ 2>/dev/null
+	@make -f $(TOPDIR)/Makefile.build obj=$@
 
 $(obj)/built-in.o: $(cur_objs) $(subdir_objs)
 	@echo "LD $@"
