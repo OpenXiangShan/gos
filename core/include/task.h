@@ -37,6 +37,7 @@ struct task {
 	int cpu;
 	int id;
 	struct pt_regs regs;
+	void *pgdp;
 	int status;
 };
 
@@ -59,11 +60,14 @@ void walk_task_all_cpu(void);
 int percpu_tasks_init(int cpu);
 int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 		unsigned long stack, unsigned int stack_size, void *pgd);
+int create_user_task(char *name, int (*fn)(void *data), void *data, int cpu,
+		     unsigned long stack, unsigned int stack_size, void *pgd);
 int do_idle(void *data);
 void task_scheduler_enter(struct pt_regs *regs);
 void task_scheduler_exit(struct pt_regs *regs);
 void schedule(void);
 void Sleep(void);
+struct task *get_current_task(void);
 void set_task_status(struct task *task, int status);
 void sleep_to_timeout(int ms);
 

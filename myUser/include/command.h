@@ -25,6 +25,9 @@ struct user_run_params {
 	int argc;
 	char argv[16][64];
 	int busy;
+	int userid;
+	int cpu;
+	int bg;
 };
 
 struct command {

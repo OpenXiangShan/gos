@@ -313,8 +313,9 @@ int mmu_page_mapping_lazy(unsigned long virt, unsigned int size,
 	return 0;
 }
 
-int mmu_user_page_mapping(unsigned long phy, unsigned long virt,
-			  unsigned int size, pgprot_t pgprot)
+int mmu_user_page_mapping(unsigned long *pgdp, unsigned long phy,
+			  unsigned long virt, unsigned int size,
+			  pgprot_t pgprot)
 {
 	return __mmu_page_mapping_4k(pgdp, phy, virt, size, pgprot);
 }

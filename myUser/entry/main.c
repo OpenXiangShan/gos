@@ -20,6 +20,8 @@
 
 void start_user(struct user_run_params *params)
 {
+	user_print_info_init(params->userid, params->cpu, params->bg);
+
 	command_init();
 
 	while (1) {

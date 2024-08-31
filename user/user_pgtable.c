@@ -16,20 +16,24 @@
 
 #include "mm.h"
 #include "asm/pgtable.h"
+#include "task.h"
 
 int user_page_mapping(unsigned long phy, unsigned long virt, unsigned int size)
 {
+	struct task *task = get_current_task();
 	pgprot_t pgprot;
 
 	pgprot =
 	    __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC |
 		     _PAGE_DIRTY | _PAGE_USER);
 
-	return mmu_user_page_mapping(phy, virt, size, pgprot);
+	return mmu_user_page_mapping(task->pgdp, phy, virt, size, pgprot);
 }
 
 int user_page_mapping_pg(unsigned long phy, unsigned long virt, unsigned int size,
 		pgprot_t pgprot)
 {
-	return mmu_user_page_mapping(phy, virt, size, pgprot);
+	struct task *task = get_current_task();
+
+	return mmu_user_page_mapping(task->pgdp, phy, virt, size, pgprot);
 }

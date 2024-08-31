@@ -21,6 +21,10 @@
 
 #define MAX_PRINT_LENGTH 128
 
+static int print_info_userid;
+static int print_info_cpu;
+static int print_info_bg;
+
 static char log_buf[MAX_PRINT_LENGTH];
 static unsigned int pos;
 
@@ -191,14 +195,17 @@ static int my_vprintf(const char *fmt, va_list ap)
 void printf(const char *fmt, ...)
 {
 	va_list ap;
-	char user_log[32];
+	char user_log[128] = { 0 };
 	char *tmp = user_log;
 	char *buf = log_buf;
+
+	if (print_info_bg)
+		return;
 
 	spin_lock(&_lock);
 	pos = 0;
 
-	strcpy(tmp, "[User log] ");
+	sprintf(tmp, "[User%d on cpu%d log]", print_info_userid, print_info_cpu);
 	__puts(tmp);
 
 	va_start(ap, fmt);
@@ -209,4 +216,11 @@ void printf(const char *fmt, ...)
 
 	syscall(__NR_print, buf, pos);
 	spin_unlock(&_lock);
+}
+
+void user_print_info_init(int userid, int cpu, int bg)
+{
+	print_info_userid = userid;
+	print_info_cpu = cpu;
+	print_info_bg = bg;
 }

@@ -34,6 +34,12 @@ config APP_TASK_INFO
 config APP_USER_RUN
 	bool "APP_USER_RUN"
 	depends on USER
+config APP_USER_RUN_EXT
+	bool "APP_USER_RUN_EXT"
+	depends on USER
+config APP_USER_INFO
+	bool "APP_USER_INFO"
+	depends on USER
 config APP_VCPU_RUN
 	bool "APP_VCPU_RUN"
 	depends on VIRT

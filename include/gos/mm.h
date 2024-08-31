@@ -64,8 +64,9 @@ int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 		     pgprot_t pgprot);
 int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt, unsigned int size,
 			       pgprot_t pgprot);
-int mmu_user_page_mapping(unsigned long phy, unsigned long virt,
-			  unsigned int size, pgprot_t pgprot);
+int mmu_user_page_mapping(unsigned long *pgdp, unsigned long phy,
+			  unsigned long virt, unsigned int size,
+			  pgprot_t pgprot);
 int mmu_gstage_page_mapping(unsigned long *_pgdp, unsigned long phy,
 			    unsigned long virt, unsigned int size,
 			    pgprot_t pgprot);

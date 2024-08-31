@@ -176,14 +176,18 @@ continue_to_run:
 		new->regs.sstatus |= SR_FS;
 
 	if (mmu_is_on) {
-		if (pgd)
+		if (pgd) {
 			new->regs.satp = (((unsigned long)pgd) >> PAGE_SHIFT) |
 						SATP_MODE |
 						(((unsigned long)new->id) << SATP_ASID_SHIFT);
-		else
+			new->pgdp = pgd;
+		}
+		else {
 			new->regs.satp = (get_default_pgd() >> PAGE_SHIFT) |
 						SATP_MODE |
 						(((unsigned long)new->id) << SATP_ASID_SHIFT);
+			new->pgdp = (void *)get_default_pgd();
+		}
 	}
 
 	spin_lock(&tsk_ctl->lock);
@@ -195,6 +199,25 @@ continue_to_run:
 free_task:
 	mm_free(new, sizeof(struct task));
 	return -1;
+}
+
+int create_user_task(char *name, int (*fn)(void *data), void *data, int cpu,
+		     unsigned long stack, unsigned int stack_size, void *pgd)
+{
+	void *default_pgd = (void *)phy_to_virt(get_default_pgd());
+	void *pgdp;
+
+	if (!pgd) {
+		pgdp = mm_alloc(4096);
+		if (!pgdp)
+			return -1;
+	}
+	else
+		pgdp = (void *)phy_to_virt((unsigned long)pgd);
+
+	memcpy((char *)pgdp, (char *)default_pgd, 4096);
+
+	return create_task(name, fn, data, cpu, stack, stack_size, (void *)virt_to_phy(pgdp));
 }
 
 static void switch_mm(struct task *task)
@@ -320,6 +343,14 @@ void task_scheduler_enter(struct pt_regs *regs)
 	struct task_scheduler *sc = &per_cpu(schedulers, cpu);
 
 	sc->irq_regs = regs;
+}
+
+struct task *get_current_task(void)
+{
+	int cpu = sbi_get_cpu_id();
+	struct task_scheduler *sc = &per_cpu(schedulers, cpu);
+
+	return sc->current_task;
 }
 
 void task_scheduler_exit(struct pt_regs *regs)

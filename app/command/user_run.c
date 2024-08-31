@@ -67,7 +67,7 @@ static int cmd_user_run_handler(int argc, char *argv[], void *priv)
 	for (i = 0; i < params->argc; i++)
 		strcpy(params->argv[i], argv[i + 1]);
 
-	create_task("user", user_task_start, (void *)params, 0, NULL, 0, NULL);
+	create_user_task("user", user_task_start, (void *)params, 0, NULL, 0, NULL);
 
 	return 0;
 }

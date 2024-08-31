@@ -25,10 +25,13 @@
 
 #define USER_SPACE_CODE_START 0x1000
 
+#define USER_SPACE_START 0x0
 #define USER_SPACE_FIXED_MMAP 0x0
 #define USER_SPACE_FIXED_MMAP_SIZE (1 * 1024 * 1024 * 1024UL)	//1G
 #define USER_SPACE_DYNAMIC_MMAP (USER_SPACE_FIXED_MMAP + USER_SPACE_FIXED_MMAP_SIZE)
 #define USER_SPACE_DYNAMIC_MMAP_SIZE (1 * 1024 * 1024 * 1024UL)	//1G
+#define USER_SPACE_TOTAL_SIZE (4 * 1024 * 1024 * 1024UL) //4G
+
 #define USER_SPACE_DYNAMIC_MAP_NR 4096UL
 
 struct user_cpu_context {
@@ -124,9 +127,14 @@ struct user_run_params {
 	int argc;
 	char argv[16][64];
 	int busy;
+	int userid;
+	int cpu;
+	int bg;
 };
 
 struct user {
+	struct list_head list;
+	int user_id;
 	struct user_mode_cpu_context cpu_context;
 	unsigned long user_code_va;
 	unsigned long user_code_pa;
@@ -139,18 +147,29 @@ struct user {
 	int mapping;
 	struct user_run_params *run_params;
 	struct user_run_params s_run_params;
+	void *pgdp;
 };
 
 #if CONFIG_USER
 struct user *user_create(void);
+struct user *user_create_force(void);
 int user_mode_run(struct user *user, struct user_run_params *params);
 void user_mode_switch_to(struct user_mode_cpu_context *ctx);
 int user_page_mapping(unsigned long phy, unsigned long virt, unsigned int size);
 int user_page_mapping_pg(unsigned long phy, unsigned long virt, unsigned int size,
                 pgprot_t pgprot);
+void user_init(void);
+void dump_user_info_on_all_cpu(void);
+void dump_user_info_on_cpu(int cpu);
+struct user *get_user(int userid, int cpu);
 #else
+void user_init(void) {return};
 struct user *user_create(void) {return NULL;}
+struct user *user_create_force(void) {return NULL;}
 int user_mode_run(struct user *user, struct user_run_params *params) {return -1;}
+void dump_user_info_on_all_cpu(void) {return;}
+void dump_user_info_on_cpu(int cpu) {return;}
+struct user *get_user(int userid, int cpu) {return NULL;}
 #endif
 
 #endif

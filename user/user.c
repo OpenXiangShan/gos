@@ -26,14 +26,24 @@
 #include "user_memory.h"
 #include "user_exception.h"
 #include "asm/ptregs.h"
+#include "percpu.h"
+#include "asm/sbi.h"
+#include "asm/pgtable.h"
+#include "asm/tlbflush.h"
+#include "task.h"
 
 #define USER_SPACE_SHARE_MEMORY 0x0
 #define USER_SPACE_SHARE_MEMORY_SIZE 0x1000
 
 extern void do_exception_vector(void);
 extern char user_bin[];
+static DEFINE_PER_CPU(struct list_head, user_list);
+static unsigned long userid_bitmap;
 
-struct user *p_user __attribute__((section(".data"))) = NULL;
+static void user_userid_init(void)
+{
+	userid_bitmap = 0;
+}
 
 static void user_update_run_params(struct user *user)
 {
@@ -73,13 +83,11 @@ static int user_set_run_params(struct user *user, struct user_run_params *cmd)
 	return 0;
 }
 
-struct user *user_create(void)
+static struct user *__user_create(void)
 {
 	struct user *user;
 	struct user_cpu_context *u_context;
-
-	if (p_user)
-		return p_user;
+	struct list_head *users;
 
 	user = (struct user *)mm_alloc(sizeof(struct user));
 	if (!user) {
@@ -96,9 +104,116 @@ struct user *user_create(void)
 	INIT_LIST_HEAD(&user->memory_region);
 	__SPINLOCK_INIT(&user->lock);
 
-	p_user = user;
+	users = &per_cpu(user_list, sbi_get_cpu_id());
+	list_add_tail(&user->list, users);
 
 	return user;
+}
+
+static int find_free_userid(unsigned long *userid)
+{
+	unsigned long bitmap = *userid;
+	int pos = 0;
+
+	while (bitmap & 0x01) {
+		if (pos == 64)
+			return -1;
+		bitmap = bitmap >> 1;
+		pos++;
+	}
+
+	*userid |= (1UL) << pos;
+
+	return pos;
+}
+
+static int user_alloc_userid(int cpu)
+{
+
+	return find_free_userid(&userid_bitmap);
+}
+
+static void user_update_userid(struct user *user)
+{
+	user->user_id = user_alloc_userid(sbi_get_cpu_id());
+}
+
+static void __dump_user_info(int cpu)
+{
+	struct user *user;
+	struct list_head *users;
+
+	users = &per_cpu(user_list, cpu);
+	if (!users) {
+		print("Invalid hart id: %d\n", cpu);
+		return;
+	}
+
+	print("+++++++++++++ user info on cpu%d +++++++++++++\n", cpu);
+	list_for_each_entry(user, users, list) {
+		print("@@@@@@@@@@@@@@ user%d info: @@@@@@@@@@@@@@\n", user->user_id);
+		print("- userid : %d\n", user->user_id);
+		print("- pgdp : 0x%lx\n", user->pgdp);
+		print("- memory info:\n");
+		print("    code_va : 0x%lx\n", user->user_code_va);
+		print("    code_user_va : 0x%lx\n", user->user_code_user_va);
+		print("    code_pa : 0x%lx\n", user->user_code_pa);
+		print("    share_mem_va : 0x%lx\n", user->user_share_memory_va);
+		print("    share_mem_user_va : 0x%lx\n", user->user_share_memory_user_va);
+		print("    share_mem_pa : 0x%lx\n", user->user_share_memory_pa);
+		print("\n");
+	}
+}
+
+struct user *get_user(int userid, int cpu)
+{
+	struct user *user;
+	struct list_head *users;
+
+	users = &per_cpu(user_list, cpu);
+
+	list_for_each_entry(user, users, list) {
+		if (user->user_id == userid)
+			return user;
+	}
+
+	return NULL;
+}
+
+void dump_user_info_on_all_cpu(void)
+{
+	int cpu;
+
+	for_each_online_cpu(cpu)
+		__dump_user_info(cpu);
+}
+
+void dump_user_info_on_cpu(int cpu)
+{
+	__dump_user_info(cpu);
+}
+
+struct user *user_create_force(void)
+{
+	return __user_create();
+}
+
+struct user *user_create(void)
+{
+	struct user *user;
+	struct list_head *users;
+
+	users = &per_cpu(user_list, sbi_get_cpu_id());
+
+	if (list_empty(users))
+		goto create_user;
+
+	user = list_entry(list_first(users), struct user, list);
+
+	return user;
+
+create_user:
+	return __user_create();
 }
 
 int user_mode_run(struct user *user, struct user_run_params *params)
@@ -114,6 +229,9 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 	if (user->mapping == 1) {
 		return user_set_run_params(user, params);
 	}
+
+	user_update_userid(user);
+	print("userid: %d\n", user->user_id);
 
 	/* map user code */
 	user->user_code_user_va = USER_SPACE_CODE_START;
@@ -158,7 +276,7 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 			  user->user_share_memory_user_va,
 			  USER_SPACE_SHARE_MEMORY_SIZE);
 
-	__asm__ __volatile("sfence.vma":::"memory");
+	local_flush_tlb_all();
 
 	if (-1 ==
 	    add_user_space_memory(user, user->user_share_memory_user_va,
@@ -171,6 +289,8 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 
 	memcpy((char *)user->user_code_va, user_bin_ptr, user_bin_size);
 	if (params) {
+		params->userid = user->user_id;
+		params->cpu = sbi_get_cpu_id();
 		memcpy((char *)user->user_share_memory_va, (void *)params,
 		       sizeof(struct user_run_params));
 		user->run_params =
@@ -191,6 +311,8 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 	}
         memset((char *)regs, 0, sizeof(struct pt_regs));
 
+	user->pgdp = get_current_task()->pgdp;
+
 	while (1) {
 		user_update_run_params(user);
 		disable_local_irq();
@@ -199,5 +321,20 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 		enable_local_irq();
 	}
 
+	mm_free((void *)regs, sizeof(struct pt_regs));
+
 	return 0;
+}
+
+void user_init(void)
+{
+	int cpu;
+	struct list_head *users;
+
+	for_each_online_cpu(cpu) {
+		users = &per_cpu(user_list, cpu);
+		INIT_LIST_HEAD(users);
+	}
+
+	user_userid_init();
 }

@@ -177,7 +177,7 @@ static int my_vprintf(const char *fmt, va_list ap)
 int myGuest_print(const char *fmt, ...)
 {
 	va_list ap;
-	char guest_log[32] = { 0 };
+	char guest_log[128] = { 0 };
 	char *tmp = guest_log;
 
 	if (print_info_bg)
