@@ -289,8 +289,8 @@ static void sbi_jump_to_supervisor(unsigned int hart_id, unsigned long hw_info,
 	write_csr(satp, 0);
 	//write_csr(sie, 0);
 
-	sbi_print("Ready to jump to S mode. hart_id:%d next_addr:0x%lx boot_optoin:0x%lx\n",
-		  hart_id, addr, option);
+	//sbi_print("Ready to jump to S mode. hart_id:%d next_addr:0x%lx boot_optoin:0x%lx\n",
+	//	    hart_id, addr, option);
 
 	register unsigned long a0 asm("a0") = hart_id;
 	register unsigned long a1 asm("a1") = hw_info;
