@@ -74,7 +74,6 @@ void show_user_regs(struct pt_regs *regs)
 int do_user_exception(struct user *user, struct pt_regs *regs)
 {
 	struct user_cpu_context *u_context = &user->cpu_context.u_context;
-	struct fault_info *fi;
 	int ret = 0;
 
 	memcpy((char *)regs, (char *)u_context, sizeof(struct user_cpu_context));
