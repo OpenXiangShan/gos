@@ -143,7 +143,7 @@ static void hfence_gvma_gpa()
 	}
 
 	vcpu->v_gpa->gpa = vcpu->host_memory_test_pa;
-	append_to_list(vcpu->v_gpa);
+	append_vcpu_vgpalist(vcpu->v_gpa);
 	print("----->before fence_gvma.all va value:\n");
 	create_task("memory_test2", (void *)memory_test, (void *)vcpu, 0, NULL,
 		    0, NULL);

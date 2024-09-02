@@ -194,7 +194,7 @@ struct vcpu {
 	int running;
 };
 
-void append_to_list(struct vcpu_gpa *t);
+void append_vcpu_vgpalist(struct vcpu_gpa *t);
 
 struct vcpu_machine_device {
 	unsigned long base;

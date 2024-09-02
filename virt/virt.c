@@ -40,7 +40,7 @@ static DEFINE_PER_CPU(unsigned long, vmid_bitmap);
 static LIST_HEAD(vgpa_list);
 static spinlock_t vcpu_req_lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
 
-void append_to_list(struct vcpu_gpa *t)
+void append_vcpu_vgpalist(struct vcpu_gpa *t)
 {
 	spin_lock(&vcpu_req_lock);
 	list_add(&t->v_list, &vgpa_list);
