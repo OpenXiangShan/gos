@@ -23,6 +23,7 @@
 #define SBI_CONSOLE_PUTCHAR 0x1
 #define SBI_CONSOLE_GETCHAR 0x2
 #define SBI_SET_MCOUNTEREN 0x3
+#define SBI_SET_MEDELEG 0x4
 #define SBI_EXIT_VM_TEST 0x100
 #define SBI_GET_CPU_CYCLE 0x200
 #define SBI_GET_CPU_ID 0x201
@@ -113,5 +114,10 @@ static inline unsigned long sbi_get_csr_mie()
 static inline unsigned long sbi_get_csr_menvcfg()
 {
 	return SBI_CALL_0(SBI_GET_CSR_MENVCFG);
+}
+
+static inline void sbi_set_medeleg(unsigned long m_value)
+{
+	SBI_CALL_1(SBI_SET_MEDELEG, m_value);
 }
 #endif

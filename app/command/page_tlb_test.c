@@ -28,6 +28,7 @@
 #include "task.h"
 #include "asm/csr.h"
 #include "gos.h"
+#include "asm/sbi.h"
 
 enum test_opt {
 	ACCESS = 1,
@@ -340,8 +341,8 @@ static int flush_satp(void)
 	write_csr(CSR_SATP, satp);
 
 	local_flush_tlb_all();
+	sbi_set_medeleg(0);
 	print("get va value again: %s\n", (char *)va);
-	while(1);
 
 ret:
 	vmap_free(va, PAGE_SIZE);
