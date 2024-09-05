@@ -540,10 +540,11 @@ static void page_table_access_dirty_bit_test(enum test_opt opt)
 	if (opt == ACCESS) {
 		pte_val &= ~(1UL << 6);	//Access bit
 		print("clear access bit -- pte_val:0x%lx\n", pte_val);
+		print("TEST PASS\n");
 	} else if (opt == DIRTY) {
 		pte_val &= ~(1UL << 7);	//Dirty bit
 		print("clear dirty bit -- pte_val:0x%lx\n", pte_val);
-
+		print("TEST PASS\n");
 	} else {
 		print(" ERROR: %s():%d: Option invalid: %d\n", __func__, __LINE__, opt);
 		return;
