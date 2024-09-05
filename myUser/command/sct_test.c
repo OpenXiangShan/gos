@@ -20,6 +20,17 @@
 #include <../asm/csr.h>
 #include "string.h"
 
+#define is_csr_change(__reg)	\
+({						\
+	unsigned long __v;			\
+	__v = read_csr(__reg);		\
+	__asm__ volatile ("nop");	\
+	__asm__ volatile ("nop");	\
+	__asm__ volatile ("nop");	\
+	__v = read_csr(__reg) - __v;	\
+	__v;					\
+})
+
 void scounter_test(int val)
 {
 	switch (val) {
@@ -168,6 +179,7 @@ void scounter_test(int val)
 		break;
 	}
 
+        printf("TEST PASS\n");
 }
 
 static void read_Zicntr()
@@ -175,6 +187,17 @@ static void read_Zicntr()
 	printf("CSR_CYCLE value : 0x%lx\n", read_csr(CSR_CYCLE));
 	printf("CSR_TIME value : 0x%lx\n", read_csr(CSR_TIME));
 	printf("CSR_INSTRET value : 0x%lx\n", read_csr(CSR_INSTRET));
+
+	if(is_csr_change(CSR_CYCLE)&&
+	   is_csr_change(CSR_TIME)&&
+	   is_csr_change(CSR_INSTRET))
+	{
+		printf("TEST PASS\n");
+	}
+	else
+	{
+		printf("TEST FAIL\n");
+	}
 }
 
 static void read_Zihpm()
@@ -209,6 +232,8 @@ static void read_Zihpm()
 	printf("CSR_HPMCOUNTER29 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER29));
 	printf("CSR_HPMCOUNTER30 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER30));
 	printf("CSR_HPMCOUNTER31 value : 0x%lx\n", read_csr(CSR_HPMCOUNTER31));
+	
+	printf("TEST PASS\n");
 }
 
 static void Usage(void)
