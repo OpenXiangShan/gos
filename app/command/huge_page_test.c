@@ -118,6 +118,8 @@ static int cmd_huge_page_test_handler(int argc, char *argv[], void *priv)
 	print("free unmap test...\n");
 	addr_1g[0] = 1;
 
+	print("TEST PASS\n");
+
 	return 0;
 }
 
