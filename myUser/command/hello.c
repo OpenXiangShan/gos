@@ -25,6 +25,8 @@ static int user_cmd_hello_handler(int argc, char *argv[], void *priv)
 	for (int i = 0; i < argc; i++)
 		printf("cmd%d: %s\n", i, argv[i]);
 
+	print("TEST PASS\n");
+	
 	return 0;
 }
 
