@@ -46,6 +46,8 @@ static int cmd_svnapot_test_handler(int argc, char *argv[], void *priv)
 			addr[i * PAGE_SIZE + PAGE_SIZE - 1]);
 	}
 
+	print("TEST PASS\n");
+
 	return 0;
 }
 
