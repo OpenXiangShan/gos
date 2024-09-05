@@ -21,6 +21,7 @@
 #include "../command.h"
 #include <asm/csr.h>
 #include <asm/sbi.h>
+#include "virt.h"
 
 static void Usage(void)
 {
@@ -28,10 +29,16 @@ static void Usage(void)
 	print("mode option:\n");
 	print("    -- 1 (read csr register)\n");
 	print("    -- 2 (write csr register)\n");
-	print("    -- 3 (read mcounteren register)\n");
-	print("         --> csr_ctl  3  0  0\n");
-	print("    -- 4 (write mcounteren register)\n");
+	print("    -- 3 (read counteren register)\n");
+	print("        (read mcounteren register)\n");
+	print("         --> csr_ctl  3  0  \n");
+	print("        (read hcounteren register)\n");
+	print("         --> csr_ctl  3  1  \n");
+	print("    -- 4 (write counteren register)\n");
+	print("        (write mcounteren register)\n");
 	print("         --> csr_ctl  4  0 value\n");
+	print("        (write hcounteren register)\n");
+	print("         --> csr_ctl  4  1 value\n");
 	print("----------------------------------------------\n");
 	print("csr_num option:\n");
 	print("    -- csr register \n");
@@ -214,6 +221,10 @@ static void csr_write(unsigned long c_num, unsigned long value)
 		print("CSR_SCOUNTEREN value : 0x%lx\n",
 		      read_csr(CSR_SCOUNTEREN));
 		break;
+	case 0x606:
+		write_csr(CSR_HCOUNTEREN, value);
+		print("CSR_HCOUNTEREN value : 0x%lx\n", read_csr(CSR_HCOUNTEREN));
+		break;
 	default:
 		print("-------> get csr not support, try again \n");
 		break;
@@ -361,6 +372,9 @@ void csr_read(unsigned long c_num)
 	case 0x100:
 		print("CSR_SSTATUS value : 0x%lx\n", read_csr(CSR_SSTATUS));
 		break;
+	case 0x606:
+		print("CSR_HCOUNTEREN value : 0x%lx\n", read_csr(CSR_HCOUNTEREN));
+		break;
 	default:
 		print("-------> get csr not support, try again \n");
 		break;
@@ -373,6 +387,7 @@ static int cmd_csr_ctl_handler(int argc, char *argv[], void *priv)
 	unsigned int mode;
 	unsigned long csr_num;
 	unsigned long value;
+	struct vcpu *vcpu;
 
 	if (argc < 2) {
 		Usage();
@@ -392,15 +407,25 @@ static int cmd_csr_ctl_handler(int argc, char *argv[], void *priv)
 	print("-----> Modfiy mode:%d ,csr %d, value:0x%lx \n", mode, csr_num,
 	      value);
 #endif
+	vcpu = vcpu_create();
+	if (!vcpu)
+		return -1;
 
 	if (mode == 1)
 		csr_read(csr_num);
 	else if (mode == 2)
 		csr_write(csr_num, value);
-	else if (mode == 3)
-		print("mcounteren:0x%lx \n", sbi_get_cpu_mcounteren());
-	else if (mode == 4)
-		sbi_set_mcounteren(value);
+	else if (mode == 3){
+		if (csr_num == 0)
+			print("mcounteren:0x%lx \n", sbi_get_cpu_mcounteren());
+		else if (csr_num == 1)
+			print("hcounteren: 0x%lx \n", vcpu->cpu_ctx.hcounteren);
+	}else if (mode == 4) {
+		if (csr_num == 0)
+			sbi_set_mcounteren(value);
+		else if (csr_num == 1)
+			vcpu->cpu_ctx.hcounteren =  value;
+	}
 
 	print("\n");
 

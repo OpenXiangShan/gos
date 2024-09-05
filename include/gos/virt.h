@@ -120,6 +120,7 @@ struct cpu_context {
 	unsigned long vsie;
 	unsigned long vsip;
 	unsigned long vsatp;
+	unsigned long hcounteren;
 };
 
 struct virt_run_params {

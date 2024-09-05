@@ -62,13 +62,11 @@ static void vcpu_timer_next_event(unsigned long next, void *data)
 #endif
 
 #if CONFIG_ENABLE_VS_SSTC
-static void vs_sstc_init(void)
+static void vs_sstc_init(struct vcpu *vcpu)
 {
 	unsigned long val;
 
-	val = read_csr(hcounteren);
-	val |= HCOUNTEREN_TM;
-	write_csr(hcounteren, val);
+	vcpu->cpu_ctx.hcounteren |= HCOUNTEREN_TM;
 
 	val = read_csr(henvcfg);
 	val |= HENVCFG_STCE;
@@ -117,7 +115,7 @@ int vcpu_timer_init(struct vcpu *vcpu)
 	t->data = (void *)vcpu;
 
 #if CONFIG_ENABLE_VS_SSTC
-	vs_sstc_init();
+	vs_sstc_init(vcpu);
 #endif
 
 	return 0;
