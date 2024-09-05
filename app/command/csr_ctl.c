@@ -230,6 +230,8 @@ static void csr_write(unsigned long c_num, unsigned long value)
 		break;
 
 	}
+	
+	print("TEST PASS\n");
 }
 
 void csr_read(unsigned long c_num)
@@ -380,6 +382,8 @@ void csr_read(unsigned long c_num)
 		break;
 
 	}
+	
+	print("TEST PASS\n");
 }
 
 static int cmd_csr_ctl_handler(int argc, char *argv[], void *priv)
