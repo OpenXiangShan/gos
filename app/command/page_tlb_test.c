@@ -295,6 +295,8 @@ static void page_table_flag_test(char *param, char *cflag)
 		pte_val = (((pte_val >> PAGE_SHIFT) << PAGE_SHIFT) | pte_flag);
 		print("remove bit -- pte_val:0x%lx\n", pte_val);
 
+		print("TEST PASS\n");
+
 		if (fence_flag == 1) {
 			*pte = pte_val;
 			local_flush_tlb_all();
@@ -303,6 +305,8 @@ static void page_table_flag_test(char *param, char *cflag)
 			*pte = pte_val;
 		}
 		print("%s\n", vaddr);
+		
+		print("TEST PASS\n");
         }
 ret:
 	vmem_free(vaddr, PAGE_SIZE);
