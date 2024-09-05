@@ -416,7 +416,9 @@ static void page_table_sfence_all_test()
 	void *addr;
 	void *va, *pa1, *pa2;
 	int i = 0;
-
+	
+	unsigned long mask1,mask2;
+	
 	addr = mm_alloc(PAGE_SIZE);
 	if (!addr) {
 		print("%s -- Out of memory\n", __FUNCTION__);
@@ -465,6 +467,11 @@ static void page_table_sfence_all_test()
 	print("test start --> load 0x%lx(before sfence.vma)\n", va);
 	for (i = 0; i < 5; i++) {
 		print("0x%lx : %s\n", va, (char *)va);
+	
+		if(!strcmp((char *)va, "sfence test -- This is pa1"))
+		{
+			mask1 |= 1<<i;
+		}
 	}
 
 	local_flush_tlb_all();
@@ -472,7 +479,22 @@ static void page_table_sfence_all_test()
 	print("test start --> load 0x%lx(after sfence.vma)\n", va);
 	for (i = 0; i < 5; i++) {
 		print("0x%lx : %s\n", va, (char *)va);
+	
+		if(!strcmp((char *)va, "sfence test -- This is pa2"))
+		{
+			mask2 |= 1<<i;
+		}
 	}
+
+	if((mask1&0x1f)==0x1f && (mask2&0x1f)==0x1f)
+	{
+		print("TEST PASS\n");
+	}
+	else
+	{
+		print("TEST FAIL\n");
+	}
+	
 ret4:
 	vmap_free(va, PAGE_SIZE);
 ret3:
