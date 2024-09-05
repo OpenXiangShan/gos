@@ -196,6 +196,9 @@ static void sfence_param_test(char flag)
 		ret =  v_p_address_mapping(va1, str[2], str[3], 1, pgprot);
 		if (ret == -1)
 			goto err1;
+		
+		print("TEST PASS\n");
+
 	}else if (flag == 2) {
 		ret =  v_p_address_mapping(va, str[0], str[1], 2, pgprot);
 		if (ret == -1)
@@ -204,6 +207,8 @@ static void sfence_param_test(char flag)
 		ret =  v_p_address_mapping(va1, str[2], str[3], 0, pgprot);
 		if (ret == -1)
 			goto err1;
+
+		print("TEST PASS\n");
 	}
 err:
 	vmap_free(va, PAGE_SIZE);
