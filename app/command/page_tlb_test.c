@@ -547,6 +547,7 @@ static void page_table_access_dirty_bit_test(enum test_opt opt)
 	if (opt == ACCESS){
 		print("try reading virtual memory [0x%lx]\n\n", vaddr);
 		c = *(char*)vaddr;
+		print("TEST PASS\n");
 	}
 	else if (opt == DIRTY) {
 		print("try writing virtual memory [0x%lx]\n\n", vaddr);
