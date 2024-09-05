@@ -616,6 +616,7 @@ static int cmd_page_tlb_test_handler(int argc, char *argv[], void *priv)
 		sfence_param_test(2);
 	} else if (!strncmp(argv[0], "pte_g_test", sizeof("pte_g_test"))) {
 		sfence_g_test(argv[1]);
+		print("TEST PASS\n");
 	} else {
 		print("Unsupport command\n");
 		Usage();
