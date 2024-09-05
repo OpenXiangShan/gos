@@ -26,6 +26,7 @@
 #include "asm/tlbflush.h"
 
 #define DIS_PAGE_TABLE  0x1FF
+#define PTE_SHIFT	8
 static char *str[]={"hfence test -- This is pa1", "hfence test -- This is pa2",
 	"hfence test -- This is pa3", "hfence test -- This is pa4"};
 
@@ -280,7 +281,7 @@ static int page_table_flag_test(char *param, char *cflag)
 		else
 			fence_flag = atoi(cflag);
 
-		pte_val = (((pte_val >> PAGE_SHIFT) << PAGE_SHIFT) | pte_flag);
+		pte_val = (((pte_val >> PTE_SHIFT) << PTE_SHIFT) | pte_flag);
 		print("remove bit -- pte_val:0x%lx\n", pte_val);
 
 		if (fence_flag == 1) {
