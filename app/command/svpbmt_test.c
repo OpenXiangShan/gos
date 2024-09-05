@@ -29,10 +29,8 @@ static int cmd_svpbmt_test_handler(int argc, char *argv[], void *priv)
 	unsigned long *pte;
 	unsigned long start;
 	int i, __attribute__((unused)) tmp;
-	
 	unsigned long nocache_time;
 	unsigned long cache_time;
-
 	addr = (char *)vmem_alloc(4096, GFP_NOCACHE);
 	pte = mmu_get_pte((unsigned long)addr);
 

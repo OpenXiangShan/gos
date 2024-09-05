@@ -291,7 +291,6 @@ static int page_table_flag_test(char *param, char *cflag)
 			*pte = pte_val;
 		}
 		print("%s\n", vaddr);
-		
 		print("TEST PASS\n");
     }
 ret:

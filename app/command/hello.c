@@ -22,9 +22,7 @@
 static int cmd_hello_handler(int argc, char *argv[], void *priv)
 {
 	print("Hello Bosc gos Shell!!!\n");
-	
 	print("TEST PASS\n");
-	
 	return 0;
 }
 

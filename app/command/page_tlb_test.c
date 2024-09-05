@@ -196,9 +196,7 @@ static void sfence_param_test(char flag)
 		ret =  v_p_address_mapping(va1, str[2], str[3], 1, pgprot);
 		if (ret == -1)
 			goto err1;
-		
 		print("TEST PASS\n");
-
 	}else if (flag == 2) {
 		ret =  v_p_address_mapping(va, str[0], str[1], 2, pgprot);
 		if (ret == -1)
@@ -207,7 +205,6 @@ static void sfence_param_test(char flag)
 		ret =  v_p_address_mapping(va1, str[2], str[3], 0, pgprot);
 		if (ret == -1)
 			goto err1;
-
 		print("TEST PASS\n");
 	}
 err:
@@ -425,9 +422,7 @@ static void page_table_sfence_all_test()
 	void *addr;
 	void *va, *pa1, *pa2;
 	int i = 0;
-	
 	unsigned long mask1,mask2;
-	
 	addr = mm_alloc(PAGE_SIZE);
 	if (!addr) {
 		print("%s -- Out of memory\n", __FUNCTION__);
@@ -476,7 +471,6 @@ static void page_table_sfence_all_test()
 	print("test start --> load 0x%lx(before sfence.vma)\n", va);
 	for (i = 0; i < 5; i++) {
 		print("0x%lx : %s\n", va, (char *)va);
-	
 		if(!strcmp((char *)va, "sfence test -- This is pa1"))
 		{
 			mask1 |= 1<<i;
@@ -488,7 +482,6 @@ static void page_table_sfence_all_test()
 	print("test start --> load 0x%lx(after sfence.vma)\n", va);
 	for (i = 0; i < 5; i++) {
 		print("0x%lx : %s\n", va, (char *)va);
-	
 		if(!strcmp((char *)va, "sfence test -- This is pa2"))
 		{
 			mask2 |= 1<<i;
@@ -503,7 +496,6 @@ static void page_table_sfence_all_test()
 	{
 		print("TEST FAIL\n");
 	}
-	
 ret4:
 	vmap_free(va, PAGE_SIZE);
 ret3:
