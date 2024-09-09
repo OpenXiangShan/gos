@@ -25,6 +25,17 @@ void gos_init(unsigned int hart, struct sbi_trap_hw_context *ctx)
 	sbi_init(hart, ctx);
 }
 
+#if CONFIG_ENABLE_ZICBOM
+static void zicbom_init()
+{
+	unsigned long val;
+
+	val = read_csr(menvcfg);
+	val |= MENVCFG_CBIE | MENVCFG_CBCFE | MENVCFG_CBZE;
+	write_csr(menvcfg, val);
+}
+#endif
+
 #if CONFIG_ENABLE_SVPBMT
 static void svpbmt_init()
 {
@@ -88,6 +99,9 @@ void boot_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 	svpbmt_init();
 #endif
 
+#if CONFIG_ENABLE_ZICBOM
+	zicbom_init();
+#endif
 	sbi_jump_to_next(ctx);
 }
 
@@ -106,6 +120,10 @@ void other_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 
 #if CONFIG_ENABLE_SVPBMT
 	svpbmt_init();
+#endif
+
+#if CONFIG_ENABLE_ZICBOM
+	zicbom_init();
 #endif
 	sbi_secondary_init(hart, ctx);
 

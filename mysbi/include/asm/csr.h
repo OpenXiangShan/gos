@@ -34,6 +34,15 @@
 #define MENVCFG_PBMTE_SHIFT 62
 #define MENVCFG_PBMTE       (1UL << MENVCFG_PBMTE_SHIFT)
 
+#define MENVCFG_CBIE_SHIFT   4
+#define MENVCFG_CBIE         (3UL << MENVCFG_CBIE_SHIFT)
+
+#define MENVCFG_CBCFE_SHIFT  6
+#define MENVCFG_CBCFE        (1UL << MENVCFG_CBCFE_SHIFT)
+
+#define MENVCFG_CBZE_SHIFT   7
+#define MENVCFG_CBZE         (1UL << MENVCFG_CBZE_SHIFT)
+
 #define PRV_U				(0UL)
 #define PRV_S				(1UL)
 #define PRV_M				(3UL)
