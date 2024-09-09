@@ -86,6 +86,10 @@ config SVNAPOT
 	depends on ENABLE_MMU
 	depends on SELECT_SV39
 
+config ENABLE_ZICBOM
+	bool "Enable Zicbom"
+	default y
+
 config ENABLE_MULTI_TASK
 	bool "Enable Multi task"
 	default y
