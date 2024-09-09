@@ -170,7 +170,7 @@ static void cache_flush_test(void)
 
 	strcpy((char *)addr, "This is content in cache after flush");
 
-	cbo_cache_clean((unsigned long)addr);
+	cbo_cache_flush((unsigned long)addr);
 	mb();
 
 	start = get_system_tick();
