@@ -92,4 +92,7 @@ config APP_SCAN_MEM_TEST
 config APP_RESV_MEM_INFO
 	bool "APP_RESV_MEM_INFO"
 	default y
-
+config APP_CACHE_FLUSH_TEST
+	bool "APP_CACHE_FLUSH_TEST"
+	depends on ENABLE_ZICBOM 
+	default y
