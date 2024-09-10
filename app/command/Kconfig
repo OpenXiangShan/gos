@@ -96,3 +96,6 @@ config APP_CACHE_FLUSH_TEST
 	bool "APP_CACHE_FLUSH_TEST"
 	depends on ENABLE_ZICBOM 
 	default y
+config APP_SINVAL_TEST
+	bool "APP_SINVAL_TEST"
+	default y
