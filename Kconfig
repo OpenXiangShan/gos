@@ -84,7 +84,6 @@ config ENABLE_VS_SSTC
 config SVNAPOT
 	bool "Enable svnapot"
 	depends on ENABLE_MMU
-	depends on SELECT_SV39
 
 config ENABLE_ZICBOM
 	bool "Enable Zicbom"
