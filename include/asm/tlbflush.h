@@ -57,4 +57,9 @@ static inline void local_flush_tlb_range_asid(unsigned long start,
 	else
 		local_flush_tlb_all_asid(asid);
 }
+
+void sinval_all(void);
+void sinval_va(unsigned long va);
+void sinval_asid(unsigned long asid);
+void sinval_va_asid(unsigned long va, unsigned long asid);
 #endif

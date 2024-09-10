@@ -16,4 +16,5 @@ obj-y += mm.o
 obj-y += pgtable.o
 obj-y += vmap.o
 obj-y += cache_flush_s.o
+obj-y += tlb_flush_s.o
 obj-$(CONFIG_TINY) += tiny.o
