@@ -53,7 +53,7 @@ void *vmap_alloc(unsigned int size)
 				goto success;
 		} else {
 			nr = 0;
-			addr += PAGE_SIZE;
+			addr += (nr + 1) * PAGE_SIZE;
 		}
 
 		index++;
