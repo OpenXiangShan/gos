@@ -51,3 +51,4 @@ obj-$(CONFIG_APP_SCAN_MEM_TEST) += scan_mem_test.o
 obj-$(CONFIG_APP_RESV_MEM_INFO) += reserved_mem.o
 obj-$(CONFIG_APP_CACHE_FLUSH_TEST) += cache_flush_test.o
 obj-$(CONFIG_APP_SINVAL_TEST) += sinval_test.o
+obj-$(CONFIG_APP_ZICOND_TEST) += zicond_test.o

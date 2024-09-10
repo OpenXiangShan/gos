@@ -99,3 +99,6 @@ config APP_CACHE_FLUSH_TEST
 config APP_SINVAL_TEST
 	bool "APP_SINVAL_TEST"
 	default y
+config APP_ZICOND_TEST
+	bool "APP_ZICOND_TEST"
+	default y
