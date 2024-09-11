@@ -134,7 +134,7 @@ else ifeq ($(CONFIG_SELECT_AIA), y)
 run:
 	./qemu-system-riscv64 -nographic \
         -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
-	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on -m 8G \
+	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,x-zicond=on -m 8G \
         -bios out/Image.bin
 run-debug:
 	./qemu-system-riscv64 -nographic \
