@@ -25,6 +25,8 @@
 #include "asm/barrier.h"
 #include "vmap.h"
 #include "asm/pgtable.h"
+#include "cpu.h"
+#include "asm/sbi.h"
 
 static void Usage(void)
 {
@@ -71,23 +73,65 @@ static int cmd_cbo_handler(int argc, char *argv[], void *priv)
 	return 0;
 }
 
+static int prefetch_w_test(void)
+{
+	static int test __attribute__((used));
+	int *addr, *addr2;
+	unsigned long start;
+	unsigned long cost_pre, cost_unpre;
+	unsigned long mcounteren;
+	unsigned long new;
+
+	mcounteren = sbi_get_cpu_mcounteren();
+	new = mcounteren | (1UL << 0);
+	sbi_set_mcounteren(new);
+
+	addr = (int *)mm_alloc(4096);
+	addr2 = (int *)mm_alloc(4096);
+
+	disable_local_irq();
+
+	prefetch_r((unsigned long)addr);
+
+	start = read_csr(cycle);
+	test = *addr;
+	cost_pre = read_csr(cycle) - start;
+
+	start = read_csr(cycle);
+	test = *addr2;
+	cost_unpre = read_csr(cycle) - start;
+
+	enable_local_irq();
+
+	print("cost_pre: %dcycles cosr_unpre: %dcycles\n", cost_pre, cost_unpre);
+
+	sbi_set_mcounteren(mcounteren);
+	mm_free((void *)addr, 4096);
+	mm_free((void *)addr2, 4096);
+
+	return 0;
+}
+
 static int cmd_prefetch_handler(int argc, char *argv[], void *priv)
 {
 	unsigned long base;
 
-	if (argc != 2) {
+	if (argc < 1) {
 		print("Invalid input params\n");
 		Usage();
 		return -1;
 	}
 
-	base = atoi(argv[1]);
+	if (argc == 2)
+		base = atoi(argv[1]);
 	if (!strncmp(argv[0], "i", sizeof("i"))) {
 		prefetch_i(base);
 	} else if (!strncmp(argv[0], "w", sizeof("w"))) {
 		prefetch_w(base);
 	} else if (!strncmp(argv[0], "r", sizeof("r"))) {
 		prefetch_r(base);
+	} else if (!strncmp(argv[0], "test", sizeof("test"))) {
+		prefetch_w_test();
 	}
 
 	return 0;
