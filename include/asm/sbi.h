@@ -36,6 +36,7 @@
 #define SBI_GET_M_MSI_ADDR 0x501
 #define SBI_GET_M_MSI_DATA_IPI 0x502
 #define SBI_GET_M_MSI_ADDR_IPI 0x503
+#define SBI_HPM_TEST 0x600
 
 #define SBI_CALL(which, arg0, arg1, arg2) ({                    \
         register unsigned long a0 asm ("a0") = (unsigned long)(arg0);   \
@@ -119,5 +120,10 @@ static inline unsigned long sbi_get_csr_menvcfg()
 static inline void sbi_set_medeleg(unsigned long m_value)
 {
 	SBI_CALL_1(SBI_SET_MEDELEG, m_value);
+}
+
+static inline void sbi_hpm_test()
+{
+	SBI_CALL_0(SBI_HPM_TEST);
 }
 #endif

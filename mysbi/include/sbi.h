@@ -34,6 +34,7 @@
 #define SBI_GET_M_MSI_ADDR 0x501
 #define SBI_GET_M_MSI_DATA_IPI 0x502
 #define SBI_GET_M_MSI_ADDR_IPI 0x503
+#define SBI_HPM_TEST 0x600
 
 typedef int (*do_ext_irq_t)(void);
 

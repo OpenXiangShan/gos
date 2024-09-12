@@ -102,3 +102,6 @@ config APP_SINVAL_TEST
 config APP_ZICOND_TEST
 	bool "APP_ZICOND_TEST"
 	default y
+config APP_HPM_TEST
+	bool "APP_HPM_TEST"
+	default y
