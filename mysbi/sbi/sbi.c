@@ -246,10 +246,10 @@ void sbi_trap_handler(struct sbi_trap_regs *regs)
 		rc = sbi_ecall_handle(ecall_id, regs);
 		msg = "ecall handler failed";
 		break;
-	case CAUSE_LOAD_ACCESS:
-	case CAUSE_STORE_ACCESS:
-		msg = "load store access failed";
-		break;
+//	case CAUSE_LOAD_ACCESS:
+//	case CAUSE_STORE_ACCESS:
+//		msg = "load store access failed";
+//		break;
 	case CAUSE_FETCH_ACCESS:
 		msg = "Instruction access fault";
 		break;
@@ -396,6 +396,7 @@ void delegate_traps(void)
 
 	interrupts = MIP_SSIP | MIP_STIP | MIP_SEIP;
 	exceptions =
+		(1UL << CAUSE_BREAKPOINT) |
 	    (1UL << CAUSE_MISALIGNED_LOAD) | (1UL << CAUSE_MISALIGNED_STORE) |
 	    (1UL << CAUSE_MISALIGNED_FETCH) | (1UL << CAUSE_FETCH_PAGE_FAULT) |
 	    (1UL << CAUSE_LOAD_PAGE_FAULT) | (1UL << CAUSE_STORE_PAGE_FAULT)

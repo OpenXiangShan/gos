@@ -75,7 +75,7 @@ static void do_trap_error(struct pt_regs *regs, const char *str)
 		print
 		    ("sstatus:0x%lx  sbadaddr:0x%lx scause:0x%lx\n",
 		     regs->sstatus, regs->sbadaddr, regs->scause);
-
+	print("stval:0x%lx\n", read_csr(CSR_STVAL));
 	panic();
 }
 
