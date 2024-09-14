@@ -60,6 +60,11 @@ SECTIONS
 	.command_init_table : { *(.command_init_table) }
 	__command_init_table_end = .;
 
+	. = ALIGN(8);
+	__pci_driver_init_table = .;
+	.pci_driver_init_table : { *(.pci_driver_init_table) }
+	__pci_driver_init_table_end = .;
+
 	bss_begin = .;
         .bss : { *(.bss*) }
         bss_end = .;

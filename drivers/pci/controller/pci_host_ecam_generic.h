@@ -14,13 +14,14 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ALIGN_H__
-#define __ALIGN_H__
+#ifndef __PCI_HOST_ECAM_GENERIC__
+#define __PCI_HOST_ECAM_GENERIC__
 
-#define ALIGN_MASK(x, mask) (((x) + (mask)) & ~(mask))
-#define ALIGN(p, a) ALIGN_MASK(p, (typeof(p))(a) - 1)
-#define PTR_ALIGN(p, a) (typeof(p))ALIGN((unsigned long)p, a)
+#include "pci.h"
 
-#define RESIZE(v, up) ((v / up == 0) ?  (v) : ((v / up + 1)*up))
+struct pci_ecam_generic_bus {
+	struct pci_bus bus;
+	unsigned long base;
+};
 
 #endif

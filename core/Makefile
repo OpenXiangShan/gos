@@ -24,3 +24,4 @@ obj-y += event.o
 obj-y += cpu.o
 obj-y += percpu.o
 obj-y += clock.o
+obj-y += pci_device_driver.o

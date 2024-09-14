@@ -23,11 +23,13 @@
 #include "riscv_iommu_data.h"
 #include "imsic_data.h"
 #include "aplic_data.h"
+#include "pci_data.h"
 
 extern struct clint_data clint_hw_data;
 extern struct clint_data qemu_clint_hw_data;
 extern struct plic_data plic_hw_data;
 extern struct riscv_iommu_data riscv_iommu_data;
+extern struct pci_data generic_ecam_pci_data;
 
 static const struct device_init_entry __attribute__((used))
     device_info[] __attribute__((section(".device_init_table"))) = {
@@ -182,6 +184,16 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	  },
 #endif
+	{
+	 "pci-host-ecam-generic",
+	 0x30000000,
+	 0x10000000,
+	 " ",
+	 { 0xFF,},
+	 0,
+	 0,
+	 &generic_ecam_pci_data,
+	  },
 	{
 	 "THE END",
 	 0xFF,

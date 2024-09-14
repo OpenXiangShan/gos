@@ -35,4 +35,7 @@ menuconfig UART
 	if UART
 		source "drivers/uart/Kconfig"
 	endif
+config PCI
+	bool "Pcie drivers"
+	default y
 endmenu

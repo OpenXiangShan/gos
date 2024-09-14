@@ -90,14 +90,14 @@ void start_gos(unsigned int hart_id,
 
 	percpu_tasks_init(0);
 
-	enable_local_irq();
-
 	vcpu_init();
 
 	user_init();
 
 	end = sbi_get_cpu_cycles();
 	print("gos startup success, cost: %d(cycles)\n", end - start);
+
+	enable_local_irq();
 
 	create_task("shell_init", shell_init, NULL, 0, NULL, 0, NULL);
 }
