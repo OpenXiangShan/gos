@@ -13,3 +13,4 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 obj-$(CONFIG_DMAC_DW_AXI_DRIVER) += dmac_dw_axi.o
+obj-$(CONFIG_DMAC_MY_PCI_DMAENGINE_DRIVER) += my_pci_dmaengine.o

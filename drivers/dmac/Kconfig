@@ -1,3 +1,7 @@
 config DMAC_DW_AXI_DRIVER
 	bool "DRIVER_DMAC_DW_AXI"
 	default y
+
+config DMAC_MY_PCI_DMAENGINE_DRIVER
+	bool "DRIVER_MY_PCI_DMAENGINE"
+	default y
