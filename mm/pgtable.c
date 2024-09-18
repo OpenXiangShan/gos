@@ -503,7 +503,7 @@ int mmu_direct_page_mapping()
 		start = mm_blocks->memory_block_start[i];
 		size = mm_blocks->memory_block_size[i];
 
-		print("%s -- start:0x%lx size:0x%lx\n", __FUNCTION__, start, size);
+		print("Direct mapping: start:0x%lx size:0x%lx\n", start, size);
 #if CONFIG_SELECT_4K_DIRECT_MAPPING
 		ret = mmu_page_mapping(start, phy_to_virt(start), size, pgprot);
 #elif CONFIG_SELECT_2M_DIRECT_MAPPING
@@ -528,7 +528,7 @@ static int mmu_hw_page_mapping(struct device_init_entry *hw)
 
 	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
 
-	print("%s -- start:0x%lx size:0x%lx\n", __FUNCTION__, phy_start, size);
+	print("HW mapping: start:0x%lx size:0x%lx\n", phy_start, size);
 	return mmu_page_mapping_2M(phy_start, virt_start, size, pgprot);
 }
 
@@ -544,7 +544,7 @@ static int mmu_dtb_page_mapping()
 	unsigned long virt_start = (unsigned long)FIXMAP_DTB_START;
 	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
 
-	print("%s -- start:0x%lx size:0x%lx\n", __FUNCTION__, phy_start, size);
+	print("DTB mapping: start:0x%lx size:0x%lx\n", phy_start, size);
 	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
 }
 
@@ -560,7 +560,7 @@ static int mmu_code_page_mapping()
 	    __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC |
 		     _PAGE_DIRTY);
 
-	print("%s -- start:0x%lx size:0x%lx\n", __FUNCTION__, phy_start, size);
+	print("Code mapping: start:0x%lx size:0x%lx\n", phy_start, size);
 	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
 }
 
@@ -608,7 +608,7 @@ int paging_init(struct device_init_entry *hw)
 	mmu_hw_page_mapping(hw);
 	mmu_dtb_page_mapping();
 
-	print("mmu page mapping finish...\n");
+	print("Paging init: mmu page mapping finish...\n");
 
 	enable_mmu(1);
 
@@ -622,7 +622,7 @@ int do_page_fault(unsigned long addr)
 	unsigned long virt_start;
 	pgprot_t pgprot;
 
-	print("%s -- fault addr:0x%lx\n", __FUNCTION__, addr);
+	print("Page Fault -- fault addr:0x%lx\n", addr);
 
 	if (addr >= VMAP_START && addr <= VMAP_END) {
 		virt_start = addr;

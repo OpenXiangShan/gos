@@ -173,8 +173,8 @@ static int imsic_state_setup(struct imsic *p_imsic,
 	int i;
 
 	print
-	    ("%s -- nr_harts:%d, nr_guests:%d, nr_ids:%d, guest_index_bits:%d, hart_index_bits:%d, group_index_bits:%d\n",
-	     __FUNCTION__, data->nr_harts, data->nr_guests, data->nr_ids,
+	    ("imsic: nr_harts:%d, nr_guests:%d, nr_ids:%d, guest_index_bits:%d, hart_index_bits:%d, group_index_bits:%d\n",
+	     data->nr_harts, data->nr_guests, data->nr_ids,
 	     data->guest_index_bits, data->hart_index_bits,
 	     data->group_index_bits);
 
@@ -187,12 +187,12 @@ static int imsic_state_setup(struct imsic *p_imsic,
 	p_imsic->nr_ids = data->nr_ids;
 
 	if ((1ULL << p_imsic->guest_index_bits) < p_imsic->nr_guests) {
-		print("%s -- invalid guest param\n", __FUNCTION__);
+		print("imsic: invalid guest param\n");
 		return -1;
 	}
 
 	if ((1ULL << p_imsic->hart_index_bits) < p_imsic->nr_harts) {
-		print("%s -- invalid hart param\n", __FUNCTION__);
+		print("imsic: invalid hart param\n");
 		return -1;
 	}
 
@@ -213,8 +213,8 @@ static int imsic_state_setup(struct imsic *p_imsic,
 			    per_hart_base + (1ULL << 12) * guest_id;
 			p_imsic->interrupt_file_base[hart_id][guest_id] =
 			    interrupt_file_base;
-			print("%s -- interrupt file(hart_%d, guest_%d): 0x%x\n",
-			      __FUNCTION__, hart_id, guest_id,
+			print("imsic: interrupt file(hart_%d, guest_%d): 0x%x\n",
+			      hart_id, guest_id,
 			      interrupt_file_base);
 		}
 	}
@@ -335,7 +335,7 @@ int imsic_init(char *name, unsigned long base, int len,
 
 	cpu_hotplug_notify_register(&imsic_cpuhp_notifier);
 
-	print("%s success irq_domain:0x%x\n", __FUNCTION__, &imsic.irq_domain);
+	print("imsic: init success irq_domain:0x%x\n", &imsic.irq_domain);
 
 	return 0;
 }

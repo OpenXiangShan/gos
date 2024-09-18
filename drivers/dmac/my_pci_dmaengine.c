@@ -71,9 +71,9 @@ static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 	struct resource res;
 	int size;
 
-	print("%s -- 0:%x:%x:%x\n",
-		__FUNCTION__, pdev->bus->bus_number, PCI_SLOT(pdev->devfn),
-		PCI_FUNC(pdev->devfn), pdev->vendor, pdev->device);
+	print("pci-dev[0:%x:%x:%x]: vendor:0x%x device:0x%x\n",
+	      pdev->bus->bus_number, PCI_SLOT(pdev->devfn),
+	      PCI_FUNC(pdev->devfn), pdev->vendor, pdev->device);
 
 	pci_enable_resource(pdev, 1 << 0);
 
@@ -82,7 +82,9 @@ static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 	pci_get_resource(pdev, 0, &res);
 
 	size = res.end - res.base + 1;
-	print("ioremap addr:0x%lx size : 0x%x\n", res.base, size);
+	print("pci-dev[0:%x:%x:%x]: ioremap addr:0x%lx size : 0x%x\n",
+	      pdev->bus->bus_number, PCI_SLOT(pdev->devfn),
+	      PCI_FUNC(pdev->devfn), res.base, size);
 	base = (unsigned long)ioremap((void *)res.base, res.end - res.base + 1, NULL);
 
 	drv = dev->drv;

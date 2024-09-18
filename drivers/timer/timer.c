@@ -151,12 +151,11 @@ int clint_timer_init(unsigned long base, int len, struct irq_domain *d, void *pr
 {
 	struct clint_priv_data *data = (struct clint_priv_data *)priv;
 
-	print("%s -- base:0x%lx, clint_freq:0x%x\n", __FUNCTION__, base,
+	print("clint: timer init -- base:0x%lx, clint_freq:0x%x\n", base,
 	      data->clint_freq);
 
 	if (!data) {
-		print("%s %s %d can not find clint info...\n", __FILE__,
-		      __FUNCTION__, __LINE__);
+		print("clint: can not find clint info...\n");
 		return -1;
 	}
 

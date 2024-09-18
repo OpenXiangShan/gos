@@ -99,12 +99,12 @@ int pci_host_ecam_generic_init(struct device *dev, void *data)
 	struct resource res;
 	struct pci_priv_data *priv = (struct pci_priv_data *)data;
 
-	print("%s -- base:0x%lx len:0x%lx cpu_addr:0x%lx pci_addr:0x%lx\n",
-		__FUNCTION__, dev->base, dev->len, priv->pci_addr + priv->offset, priv->pci_addr);
+	print("ecam-generic-pci-host: base:0x%lx len:0x%lx cpu_addr:0x%lx pci_addr:0x%lx\n",
+	      dev->base, dev->len, priv->pci_addr + priv->offset, priv->pci_addr);
 
 	generic_bus = (struct pci_ecam_generic_bus *)mm_alloc(sizeof(struct pci_ecam_generic_bus));
 	if (!generic_bus) {
-		print("%s -- alloc generic pci bus fauiled!!\n", __FUNCTION__);
+		print("ecam-generic-pci-host: alloc generic pci bus fauiled!!\n");
 		return -1;
 	}
 	generic_bus->base = (unsigned long)ioremap((void *)dev->base, dev->len, 0);

@@ -75,7 +75,7 @@ static void scan_dtb_cpu_satp_mode(void *dtb, int offset, void *data)
 	const char *mode;
 
 	mode = fdt_getprop((const void *)dtb, offset, "mmu-type", NULL);
-	print("%s -- mode:%s\n", __FUNCTION__, mode);
+	print("cpu: satp mode:%s\n", mode);
 	if (!strcmp(mode, "riscv,sv39")) {
 		pgtable_l4_enabled = 0;
 		pgtable_l5_enabled = 0;
@@ -89,7 +89,7 @@ static void scan_dtb_cpu_satp_mode(void *dtb, int offset, void *data)
 		pgtable_l5_enabled = 1;
 	}
 	else {
-		print("Unsupport satp mode.. default use sv39...\n");
+		print("cpu: Unsupport satp mode.. default use sv39...\n");
 		pgtable_l4_enabled = 0;
 		pgtable_l5_enabled = 0;
 	}
@@ -137,7 +137,7 @@ void bringup_secondary_cpus(struct device_init_entry *hw)
 		}
 	}
 
-	print("bringup %d cpus success\n", online);
+	print("cpu: bringup %d cpus success\n", online);
 }
 
 void cpu_regs_init(struct pt_regs *regs)

@@ -165,7 +165,7 @@ static struct pci_device *pci_setup_device(
 
 	dev = (struct pci_device *)mm_alloc(sizeof(struct pci_device));
 	if (!dev) {
-		print("pci alloc device failed!! devfn:%d\n", devfn);
+		print("pci: pci alloc device failed!! devfn:%d\n", devfn);
 		return NULL;
 	}
 
@@ -186,7 +186,7 @@ static struct pci_bus *pci_setup_bridge(struct pci_bus *bus, int devfn, unsigned
 
 	child = (struct pci_bus *)mm_alloc(sizeof(struct pci_bus));
 	if (!child) {
-		print("pci alloc bus failed!!\n");
+		print("pci: pci alloc bus failed!!\n");
 		return NULL;
 	}
 	INIT_LIST_HEAD(&child->devices);
@@ -237,7 +237,7 @@ static int pci_scan_slot(struct pci_bus *bus, int devfn)
 
 			pci_read_base_address(dev, 6);
 
-			print("pci 0:%x:%x:%x: [%x:%x] type %x class %x\n", 
+			print("pci: 0:%x:%x:%x: [%x:%x] type %x class %x\n", 
 			       bus->bus_number, PCI_SLOT(devfn),
 			       PCI_FUNC(devfn), dev->vendor,
 			       dev->device, hdr_type, dev->class);
@@ -246,7 +246,7 @@ static int pci_scan_slot(struct pci_bus *bus, int devfn)
 		else if (hdr_type == PCI_HEADER_TYPE_BRIDGE) {
 			child = pci_setup_bridge(bus, devfn, vendor_id);
 			child->class = pci_read_config_dword(bus, devfn, PCI_CLASS_REVISION) >> 8;
-			print("pci 0:%x:%x:%x: [%x:%x] type %x class %x\n", 
+			print("pci: 0:%x:%x:%x: [%x:%x] type %x class %x\n", 
 			       bus->bus_number, PCI_SLOT(devfn),
 			       PCI_FUNC(devfn), child->vendor,
 			       child->device, hdr_type, child->class);
@@ -316,7 +316,7 @@ static int pci_dev_assign_resources(struct pci_bus *bus)
 		b->base = pci_addr;
 		b->size = r->end - r->base + 1;
 
-		print("pci 0:%x:%x:%x: [%x:%x] -- BAR[%d] : 0x%lx - 0x%lx\n", 
+		print("pci: 0:%x:%x:%x: [%x:%x] -- BAR[%d] : 0x%lx - 0x%lx\n", 
 		       dev->bus->bus_number, PCI_SLOT(dev->devfn),
 		       PCI_FUNC(dev->devfn), dev->vendor,
 		       dev->device, dev_res->bar,
@@ -375,7 +375,7 @@ static int pci_scan_bus(struct pci_bus *bus, int bus_number)
 
 		child->subordinate = bus_end;
 		pci_write_config_byte(child, child->devfn, PCI_SUBORDINATE_BUS, child->subordinate);
-		print("bus:%d primary:%d subordinate:%d\n", child->bus_number, child->primary, child->subordinate);
+		print("pci: bus:%d primary:%d subordinate:%d\n", child->bus_number, child->primary, child->subordinate);
 	}	
 
 	return bus_end;
@@ -404,7 +404,7 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 		r->end = r->base + size - 1;
 
 		if (r->end > end) {
-			print("%s -- alloc resource failed\n", __FUNCTION__);
+			print("pci: %s -- alloc resource failed\n", __FUNCTION__);
 			return -1;
 		}
 
@@ -426,7 +426,7 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 	bus->base = base;
 	bus->limit = limit;
 
-	print("bus%d -- base:0x%lx limit:0x%lx\n", bus->bus_number, base, limit);
+	print("pci: bus%d -- base:0x%lx limit:0x%lx\n", bus->bus_number, base, limit);
 
 	return 0;
 }
@@ -546,7 +546,7 @@ void pci_enable_resource(struct pci_device *dev, int mask)
 	}
 
 	if (cmd != old) {
-		print("enabling device (0x%x -> 0x%x)\n", old, cmd);
+		print("pci: enabling device (0x%x -> 0x%x)\n", old, cmd);
 		pci_write_config_word(dev->bus, dev->devfn, PCI_COMMAND, cmd);
 	}
 }
@@ -572,18 +572,18 @@ int pci_probe_root_bus(struct pci_bus *bus)
 	INIT_LIST_HEAD(&bus->res_used);
 	bus->parent = NULL;
 
-	print("pci probe root bus...\n");
+	print("pci: pci probe root bus...\n");
 
 	pci_scan_bus(bus, 0);
 
-	print("pci bus assign resource...\n");
+	print("pci: pci bus assign resource...\n");
 	pci_bus_assign_resources_size(bus);
 	pci_bus_assign_resources(bus);
 
-	print("pci device assign resource...\n");
+	print("pci: pci device assign resource...\n");
 	pci_dev_assign_resources(bus);
 
-	print("pci create device...\n");
+	print("pci: pci create device...\n");
 	pci_create_device(bus);
 
 	pci_probe_driver();

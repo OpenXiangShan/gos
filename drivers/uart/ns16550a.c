@@ -158,7 +158,7 @@ int ns16550a_init(struct device *dev, void *data)
 	struct driver *drv;
 	int irqs[16], nr_irqs, i;
 
-	print("%s %d base: 0x%lx, len: %d, irq: %d\n", __FUNCTION__, __LINE__,
+	print("ns16550a: base: 0x%lx, len: %d, irq: %d\n",
 	      dev->base, dev->len, dev->irqs[0]);
 
 	while (readl(base_address + USR) & 0x1) ;

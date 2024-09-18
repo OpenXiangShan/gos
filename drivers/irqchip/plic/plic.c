@@ -170,8 +170,8 @@ int plic_init(char *name, unsigned long base, int len,
 		plic.ndev = priv->ndev;
 	}
 
-	print("%s -- %s %d, name:%s, base:0x%lx, max_priority: %d, ndev: %d\n",
-	      __FILE__, __FUNCTION__, __LINE__, name, plic.base_address,
+	print("plic: name:%s, base:0x%lx, max_priority: %d, ndev: %d\n",
+	      name, plic.base_address,
 	      plic.max_priority, plic.ndev);
 
 	__plic_init(&plic, 0);

@@ -135,7 +135,7 @@ int qemu_8250_driver_init(struct device *dev, void *data)
 	struct driver *drv;
 	int irqs[16], nr_irqs, i;
 
-	print("%s -- base: 0x%lx, len: %d, nr_irqs:%d irq: %d\n", __FUNCTION__,
+	print("8250: base: 0x%lx, len: %d, nr_irqs:%d irq: %d\n",
 	      dev->base, dev->len, dev->irq_num, dev->irqs[0]);
 
 	writeb(base_address + UART_IER, 1);

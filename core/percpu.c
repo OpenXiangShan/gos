@@ -43,7 +43,7 @@ int percpu_init()
 		percpu_buf[i] = (unsigned long)mm_alloc(percpu_sec_size);
 		memset((char *)percpu_buf[i], 0, percpu_sec_size);
 		percpu_offset[i] = percpu_buf[i] - percpu_sec_base;
-		print("cpu%d -- percpu_buf:0x%lx, percpu_offset:0x%lx\n", i,
+		print("Percpu: cpu%d -- percpu_buf:0x%lx, percpu_offset:0x%lx\n", i,
 		      percpu_buf[i], percpu_offset[i]);
 	}
 

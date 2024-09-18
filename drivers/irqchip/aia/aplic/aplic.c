@@ -151,7 +151,7 @@ int aplic_init(char *name, unsigned long base, int len,
 	aplic.child_index = aplic_priv_data->child_index;
 
 	print
-	    ("%s -- name:%s base:0x%lx mmode:%d mode:%d index:%d delegate:%d child_index:%d\n",
+	    ("aplic: %s -- name:%s base:0x%lx mmode:%d mode:%d index:%d delegate:%d child_index:%d\n",
 	     __FUNCTION__, aplic.name, aplic.base, aplic.mmode, aplic.mode,
 	     aplic.index, aplic.delegate, aplic.child_index);
 
@@ -183,11 +183,11 @@ int aplic_init(char *name, unsigned long base, int len,
 
 		aplic_msi_setup(&aplic);
 	} else {
-		print("unsupported aplic mode\n");
+		print("aplic: unsupported aplic mode\n");
 		return -1;
 	}
 
-	print("%s success irq_domain:0x%x\n", __FUNCTION__, &aplic.domain);
+	print("aplic: success irq_domain:0x%x\n", &aplic.domain);
 
 	return 0;
 }
