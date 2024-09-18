@@ -95,11 +95,18 @@ void walk_and_print_command()
 {
 	struct command_info *entry;
 	int nr = _commands.avail;
+	int count = 0;
 
 	for_each_command(entry, _commands.p_commands, nr) {
 		if (!entry->in_used)
 			continue;
-		print("%s ", entry->command->cmd);
+		print("%24s", entry->command->cmd);
+		if (count++ == 128 / 24) {
+			count = 0;
+			print("\n");
+			continue;
+		}
+		print(" ");
 	}
 	print("\n");
 }
