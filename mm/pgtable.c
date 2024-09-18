@@ -317,7 +317,12 @@ int mmu_user_page_mapping(unsigned long *pgdp, unsigned long phy,
 			  unsigned long virt, unsigned int size,
 			  pgprot_t pgprot)
 {
-	return __mmu_page_mapping_4k(pgdp, phy, virt, size, pgprot);
+	if (__mmu_page_mapping_4k(pgdp, phy, virt, size, pgprot))
+		return -1;
+
+	local_flush_tlb_range(virt, size, PAGE_SIZE);
+
+	return 0;
 }
 
 int mmu_gstage_page_mapping(unsigned long *_pgdp, unsigned long phy,
