@@ -194,7 +194,7 @@ static int _out_num(char *out, unsigned long n, int base, char lead, int maxwidt
 		*--s = '-';
 
 	while (*s != '\0') {
-		*out = *s++;
+		*out++ = *s++;
 		ret++;
 	}
 
