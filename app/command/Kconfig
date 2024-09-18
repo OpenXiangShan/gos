@@ -105,3 +105,7 @@ config APP_ZICOND_TEST
 config APP_HPM_TEST
 	bool "APP_HPM_TEST"
 	default y
+config APP_LSPCI
+	bool "APP_LSPCI"
+	depends on PCI
+	default y

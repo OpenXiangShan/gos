@@ -53,3 +53,4 @@ obj-$(CONFIG_APP_CACHE_FLUSH_TEST) += cache_flush_test.o
 obj-$(CONFIG_APP_SINVAL_TEST) += sinval_test.o
 obj-$(CONFIG_APP_ZICOND_TEST) += zicond_test.o
 obj-$(CONFIG_APP_HPM_TEST) += hpm_test.o
+obj-$(CONFIG_APP_LSPCI) += lspci.o
