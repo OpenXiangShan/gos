@@ -163,8 +163,12 @@ static void cache_inval_test(void)
 static void cache_clean_test(void)
 {
 	void *addr;
-	int i;
 	unsigned long start, before, after;
+	unsigned long mcounteren, new;
+
+	mcounteren = sbi_get_cpu_mcounteren();
+	new = mcounteren | (1UL << 0);
+	sbi_set_mcounteren(new);
 
 	addr = mm_alloc(4096);
 	if (!addr) {
@@ -174,30 +178,34 @@ static void cache_clean_test(void)
 
 	strcpy((char *)addr, "This is content in cache");
 
-	start = get_system_tick();
-	for (i = 0; i < 100; i++)
-		print("%s\n", (char *)addr);
-
-	before = get_system_tick() - start;
+	start = read_csr(cycle);
+	print("%s\n", (char *)addr);
+	before = read_csr(cycle) - start;
 
 	cbo_cache_clean((unsigned long)addr);
 	mb();
 
-	start = get_system_tick();
-	for (i = 0; i < 100; i++)
-		print("%s\n", (char *)addr);
-
-	after = get_system_tick() - start;
+	start = read_csr(cycle);
+	print("%s\n", (char *)addr);
+	after = read_csr(cycle) - start;
 
 	print("before clean cost : %dticks\n", before);
 	print("after clean cost : %dticks\n", after);
+
+	sbi_set_mcounteren(mcounteren);
+
+	mm_free((void *)addr, 4096);
 }
 
 static void cache_flush_test(void)
 {
 	void *addr;
-	int i;
 	unsigned long start, before, after;
+	unsigned long mcounteren, new;
+
+	mcounteren = sbi_get_cpu_mcounteren();
+	new = mcounteren | (1UL << 0);
+	sbi_set_mcounteren(new);
 
 	addr = mm_alloc(4096);
 	if (!addr) {
@@ -207,23 +215,28 @@ static void cache_flush_test(void)
 
 	strcpy((char *)addr, "This is content in cache before flush");
 
-	start = get_system_tick();
-	for (i = 0; i < 100; i++)
-		print("%s\n", (char *)addr);
-	before = get_system_tick() - start;
+	disable_local_irq();
+
+	start = read_csr(cycle);
+	print("%s\n", (char *)addr);
+	before = read_csr(cycle) - start;
 
 	strcpy((char *)addr, "This is content in cache after flush");
 
 	cbo_cache_flush((unsigned long)addr);
 	mb();
 
-	start = get_system_tick();
-	for (i = 0; i < 100; i++)
-		print("%s\n", (char *)addr);
-	after = get_system_tick() - start;
+	start = read_csr(cycle);
+	print("%s\n", (char *)addr);
+	after = read_csr(cycle) - start;
 
+	enable_local_irq();
 	print("before flush cost : %dticks\n", before);
 	print("after flush cost : %dticks\n", after);
+
+	sbi_set_mcounteren(mcounteren);
+
+	mm_free((void *)addr, 4096);
 }
 
 static void cache_zero_test(void)
