@@ -56,7 +56,8 @@ void start_gos(unsigned int hart_id,
 	print("    time : %s\n", BUILD_TIME);
 
 	print("Hello, gos!\n");
-	print("boot option:\n%s\n", boot_option);
+	print("boot option:\n");
+	print("    %s\n", boot_option);
 
 	trap_init();
 
@@ -98,6 +99,8 @@ void start_gos(unsigned int hart_id,
 	print("gos startup success, cost: %d(cycles)\n", end - start);
 
 	enable_local_irq();
+
+	set_print_time(0);
 
 	create_task("shell_init", shell_init, NULL, 0, NULL, 0, NULL);
 }

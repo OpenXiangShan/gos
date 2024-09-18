@@ -19,5 +19,6 @@
 
 int print(const char *fmt, ...);
 int print_backspace(int n);
+void set_print_time(int en);
 
 #endif

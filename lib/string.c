@@ -379,6 +379,9 @@ static int my_vsprintf(char *out, const char *fmt, va_list ap)
 			} else if (*(fmt + 1) == 'x') {
 				fmt++;
 				out += _out_num(out, va_arg(ap, u64), 16, lead, maxwidth);
+			} else if (*(fmt + 1) == 'd') {
+				fmt++;
+				out += _out_num(out, va_arg(ap, s64), 10, lead, maxwidth);
 			}
 			break;
 		case 'b':

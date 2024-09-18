@@ -16,6 +16,10 @@
 
 #include <asm/type.h>
 #include <uart.h>
+#include "clock.h"
+#include "string.h"
+
+static int print_time = 1;
 
 typedef __builtin_va_list __gnuc_va_list;
 typedef __gnuc_va_list va_list;
@@ -32,6 +36,20 @@ const unsigned char hex_tab[] =
 #define va_start(v,l) __builtin_va_start(v,l)
 #define va_end(v) __builtin_va_end(v)
 #define va_arg(v,l) __builtin_va_arg(v,l)
+
+static void out_string(char *str, char lead, int maxwidth)
+{
+	int count = 0, i;
+	char *tmp = str;
+
+	while (*tmp++)
+		count++;
+
+	uart_puts(str);
+
+	for (i = 0; i < maxwidth - count; i++)
+		uart_putc(lead);
+}
 
 static void out_num(unsigned long n, int base, char lead, int maxwidth)
 {
@@ -148,6 +166,9 @@ static int my_vprintf(const char *fmt, va_list ap)
 			} else if (*(fmt + 1) == 'x') {
 				fmt++;
 				out_num(va_arg(ap, u64), 16, lead, maxwidth);
+			} else if (*(fmt + 1) == 'd') {
+				fmt++;
+				out_num(va_arg(ap, s64), 10, lead, maxwidth);
 			}
 			break;
 		case 'b':
@@ -157,7 +178,8 @@ static int my_vprintf(const char *fmt, va_list ap)
 			uart_putc(va_arg(ap, int));
 			break;
 		case 's':
-			uart_puts(va_arg(ap, char *));
+			out_string(va_arg(ap, char *), lead, maxwidth);
+			//uart_puts(va_arg(ap, char *));
 			break;
 		case 'f':
 			double value = va_arg(ap, double);
@@ -172,9 +194,24 @@ static int my_vprintf(const char *fmt, va_list ap)
 	return 0;
 }
 
+void set_print_time(int en)
+{
+	print_time = en;
+}
+
 int print(const char *fmt, ...)
 {
 	va_list ap;
+	char prefix[128] = { 0 };
+	char *tmp = prefix;
+	unsigned long time;
+
+	if (print_time) {
+		time = get_clocksource_counter_us();
+
+		sprintf(tmp, "[%6ld.%06ld] ", time / 1000000, time % 1000000);
+		uart_puts(tmp);
+	}
 
 	va_start(ap, fmt);
 	my_vprintf(fmt, ap);
