@@ -18,11 +18,15 @@
 #include <device.h>
 #include <print.h>
 #include <string.h>
+#include "asm/pgtable.h"
+
+extern int mmu_is_on;
 
 static char dmaengine_name[] = "DMAC0";
 
 int memcpy_hw(char *dst, char *src, unsigned int size)
 {
+	void *_src, *_dst;
 	struct dmac_ioctl_data data;
 	unsigned int dma_width = 0;
 	unsigned int blockTS = (size >> dma_width) - 1;
@@ -36,8 +40,13 @@ int memcpy_hw(char *dst, char *src, unsigned int size)
 
 	memset((char *)&data, 0, sizeof(struct dmac_ioctl_data));
 
-	data.src = src;
-	data.dst = dst;
+	if (mmu_is_on) {
+		_src = (void *)virt_to_phy(src);
+		_dst = (void *)virt_to_phy(dst);
+	}
+
+	data.src = _src;
+	data.dst = _dst;
 	data.blockTS = blockTS;
 	data.src_addr_inc = 0;
 	data.des_addr_inc = 0;
@@ -46,6 +55,7 @@ int memcpy_hw(char *dst, char *src, unsigned int size)
 	data.src_burstsize = 0;
 	data.des_burstsize = 0;
 	data.burst_len = 7;
+	data.size = size;
 
 	return ioctl(fd, MEM_TO_MEM, &data);
 }
@@ -75,6 +85,7 @@ int dma_transfer(char *dst, char *src, unsigned int size,
 	data.src_burstsize = 0;
 	data.des_burstsize = 0;
 	data.burst_len = burst_len;
+	data.size = size;
 
 	return ioctl(fd, MEM_TO_MEM, &data);
 }

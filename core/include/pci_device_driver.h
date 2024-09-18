@@ -19,11 +19,17 @@
 
 #include "pci.h"
 #include "container_of.h"
+#include "device.h"
 
 #define PCI_DRIVER_INIT_TABLE __pci_driver_init_table
 #define PCI_DRIVER_INIT_TABLE_END __pci_driver_init_table_end
 
 typedef int (*pci_driver_init)(struct pci_device *dev, void *data);
+
+struct pci_driver {
+	struct list_head list;
+	struct driver drv;
+};
 
 struct pci_driver_init_entry {
 	int vendor_id;
@@ -41,8 +47,10 @@ struct pci_driver_init_entry {
 		}
 
 #define to_pci_dev(dev) container_of(dev, struct pci_device, dev)
+#define to_pci_driver(pdev) container_of(&pdev->dev.drv, struct pci_driver, drv)
 
 int pci_register_device(struct pci_device *pci_dev);
 int pci_probe_driver(void);
+void walk_pci_devices(void);
 
 #endif

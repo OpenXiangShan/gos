@@ -21,6 +21,7 @@
 #include "event.h"
 #include "string.h"
 #include "uartlite.h"
+#include "vmap.h"
 
 static unsigned long base_address;
 
@@ -42,19 +43,19 @@ static void uartlite_puts(char *str)
 		uartlite_putc(*str++);
 }
 
-static int __uartlite_init(unsigned long base)
+static int __uartlite_init(unsigned long base, int len)
 {
-	base_address = base;
+	base_address = (unsigned long)ioremap((void *)base, len, 0);
 
 	writeb(base_address + UARTLITE_CTRL_REG, UARTLITE_RST_FIFO);
 
 	return 0;
 }
 
-int uartlite_earlycon_init(unsigned long base,
+int uartlite_earlycon_init(unsigned long base, int len,
 			   struct early_print_device *device)
 {
-	__uartlite_init(base);
+	__uartlite_init(base, len);
 	device->write = uartlite_puts;
 
 	return 0;
@@ -62,7 +63,8 @@ int uartlite_earlycon_init(unsigned long base,
 
 EARLYCON_REGISTER(uartlite, uartlite_earlycon_init, "uartlite");
 
-static int uartlite_write(char *buf, unsigned long offset, unsigned int len)
+static int uartlite_write(struct device *dev, char *buf,
+			  unsigned long offset, unsigned int len)
 {
 	int i;
 
@@ -72,8 +74,8 @@ static int uartlite_write(char *buf, unsigned long offset, unsigned int len)
 	return 0;
 }
 
-static int uartlite_read(char *buf, unsigned long offset, unsigned int len,
-			 int flag)
+static int uartlite_read(struct device *dev, char *buf,
+			 unsigned long offset, unsigned int len, int flag)
 {
 	if (flag == BLOCK) {
 		while (!readb(base_address + UARTLITE_STAT_REG) &

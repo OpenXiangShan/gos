@@ -68,7 +68,6 @@ int early_print_setup(struct device_init_entry *hw)
 	int driver_nr_tmp = 0;
 	struct earlycon_init_entry *driver_entry;
 	struct device_init_entry *device_entry = hw;
-	unsigned long base;
 
 	while (strncmp(device_entry->compatible, "THE END", sizeof("THE_END"))) {
 		driver_nr_tmp = driver_nr;
@@ -77,13 +76,8 @@ int early_print_setup(struct device_init_entry *hw)
 			if (!strncmp
 			    (driver_entry->compatible, device_entry->compatible,
 			     128)) {
-				if (mmu_is_on)
-					base = (unsigned long)ioremap((void *)
-								      device_entry->start, device_entry->len, 0);
-				else
-					base = device_entry->start;
 
-				driver_entry->init(base, &earlycon);
+				driver_entry->init(device_entry->start, device_entry->len, &earlycon);
 				earlycon.early_print_enable = 1;
 			}
 		}

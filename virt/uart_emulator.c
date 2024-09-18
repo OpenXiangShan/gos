@@ -107,17 +107,15 @@ int create_uart_device(struct virt_machine *machine, int id, unsigned long base,
 int uart_device_finialize(struct virt_machine *machine, unsigned long gpa,
 			  unsigned int size, int id, int pt)
 {
-	int nr, found = 0;
+	int found = 0;
 	struct device *dev;
-	struct devices *p_devs = get_devices();
 	struct memory_region *region;
 
 	region = find_memory_region_by_id(machine, id);
 	if (!region)
 		return -1;
 
-	nr = p_devs->avail;
-	for_each_device(dev, p_devs->p_devices, nr) {
+	for_each_device(dev) {
 		if (!strncmp(dev->compatible, "qemu-8250", 128)) {
 			found = 1;
 			goto find;

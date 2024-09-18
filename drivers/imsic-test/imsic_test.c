@@ -76,7 +76,7 @@ static void imsic_test_write_msi_msg(unsigned long msi_addr,
 	msi_msg[hwirq - base_hwirq].msi_data = msi_data;
 }
 
-static int imsic_test_ioctl(unsigned int cmd, void *arg)
+static int imsic_test_ioctl(struct device *dev, unsigned int cmd, void *arg)
 {
 	unsigned long msi_addr, msi_data, msi_addr_pa;
 

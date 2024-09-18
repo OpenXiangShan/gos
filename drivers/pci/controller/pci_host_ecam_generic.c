@@ -23,6 +23,7 @@
 #include "pci.h"
 #include "mm.h"
 #include "pci_host_ecam_generic.h"
+#include "vmap.h"
 
 static struct pci_ecam_generic_bus *generic_bus;
 
@@ -99,14 +100,14 @@ int pci_host_ecam_generic_init(struct device *dev, void *data)
 	struct pci_priv_data *priv = (struct pci_priv_data *)data;
 
 	print("%s -- base:0x%lx len:0x%lx cpu_addr:0x%lx pci_addr:0x%lx\n",
-		__FUNCTION__, dev->start, dev->len, priv->pci_addr + priv->offset, priv->pci_addr);
+		__FUNCTION__, dev->base, dev->len, priv->pci_addr + priv->offset, priv->pci_addr);
 
 	generic_bus = (struct pci_ecam_generic_bus *)mm_alloc(sizeof(struct pci_ecam_generic_bus));
 	if (!generic_bus) {
 		print("%s -- alloc generic pci bus fauiled!!\n", __FUNCTION__);
 		return -1;
 	}
-	generic_bus->base = dev->base;
+	generic_bus->base = (unsigned long)ioremap((void *)dev->base, dev->len, 0);
 
 	res.base = priv->pci_addr;
 	res.end = res.base + priv->size - 1;

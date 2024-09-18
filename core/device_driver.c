@@ -22,133 +22,76 @@
 #include "irq.h"
 #include "dma_mapping.h"
 #include "vmap.h"
+#include "list.h"
 
 extern int mmu_is_on;
 
-static struct devices _devices;
-static struct drivers _drivers;
+static LIST_HEAD(_devices);
+static LIST_HEAD(_drivers);
+static unsigned long driver_idx_bitmap = 0x1;
+
+static int find_free_drv_index(void)
+{
+	unsigned long bitmap = driver_idx_bitmap;
+	int pos = 0;
+
+	while (bitmap & 0x01) {
+		if (pos == 64)
+			return -1;
+		bitmap = bitmap >> 1;
+		pos++;
+	}
+
+	driver_idx_bitmap |= (1UL) << pos;
+
+	return pos;
+}
 
 static struct device *create_device(struct device_init_entry *entry)
 {
-	struct device *new, *old;
-	struct device *dev = NULL;
-	int remain;
-	struct driver *drv;
-	unsigned long base;
+	struct device *new;
 
-retry:
-	dev = _devices.p_devices;
-	remain = _devices.total;
-	while (remain > sizeof(struct device)) {
-		if (!dev->in_used) {
-			goto found;
-		}
-
-		dev++;
-		remain -= sizeof(struct device);
-	}
-
-	new = mm_alloc(_devices.total + PAGE_SIZE);
-	if (!new)
+	new = (struct device *)mm_alloc(sizeof(struct device));
+	if (!new) {
+		print("%s -- alloc device failed!\n", __FUNCTION__);
 		return NULL;
-
-	memset((char *)new, 0, _devices.total + PAGE_SIZE);
-	memcpy((char *)new, (char *)_devices.p_devices, _devices.total);
-	old = _devices.p_devices;
-	mm_free(old, _devices.total);
-	_devices.p_devices = new;
-	_devices.total += PAGE_SIZE;
-
-	drv = _drivers.p_drivers;
-	remain = _drivers.total;
-	while (remain > sizeof(struct driver)) {
-		if (!drv->in_used)
-			continue;
-
-		if (new > old)
-			drv->dev += new - old;
-		else
-			drv->dev -= old - new;
-
-		drv++;
-		remain -= sizeof(struct driver);
 	}
 
-	goto retry;
+	new->base = entry->start;
+	new->len = entry->len;
+	new->irqs = entry->irq;
+	new->irq_num = entry->irq_num;
+	new->iommu.dev_id = entry->dev_id;
+	new->irq_domain = find_irq_domain(entry->irq_parent);
+	strcpy(new->compatible, entry->compatible);
 
-found:
-	if (mmu_is_on)
-		base =
-		    (unsigned long)ioremap((void *)entry->start, entry->len, 0);
-	else
-		base = entry->start;
+	list_add_tail(&new->list, &_devices);
 
-	dev->in_used = 1;
-	dev->start = base;
-	dev->base = base;
-	dev->len = entry->len;
-	dev->irqs = entry->irq;
-	dev->irq_num = entry->irq_num;
-	dev->iommu.dev_id = entry->dev_id;
-	dev->irq_domain = find_irq_domain(entry->irq_parent);
-	strcpy(dev->compatible, entry->compatible);
-	_devices.avail++;
-
-	return dev;
+	return new;
 }
 
-static struct driver *create_driver(struct driver_init_entry *entry)
+void add_driver(struct driver *drv)
 {
-	struct driver *new, *old;
-	struct driver *drv;
-	int remain = _drivers.total;
-	int new_size = _drivers.total + PAGE_SIZE;
-	struct device *dev;
+	drv->index = find_free_drv_index();
 
-retry:
-	drv = _drivers.p_drivers;
-	remain = _drivers.total;
-	while (remain > sizeof(struct driver)) {
-		if (!drv->in_used) {
-			goto found;
-		}
-		drv++;
-		remain -= sizeof(struct driver);
-	}
+	list_add_tail(&drv->list, &_drivers);
+}
 
-	new = mm_alloc(new_size);
-	if (!new)
+struct driver *create_driver(struct driver_init_entry *entry)
+{
+	struct driver *new;
+
+	new = (struct driver *)mm_alloc(sizeof(struct driver));
+	if (!new) {
+		print("%s -- alloc driver failed!\n", __FUNCTION__);
 		return NULL;
-
-	memset((char *)new, 0, new_size);
-	memcpy((char *)new, (char *)_drivers.p_drivers, _drivers.total);
-	old = _drivers.p_drivers;
-	mm_free(old, _drivers.total);
-	_drivers.p_drivers = new;
-	_drivers.total = new_size;
-
-	dev = _devices.p_devices;
-	remain = _devices.total;
-	while (remain < sizeof(struct device)) {
-		if (!dev->in_used)
-			continue;
-
-		if (new > old)
-			dev->drv += new - old;
-		else
-			dev->drv -= old - new;
-
-		dev++;
-		remain -= sizeof(struct device);
 	}
 
-	goto retry;
+	new->index = find_free_drv_index();
 
-found:
-	drv->in_used = 1;
-	_drivers.avail++;
+	list_add_tail(&new->list, &_drivers);
 
-	return drv;
+	return new;
 }
 
 static int __NoNeed_create_device(struct device_init_entry *entry)
@@ -211,47 +154,22 @@ int device_driver_init(struct device_init_entry *hw)
 {
 	extern struct driver_init_entry DRIVER_INIT_TABLE,
 	    DRIVER_INIT_TABLE_END;
-	struct device *p_devices;
-	struct driver *p_drivers;
-
-	/* alloc buffer for devices */
-	p_devices = (struct device *)mm_alloc(PAGE_SIZE);
-	if (!p_devices)
-		return -1;
-	memset((char *)p_devices, 0, PAGE_SIZE);
-	_devices.p_devices = p_devices;
-	_devices.total = PAGE_SIZE;
-	_devices.avail = 0;
-
-	/* alloc buffer for drivers */
-	p_drivers = (struct driver *)mm_alloc(PAGE_SIZE);
-	if (!p_drivers)
-		return -1;
-	memset((char *)p_drivers, 0, PAGE_SIZE);
-	_drivers.p_drivers = p_drivers;
-	_drivers.total = PAGE_SIZE;
-	_drivers.avail = 0;
 
 	/* probe devices and drivers */
-	__probe_device_table((struct driver_init_entry *)&DRIVER_INIT_TABLE,
-			     (struct driver_init_entry *)&DRIVER_INIT_TABLE_END,
-			     hw);
-
-	return 0;
+	return __probe_device_table((struct driver_init_entry *)&DRIVER_INIT_TABLE,
+				    (struct driver_init_entry *)&DRIVER_INIT_TABLE_END,
+				    hw);
 }
 
 int open(char *name)
 {
 	struct driver *drv;
-	struct driver *p_tmp = _drivers.p_drivers;
-	int nr = _drivers.avail;
 
-	for_each_driver(drv, p_tmp, nr) {
+	list_for_each_entry(drv, &_drivers, list) {
 		if (!drv->probe)
 			continue;
-
 		if (!strncmp(name, drv->name, 64))
-			return drv - _drivers.p_drivers;
+			return drv->index;
 	}
 
 	return -1;
@@ -259,56 +177,84 @@ int open(char *name)
 
 int read(int fd, char *buf, unsigned long offset, unsigned int len, int flag)
 {
-	struct driver *drv = &_drivers.p_drivers[fd];
+	struct driver *drv;
+
+	list_for_each_entry(drv, &_drivers, list) {
+		if (drv->index == fd)
+			goto find;
+	}
+
+	return -1;
+find:
 
 	if (!drv->ops->read) {
 		return NULL;
 	}
 
-	return drv->ops->read(buf, offset, len, flag);
+	return drv->ops->read(drv->dev, buf, offset, len, flag);
 
 }
 
 int write(int fd, char *buf, unsigned long offset, unsigned int len)
 {
-	struct driver *drv = &_drivers.p_drivers[fd];
+	struct driver *drv;
+
+	list_for_each_entry(drv, &_drivers, list) {
+		if (drv->index == fd)
+			goto find;
+	}
+
+	return -1;
+find:
 
 	if (!drv->ops->write) {
 		return NULL;
 	}
 
-	return drv->ops->write(buf, offset, len);
+	return drv->ops->write(drv->dev, buf, offset, len);
 }
 
 int ioctl(int fd, unsigned int cmd, void *arg)
 {
-	struct driver *drv = &_drivers.p_drivers[fd];
+	struct driver *drv;
 
+	list_for_each_entry(drv, &_drivers, list) {
+		if (drv->index == fd)
+			goto find;
+	}
+
+	return -1;
+find:
 	if (!drv->ops || !drv->ops->ioctl) {
 		return NULL;
 	}
 
-	return drv->ops->ioctl(cmd, arg);
+	return drv->ops->ioctl(drv->dev, cmd, arg);
 }
 
-struct devices *get_devices()
+struct list_head *get_devices(void)
 {
 	return &_devices;
+}
+
+struct list_head *get_drivers(void)
+{
+	return &_drivers;
 }
 
 void walk_devices()
 {
 	struct device *dev;
-	int nr = _devices.avail;
 	int id = 0, i;
 
 	print("================= walk devices =================\n");
-	for_each_device(dev, _devices.p_devices, nr) {
+	list_for_each_entry(dev, &_devices, list) {
 		print("device %d\n", id++);
-		print("    name: %s\n", dev->name);
-		print("    base address: 0x%lx\n", dev->start);
+		print("    name: %s\n", dev->compatible);
+		print("    base address: 0x%lx\n", dev->base);
 		for (i = 0; i < dev->irq_num; i++)
 			print("    irq[i]: %d\n", dev->irqs[i]);
 		print("    probe: %d\n", dev->probe);
+
 	}
 }

@@ -26,6 +26,7 @@
 #include "percpu.h"
 #include "asm/sbi.h"
 #include "string.h"
+#include "vmap.h"
 
 static struct plic plic;
 static DEFINE_PER_CPU(struct plic_percpu_info, plic_info);
@@ -153,14 +154,17 @@ static struct irq_domain_ops plic_irq_domain_ops = {
 	.set_affinity = plic_set_affinity,
 };
 
-int plic_init(char *name, unsigned long base, struct irq_domain *parent,
-	      void *data)
+int plic_init(char *name, unsigned long base, int len,
+	      struct irq_domain *parent, void *data)
 {
 	struct plic_priv_data *priv = (struct plic_priv_data *)data;
+	unsigned long addr;
 
 	memset((char *)&plic, 0, sizeof(struct plic));
 
-	plic.base_address = base;
+	addr = (unsigned long)ioremap((void *)base, len, 0);
+
+	plic.base_address = addr;
 	if (priv) {
 		plic.max_priority = priv->max_priority;
 		plic.ndev = priv->ndev;

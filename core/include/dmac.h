@@ -32,6 +32,7 @@ struct dmac_ioctl_data {
 	unsigned int src_burstsize;
 	unsigned int des_burstsize;
 	unsigned int burst_len;
+	unsigned int size;
 };
 
 int memcpy_hw(char *dst, char *src, unsigned int size);

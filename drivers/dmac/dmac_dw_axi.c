@@ -24,6 +24,7 @@
 #include <string.h>
 #include "dmac_dw_axi.h"
 #include "event.h"
+#include "vmap.h"
 
 static int done = 0;
 static unsigned long base;
@@ -136,7 +137,7 @@ static int wake_expr(void *data)
 	return *wake == 1;
 }
 
-static int dw_dmac_ioctl(unsigned int cmd, void *arg)
+static int dw_dmac_ioctl(struct device *dev, unsigned int cmd, void *arg)
 {
 	int ret = 0;
 	struct dmac_ioctl_data *data = (struct dmac_ioctl_data *)arg;
@@ -210,9 +211,9 @@ int dw_dmac_init(struct device *dev, void *data)
 	int irqs[16], nr_irqs, i;
 
 	print("%s %d base: 0x%x, len: %d, irq: %d\n", __FUNCTION__, __LINE__,
-	      dev->start, dev->len, dev->irqs[0]);
+	      dev->base, dev->len, dev->irqs[0]);
 
-	base = dev->start;
+	base = (unsigned long)ioremap((void *)dev->base, dev->len, 0);
 
 	nr_irqs = get_hwirq(dev, irqs);
 	for (i = 0; i < nr_irqs; i++)

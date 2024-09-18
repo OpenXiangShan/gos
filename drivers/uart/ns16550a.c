@@ -21,6 +21,7 @@
 #include <event.h>
 #include <string.h>
 #include "ns16550a.h"
+#include "vmap.h"
 
 #define UART_CLK          50000000
 #define UART_DEFAULT_BAUD 115200
@@ -81,7 +82,8 @@ static void ns16550a_irq_handler(void *data)
 	wakeup = 1;
 }
 
-static int ns16550a_write(char *buf, unsigned long offset, unsigned int len)
+static int ns16550a_write(struct device *dev, char *buf,
+			  unsigned long offset, unsigned int len)
 {
 	int i;
 
@@ -98,8 +100,8 @@ static int ns16550a_wake_expr(void *data)
 	return *wake == 1;
 }
 
-static int ns16550a_read(char *buf, unsigned long offset, unsigned int len,
-			 int flag)
+static int ns16550a_read(struct device *dev, char *buf, unsigned long offset,
+			 unsigned int len, int flag)
 {
 	if (flag == BLOCK) {
 		wait_for_event(&wakeup, ns16550a_wake_expr);
@@ -115,11 +117,11 @@ static int ns16550a_read(char *buf, unsigned long offset, unsigned int len,
 	return 1;
 }
 
-static int __ns16550a_init(unsigned long base)
+static int __ns16550a_init(unsigned long base, int len)
 {
 	unsigned int divisor = UART_CLK / (16 * UART_DEFAULT_BAUD);
 
-	base_address = base;
+	base_address = (unsigned long)ioremap((void *)base, len, 0);
 
 	writel(base_address + LCR, 0x83);
 
@@ -135,10 +137,10 @@ static int __ns16550a_init(unsigned long base)
 	return 0;
 }
 
-int ns16550a_earlycon_init(unsigned long base,
+int ns16550a_earlycon_init(unsigned long base, int len,
 			   struct early_print_device *device)
 {
-	__ns16550a_init(base);
+	__ns16550a_init(base, len);
 	device->write = ns16550a_puts;
 
 	return 0;
@@ -157,11 +159,11 @@ int ns16550a_init(struct device *dev, void *data)
 	int irqs[16], nr_irqs, i;
 
 	print("%s %d base: 0x%lx, len: %d, irq: %d\n", __FUNCTION__, __LINE__,
-	      dev->start, dev->len, dev->irqs[0]);
+	      dev->base, dev->len, dev->irqs[0]);
 
-	while (readl(dev->start + USR) & 0x1) ;
+	while (readl(base_address + USR) & 0x1) ;
 
-	writel(dev->start + IER, 1);
+	writel(base_address + IER, 1);
 
 	nr_irqs = get_hwirq(dev, irqs);
 	for (i = 0; i < nr_irqs; i++)

@@ -37,6 +37,8 @@
 
 #define MAX_IRQ_NUM 16
 
+
+
 struct iommu_group;
 struct iommu {
 	int dev_id;
@@ -47,11 +49,9 @@ struct iommu {
 
 struct device {
 	struct list_head list;
-	int in_used;
 	int probe;
 	char name[64];
 	unsigned long base;
-	unsigned long start;
 	unsigned int len;
 	int *irqs;
 	int irq_num;
@@ -61,31 +61,20 @@ struct device {
 	char compatible[128];
 };
 
-struct devices {
-	struct device *p_devices;
-	int total;
-	int avail;
-};
-
 struct driver_ops {
-	int (*write)(char *buf, unsigned long offset, unsigned int len);
-	int (*read)(char *buf, unsigned long offset, unsigned int len,
+	int (*write)(struct device *dev, char *buf, unsigned long offset, unsigned int len);
+	int (*read)(struct device *dev, char *buf, unsigned long offset, unsigned int len,
 		    int flag);
-	int (*ioctl)(unsigned int cmd, void *arg);
+	int (*ioctl)(struct device *dev, unsigned int cmd, void *arg);
 };
 
 struct driver {
-	int in_used;
+	struct list_head list;
+	int index;
 	int probe;
 	char name[64];
 	const struct driver_ops *ops;
 	struct device *dev;
-};
-
-struct drivers {
-	struct driver *p_drivers;
-	int total;
-	int avail;
 };
 
 struct device_init_entry {
@@ -112,7 +101,7 @@ struct early_print_device {
 	int early_print_enable;
 };
 
-typedef int (*earlycon_init)(unsigned long base,
+typedef int (*earlycon_init)(unsigned long base, int len,
 			     struct early_print_device * device);
 
 struct earlycon_init_entry {
@@ -120,7 +109,7 @@ struct earlycon_init_entry {
 	earlycon_init init;
 };
 
-typedef int (*irqchip_init)(char *name, unsigned long base,
+typedef int (*irqchip_init)(char *name, unsigned long base, int len,
 			    struct irq_domain * d, void *priv);
 
 struct irqchip_init_entry {
@@ -128,8 +117,8 @@ struct irqchip_init_entry {
 	irqchip_init init;
 };
 
-typedef int (*timer_init)(unsigned long base, struct irq_domain * d,
-			  void *priv);
+typedef int (*timer_init)(unsigned long base, int len,
+			  struct irq_domain * d, void *priv);
 
 struct timer_init_entry {
 	char compatible[128];
@@ -168,11 +157,12 @@ struct timer_init_entry {
 			.init = init_fn,                                      \
 		}
 
-#define for_each_device(entry, devices, n)                                    \
-	for (entry = (struct device *)devices; n > 0; entry++, n--)
-
-#define for_each_driver(entry, drivers, n)                                    \
-	for (entry = (struct driver *)drivers; n > 0; entry++, n--)
+struct list_head *get_devices(void);
+struct list_head *get_drivers(void);
+#define for_each_device(entry) \
+	list_for_each_entry(entry, get_devices(), list)
+#define for_each_driver(entry) \
+	list_for_each_entry(entry, get_drivers(), list)
 
 int device_driver_init(struct device_init_entry *hw);
 int earlycon_driver_init(void);
@@ -197,7 +187,7 @@ static inline int dev_register_irq(struct device *dev, unsigned int hwirq,
 {
 	return register_device_irq(dev->irq_domain, hwirq, handler, priv);
 }
-
-struct devices *get_devices(void);
+struct driver *create_driver(struct driver_init_entry *entry);
+void add_driver(struct driver *drv);
 
 #endif

@@ -24,6 +24,7 @@
 #include "dma_mapping.h"
 #include "io_pgtable.h"
 #include "queue.h"
+#include "vmap.h"
 
 static struct riscv_iommu iommu;
 
@@ -433,13 +434,16 @@ int riscv_iommu_init(struct device *dev, void *data)
 {
 	struct riscv_iommu_priv_data *priv =
 	    (struct riscv_iommu_priv_data *)data;
+	unsigned long addr;
 
 	print("%s %d base: 0x%x, len: %d, irq: %d\n", __FUNCTION__, __LINE__,
-	      dev->start, dev->len, dev->irqs[0]);
+	      dev->base, dev->len, dev->irqs[0]);
 
 	memset((char *)&iommu, 0, sizeof(struct riscv_iommu));
 
-	iommu.base = dev->start;
+	addr = (unsigned long)ioremap((void *)dev->base, dev->len, 0);
+
+	iommu.base = addr;
 	iommu.cmdq_len = priv->cmdq_len;
 	iommu.fltq_len = priv->fltq_len;
 	iommu.priq_len = priv->priq_len;

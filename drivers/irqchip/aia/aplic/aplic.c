@@ -20,6 +20,7 @@
 #include "device.h"
 #include "aplic.h"
 #include "aplic_msi.h"
+#include "vmap.h"
 
 static struct aplic aplic;
 
@@ -128,19 +129,22 @@ static void aplic_m_mode_init(struct aplic *p_aplic)
 	writel(p_aplic->base + APLIC_SMSICFGADDRH, val_smsicfgaddrh);
 }
 
-int aplic_init(char *name, unsigned long base, struct irq_domain *parent,
-	       void *data)
+int aplic_init(char *name, unsigned long base, int len,
+	       struct irq_domain *parent, void *data)
 {
+	unsigned long addr;
 	struct aplic_priv_data *aplic_priv_data =
 	    (struct aplic_priv_data *)data;
 
 	memset((char *)&aplic, 0, sizeof(struct aplic));
 
+	addr = (unsigned long)ioremap((void *)base, len, 0);
+
 	aplic.mmode = aplic_priv_data->mmode;
 	aplic.mode = aplic_priv_data->mode;
 	aplic.index = aplic_priv_data->index;
 	aplic.name = name;
-	aplic.base = base;
+	aplic.base = addr;
 	aplic.parent = parent;
 	aplic.nr_irqs = aplic_priv_data->nr_irqs;
 	aplic.delegate = aplic_priv_data->delegate;

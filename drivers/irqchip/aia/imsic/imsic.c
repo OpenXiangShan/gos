@@ -23,6 +23,7 @@
 #include "imsic.h"
 #include "imsic_reg.h"
 #include "cpu.h"
+#include "vmap.h"
 
 static struct imsic imsic;
 extern int mmu_is_on;
@@ -308,15 +309,18 @@ static struct cpu_hotplug_notifier imsic_cpuhp_notifier = {
 	.startup = imsic_cpuhp_startup,
 };
 
-int imsic_init(char *name, unsigned long base, struct irq_domain *parent,
-	       void *data)
+int imsic_init(char *name, unsigned long base, int len,
+	       struct irq_domain *parent, void *data)
 {
 	int i;
 	struct imsic_priv_data *state = (struct imsic_priv_data *)data;
+	unsigned long addr;
 
 	memset((char *)&imsic, 0, sizeof(struct imsic));
 
-	imsic.base = base;
+	addr = (unsigned long)ioremap((void *)base, len, 0);
+
+	imsic.base = addr;
 	imsic_state_setup(&imsic, state);
 
 	irq_domain_init_cascade(&imsic.irq_domain, name,

@@ -22,6 +22,7 @@
 #include <string.h>
 #include "qemu-8250.h"
 #include <asm/sbi.h>
+#include "vmap.h"
 
 static unsigned long base_address;
 static unsigned int size;
@@ -60,12 +61,12 @@ static char qemu_8250_get(void)
 }
 
 #define UART_DEFAULT_BAUD  115200
-static int qemu_8250_init(unsigned long base)
+static int qemu_8250_init(unsigned long base, int len)
 {
 	unsigned int uart16550_clock = 1843200;
 	unsigned int divisor = uart16550_clock / (16 * UART_DEFAULT_BAUD);
 
-	base_address = base;
+	base_address = (unsigned long)ioremap((void *)base, len, 0);
 
 	writeb(base_address + UART_IER, 0);
 
@@ -83,7 +84,8 @@ static void qemu_8250_irq_handler(void *data)
 	wakeup = 1;
 }
 
-static int qemu_8250_write(char *buf, unsigned long offset, unsigned int len)
+static int qemu_8250_write(struct device *dev, char *buf,
+			   unsigned long offset, unsigned int len)
 {
 	int i;
 
@@ -100,8 +102,8 @@ static int wake_expr(void *data)
 	return *wake == 1;
 }
 
-static int qemu_8250_read(char *buf, unsigned long offset, unsigned int len,
-			  int flag)
+static int qemu_8250_read(struct device *dev, char *buf,
+			  unsigned long offset, unsigned int len, int flag)
 {
 	char c;
 	unsigned int ret = 0;
@@ -134,9 +136,9 @@ int qemu_8250_driver_init(struct device *dev, void *data)
 	int irqs[16], nr_irqs, i;
 
 	print("%s -- base: 0x%lx, len: %d, nr_irqs:%d irq: %d\n", __FUNCTION__,
-	      dev->start, dev->len, dev->irq_num, dev->irqs[0]);
+	      dev->base, dev->len, dev->irq_num, dev->irqs[0]);
 
-	writeb(dev->start + UART_IER, 1);
+	writeb(base_address + UART_IER, 1);
 
 	nr_irqs = get_hwirq(dev, irqs);
 	for (i = 0; i < nr_irqs; i++)
@@ -148,7 +150,6 @@ int qemu_8250_driver_init(struct device *dev, void *data)
 	strcpy(drv->name, "UART0");
 	drv->ops = &qemu_8250_ops;
 
-	base_address = dev->start;
 	size = dev->len;
 
 	return 0;
@@ -156,10 +157,10 @@ int qemu_8250_driver_init(struct device *dev, void *data)
 
 DRIVER_REGISTER(qemu_8250, qemu_8250_driver_init, "qemu-8250");
 
-int qemu_8250_earlycon_init(unsigned long base,
+int qemu_8250_earlycon_init(unsigned long base, int len,
 			    struct early_print_device *device)
 {
-	qemu_8250_init(base);
+	qemu_8250_init(base, len);
 	device->write = qemu_8250_puts;
 
 	return 0;

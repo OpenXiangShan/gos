@@ -95,7 +95,6 @@ int irqchip_setup(struct device_init_entry *hw)
 	struct irqchip_init_entry *driver_tmp =
 	    (struct irqchip_init_entry *)&IRQCHIP_INIT_TABLE;
 	struct irq_domain *d;
-	unsigned long base;
 
 	while (strncmp(device_entry->compatible, "THE END", sizeof("THE_END"))) {
 		driver_nr_tmp = driver_nr;
@@ -105,14 +104,10 @@ int irqchip_setup(struct device_init_entry *hw)
 			if (!strncmp
 			    (driver_entry->compatible, device_entry->compatible,
 			     128)) {
-				if (mmu_is_on)
-					base = (unsigned long)ioremap((void *)
-								      device_entry->start, device_entry->len, 0);
-				else
-					base = device_entry->start;
-
 				driver_entry->init(device_entry->compatible,
-						   base, d, device_entry->data);
+						   device_entry->start,
+						   device_entry->len, d,
+						   device_entry->data);
 			}
 		}
 		device_entry++;

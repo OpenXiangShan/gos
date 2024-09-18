@@ -26,6 +26,7 @@
 #include "cpu.h"
 #include "clock.h"
 #include "gos.h"
+#include "vmap.h"
 
 #define HZ 1000
 
@@ -146,7 +147,7 @@ static struct cpu_hotplug_notifier timer_cpuhp_notifier = {
 	.startup = timer_cpuhp_startup,
 };
 
-int clint_timer_init(unsigned long base, struct irq_domain *d, void *priv)
+int clint_timer_init(unsigned long base, int len, struct irq_domain *d, void *priv)
 {
 	struct clint_priv_data *data = (struct clint_priv_data *)priv;
 
@@ -159,9 +160,9 @@ int clint_timer_init(unsigned long base, struct irq_domain *d, void *priv)
 		return -1;
 	}
 
-	clint_freq = data->clint_freq;
+	base_address = (unsigned long)ioremap((void *)base, len, 0);
 
-	base_address = base;
+	clint_freq = data->clint_freq;
 
 	__timer_init();
 
