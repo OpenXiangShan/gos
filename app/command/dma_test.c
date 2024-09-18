@@ -21,33 +21,44 @@
 #include <dmac.h>
 #include <timer.h>
 #include "../command.h"
+#include "mm.h"
 
 static void Usage()
 {
-	print("dma_test [dst_addr] [src_addr] [size]\n");
+	print("dma_test [size]\n");
 }
 
 static int cmd_dma_test_handler(int argc, char *argv[], void *priv)
 {
-	int ret = 0;
+	int ret = 0, i;
 	void *dst, *src;
 	unsigned int size;
 	unsigned int diff = 0, start_time = 0;
 
-	if (argc != 3) {
+	if (argc == 0) {
 		Usage();
 		return -1;
 	}
 
-	if (!is_digit((char *)argv[0]) || !is_digit((char *)argv[1])
-	    || !is_digit((char *)argv[2])) {
+	if (!is_digit((char *)argv[0])) {
 		print("invalid input params.\n");
 		return -1;
 	}
 
-	dst = (void *)atoi(argv[0]);
-	src = (void *)atoi(argv[1]);
-	size = atoi(argv[2]);
+	size = atoi(argv[0]);
+	src = mm_alloc(size);
+	if (!src) {
+		print("%s -- alloc src failed!\n", __FUNCTION__);
+		return -1;
+	}
+	dst = mm_alloc(size);
+	if (!dst) {
+		print("%s -- alloc dst failed!\n", __FUNCTION__);
+		return -1;
+	}
+
+	for (i = 0; i < size; i++)
+		*((char *)((unsigned long)src + i)) = i;
 
 	start_time = get_system_time_ms();
 	ret = memcpy_hw(dst, src, size);
@@ -57,6 +68,14 @@ static int cmd_dma_test_handler(int argc, char *argv[], void *priv)
 	}
 
 	diff = get_system_time_ms() - start_time;
+
+	for (i = 0; i < size; i++) {
+		if (*((char *)((unsigned long)src + i)) !=
+		    *((char *)((unsigned long)dst + i))) {
+			print("dma_test failed!!\n");
+			return -1;
+		}
+	}
 
 	print("dma_test success! cost: %dms\n", diff);
 
