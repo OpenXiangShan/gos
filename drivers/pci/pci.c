@@ -511,6 +511,21 @@ static int pci_bus_assign_resources_size(struct pci_bus *bus)
 	return 0;
 }
 
+void pci_set_master(struct pci_device *dev, int enable)
+{
+	int cmd;
+
+	cmd = pci_read_config_word(dev->bus, dev->devfn, PCI_COMMAND);
+
+	if (enable)
+		cmd |= PCI_COMMAND_MASTER;
+
+	else
+		cmd &= ~PCI_COMMAND_MASTER;
+
+	pci_write_config_word(dev->bus, dev->devfn, PCI_COMMAND, cmd);
+}
+
 void pci_enable_resource(struct pci_device *dev, int mask)
 {
 	int i;

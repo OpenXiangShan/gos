@@ -25,6 +25,7 @@
 #define PCI_COMMAND   0x04
 #define  PCI_COMMAND_IO      0x1
 #define  PCI_COMMAND_MEMORY  0x2
+#define  PCI_COMMAND_MASTER  0x4
 
 #define PCI_STATUS 0x06
 
@@ -157,6 +158,7 @@ struct pci_bus {
 	int limit;
 };
 
+void pci_set_master(struct pci_device *dev, int enable);
 void pci_enable_resource(struct pci_device *dev, int mask);
 void pci_get_resource(struct pci_device *dev, int bar, struct resource *res);
 int pci_root_bus_init(struct pci_bus *bus, struct ecam_ops *ops, void *data,
