@@ -19,12 +19,70 @@
 #include <print.h>
 #include <string.h>
 #include "asm/pgtable.h"
+#include "list.h"
+#include "mm.h"
 
 extern int mmu_is_on;
+static LIST_HEAD(dmacs);
+static unsigned long dmac_idx_bitmap __attribute__((section(".data"))) = 0;
 
-static char dmaengine_name[] = "DMAC0";
+static int find_free_dmac_index(void)
+{
+	unsigned long bitmap = dmac_idx_bitmap;
+	int pos = 0;
 
-int memcpy_hw(char *dst, char *src, unsigned int size)
+	while (bitmap & 0x01) {
+		if (pos == 64)
+			return -1;
+		bitmap = bitmap >> 1;
+		pos++;
+	}
+
+	dmac_idx_bitmap |= (1UL) << pos;
+
+	return pos;
+}
+
+void walk_all_dmac(void)
+{
+	struct dmac_device *dmac;
+	int i;
+
+	list_for_each_entry(dmac, &dmacs, list){
+		print("%s:\n", dmac->name);
+		print("    device:0x%lx\n", dmac->dev);
+		print("    device name:%s\n", dmac->dev->compatible);
+		if (dmac->dev->irq_domain) {
+			print("    irq domain: %s\n", dmac->dev->irq_domain->name);
+			print("    irq:");
+			for (i = 0; i < dmac->dev->irq_num; i++)
+				print("%d ", dmac->dev->irqs[i]);
+			print("\n");
+		}
+	}
+}
+
+int register_dmac_device(struct device *dev)
+{
+	struct dmac_device *dmac;
+	int index;
+
+	dmac = (struct dmac_device *)mm_alloc(sizeof(struct dmac_device));
+	if (!dmac) {
+		print("dmac: register dmac failed.. Out of memory\n");
+		return -1;
+	}
+
+	index = find_free_dmac_index();
+	sprintf(dmac->name, "DMAC%d", index);
+
+	dmac->dev = dev;
+	list_add_tail(&dmac->list, &dmacs);
+
+	return 0;
+}
+
+int memcpy_hw(char * name, char *dst, char *src, unsigned int size)
 {
 	void *_src, *_dst;
 	struct dmac_ioctl_data data;
@@ -32,9 +90,9 @@ int memcpy_hw(char *dst, char *src, unsigned int size)
 	unsigned int blockTS = (size >> dma_width) - 1;
 	int fd = 0;
 
-	fd = open(dmaengine_name);
+	fd = open(name);
 	if (fd == -1) {
-		print("open %s fail.\n", dmaengine_name);
+		print("open %s fail.\n", name);
 		return -1;
 	}
 
@@ -60,16 +118,16 @@ int memcpy_hw(char *dst, char *src, unsigned int size)
 	return ioctl(fd, MEM_TO_MEM, &data);
 }
 
-int dma_transfer(char *dst, char *src, unsigned int size,
+int dma_transfer(char * name, char *dst, char *src, unsigned int size,
 		 unsigned int data_width, unsigned int burst_len)
 {
 	struct dmac_ioctl_data data;
 	unsigned int blockTS = (size >> data_width) - 1;
 	int fd = 0;
 
-	fd = open(dmaengine_name);
+	fd = open(name);
 	if (fd == -1) {
-		print("open %s fail.\n", dmaengine_name);
+		print("open %s fail.\n", name);
 		return -1;
 	}
 

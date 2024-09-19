@@ -60,7 +60,7 @@ static int cmd_dma_test_ext_handler(int argc, char *argv[], void *priv)
 	awlen = atoi(argv[4]);
 
 	start_time = get_system_time_ms();
-	ret = dma_transfer(dst, src, size, data_width, awlen);
+	ret = dma_transfer("DMAC0", dst, src, size, data_width, awlen);
 	if (ret == -1) {
 		print("memcpy_hw failed, timeout...\n");
 		return -1;

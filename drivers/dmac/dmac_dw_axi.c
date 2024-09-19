@@ -232,6 +232,8 @@ int dw_dmac_init(struct device *dev, void *data)
 	strcpy(drv->name, "DMAC0");
 	drv->ops = &dw_dmac_ops;
 
+	register_dmac_device(dev);
+
 	return 0;
 }
 

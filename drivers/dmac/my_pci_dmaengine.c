@@ -92,6 +92,8 @@ static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 	strcpy(drv->name, "DMAC0");
 	drv->ops = &my_dmaengine_ops;
 
+	register_dmac_device(dev);
+
 	return 0;
 }
 

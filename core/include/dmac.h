@@ -17,6 +17,9 @@
 #ifndef DMAC_H
 #define DMAC_H
 
+#include "list.h"
+#include "device.h"
+
 enum DMA_TYPE {
 	MEM_TO_MEM = 0,
 };
@@ -35,8 +38,16 @@ struct dmac_ioctl_data {
 	unsigned int size;
 };
 
-int memcpy_hw(char *dst, char *src, unsigned int size);
-int dma_transfer(char *dst, char *src, unsigned int size,
+struct dmac_device {
+	struct list_head list;
+	char name[64];
+	struct device *dev;
+};
+
+int register_dmac_device(struct device *dev);
+void walk_all_dmac(void);
+int memcpy_hw(char *name, char *dst, char *src, unsigned int size);
+int dma_transfer(char *name, char *dst, char *src, unsigned int size,
 		 unsigned int data_width, unsigned int burst_len);
 
 #endif

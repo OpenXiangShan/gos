@@ -25,7 +25,7 @@
 
 static void Usage()
 {
-	print("dma_test [size]\n");
+	print("dma_test [dev_name] [size]\n");
 }
 
 static int cmd_dma_test_handler(int argc, char *argv[], void *priv)
@@ -34,18 +34,20 @@ static int cmd_dma_test_handler(int argc, char *argv[], void *priv)
 	void *dst, *src;
 	unsigned int size;
 	unsigned int diff = 0, start_time = 0;
+	char *name;
 
-	if (argc == 0) {
+	if (argc < 2) {
 		Usage();
 		return -1;
 	}
 
-	if (!is_digit((char *)argv[0])) {
+	if (!is_digit((char *)argv[1])) {
 		print("invalid input params.\n");
 		return -1;
 	}
 
-	size = atoi(argv[0]);
+	name = argv[0];
+	size = atoi(argv[1]);
 	src = mm_alloc(size);
 	if (!src) {
 		print("%s -- alloc src failed!\n", __FUNCTION__);
@@ -61,7 +63,7 @@ static int cmd_dma_test_handler(int argc, char *argv[], void *priv)
 		*((char *)((unsigned long)src + i)) = i;
 
 	start_time = get_system_time_ms();
-	ret = memcpy_hw(dst, src, size);
+	ret = memcpy_hw(name, dst, src, size);
 	if (ret == -1) {
 		print("memcpy_hw failed, timeout...\n");
 		return -1;
