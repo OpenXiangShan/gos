@@ -109,3 +109,6 @@ config APP_LSPCI
 	bool "APP_LSPCI"
 	depends on PCI
 	default y
+config APP_LSDMAC
+	bool "APP_LSDMAC"
+	default y
