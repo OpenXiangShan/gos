@@ -144,8 +144,11 @@ int pci_msix_enable(struct pci_device *pdev, int *irqs)
 	pdev->msix_base = pci_msix_map(pdev, count);
 
 	irq_base = msi_get_hwirq(&pdev->dev, count, pci_msix_write_msi_msg, pci_msix_set_desc);
-	for (i = 0; i < count; i++)
-		irqs[i] = irq_base + i;	
+	pdev->dev.irq_num = count;
+	for (i = 0; i < count; i++) {
+		irqs[i] = irq_base + i;
+		pdev->dev.irqs[i] = irqs[i];
+	}
 
 	msg_ctrl = pci_read_config_word(pdev->bus, pdev->devfn,
 				pdev->msix_cap_pos + PCI_MSIX_FLAGS);

@@ -43,7 +43,7 @@ struct device {
 	char name[64];
 	unsigned long base;
 	unsigned int len;
-	int *irqs;
+	int irqs[64];
 	int irq_num;
 	struct driver *drv;
 	struct iommu iommu;

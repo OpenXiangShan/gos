@@ -50,6 +50,7 @@ static int find_free_drv_index(void)
 static struct device *create_device(struct device_init_entry *entry)
 {
 	struct device *new;
+	int i;
 
 	new = (struct device *)mm_alloc(sizeof(struct device));
 	if (!new) {
@@ -59,8 +60,9 @@ static struct device *create_device(struct device_init_entry *entry)
 
 	new->base = entry->start;
 	new->len = entry->len;
-	new->irqs = entry->irq;
 	new->irq_num = entry->irq_num;
+	for(i = 0; i < entry->irq_num; i++)
+		new->irqs[i] = entry->irq[i];
 	new->iommu.dev_id = entry->dev_id;
 	new->irq_domain = find_irq_domain(entry->irq_parent);
 	strcpy(new->compatible, entry->compatible);
