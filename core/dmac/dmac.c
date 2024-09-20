@@ -76,6 +76,8 @@ int register_dmac_device(struct device *dev)
 
 	index = find_free_dmac_index();
 	sprintf(dmac->name, "DMAC%d", index);
+	strcpy(dev->name, dmac->name);
+	strcpy(dev->drv->name, dmac->name);
 
 	dmac->dev = dev;
 	list_add_tail(&dmac->list, &dmacs);

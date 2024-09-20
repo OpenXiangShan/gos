@@ -229,8 +229,6 @@ int dw_dmac_init(struct device *dev, void *data)
 	writel(base + DMAC_AXI0_COMMON_CFG, 0x3);
 
 	drv = dev->drv;
-	strcpy(dev->name, "DMAC0");
-	strcpy(drv->name, "DMAC0");
 	drv->ops = &dw_dmac_ops;
 
 	register_dmac_device(dev);

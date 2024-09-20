@@ -116,8 +116,6 @@ static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 				    irqs[i], my_pci_dmaengine_irq_handler, NULL);
 
 	drv = dev->drv;
-	strcpy(dev->name, "DMAC0");
-	strcpy(drv->name, "DMAC0");
 	drv->ops = &my_dmaengine_ops;
 
 	register_dmac_device(dev);
