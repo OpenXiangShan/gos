@@ -169,7 +169,7 @@ int clint_timer_init(unsigned long base, int len, struct irq_domain *d, void *pr
 
 	register_clock_event(&clock_event_info, 0);
 	register_clock_source(&clock_source_info, 0);
-	register_device_irq(d, INTERRUPT_CAUSE_TIMER, timer_handle_irq, NULL);
+	register_device_irq(NULL, d, INTERRUPT_CAUSE_TIMER, timer_handle_irq, NULL);
 
 	cpu_hotplug_notify_register(&timer_cpuhp_notifier);
 

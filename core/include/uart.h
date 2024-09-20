@@ -17,10 +17,37 @@
 #ifndef _UART_H
 #define _UART_H
 
+#include "device.h"
+
+#define EARLYCON_INIT_TABLE __earlycon_init_table
+#define EARLYCON_INIT_TABLE_END __earlycon_init_table_end
+
+struct early_print_device {
+	char name[128];
+	void (*write)(char *str);
+	int early_print_enable;
+};
+
+typedef int (*earlycon_init)(unsigned long base, int len,
+			     struct early_print_device * device);
+
+struct earlycon_init_entry {
+	char compatible[128];
+	earlycon_init init;
+};
+
+#define EARLYCON_REGISTER(name, init_fn, compat)                              \
+	static const struct earlycon_init_entry __attribute__((used))         \
+		__earlycon_entry_##name                                       \
+		__attribute__((section(".earlycon_init_table"))) = {          \
+			.compatible = compat,                                 \
+			.init = init_fn,                                      \
+		}
+
+
 void uart_putc(char c);
 void uart_puts(char *str);
 int uart_init(void);
-
-int early_print_setup();
+int early_print_setup(struct device_init_entry *hw);
 
 #endif

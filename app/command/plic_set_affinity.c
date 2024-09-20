@@ -44,7 +44,7 @@ static int cmd_plic_set_affinity_handler(int argc, char *argv[], void *priv)
 	hwirq = atoi(argv[0]);
 	cpu = atoi(argv[1]);
 
-	irq_domain_set_affinity(irq_domain, hwirq, cpu);
+	irq_domain_set_affinity(NULL, irq_domain, hwirq, cpu);
 
 	return 0;
 }

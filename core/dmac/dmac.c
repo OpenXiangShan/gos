@@ -15,12 +15,13 @@
  */
 
 #include <dmac.h>
-#include <device.h>
 #include <print.h>
 #include <string.h>
+#include "device.h"
 #include "asm/pgtable.h"
 #include "list.h"
 #include "mm.h"
+#include "irq.h"
 
 extern int mmu_is_on;
 static LIST_HEAD(dmacs);

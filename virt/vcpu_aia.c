@@ -100,7 +100,7 @@ int vcpu_interrupt_file_update(struct vcpu *vcpu)
 		print("get intc domain failed...\n");
 		return -1;
 	}
-	register_device_irq(intc, INTERRUPT_CAUSE_GEXTERNAL, hgei_irq_handler, NULL);
+	register_device_irq(NULL, intc, INTERRUPT_CAUSE_GEXTERNAL, hgei_irq_handler, NULL);
 
 	interrupt_file_base = imsic_get_interrupt_file_base(cpu, hgei);
 	if (!interrupt_file_base)

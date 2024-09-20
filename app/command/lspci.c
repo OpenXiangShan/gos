@@ -19,10 +19,18 @@
 #include <device.h>
 #include "../command.h"
 #include "pci_device_driver.h"
+#include "string.h"
 
 static int cmd_lspci_handler(int argc, char *argv[], void *priv)
 {
-	walk_pci_devices();
+
+	if (argc == 0) {
+		walk_pci_devices(0);
+		return 0;
+	}
+
+	if (!strncmp(argv[0], "-x", sizeof("-x")))
+		walk_pci_devices(1);
 
 	return 0;
 }

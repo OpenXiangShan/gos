@@ -23,6 +23,7 @@
 #include "uapi/align.h"
 #include "container_of.h"
 #include "pci_device_driver.h"
+#include "irq.h"
 
 unsigned int pci_read_config_byte(struct pci_bus *bus, int devfn, int addr)
 {
@@ -52,6 +53,46 @@ unsigned int pci_write_config_word(struct pci_bus *bus, int devfn, int addr, uns
 unsigned int pci_write_config_dword(struct pci_bus *bus, int devfn, int addr, unsigned int val)
 {
 	return bus->ops->write(bus, devfn, addr, 4, val);
+}
+
+void pci_get_config(struct pci_device *dev, char *out)
+{
+	int i;
+
+	for (i = 0; i < 256; i++)
+		*out++ = pci_read_config_byte(dev->bus, dev->devfn, i);
+}
+
+unsigned int pci_find_capability(struct pci_device *dev, int cap)
+{
+	unsigned char pos;
+	unsigned char cap_id;
+
+	pos = pci_read_config_byte(dev->bus, dev->devfn, PCI_CAPABILITY_START);
+	while (pos) {
+		cap_id = pci_read_config_byte(dev->bus, dev->devfn, pos);
+		if (cap_id == cap)
+			return pos;
+		pos = pci_read_config_byte(dev->bus, dev->devfn, pos + 1);
+	}
+
+	return pos;
+}
+
+static void pci_set_device_msi_domain(struct pci_device *dev)
+{
+	struct irq_domain *domain = find_irq_domain("IMSIC");
+
+	if (!domain)
+		return;
+
+	dev->dev.irq_domain = domain;
+}
+
+static void pci_init_capabilities(struct pci_device *dev)
+{
+	pci_msi_init(dev);
+	pci_msix_init(dev);
 }
 
 static unsigned int pci_read_dev_vendor_id(struct pci_bus *bus, int devfn)
@@ -272,6 +313,10 @@ static int __pci_create_device(struct pci_device *pci_dev)
 		bus->bus_number, PCI_SLOT(pci_dev->devfn), PCI_FUNC(pci_dev->devfn));
 	sprintf(dev->compatible, "%x:%x", pci_dev->vendor, pci_dev->device);
 
+	pci_init_capabilities(pci_dev);
+
+	pci_set_device_msi_domain(pci_dev);
+
 	pci_register_device(pci_dev);
 
 	return 0;
@@ -322,7 +367,7 @@ static int pci_dev_assign_resources(struct pci_bus *bus)
 		       dev->device, dev_res->bar,
 		       b->base, b->base + b->size);
 
-		reg = PCI_BASE_ADDRESS_0 + dev_res->bar;
+		reg = PCI_BASE_ADDRESS_0 + dev_res->bar * sizeof(unsigned int);
 		val = pci_read_config_dword(dev->bus, dev->devfn, reg) & (0xFUL);
 		val |= pci_addr & 0xffffffffUL;
 		pci_write_config_dword(dev->bus, dev->devfn, reg, val);

@@ -23,6 +23,7 @@
 #include "asm/tlbflush.h"
 #include "gos.h"
 #include "asm/bitops.h"
+#include "irq.h"
 
 static void *pgdp __attribute__((section(".data"))) = NULL;
 

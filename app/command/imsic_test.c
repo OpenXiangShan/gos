@@ -28,6 +28,7 @@
 #include "task.h"
 #include "string.h"
 #include "mm.h"
+#include "irq.h"
 
 #define TEST_COUNT 1
 

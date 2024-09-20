@@ -22,6 +22,7 @@
 #include "string.h"
 #include "uartlite.h"
 #include "vmap.h"
+#include "uart.h"
 
 static unsigned long base_address;
 

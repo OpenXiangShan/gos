@@ -33,7 +33,7 @@ static int imsic_id_get_target(struct imsic *p_imsic, int id)
 	return p_imsic->ids_target_cpu[id];
 }
 
-static int imsic_get_msi_msg(struct irq_domain *domain, int hwirq,
+static int imsic_get_msi_msg(struct device *dev, struct irq_domain *domain, int hwirq,
 			     unsigned long *msi_addr, unsigned long *msi_data,
 			     void *data)
 {
@@ -101,7 +101,7 @@ static int imsic_alloc_ids_fix(struct imsic *p_imsic, int id)
 
 static int imsic_alloc_ids(int nr_irqs, struct imsic *p_imsic)
 {
-	int index = 0, nr = 0;
+	int index = 0, base, nr = 0;
 	unsigned long ids;
 	int per_ids = sizeof(unsigned long) * 8;
 
@@ -111,6 +111,7 @@ static int imsic_alloc_ids(int nr_irqs, struct imsic *p_imsic)
 			if (++nr == nr_irqs)
 				goto alloc_success;
 		} else {
+			base = index + 1;
 			nr = 0;
 		}
 
@@ -120,10 +121,12 @@ static int imsic_alloc_ids(int nr_irqs, struct imsic *p_imsic)
 	return -1;
 
 alloc_success:
-	ids |= (1 << (index % per_ids));
-	p_imsic->ids_used_bits[index / per_ids] = ids;
+	for (index = base; index < base + nr; index++) {
+		ids |= (1 << (index % per_ids));
+		p_imsic->ids_used_bits[index / per_ids] = ids;
+	}
 
-	return (index - nr_irqs + 1);
+	return base;
 }
 
 static int imsic_disable_id(struct imsic *p_imsic, int id)
@@ -249,7 +252,7 @@ static void imsic_handle_irq(void *data)
 	}
 }
 
-static int imsic_alloc_irqs(int nr_irqs, void *data)
+static int imsic_alloc_irqs(struct device *dev, int nr_irqs, void *data)
 {
 	struct imsic *p_imsic = (struct imsic *)data;
 	int id = -1, i;
@@ -266,21 +269,21 @@ static int imsic_alloc_irqs(int nr_irqs, void *data)
 	return id;
 }
 
-static int imsic_mask_irq(int hwirq, void *data)
+static int imsic_mask_irq(struct device *dev, int hwirq, void *data)
 {
 	struct imsic *p_imsic = (struct imsic *)data;
 
 	return imsic_disable_id(p_imsic, hwirq);
 }
 
-static int imsic_unmask_irq(int hwirq, void *data)
+static int imsic_unmask_irq(struct device *dev, int hwirq, void *data)
 {
 	struct imsic *p_imsic = (struct imsic *)data;
 
 	return imsic_enable_id(p_imsic, hwirq);
 }
 
-static int imsic_set_affinity(int hwirq, int cpu)
+static int imsic_set_affinity(struct device *dev, int hwirq, int cpu)
 {
 	return imsic_id_set_target(&imsic, hwirq, cpu);
 }

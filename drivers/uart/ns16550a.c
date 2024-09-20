@@ -22,6 +22,8 @@
 #include <string.h>
 #include "ns16550a.h"
 #include "vmap.h"
+#include "irq.h"
+#include "uart.h"
 
 #define UART_CLK          50000000
 #define UART_DEFAULT_BAUD 115200
@@ -167,7 +169,7 @@ int ns16550a_init(struct device *dev, void *data)
 
 	nr_irqs = get_hwirq(dev, irqs);
 	for (i = 0; i < nr_irqs; i++)
-		register_device_irq(dev->irq_domain, irqs[i],
+		register_device_irq(dev, dev->irq_domain, irqs[i],
 				    ns16550a_irq_handler, NULL);
 
 	drv = dev->drv;

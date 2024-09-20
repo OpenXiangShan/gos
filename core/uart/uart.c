@@ -14,9 +14,10 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <device.h>
-#include <string.h>
+#include "device.h"
+#include "string.h"
 #include "vmap.h"
+#include "uart.h"
 
 extern int mmu_is_on;
 

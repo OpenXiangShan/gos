@@ -17,29 +17,19 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
-#include <irq.h>
-#include <list.h>
+#include "list.h"
 
 #define DRIVER_INIT_TABLE __driver_init_table
 #define DRIVER_INIT_TABLE_END __driver_init_table_end
-
-#define EARLYCON_INIT_TABLE __earlycon_init_table
-#define EARLYCON_INIT_TABLE_END __earlycon_init_table_end
-
-#define IRQCHIP_INIT_TABLE __irqchip_init_table
-#define IRQCHIP_INIT_TABLE_END __irqchip_init_table_end
-
-#define TIMER_INIT_TABLE __timer_init_table
-#define TIMER_INIT_TABLE_END __timer_init_table_end
 
 #define BLOCK 0
 #define NONBLOCK 1
 
 #define MAX_IRQ_NUM 16
 
-
-
+struct irq_domain;
 struct iommu_group;
+
 struct iommu {
 	int dev_id;
 	struct iommu_group *group;
@@ -95,36 +85,6 @@ struct driver_init_entry {
 	driver_init init;
 };
 
-struct early_print_device {
-	char name[128];
-	void (*write)(char *str);
-	int early_print_enable;
-};
-
-typedef int (*earlycon_init)(unsigned long base, int len,
-			     struct early_print_device * device);
-
-struct earlycon_init_entry {
-	char compatible[128];
-	earlycon_init init;
-};
-
-typedef int (*irqchip_init)(char *name, unsigned long base, int len,
-			    struct irq_domain * d, void *priv);
-
-struct irqchip_init_entry {
-	char compatible[128];
-	irqchip_init init;
-};
-
-typedef int (*timer_init)(unsigned long base, int len,
-			  struct irq_domain * d, void *priv);
-
-struct timer_init_entry {
-	char compatible[128];
-	timer_init init;
-};
-
 #define DRIVER_REGISTER(name, init_fn, compat)                                \
 	static const struct driver_init_entry __attribute__((used))           \
 		__drvier_init_##name                                          \
@@ -133,37 +93,13 @@ struct timer_init_entry {
 			.init = init_fn,                                      \
 		}
 
-#define EARLYCON_REGISTER(name, init_fn, compat)                              \
-	static const struct earlycon_init_entry __attribute__((used))         \
-		__earlycon_entry_##name                                       \
-		__attribute__((section(".earlycon_init_table"))) = {          \
-			.compatible = compat,                                 \
-			.init = init_fn,                                      \
-		}
-
-#define IRQCHIP_REGISTER(name, init_fn, compat)                               \
-	static const struct irqchip_init_entry __attribute__((used))          \
-		__irqchip_entry_##name                                        \
-		__attribute__((section(".irqchip_init_table"))) = {           \
-			.compatible = compat,                                 \
-			.init = init_fn,                                      \
-		}
-
-#define TIMER_REGISTER(name, init_fn, compat)                                 \
-	static const struct timer_init_entry __attribute__((used))            \
-		__timer_entry_##name                                          \
-		__attribute__((section(".timer_init_table"))) = {             \
-			.compatible = compat,                                 \
-			.init = init_fn,                                      \
-		}
-
-struct list_head *get_devices(void);
-struct list_head *get_drivers(void);
 #define for_each_device(entry) \
 	list_for_each_entry(entry, get_devices(), list)
 #define for_each_driver(entry) \
 	list_for_each_entry(entry, get_drivers(), list)
 
+struct list_head *get_devices(void);
+struct list_head *get_drivers(void);
 int device_driver_init(struct device_init_entry *hw);
 int earlycon_driver_init(void);
 int regist_device_irq(unsigned long hwirq, void (*handler)(void *data),
@@ -176,17 +112,6 @@ void walk_devices(void);
 
 unsigned long get_cycles(void);
 
-int msi_get_hwirq_affinity(struct device *dev, int nr_irqs,
-			   write_msi_msg_t write_msi_msg, int cpu);
-int msi_get_hwirq(struct device *dev, int nr_irqs,
-		  write_msi_msg_t write_msi_msg);
-int get_hwirq(struct device *dev, int *ret_irq);
-
-static inline int dev_register_irq(struct device *dev, unsigned int hwirq,
-				   void (*handler)(void *data), void *priv)
-{
-	return register_device_irq(dev->irq_domain, hwirq, handler, priv);
-}
 struct driver *create_driver(struct driver_init_entry *entry);
 void add_driver(struct driver *drv);
 

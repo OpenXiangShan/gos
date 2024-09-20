@@ -21,7 +21,8 @@
 #include "print.h"
 #include "../imsic/imsic.h"
 
-void aplic_msi_write_msi_msg(unsigned long msi_addr, unsigned long msi_data,
+void aplic_msi_write_msi_msg(struct device *dev, unsigned long msi_addr,
+			     unsigned long msi_data,
 			     int hwirq, void *priv)
 {
 	struct aplic *p_aplic = (struct aplic *)priv;
@@ -49,7 +50,7 @@ void aplic_msi_write_msi_msg(unsigned long msi_addr, unsigned long msi_data,
 	writel(target, val);
 }
 
-static int aplic_msi_alloc_irqs(int nr_irqs, void *data)
+static int aplic_msi_alloc_irqs(struct device *dev, int nr_irqs, void *data)
 {
 	struct aplic *p_aplic = (struct aplic *)data;
 	struct irq_domain *domain = &p_aplic->domain;
@@ -58,28 +59,28 @@ static int aplic_msi_alloc_irqs(int nr_irqs, void *data)
 	if (domain->parent_domain
 	    && domain->parent_domain->domain_ops->alloc_irqs)
 		hwirq =
-		    domain->parent_domain->domain_ops->alloc_irqs(nr_irqs,
+		    domain->parent_domain->domain_ops->alloc_irqs(dev, nr_irqs,
 								  domain->
 								  parent_domain->
 								  priv);
 
 	if (hwirq != -1) {
 		for (i = 0; i < nr_irqs; i++)
-			register_device_irq(domain->parent_domain, hwirq + i,
+			register_device_irq(dev, domain->parent_domain, hwirq + i,
 					    NULL, data);
 	}
 
 	return hwirq;
 }
 
-static int aplic_msi_mask_irq(int hwirq, void *data)
+static int aplic_msi_mask_irq(struct device *dev, int hwirq, void *data)
 {
 	aplic_irq_mask(hwirq, data);
 
 	return 0;
 }
 
-static int aplic_msi_unmask_irq(int hwirq, void *data)
+static int aplic_msi_unmask_irq(struct device *dev, int hwirq, void *data)
 {
 	aplic_irq_unmask(hwirq, data);
 

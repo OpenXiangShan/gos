@@ -34,7 +34,8 @@ void aplic_irq_unmask(int hwirq, void *data)
 	writel(aplic.base + APLIC_SETIENUM, hwirq);
 }
 
-int aplic_irq_set_type(int hwirq, int type, void *data)
+int aplic_irq_set_type(struct device *dev, int hwirq,
+		       int type, void *data)
 {
 	unsigned long sourcecfg;
 	unsigned int val;

@@ -27,6 +27,7 @@
 #include "asm/pgtable.h"
 #include "cpu.h"
 #include "asm/sbi.h"
+#include "irq.h"
 
 static void Usage(void)
 {

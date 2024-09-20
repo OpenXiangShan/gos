@@ -23,6 +23,8 @@
 #include "qemu-8250.h"
 #include <asm/sbi.h>
 #include "vmap.h"
+#include "irq.h"
+#include "uart.h"
 
 static unsigned long base_address;
 static unsigned int size;
@@ -142,7 +144,7 @@ int qemu_8250_driver_init(struct device *dev, void *data)
 
 	nr_irqs = get_hwirq(dev, irqs);
 	for (i = 0; i < nr_irqs; i++)
-		register_device_irq(dev->irq_domain, irqs[i],
+		register_device_irq(dev, dev->irq_domain, irqs[i],
 				    qemu_8250_irq_handler, NULL);
 
 	drv = dev->drv;

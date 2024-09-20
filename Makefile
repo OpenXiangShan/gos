@@ -134,7 +134,7 @@ run-debug:
 	-S -s
 else ifeq ($(CONFIG_SELECT_AIA), y)
 run:
-	./qemu-system-riscv64 -d unimp,guest_errors -D qemu.log -nographic \
+	./qemu-system-riscv64 -nographic \
         -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
 	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on -m 8G \
 	-device my_dmaengine \

@@ -20,6 +20,9 @@
 #include <device.h>
 #include "list.h"
 
+#define TIMER_INIT_TABLE __timer_init_table
+#define TIMER_INIT_TABLE_END __timer_init_table_end
+
 struct timer_event_info {
 	struct list_head list;
 	void (*handler)(void *data);
@@ -31,6 +34,22 @@ struct timer_event_info {
 	int restart;
 	int freeze;
 };
+
+typedef int (*timer_init)(unsigned long base, int len,
+			  struct irq_domain * d, void *priv);
+
+struct timer_init_entry {
+	char compatible[128];
+	timer_init init;
+};
+
+#define TIMER_REGISTER(name, init_fn, compat)                                 \
+	static const struct timer_init_entry __attribute__((used))            \
+		__timer_entry_##name                                          \
+		__attribute__((section(".timer_init_table"))) = {             \
+			.compatible = compat,                                 \
+			.init = init_fn,                                      \
+		}
 
 int init_timer(struct device_init_entry *hw);
 unsigned long get_system_time(void);

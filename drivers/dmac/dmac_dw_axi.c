@@ -25,6 +25,7 @@
 #include "dmac_dw_axi.h"
 #include "event.h"
 #include "vmap.h"
+#include "irq.h"
 
 static int done = 0;
 static unsigned long base;
@@ -217,7 +218,7 @@ int dw_dmac_init(struct device *dev, void *data)
 
 	nr_irqs = get_hwirq(dev, irqs);
 	for (i = 0; i < nr_irqs; i++)
-		register_device_irq(dev->irq_domain, irqs[i],
+		register_device_irq(dev, dev->irq_domain, irqs[i],
 				    dw_dmac_irq_handler, NULL);
 	/* enable interrupt */
 	writel(base + DMAC_AXI0_CH1_INTR_STATUS_ENABLE, 0x3);

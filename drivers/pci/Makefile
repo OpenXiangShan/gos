@@ -13,4 +13,5 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 obj-$(CONFIG_PCI) += pci.o
+obj-$(CONFIG_PCI) += msi.o
 obj-$(CONFIG_PCI) += controller/

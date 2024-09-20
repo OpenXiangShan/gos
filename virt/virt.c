@@ -33,6 +33,7 @@
 #include "list.h"
 #include "percpu.h"
 #include "device.h"
+#include "irq.h"
 
 extern char guest_bin[];
 static DEFINE_PER_CPU(struct list_head, vcpu_list);

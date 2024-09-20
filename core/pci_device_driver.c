@@ -86,11 +86,12 @@ int pci_probe_driver(void)
 	return 0;
 }
 
-void walk_pci_devices(void)
+void walk_pci_devices(int print_conf)
 {
 	struct device *dev;
 	struct pci_device *pdev;
 	int i;
+	char config[256];
 
 	list_for_each_entry(dev, &pci_devices, list) {
 		pdev = to_pci_dev(dev);
@@ -105,6 +106,19 @@ void walk_pci_devices(void)
 				      pdev->bar[i].base,
 				      pdev->bar[i].base + pdev->bar[i].size - 1);
 			}
+		}
+		if (print_conf) {
+			memset(config, 0, 256);
+			pci_get_config(pdev, config);
+			print("    00: ");
+			for (i = 0; i < 256; i++) {
+				if (i % 16 == 0 && i != 0) {
+					print("\n");
+					print("    %02x: ", i);
+				}
+				print("%02x ", config[i]);
+			}
+			print("\n");
 		}
 	}
 }

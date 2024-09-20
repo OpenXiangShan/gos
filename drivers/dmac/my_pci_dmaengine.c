@@ -26,12 +26,28 @@
 #include "cache_flush.h"
 #include "asm/barrier.h"
 #include "string.h"
+#include "irq.h"
+#include "event.h"
 
+static int done = 0;
 static unsigned long base;
 
 static void my_dmaengine_wait_for_complete(void)
 {
 	while (readl(base + MY_DMAENGINE_MMIO_CH0_DONE)) ;
+}
+
+static void my_pci_dmaengine_irq_handler(void *data)
+{
+	my_dmaengine_wait_for_complete();
+	done = 1;
+}
+
+static int wake_expr(void *data)
+{
+	int *wake = (int *)data;
+
+	return *wake == 1;
 }
 
 static int my_dmaengine_ioctl(struct device *dev, unsigned int cmd, void *arg)
@@ -52,7 +68,13 @@ static int my_dmaengine_ioctl(struct device *dev, unsigned int cmd, void *arg)
 		writel(base + MY_DMAENGINE_MMIO_CH0_START, 1);
 		mb();
 
-		my_dmaengine_wait_for_complete();
+		wait_for_event_timeout(&done, wake_expr, 5 * 1000 /* 5s */ );
+		if (done == 0)
+			ret = -1;
+		else {
+			done = 0;
+			ret = 0;
+		}
 
 		break;
 	}
@@ -69,7 +91,8 @@ static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 	struct driver *drv;
 	struct device *dev = &pdev->dev;
 	struct resource res;
-	int size;
+	int size, i;
+	int irqs[32], nr;
 
 	print("pci-dev[0:%x:%x:%x]: vendor:0x%x device:0x%x\n",
 	      pdev->bus->bus_number, PCI_SLOT(pdev->devfn),
@@ -86,6 +109,11 @@ static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 	      pdev->bus->bus_number, PCI_SLOT(pdev->devfn),
 	      PCI_FUNC(pdev->devfn), res.base, size);
 	base = (unsigned long)ioremap((void *)res.base, res.end - res.base + 1, NULL);
+
+	nr = pci_msix_enable(pdev, irqs);
+	for (i = 0; i < nr; i++)
+		register_device_irq(&pdev->dev, pdev->dev.irq_domain,
+				    irqs[i], my_pci_dmaengine_irq_handler, NULL);
 
 	drv = dev->drv;
 	strcpy(dev->name, "DMAC0");

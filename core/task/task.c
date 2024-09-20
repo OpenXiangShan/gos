@@ -29,6 +29,7 @@
 #include "spinlocks.h"
 #include "gos.h"
 #include "timer.h"
+#include "irq.h"
 
 extern int mmu_is_on;
 static DEFINE_PER_CPU(struct task_ctrl, tasks);

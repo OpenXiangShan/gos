@@ -50,7 +50,7 @@ static void imsic_test_irq_handler2(void *data)
 	print("imsic test driver: ###### enter %s (cpu%d)\n", __FUNCTION__, sbi_get_cpu_id());
 }
 
-static void imsic_test_write_msi_msg(unsigned long msi_addr,
+static void imsic_test_write_msi_msg(struct device *dev, unsigned long msi_addr,
 				     unsigned long msi_data, int hwirq,
 				     void *priv)
 {
@@ -115,17 +115,17 @@ int imsic_test_init(struct device *dev, void *data)
 	int hwirq;
 	struct driver *drv;
 
-	hwirq = msi_get_hwirq_affinity(dev, 3, imsic_test_write_msi_msg, 0);
+	hwirq = msi_get_hwirq_affinity(dev, 3, imsic_test_write_msi_msg, 1, NULL);
 	if (hwirq == -1) {
 		print("imsic test driver: imsic test driver: msi_get_hwirq failed\n", __FUNCTION__);
 		return -1;
 	}
-	register_device_irq(dev->irq_domain, hwirq, imsic_test_irq_handler0,
-			    NULL);
-	register_device_irq(dev->irq_domain, hwirq + 1, imsic_test_irq_handler1,
-			    NULL);
-	register_device_irq(dev->irq_domain, hwirq + 2, imsic_test_irq_handler2,
-			    NULL);
+	register_device_irq(dev, dev->irq_domain, hwirq,
+			    imsic_test_irq_handler0, NULL);
+	register_device_irq(dev, dev->irq_domain, hwirq + 1,
+			    imsic_test_irq_handler1, NULL);
+	register_device_irq(dev, dev->irq_domain, hwirq + 2,
+			    imsic_test_irq_handler2, NULL);
 
 	drv = dev->drv;
 	strcpy(dev->name, "IMSIC_TEST");

@@ -17,6 +17,8 @@
 #ifndef __SPINLOCK_H
 #define __SPINLOCK_H
 
+#include "asm/asm-irq.h"
+
 typedef unsigned int irq_flags_t;
 
 typedef struct {

@@ -68,21 +68,21 @@ static int plic_enable_irq(int cpu, int hwirq, int enable)
 	return 0;
 }
 
-static int plic_mask_irq(int hwirq, void *data)
+static int plic_mask_irq(struct device *dev, int hwirq, void *data)
 {
 	plic_set_prority(hwirq, 0);
 
 	return 0;
 }
 
-static int plic_unmask_irq(int hwirq, void *data)
+static int plic_unmask_irq(struct device *dev, int hwirq, void *data)
 {
 	plic_set_prority(hwirq, 1);
 
 	return 0;
 }
 
-static int plic_set_affinity(int hwirq, int cpu)
+static int plic_set_affinity(struct device *dev, int hwirq, int cpu)
 {
 	int cpu_online;
 

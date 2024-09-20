@@ -80,6 +80,8 @@
 #define APLIC_M_MODE 0
 #define APLIC_S_MODE 1
 
+#include "device.h"
+
 struct aplic_priv_data {
 	int index;
 	int mmode;
@@ -109,6 +111,6 @@ struct aplic {
 void aplic_hw_mode_init(struct aplic *p_aplic);
 void aplic_irq_mask(int hwirq, void *data);
 void aplic_irq_unmask(int hwirq, void *data);
-int aplic_irq_set_type(int hwirq, int type, void *data);
+int aplic_irq_set_type(struct device *dev, int hwirq, int type, void *data);
 
 #endif

@@ -32,6 +32,7 @@
 #include "asm/sbi.h"
 #include "virt.h"
 #include "user.h"
+#include "uart.h"
 #include "../app/command.h"
 
 extern const char logo[];
