@@ -212,6 +212,11 @@ int msi_get_hwirq_affinity(struct device *dev, int nr_irqs,
 	if (hwirq == -1)
 		return 0;
 
+	dev->irq_num = nr_irqs;
+	for (i = 0; i < nr_irqs; i++) {
+		dev->irqs[i] = hwirq + i;
+	}
+
 	if (set_msi_desc)
 		set_msi_desc(dev, hwirq, nr_irqs);
 

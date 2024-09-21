@@ -104,6 +104,8 @@ static int __NoNeed_create_device(struct device_init_entry *entry)
 		return 1;
 	if (!strncmp(entry->compatible, "IMSIC", sizeof("IMSIC")))
 		return 1;
+	if (!strncmp(entry->compatible, "IMSIC_M", sizeof("IMSIC_M")))
+		return 1;
 	if (!strncmp(entry->compatible, "APLIC_S", sizeof("APLIC_S")))
 		return 1;
 	if (!strncmp(entry->compatible, "APLIC_M", sizeof("APLIC_M")))
@@ -254,8 +256,13 @@ void walk_devices()
 		print("device %d\n", id++);
 		print("    name: %s\n", dev->compatible);
 		print("    base address: 0x%lx\n", dev->base);
-		for (i = 0; i < dev->irq_num; i++)
-			print("    irq[i]: %d\n", dev->irqs[i]);
+		if (dev->irq_domain) {
+			print("    irq domain: %s\n", dev->irq_domain->name);
+			print("    irq: ");
+			for (i = 0; i < dev->irq_num; i++)
+				print("%d ", dev->irqs[i]);
+			print("\n");
+		}
 		print("    probe: %d\n", dev->probe);
 
 	}
