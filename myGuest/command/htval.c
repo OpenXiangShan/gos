@@ -89,7 +89,7 @@ static int misaligne_store(void)
 
 static void Usage(void)
 {
-	print("Usage: page_tlb_test [cmd] \n");
+	print("Usage:vcpu_run htval_test [cmd] \n");
 	print("cmd option:\n");
 	print("    -- misaligne_load \n");
 	print("    -- misaligne_store \n");

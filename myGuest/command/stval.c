@@ -73,7 +73,7 @@ static int illegal_instruction_test(void)
 
 static void Usage(void)
 {
-	print("Usage: page_tlb_test [cmd] \n");
+	print("Usage:vcpu_run stval_test [cmd] \n");
 	print("cmd option:\n");
 	print("    -- ebreak \n");
 	print("    -- load_misaligned \n");

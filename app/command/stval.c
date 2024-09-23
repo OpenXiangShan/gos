@@ -17,7 +17,7 @@
 #include <asm/type.h>
 #include <print.h>
 #include <device.h>
-#include <asm/mmio.h> 
+#include <asm/mmio.h>
 #include <vmap.h>
 #include <string.h>
 #include "../command.h"
@@ -34,7 +34,7 @@ static int ebreak_test(void)
 static int load_misaligned_test(void)
 {
 	unsigned int val = 0;
-	val = readl(0x80000007);	
+	val = readl(0x80000007);
 	print("0x80000007 = %x\n", val);
 	return 0;
 }
@@ -50,8 +50,8 @@ static int store_misaligned_test(void)
 
 static int load_page_test(void)
 {
-	int val = 0;                                                         
-                                                                                
+	int val = 0;
+
 	val = readl(0xffffffc700000000);
 	print("0xffffffc700000000 = %x\n", val);
 	return 0;
@@ -59,8 +59,8 @@ static int load_page_test(void)
 
 static int store_page_test(void)
 {
-	int val = 0;                                                   
-                                                                                 
+	int val = 0;
+
 	writel(0xffffffc700000000, val);
 	print("0xffffffc700000000 = %x\n", val);
 	return 0;
@@ -68,11 +68,11 @@ static int store_page_test(void)
 
 static int load_access_test(void)
 {
-	unsigned long addr = 0;    
-	unsigned long val = 0;    
+	unsigned long addr = 0;
+	unsigned long val = 0;
 
 	addr = (unsigned long)ioremap(0, 4096, 0);
-	
+
 	val = readl(addr);
 	print("0x%x = %x\n", addr, val);
 	return 0;
@@ -80,11 +80,11 @@ static int load_access_test(void)
 
 static int store_access_test(void)
 {
-	unsigned long addr = 0;    
-	unsigned long val = 0;    
+	unsigned long addr = 0;
+	unsigned long val = 0;
 
 	addr = (unsigned long)ioremap(0, 4096, 0);
-	
+
 	writel(addr, val);
 	print("0x%x = %x\n", addr, val);
 	return 0;
@@ -98,7 +98,7 @@ static int illegal_instruction_test(void)
 
 static void Usage(void)
 {
-	print("Usage: page_tlb_test [cmd] \n");
+	print("Usage: stval_test [cmd] \n");
 	print("cmd option:\n");
 	print("    -- ebreak \n");
 	print("    -- load_misaligned \n");
@@ -107,7 +107,7 @@ static void Usage(void)
 	print("    -- store_page \n");
 	print("    -- load_access \n");
 	print("    -- store_access \n");
-	print("    -- illegal_instruction \n");	
+	print("    -- illegal_instruction \n");
 }
 
 static int cmd_stval_test_handler(int argc, char *argv[], void *priv)
