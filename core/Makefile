@@ -15,6 +15,7 @@
 obj-y += uart/
 obj-y += irq/
 obj-y += timer/
+obj-y += iommu/
 obj-y += dma-mapping/
 obj-y += dmac/
 obj-y += task/

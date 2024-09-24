@@ -14,8 +14,10 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RISCV_IOMMU_H
-#define RISCV_IOMMU_H
+#ifndef __RISCV_IOMMU_H__
+#define __RISCV_IOMMU_H__
+
+#include "iommu.h"
 
 #define DDTP_PPN_MASK      (0x3FFFFFFFFFFC00ULL)
 #define DC_FSC_MODE_MASK   (~0x0FFFFFFFFFFFFFFFULL)
@@ -153,6 +155,8 @@
 #define RISCV_IOMMU_FIRST_STAGE 1
 #define RISCV_IOMMU_GSTAGE 2
 
+#define to_riscv_iommu(iommu) container_of(iommu, struct riscv_iommu, iommu)
+
 enum riscv_iommu_ddtp_modes {
 	DDTP_MODE_OFF,
 	DDTP_MODE_BARE,
@@ -219,6 +223,7 @@ struct riscv_iommu_device {
 };
 
 struct riscv_iommu {
+	struct iommu iommu;
 	unsigned long base;
 	int cmdq_len;
 	int fltq_len;

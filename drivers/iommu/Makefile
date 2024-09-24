@@ -12,7 +12,4 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-obj-$(CONFIG_RISCV_IOMMU_DRIVER) += iommu.o
-obj-$(CONFIG_RISCV_IOMMU_DRIVER) += io_pgtable.o
-obj-$(CONFIG_RISCV_IOMMU_DRIVER) += queue.o
-obj-$(CONFIG_RISCV_IOMMU_DRIVER) += iommu_test.o
+obj-$(CONFIG_RISCV_IOMMU_DRIVER) += riscv-iommu/

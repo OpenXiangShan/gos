@@ -319,6 +319,8 @@ static int __pci_create_device(struct pci_device *pci_dev)
 
 	pci_register_device(pci_dev);
 
+	pci_set_device_iommu(pci_dev);
+
 	return 0;
 }
 

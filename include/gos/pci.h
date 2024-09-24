@@ -133,6 +133,8 @@
 #define pci_for_each_device(dev, head) \
 	list_for_each_entry(dev, head, list)
 
+#define PCI_DEVID(bus, devfn) ((((u16)(bus)) << 8) | (devfn))
+
 enum {
 	pci_mem_type_io = 0,
 	pci_mem_type_mem,

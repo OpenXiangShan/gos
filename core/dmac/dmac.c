@@ -118,7 +118,7 @@ int memcpy_hw(char * name, char *dst, char *src, unsigned int size)
 	data.burst_len = 7;
 	data.size = size;
 
-	return ioctl(fd, MEM_TO_MEM, &data);
+	return ioctl(fd, MEM_TO_MEM_FIX, &data);
 }
 
 int dma_transfer(char * name, char *dst, char *src, unsigned int size,

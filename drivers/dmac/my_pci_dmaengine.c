@@ -28,6 +28,7 @@
 #include "string.h"
 #include "irq.h"
 #include "event.h"
+#include "dma-mapping.h"
 
 static int done = 0;
 static unsigned long base;
@@ -54,20 +55,26 @@ static int my_dmaengine_ioctl(struct device *dev, unsigned int cmd, void *arg)
 {
 	int ret = 0;
 	struct dmac_ioctl_data *data = (struct dmac_ioctl_data *)arg;
-	unsigned long src_addr, des_addr;
 	unsigned int size;
+	unsigned long src_iova, dst_iova;
+	unsigned long src_addr, dst_addr;
 
 	switch (cmd) {
-	case MEM_TO_MEM:
+	case MEM_TO_MEM_FIX:
 		src_addr = (unsigned long)data->src;
-		des_addr = (unsigned long)data->dst;
+		dst_addr = (unsigned long)data->dst;
 		size = data->size;
-		writeq(base + MY_DMAENGINE_MMIO_CH0_SRC, src_addr);
-		writeq(base + MY_DMAENGINE_MMIO_CH0_DST, des_addr);
+		if (dma_mapping(dev, src_addr, &src_iova, size, NULL))
+			return -1;
+		if (dma_mapping(dev, dst_addr, &dst_iova, size, NULL))
+			return -1;
+		writeq(base + MY_DMAENGINE_MMIO_CH0_SRC, src_iova);
+		writeq(base + MY_DMAENGINE_MMIO_CH0_DST, dst_iova);
 		writel(base + MY_DMAENGINE_MMIO_CH0_TRAN_SIZE, size);
 		writel(base + MY_DMAENGINE_MMIO_CH0_START, 1);
 		mb();
 
+#if 0
 		wait_for_event_timeout(&done, wake_expr, 5 * 1000 /* 5s */ );
 		if (done == 0)
 			ret = -1;
@@ -75,7 +82,41 @@ static int my_dmaengine_ioctl(struct device *dev, unsigned int cmd, void *arg)
 			done = 0;
 			ret = 0;
 		}
+#else
+		my_dmaengine_wait_for_complete();
+#endif
+		break;
+	case MEM_TO_MEM:
+		size = data->size;
+		src_addr = (unsigned long)dma_alloc(dev, &src_iova, size, NULL);
+		if (!src_addr)
+			return -1;
 
+		for (int i = 0; i < size; i++)
+			((char *)(phy_to_virt(src_addr)))[i] = i;
+
+		dst_addr = (unsigned long)dma_alloc(dev, &dst_iova, size, NULL);
+		if (!dst_addr)
+			return -1;
+		print("src_addr:0x%lx dst_addr:0x%lx\n", src_addr, dst_addr);
+		writeq(base + MY_DMAENGINE_MMIO_CH0_SRC, src_iova);
+		writeq(base + MY_DMAENGINE_MMIO_CH0_DST, dst_iova);
+		writel(base + MY_DMAENGINE_MMIO_CH0_TRAN_SIZE, size);
+		writel(base + MY_DMAENGINE_MMIO_CH0_START, 1);
+		mb();
+#if 0
+		wait_for_event_timeout(&done, wake_expr, 5 * 1000 /* 5s */ );
+		if (done == 0)
+			ret = -1;
+		else {
+			done = 0;
+			ret = 0;
+		}
+#else
+		my_dmaengine_wait_for_complete();
+#endif
+		for (int i = 0; i < size; i++)
+			print("dst[%d]: %d\n", i, ((char *)(phy_to_virt(dst_addr)))[i]);
 		break;
 	}
 

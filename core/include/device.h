@@ -28,27 +28,23 @@
 #define MAX_IRQ_NUM 16
 
 struct irq_domain;
-struct iommu_group;
-
-struct iommu {
-	int dev_id;
-	struct iommu_group *group;
-	void *priv_data;
-	struct list_head list;
-};
+struct iommu;
 
 struct device {
 	struct list_head list;
 	int probe;
 	char name[64];
+	char compatible[128];
 	unsigned long base;
 	unsigned int len;
 	int irqs[64];
 	int irq_num;
 	struct driver *drv;
-	struct iommu iommu;
 	struct irq_domain *irq_domain;
-	char compatible[128];
+	struct iommu *iommu;
+	struct iommu_group *iommu_group;
+	struct list_head iommu_group_list;
+	int dev_id;
 };
 
 struct driver_ops {
@@ -74,6 +70,7 @@ struct device_init_entry {
 	char irq_parent[128];
 	int irq[16];
 	int irq_num;
+	char iommu[128];
 	int dev_id;
 	void *data;
 };

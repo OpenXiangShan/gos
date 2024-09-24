@@ -21,7 +21,8 @@
 #include "device.h"
 
 enum DMA_TYPE {
-	MEM_TO_MEM = 0,
+	MEM_TO_MEM_FIX = 0,
+	MEM_TO_MEM,
 };
 
 struct dmac_ioctl_data {

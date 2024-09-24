@@ -20,9 +20,9 @@
 #include <mm.h>
 #include <print.h>
 #include "irq.h"
-#include "dma_mapping.h"
 #include "vmap.h"
 #include "list.h"
+#include "iommu.h"
 
 extern int mmu_is_on;
 
@@ -63,8 +63,8 @@ static struct device *create_device(struct device_init_entry *entry)
 	new->irq_num = entry->irq_num;
 	for(i = 0; i < entry->irq_num; i++)
 		new->irqs[i] = entry->irq[i];
-	new->iommu.dev_id = entry->dev_id;
 	new->irq_domain = find_irq_domain(entry->irq_parent);
+	new->iommu = find_iommu(entry->iommu);
 	strcpy(new->compatible, entry->compatible);
 
 	list_add_tail(&new->list, &_devices);
@@ -131,6 +131,8 @@ static int __probe_device_table(struct driver_init_entry *driver_head,
 
 		driver_nr_tmp = driver_nr;
 		dev = create_device(device_entry);
+		if (dev->iommu)
+			iommu_attach_device(dev, dev->iommu);
 		for (driver_entry = driver_head; driver_nr_tmp;
 		     driver_entry++, driver_nr_tmp--) {
 			drv = create_driver(driver_entry);
@@ -143,7 +145,6 @@ static int __probe_device_table(struct driver_init_entry *driver_head,
 				dev->probe = 1;
 				drv->dev = dev;
 				drv->probe = 1;
-				dma_mapping_probe_device(dev);
 				driver_entry->init(dev, device_entry->data);
 			}
 		}
@@ -262,6 +263,9 @@ void walk_devices()
 			for (i = 0; i < dev->irq_num; i++)
 				print("%d ", dev->irqs[i]);
 			print("\n");
+		}
+		if (dev->iommu) {
+			print("    iommu: %s\n", dev->iommu->name);
 		}
 		print("    probe: %d\n", dev->probe);
 

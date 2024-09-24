@@ -50,6 +50,7 @@ struct pci_driver_init_entry {
 #define to_pci_driver(pdev) container_of(&pdev->dev.drv, struct pci_driver, drv)
 
 int pci_register_device(struct pci_device *pci_dev);
+void pci_set_device_iommu(struct pci_device *pdev);
 int pci_probe_driver(void);
 void walk_pci_devices(int print_conf);
 

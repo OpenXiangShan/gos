@@ -22,6 +22,7 @@
 #include "mm.h"
 #include "string.h"
 #include "print.h"
+#include "iommu.h"
 
 static LIST_HEAD(pci_devices);
 static LIST_HEAD(pci_drivers);
@@ -43,6 +44,16 @@ static struct pci_driver *create_pci_driver(void)
 	add_driver(&new->drv);
 
 	return new;
+}
+
+void pci_set_device_iommu(struct pci_device *pdev)
+{
+	pdev->dev.iommu = find_default_iommu();
+
+	pdev->dev.dev_id = PCI_DEVID(pdev->bus->bus_number, pdev->devfn);
+
+	if (pdev->dev.iommu)
+		iommu_attach_device(&pdev->dev, pdev->dev.iommu);
 }
 
 int pci_register_device(struct pci_device *pci_dev)
