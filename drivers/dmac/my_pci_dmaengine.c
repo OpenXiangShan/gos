@@ -44,13 +44,14 @@ static void my_pci_dmaengine_irq_handler(void *data)
 	done = 1;
 }
 
+#if 0
 static int wake_expr(void *data)
 {
 	int *wake = (int *)data;
 
 	return *wake == 1;
 }
-
+#endif
 static int my_dmaengine_ioctl(struct device *dev, unsigned int cmd, void *arg)
 {
 	int ret = 0;
