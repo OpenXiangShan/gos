@@ -179,6 +179,9 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 	case SBI_SET_MEDELEG:
 		write_csr(medeleg, regs->a0);
 		break;
+	case SBI_GET_MEDELEG:
+		ret_value = read_csr(medeleg);
+		break;
 	case SBI_HPM_TEST:
 		hpm_test();
 		break;
@@ -396,7 +399,6 @@ void delegate_traps(void)
 
 	interrupts = MIP_SSIP | MIP_STIP | MIP_SEIP;
 	exceptions =
-		(1UL << CAUSE_BREAKPOINT) |
 	    (1UL << CAUSE_MISALIGNED_LOAD) | (1UL << CAUSE_MISALIGNED_STORE) |
 	    (1UL << CAUSE_MISALIGNED_FETCH) | (1UL << CAUSE_FETCH_PAGE_FAULT) |
 	    (1UL << CAUSE_LOAD_PAGE_FAULT) | (1UL << CAUSE_STORE_PAGE_FAULT)

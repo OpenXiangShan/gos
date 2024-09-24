@@ -18,6 +18,8 @@
 #include <print.h>
 #include <device.h>
 #include <asm/mmio.h>
+#include <asm/trap.h>
+#include <asm/sbi.h>
 #include <vmap.h>
 #include <string.h>
 #include "command.h"
@@ -26,6 +28,11 @@
 
 static int ebreak_test(void)
 {
+	unsigned long medeleg = 0;
+
+	medeleg = sbi_get_medeleg();
+	medeleg |= (1UL << CAUSE_BREAKPOINT);
+	sbi_set_medeleg(medeleg);
 	asm volatile ("ebreak");
 	return 0;
 }

@@ -41,6 +41,12 @@ int vcpu_sbi_call(struct vcpu *vcpu)
 	case SBI_SET_TIMER:
 		vcpu_sbi_set_timer(vcpu, guest_ctx->a0);
 		break;
+	case SBI_SET_MEDELEG:
+		sbi_set_medeleg(guest_ctx->a0);
+		break;
+	case SBI_GET_MEDELEG:
+		guest_ctx->a0 = sbi_get_medeleg();
+		break;
 	default:
 		print("%s -- Unsupport sbi id: %d\n", __FUNCTION__, sbi_id);
 	}
