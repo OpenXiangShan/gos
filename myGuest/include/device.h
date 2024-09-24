@@ -27,6 +27,7 @@ struct device_init_entry {
 	char irq_parent[128];
 	int irq[16];
 	int irq_num;
+	char iommu[128];
 	int dev_id;
 	void *data;
 };
