@@ -202,7 +202,7 @@ static void *riscv_iommu_alloc(struct device *dev, unsigned long iova,
 	if (!iommu)
 		return NULL;
 
-	riscv_iommu = to_riscv_iommu(iommu);	
+	riscv_iommu = to_riscv_iommu(iommu);
 
 	dc = riscv_iommu_get_dc(riscv_iommu, dev->dev_id);
 	if (!dc) {
@@ -315,7 +315,7 @@ static int riscv_iommu_finalize(struct device *dev, int pscid)
 				print("%s -- unsupported pt mode\n", __FUNCTION__);
 				return -1;
 			}
-	
+
 			gp->pgdp_gstage = mm_alloc(pgd_size);
 			if (!gp->pgdp_gstage) {
 				print("%s -- Out of memory size:%d\n", __FUNCTION__,
@@ -366,7 +366,7 @@ int riscv_iommu_init(struct device *dev, void *data)
 
 	riscv_iommu = (struct riscv_iommu *)mm_alloc(sizeof(struct riscv_iommu));
 	if (!riscv_iommu)
-		return -1;	
+		return -1;
 	memset((char *)riscv_iommu, 0, sizeof(struct riscv_iommu));
 
 	riscv_iommu->base = (unsigned long)ioremap((void *)dev->base, dev->len, 0);
