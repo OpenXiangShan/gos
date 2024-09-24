@@ -21,9 +21,9 @@
 static do_timer_t irq_do_timer;
 static void *irq_data;
 
-static do_timer_t do_timer __attribute__((section(".data"))) = NULL;
+static do_timer_t do_timer = NULL;
 static void *timer_data;
-static unsigned long expiry_time_ms __attribute__((section(".data"))) = 0;
+static unsigned long expiry_time_ms = 0;
 
 static get_system_tick_t __get_system_tick;
 

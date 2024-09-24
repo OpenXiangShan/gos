@@ -34,8 +34,8 @@
 extern int mmu_is_on;
 static DEFINE_PER_CPU(struct task_ctrl, tasks);
 static DEFINE_PER_CPU(struct task_scheduler, schedulers);
-static unsigned long task_id_bitmap __attribute__((section(".data"))) = 0;
-static spinlock_t task_id_lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
+static unsigned long task_id_bitmap = 0;
+static spinlock_t task_id_lock = __SPINLOCK_INITIALIZER;
 
 static int alloc_task_id(void)
 {

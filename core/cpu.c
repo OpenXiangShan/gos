@@ -35,16 +35,10 @@ extern void do_exception_vector(void);
 extern int pgtable_l4_enabled;
 extern int pgtable_l5_enabled;
 
-spinlock_t cpumask_lock __attribute__((section(".data"))) =
-    __SPINLOCK_INITIALIZER;
-
-static spinlock_t notifier_lock __attribute__((section(".data"))) =
-    __SPINLOCK_INITIALIZER;
-
-unsigned long online_cpu_mask __attribute__((section(".data"))) = 0;
-
+spinlock_t cpumask_lock = __SPINLOCK_INITIALIZER;
+static spinlock_t notifier_lock = __SPINLOCK_INITIALIZER;
+unsigned long online_cpu_mask = 0;
 static LIST_HEAD(notifier_list);
-
 extern char secondary_start_sbi[];
 
 static int sbi_cpu_start(unsigned int hartid)

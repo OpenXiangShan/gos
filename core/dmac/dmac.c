@@ -25,7 +25,7 @@
 
 extern int mmu_is_on;
 static LIST_HEAD(dmacs);
-static unsigned long dmac_idx_bitmap __attribute__((section(".data"))) = 0;
+static unsigned long dmac_idx_bitmap = 0;
 
 static int find_free_dmac_index(void)
 {

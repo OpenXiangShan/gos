@@ -30,8 +30,7 @@ extern unsigned long va_pa_offset;
 #define MEM_MAP_NR 8192		//2*1024*1024*1024/PAGE_SIZE/(sizeof(unsigned long)*8)
 #define TOTAL_PAGE_NUM MEM_MAP_NR * sizeof(unsigned long)
 
-static spinlock_t mem_lock __attribute__((section(".data"))) =
-    __SPINLOCK_INITIALIZER;
+static spinlock_t mem_lock = __SPINLOCK_INITIALIZER;
 
 static unsigned long mem_maps[MEM_MAP_NR];
 static unsigned long phy_address_start;

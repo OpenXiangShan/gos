@@ -30,7 +30,7 @@
 
 static struct sbi_trap_hw_context *h_context[8] = { 0 };
 extern void exception_vector(void);
-static do_ext_irq_t do_ext_irq __attribute__((section(".data"))) = 0;
+static do_ext_irq_t do_ext_irq = 0;
 
 void sbi_panic()
 {

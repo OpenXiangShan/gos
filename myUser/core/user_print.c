@@ -36,7 +36,7 @@ const unsigned char hex_tab[] =
 	'f'
 };
 
-spinlock_t _lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
+static spinlock_t _lock = __SPINLOCK_INITIALIZER;
 
 #define  MAX_NUMBER_BYTES  64
 #define  F_PRECISION       8

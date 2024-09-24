@@ -39,7 +39,7 @@ extern char guest_bin[];
 static DEFINE_PER_CPU(struct list_head, vcpu_list);
 static DEFINE_PER_CPU(unsigned long, vmid_bitmap);
 static LIST_HEAD(vgpa_list);
-static spinlock_t vcpu_req_lock __attribute__((section(".data"))) = __SPINLOCK_INITIALIZER;
+static spinlock_t vcpu_req_lock = __SPINLOCK_INITIALIZER;
 
 void append_vcpu_vgpalist(struct vcpu_gpa *t)
 {

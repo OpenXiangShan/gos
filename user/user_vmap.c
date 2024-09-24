@@ -24,9 +24,8 @@
 #define USER_MAP_MAP_NR USER_SPACE_DYNAMIC_MAP_NR
 #define USER_MAP_TOTAL_PAGE_NUM USER_MAP_MAP_NR * sizeof(unsigned long) * 8
 
-static spinlock_t vmem_lock __attribute__((section(".data"))) =
-    __SPINLOCK_INITIALIZER;
-unsigned long vmaps[USER_MAP_MAP_NR] __attribute__((section(".data"))) = { 0 };
+static spinlock_t vmem_lock = __SPINLOCK_INITIALIZER;
+unsigned long vmaps[USER_MAP_MAP_NR] = { 0 };
 
 void *user_vmap_alloc(unsigned int size)
 {

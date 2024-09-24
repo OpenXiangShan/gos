@@ -29,10 +29,9 @@ extern int mmu_is_on;
 extern unsigned long bss_end;
 extern unsigned long va_pa_offset;
 
-static spinlock_t mem_lock __attribute__((section(".data"))) =
-    __SPINLOCK_INITIALIZER;
+static spinlock_t mem_lock = __SPINLOCK_INITIALIZER;
 
-static struct memory_block mm_blocks __attribute__((section(".data"))) = { 0 };
+static struct memory_block mm_blocks = { 0 };
 
 extern char dtb_bin[];
 

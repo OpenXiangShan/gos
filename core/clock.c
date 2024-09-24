@@ -22,7 +22,7 @@
 #include "spinlocks.h"
 #include "mm.h"
 
-static struct clock_source *clock_src __attribute__((section(".data"))) = NULL;
+static struct clock_source *clock_src = NULL;
 static DEFINE_PER_CPU(struct clock_event, clock_event);
 
 unsigned long get_clock_source_freq(void)

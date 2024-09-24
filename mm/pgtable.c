@@ -25,13 +25,13 @@
 #include "asm/bitops.h"
 #include "irq.h"
 
-static void *pgdp __attribute__((section(".data"))) = NULL;
+static void *pgdp = NULL;
 
-int pgtable_l4_enabled __attribute__((section(".data"))) = 0;
-int pgtable_l5_enabled __attribute__((section(".data"))) = 0;
+int pgtable_l4_enabled = 0;
+int pgtable_l5_enabled = 0;
 
-int mmu_is_on __attribute__((section(".data"))) = 0;
-unsigned long va_pa_offset __attribute__((section(".data"))) = 0;
+int mmu_is_on = 0;
+unsigned long va_pa_offset = 0;
 
 extern unsigned long bss_end;
 extern unsigned long __start_gos;

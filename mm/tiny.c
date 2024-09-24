@@ -22,8 +22,7 @@
 #include "asm/pgtable.h"
 #include "string.h"
 
-static spinlock_t tiny_lock __attribute__((section(".data"))) =
-    __SPINLOCK_INITIALIZER;
+static spinlock_t tiny_lock = __SPINLOCK_INITIALIZER;
 
 static struct list_head tiny_8;
 static struct list_head tiny_16;
