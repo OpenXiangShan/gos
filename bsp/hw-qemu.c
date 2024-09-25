@@ -152,7 +152,7 @@ static const struct device_init_entry __attribute__((used))
 	 " ",
 	 { 0xFF,},
 	 0,
-	 " ",
+	 "riscv,iommu",
 	 0,
 	 &generic_ecam_pci_data,
 	  },

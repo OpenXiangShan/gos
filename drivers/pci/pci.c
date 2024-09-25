@@ -638,7 +638,8 @@ int pci_probe_root_bus(struct pci_bus *bus)
 	return 0;
 }
 
-int pci_root_bus_init(struct pci_bus *bus, struct ecam_ops *ops, void *data,
+int pci_root_bus_init(struct device *dev, struct pci_bus *bus,
+		      struct ecam_ops *ops, void *data,
 		      struct resource *res, unsigned long offset)
 {
 	bus->ops = ops;
@@ -648,6 +649,7 @@ int pci_root_bus_init(struct pci_bus *bus, struct ecam_ops *ops, void *data,
 	bus->res.base = res->base + offset;
 	bus->res.end = res->end;
 	bus->offset = offset;
+	bus->dev = dev;
 
 	return 0;
 }

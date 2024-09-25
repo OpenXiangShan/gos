@@ -196,6 +196,7 @@ struct ecam_ops {
 
 struct pci_bus {
 	struct list_head list;
+	struct device *dev;
 	int devfn;
 	int bus_number;
 	int subordinate;
@@ -220,7 +221,8 @@ void pci_msix_init(struct pci_device *pdev);
 void pci_set_master(struct pci_device *dev, int enable);
 void pci_enable_resource(struct pci_device *dev, int mask);
 void pci_get_resource(struct pci_device *dev, int bar, struct resource *res);
-int pci_root_bus_init(struct pci_bus *bus, struct ecam_ops *ops, void *data,
+int pci_root_bus_init(struct device *dev, struct pci_bus *bus,
+		      struct ecam_ops *ops, void *data,
 		      struct resource *res, unsigned long offset);
 int pci_probe_root_bus(struct pci_bus *bus);
 unsigned int pci_find_capability(struct pci_device *dev, int cap);

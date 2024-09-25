@@ -46,9 +46,19 @@ static struct pci_driver *create_pci_driver(void)
 	return new;
 }
 
+static struct iommu *pci_get_bus_iommu(struct pci_device *pdev)
+{
+	struct pci_bus *root = pdev->bus;
+
+	while (root->parent)
+		root = root->parent;
+
+	return root->dev->iommu;
+}
+
 void pci_set_device_iommu(struct pci_device *pdev)
 {
-	pdev->dev.iommu = find_default_iommu();
+	pdev->dev.iommu = pci_get_bus_iommu(pdev);
 
 	pdev->dev.dev_id = PCI_DEVID(pdev->bus->bus_number, pdev->devfn);
 

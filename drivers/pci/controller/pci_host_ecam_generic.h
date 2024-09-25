@@ -18,6 +18,7 @@
 #define __PCI_HOST_ECAM_GENERIC__
 
 #include "pci.h"
+#include "device.h"
 
 struct pci_ecam_generic_bus {
 	struct pci_bus bus;

@@ -113,7 +113,7 @@ int pci_host_ecam_generic_init(struct device *dev, void *data)
 	res.end = res.base + priv->size - 1;
 
 	bus = &generic_bus->bus;
-	pci_root_bus_init(bus, &generic_ecam_ops, generic_bus, &res, priv->offset);
+	pci_root_bus_init(dev, bus, &generic_ecam_ops, generic_bus, &res, priv->offset);
 	pci_probe_root_bus(bus);
 
 	return 0;
