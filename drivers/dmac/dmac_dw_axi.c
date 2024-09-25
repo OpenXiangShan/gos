@@ -20,21 +20,20 @@
 #include <print.h>
 #include <asm/type.h>
 #include <dmac.h>
-#include <timer.h>
 #include <string.h>
 #include "dmac_dw_axi.h"
 #include "event.h"
 #include "vmap.h"
 #include "irq.h"
+#include "mm.h"
 
-static int done = 0;
-static unsigned long base;
+static struct dmac_dw_axi *dw_axi_dmac;
 
 static void dw_dmac_irq_handler(void *data)
 {
-	done = 1;
+	dw_axi_dmac->done = 1;
 
-	writel(base + DMAC_AXI0_CH1_INTR_CLEAR, 0x3);
+	writel(dw_axi_dmac->base + DMAC_AXI0_CH1_INTR_CLEAR, 0x3);
 }
 
 static int dw_dmac_mem_to_mem(unsigned int src_addr,
@@ -55,6 +54,7 @@ static int dw_dmac_mem_to_mem(unsigned int src_addr,
 	unsigned int type = 0;
 	unsigned int src_hs = 0;
 	unsigned int des_hs = 0;
+	unsigned long base = dw_axi_dmac->base;
 
 	print
 	    ("src_addr: 0x%x des_addr: 0x%x blockTS: %d src_addr_inc: %d des_addr_inc: %d src_width: %d des_width: %d src_burstsize: %d des_burstsize: %d burst_len: %d\n",
@@ -138,100 +138,90 @@ static int wake_expr(void *data)
 	return *wake == 1;
 }
 
-static int dw_dmac_ioctl(struct device *dev, unsigned int cmd, void *arg)
+static int dw_axi_dmac_transfer_m2m(unsigned long src, unsigned long dst, int size, void *priv)
 {
 	int ret = 0;
-	struct dmac_ioctl_data *data = (struct dmac_ioctl_data *)arg;
-	unsigned long src_addr;
-	unsigned long des_addr;
-	unsigned int blockTS;
-	unsigned int src_addr_inc;
-	unsigned int des_addr_inc;
-	unsigned int src_width;
-	unsigned int des_width;
-	unsigned int src_burstsize;
-	unsigned int des_burstsize;
-	unsigned int burst_len;
-	unsigned long start_cycles = 0, end_cycles = 0;
+	struct dw_dmac_priv_info *info = (struct dw_dmac_priv_info *)priv;
+	unsigned long src_addr = src;
+	unsigned long des_addr = dst;
+	unsigned int blockTS = (size >> info->dma_width) - 1;
+	unsigned int src_addr_inc = info->src_addr_inc;
+	unsigned int des_addr_inc = info->des_addr_inc;
+	unsigned int src_width = info->src_width;
+	unsigned int des_width = info->des_width;
+	unsigned int src_burstsize = info->src_burstsize;
+	unsigned int des_burstsize = info->des_burstsize;
+	unsigned int burst_len = info->burst_len;
 
-	switch (cmd) {
-	case MEM_TO_MEM:
-		src_addr = (unsigned long)data->src;
-		des_addr = (unsigned long)data->dst;
-		blockTS = data->blockTS;
-		src_addr_inc = data->src_addr_inc;
-		des_addr_inc = data->des_addr_inc;
-		src_width = data->src_width;
-		des_width = data->des_width;
-		src_burstsize = data->src_burstsize;
-		des_burstsize = data->des_burstsize;
-		burst_len = data->burst_len;
+	dw_dmac_mem_to_mem((unsigned int)src_addr,
+			   (unsigned int)des_addr,
+			   blockTS,
+			   src_addr_inc,
+			   des_addr_inc,
+			   src_width,
+			   des_width,
+			   src_burstsize, des_burstsize, burst_len);
 
-		dw_dmac_mem_to_mem((unsigned int)src_addr,
-				   (unsigned int)des_addr,
-				   blockTS,
-				   src_addr_inc,
-				   des_addr_inc,
-				   src_width,
-				   des_width,
-				   src_burstsize, des_burstsize, burst_len);
-
-		start_cycles = sbi_get_cpu_cycles();
-		print("start dma transfer m2m, get system cycles: %d\n",
-		      start_cycles);
-
-		wait_for_event_timeout(&done, wake_expr, 5 * 1000 /* 5s */ );
-		if (done == 0)
-			ret = -1;
-		else {
-			done = 0;
-			ret = 0;
-			end_cycles = sbi_get_cpu_cycles();
-			print("end dma transfer m2m, get system cycles: %d\n",
-			      end_cycles);
-			print("cycles diff: %d\n", end_cycles - start_cycles);
-		}
-
-		break;
-
-	default:
-		print("%s unsupported cmd: %d\n", __FUNCTION__, cmd);
-
+	wait_for_event_timeout(&dw_axi_dmac->done, wake_expr, 5 * 1000 /* 5s */ );
+	if (dw_axi_dmac->done == 0)
+		ret = -1;
+	else {
+		dw_axi_dmac->done = 0;
+		ret = 0;
 	}
 
 	return ret;
 }
 
-static const struct driver_ops dw_dmac_ops = {
-	.ioctl = dw_dmac_ioctl,
+static struct dmac_ops dw_axi_dmac_ops = {
+	.transfer_m2m = dw_axi_dmac_transfer_m2m,
 };
 
 int dw_dmac_init(struct device *dev, void *data)
 {
-	struct driver *drv;
+	struct dmac_device *dmac;
 	int irqs[16], nr_irqs, i;
+	struct dw_dmac_priv_info *info;
 
-	print("%s %d base: 0x%x, len: %d, irq: %d\n", __FUNCTION__, __LINE__,
+	print("dw-dmac: base: 0x%x, len: %d, irq: %d\n",
 	      dev->base, dev->len, dev->irqs[0]);
 
-	base = (unsigned long)ioremap((void *)dev->base, dev->len, 0);
+	dw_axi_dmac = (struct dmac_dw_axi *)mm_alloc(sizeof(struct dmac_dw_axi));
+	if (!dw_axi_dmac) {
+		print("dw-dmac: alloc dw_axi_dmac failed\n");
+		return -1;
+	}
+
+	dw_axi_dmac->base = (unsigned long)ioremap((void *)dev->base, dev->len, 0);
 
 	nr_irqs = get_hwirq(dev, irqs);
 	for (i = 0; i < nr_irqs; i++)
 		register_device_irq(dev, dev->irq_domain, irqs[i],
 				    dw_dmac_irq_handler, NULL);
 	/* enable interrupt */
-	writel(base + DMAC_AXI0_CH1_INTR_STATUS_ENABLE, 0x3);
-	writel(base + DMAC_AXI0_CH2_INTR_STATUS_ENABLE, 0x3);
+	writel(dw_axi_dmac->base + DMAC_AXI0_CH1_INTR_STATUS_ENABLE, 0x3);
+	writel(dw_axi_dmac->base + DMAC_AXI0_CH2_INTR_STATUS_ENABLE, 0x3);
 
 	/* enable dmac_axi0 and interrupt */
 	print("DMAC: check dma reset.\n");
-	writel(base + DMAC_AXI0_COMMON_CFG, 0x3);
+	writel(dw_axi_dmac->base + DMAC_AXI0_COMMON_CFG, 0x3);
 
-	drv = dev->drv;
-	drv->ops = &dw_dmac_ops;
+	info = (struct dw_dmac_priv_info *)mm_alloc(sizeof(struct dw_dmac_priv_info));
+	info->dma_width = 0;
+	info->src_addr_inc = 0;
+	info->des_addr_inc = 0;
+	info->src_width = info->dma_width;
+	info->des_width = info->dma_width;
+	info->src_burstsize = 0;
+	info->des_burstsize = 0;
+	info->burst_len = 7;
 
-	register_dmac_device(dev);
+	dmac = &dw_axi_dmac->dmac;
+	dmac->dev = dev;
+	dmac->ops = &dw_axi_dmac_ops;
+	dmac->priv = (void *)info;
+
+	register_dmac_device(dmac);
 
 	return 0;
 }

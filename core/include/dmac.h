@@ -20,35 +20,25 @@
 #include "list.h"
 #include "device.h"
 
-enum DMA_TYPE {
-	MEM_TO_MEM_FIX = 0,
-	MEM_TO_MEM,
+enum {
+	DMAC_XFER_M2M = 0,
 };
 
-struct dmac_ioctl_data {
-	void *src;
-	void *dst;
-	unsigned int blockTS;
-	unsigned int src_addr_inc;
-	unsigned int des_addr_inc;
-	unsigned int src_width;
-	unsigned int des_width;
-	unsigned int src_burstsize;
-	unsigned int des_burstsize;
-	unsigned int burst_len;
-	unsigned int size;
+struct dmac_ops {
+	int (*transfer_m2m)(unsigned long src, unsigned long dst, int size, void *priv);
 };
 
 struct dmac_device {
 	struct list_head list;
 	char name[64];
 	struct device *dev;
+	struct dmac_ops *ops;
+	void *priv;
 };
 
-int register_dmac_device(struct device *dev);
+int register_dmac_device(struct dmac_device *dmac);
 void walk_all_dmac(void);
 int memcpy_hw(char *name, char *dst, char *src, unsigned int size);
-int dma_transfer(char *name, char *dst, char *src, unsigned int size,
-		 unsigned int data_width, unsigned int burst_len);
+int dma_transfer(struct dmac_device *dmac, char *dst, char *src, unsigned int size, int dir);
 
 #endif

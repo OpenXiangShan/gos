@@ -18,7 +18,6 @@ obj-$(CONFIG_APP_LS) += ls.o
 obj-$(CONFIG_APP_DEVMEM) += devmm.o
 obj-$(CONFIG_APP_HISTORY) += history.o
 obj-$(CONFIG_APP_DMA_TEST) += dma_test.o
-obj-$(CONFIG_APP_DMA_TEST_EXT) += dma_test_ext.o
 obj-$(CONFIG_APP_MEM_READ) += mem_read.o
 obj-$(CONFIG_APP_IMSIC_TEST) += imsic_test.o
 obj-$(CONFIG_APP_VS_IMSIC_MULTI_TEST) += vs_imsic_multi_test.o

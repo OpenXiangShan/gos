@@ -17,6 +17,8 @@
 #ifndef DMAC_DW_AXI_H
 #define DMAC_DW_AXI_H
 
+#include "dmac.h"
+
 #define DMAC_AXI_COMMON_REG     0x0
 #define DMAC_AXI_CH1_REG        0x100
 #define DMAC_AXI_CH2_REG        0x200
@@ -107,5 +109,22 @@
 #define DMAC_AXI0_CH2_INTR_STATUS                DMAC_AXI_CH2_REG + DMAC_AXI_CH_INTR_STATUS
 #define DMAC_AXI0_CH2_INTR_SIGNAL_ENABLE         DMAC_AXI_CH2_REG + DMAC_AXI_CH_INTR_SIGNAL_ENABLE
 #define DMAC_AXI0_CH2_INTR_CLEAR                 DMAC_AXI_CH2_REG + DMAC_AXI_CH_INTR_CLEAR
+
+struct dw_dmac_priv_info {
+	unsigned int dma_width;
+        unsigned int src_addr_inc;
+        unsigned int des_addr_inc;
+        unsigned int src_width;
+        unsigned int des_width;
+        unsigned int src_burstsize;
+        unsigned int des_burstsize;
+        unsigned int burst_len;
+};
+
+struct dmac_dw_axi {
+	struct dmac_device dmac;
+	unsigned long base;
+	int done;
+};
 
 #endif

@@ -30,18 +30,17 @@
 #include "event.h"
 #include "dma-mapping.h"
 
-static int done = 0;
-static unsigned long base;
+static struct dmac_my_pci_dmaengine *my_dmac;
 
 static void my_dmaengine_wait_for_complete(void)
 {
-	while (readl(base + MY_DMAENGINE_MMIO_CH0_DONE)) ;
+	while (readl(my_dmac->base + MY_DMAENGINE_MMIO_CH0_DONE)) ;
 }
 
 static void my_pci_dmaengine_irq_handler(void *data)
 {
 	my_dmaengine_wait_for_complete();
-	done = 1;
+	my_dmac->done = 1;
 }
 
 #if 0
@@ -52,85 +51,36 @@ static int wake_expr(void *data)
 	return *wake == 1;
 }
 #endif
-static int my_dmaengine_ioctl(struct device *dev, unsigned int cmd, void *arg)
+
+static int my_pci_dmaengine_transfer_m2m(unsigned long src, unsigned long dst, int size, void *priv)
 {
-	int ret = 0;
-	struct dmac_ioctl_data *data = (struct dmac_ioctl_data *)arg;
-	unsigned int size;
-	unsigned long src_iova, dst_iova;
-	unsigned long src_addr, dst_addr;
-
-	switch (cmd) {
-	case MEM_TO_MEM_FIX:
-		src_addr = (unsigned long)data->src;
-		dst_addr = (unsigned long)data->dst;
-		size = data->size;
-		if (dma_mapping(dev, src_addr, &src_iova, size, NULL))
-			return -1;
-		if (dma_mapping(dev, dst_addr, &dst_iova, size, NULL))
-			return -1;
-		writeq(base + MY_DMAENGINE_MMIO_CH0_SRC, src_iova);
-		writeq(base + MY_DMAENGINE_MMIO_CH0_DST, dst_iova);
-		writel(base + MY_DMAENGINE_MMIO_CH0_TRAN_SIZE, size);
-		writel(base + MY_DMAENGINE_MMIO_CH0_START, 1);
-		mb();
+	writeq(my_dmac->base + MY_DMAENGINE_MMIO_CH0_SRC, src);
+	writeq(my_dmac->base + MY_DMAENGINE_MMIO_CH0_DST, dst);
+	writel(my_dmac->base + MY_DMAENGINE_MMIO_CH0_TRAN_SIZE, size);
+	writel(my_dmac->base + MY_DMAENGINE_MMIO_CH0_START, 1);
+	mb();
 
 #if 0
-		wait_for_event_timeout(&done, wake_expr, 5 * 1000 /* 5s */ );
-		if (done == 0)
-			ret = -1;
-		else {
-			done = 0;
-			ret = 0;
-		}
-#else
-		my_dmaengine_wait_for_complete();
-#endif
-		break;
-	case MEM_TO_MEM:
-		size = data->size;
-		src_addr = (unsigned long)dma_alloc(dev, &src_iova, size, NULL);
-		if (!src_addr)
-			return -1;
-
-		for (int i = 0; i < size; i++)
-			((char *)(phy_to_virt(src_addr)))[i] = i;
-
-		dst_addr = (unsigned long)dma_alloc(dev, &dst_iova, size, NULL);
-		if (!dst_addr)
-			return -1;
-		print("src_addr:0x%lx dst_addr:0x%lx\n", src_addr, dst_addr);
-		writeq(base + MY_DMAENGINE_MMIO_CH0_SRC, src_iova);
-		writeq(base + MY_DMAENGINE_MMIO_CH0_DST, dst_iova);
-		writel(base + MY_DMAENGINE_MMIO_CH0_TRAN_SIZE, size);
-		writel(base + MY_DMAENGINE_MMIO_CH0_START, 1);
-		mb();
-#if 0
-		wait_for_event_timeout(&done, wake_expr, 5 * 1000 /* 5s */ );
-		if (done == 0)
-			ret = -1;
-		else {
-			done = 0;
-			ret = 0;
-		}
-#else
-		my_dmaengine_wait_for_complete();
-#endif
-		for (int i = 0; i < size; i++)
-			print("dst[%d]: %d\n", i, ((char *)(phy_to_virt(dst_addr)))[i]);
-		break;
+	wait_for_event_timeout(&my_dmac->done, wake_expr, 5 * 1000 /* 5s */ );
+	if (my_dmac->done == 0)
+		ret = -1;
+	else {
+		my_dmac->done = 0;
+		ret = 0;
 	}
-
-	return ret;
+#else
+	my_dmaengine_wait_for_complete();
+#endif
+	return 0;
 }
 
-static const struct driver_ops my_dmaengine_ops = {
-	.ioctl = my_dmaengine_ioctl,
+static struct dmac_ops my_pci_dmaengine_ops = {
+	.transfer_m2m = my_pci_dmaengine_transfer_m2m,
 };
 
 static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 {
-	struct driver *drv;
+	struct dmac_device *dmac;
 	struct device *dev = &pdev->dev;
 	struct resource res;
 	int size, i;
@@ -139,6 +89,13 @@ static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 	print("pci-dev[0:%x:%x:%x]: vendor:0x%x device:0x%x\n",
 	      pdev->bus->bus_number, PCI_SLOT(pdev->devfn),
 	      PCI_FUNC(pdev->devfn), pdev->vendor, pdev->device);
+
+	my_dmac = (struct dmac_my_pci_dmaengine *)mm_alloc(sizeof(struct dmac_my_pci_dmaengine));
+	if (!my_dmac) {
+		print("my-pci-dmaengine: alloc dmac device failed..\n");
+		return -1;
+	}
+	memset((char *)my_dmac, 0, sizeof(my_dmac));
 
 	pci_enable_resource(pdev, 1 << 0);
 
@@ -150,17 +107,18 @@ static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 	print("pci-dev[0:%x:%x:%x]: ioremap addr:0x%lx size : 0x%x\n",
 	      pdev->bus->bus_number, PCI_SLOT(pdev->devfn),
 	      PCI_FUNC(pdev->devfn), res.base, size);
-	base = (unsigned long)ioremap((void *)res.base, res.end - res.base + 1, NULL);
+	my_dmac->base = (unsigned long)ioremap((void *)res.base, res.end - res.base + 1, NULL);
 
 	nr = pci_msix_enable(pdev, irqs);
 	for (i = 0; i < nr; i++)
 		register_device_irq(&pdev->dev, pdev->dev.irq_domain,
 				    irqs[i], my_pci_dmaengine_irq_handler, NULL);
 
-	drv = dev->drv;
-	drv->ops = &my_dmaengine_ops;
+	dmac = &my_dmac->dmac;
+	dmac->dev = dev;
+	dmac->ops = &my_pci_dmaengine_ops;
 
-	register_dmac_device(dev);
+	register_dmac_device(dmac);
 
 	return 0;
 }

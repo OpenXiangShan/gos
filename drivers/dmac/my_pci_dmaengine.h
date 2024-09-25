@@ -29,5 +29,13 @@
 #define MY_DMAENGINE_MMIO_CH1_START      0x1200
 #define MY_DMAENGINE_MMIO_CH1_DONE       0x1010
 
+#include "dmac.h"
+
+struct dmac_my_pci_dmaengine {
+	struct dmac_device dmac;
+	unsigned long base;
+	int done;
+};
+
 #endif
 

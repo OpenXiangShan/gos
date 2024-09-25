@@ -14,16 +14,17 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <dmac.h>
-#include <print.h>
-#include <string.h>
+#include "print.h"
+#include "string.h"
 #include "device.h"
 #include "asm/pgtable.h"
+#include "asm/type.h"
 #include "list.h"
 #include "mm.h"
 #include "irq.h"
+#include "dmac.h"
+#include "dma-mapping.h"
 
-extern int mmu_is_on;
 static LIST_HEAD(dmacs);
 static unsigned long dmac_idx_bitmap = 0;
 
@@ -63,90 +64,57 @@ void walk_all_dmac(void)
 	}
 }
 
-int register_dmac_device(struct device *dev)
+int register_dmac_device(struct dmac_device *dmac)
 {
-	struct dmac_device *dmac;
 	int index;
-
-	dmac = (struct dmac_device *)mm_alloc(sizeof(struct dmac_device));
-	if (!dmac) {
-		print("dmac: register dmac failed.. Out of memory\n");
-		return -1;
-	}
 
 	index = find_free_dmac_index();
 	sprintf(dmac->name, "DMAC%d", index);
-	strcpy(dev->name, dmac->name);
-	strcpy(dev->drv->name, dmac->name);
 
-	dmac->dev = dev;
 	list_add_tail(&dmac->list, &dmacs);
 
 	return 0;
 }
 
-int memcpy_hw(char * name, char *dst, char *src, unsigned int size)
+int dma_transfer(struct dmac_device *dmac, char *dst, char *src, unsigned int size, int dir)
 {
-	void *_src, *_dst;
-	struct dmac_ioctl_data data;
-	unsigned int dma_width = 0;
-	unsigned int blockTS = (size >> dma_width) - 1;
-	int fd = 0;
+	unsigned long src_iova;
+	unsigned long dst_iova;
 
-	fd = open(name);
-	if (fd == -1) {
-		print("open %s fail.\n", name);
+	if ((((unsigned long)dst) % PAGE_SIZE) || (((unsigned long)src) % PAGE_SIZE)) {
+		print("dma_transfer: Only support PAGE_SIZE algin memcpy\n");
 		return -1;
 	}
 
-	memset((char *)&data, 0, sizeof(struct dmac_ioctl_data));
+	if (!dmac || !dmac->ops || !dmac->dev)
+		return -1;
 
-	if (mmu_is_on) {
-		_src = (void *)virt_to_phy(src);
-		_dst = (void *)virt_to_phy(dst);
+	if (dma_mapping(dmac->dev, virt_to_phy(src), &src_iova, size, NULL))
+		return -1;
+
+	if (dma_mapping(dmac->dev, virt_to_phy(dst), &dst_iova, size, NULL))
+		return -1;
+
+	if (dir == DMAC_XFER_M2M) {
+		if (!dmac->ops->transfer_m2m)
+			return -1;
+		return dmac->ops->transfer_m2m(src_iova, dst_iova, size, dmac->priv);
 	}
 
-	data.src = _src;
-	data.dst = _dst;
-	data.blockTS = blockTS;
-	data.src_addr_inc = 0;
-	data.des_addr_inc = 0;
-	data.src_width = dma_width;
-	data.des_width = dma_width;
-	data.src_burstsize = 0;
-	data.des_burstsize = 0;
-	data.burst_len = 7;
-	data.size = size;
-
-	return ioctl(fd, MEM_TO_MEM_FIX, &data);
+	return -1;
 }
 
-int dma_transfer(char * name, char *dst, char *src, unsigned int size,
-		 unsigned int data_width, unsigned int burst_len)
+int memcpy_hw(char * name, char *dst, char *src, unsigned int size)
 {
-	struct dmac_ioctl_data data;
-	unsigned int blockTS = (size >> data_width) - 1;
-	int fd = 0;
+	struct dmac_device *dmac;
 
-	fd = open(name);
-	if (fd == -1) {
-		print("open %s fail.\n", name);
-		return -1;
+	list_for_each_entry(dmac, &dmacs, list) {
+		if (!strncmp(dmac->name, name, 128))
+			goto found;
 	}
 
-	memset((char *)&data, 0, sizeof(struct dmac_ioctl_data));
+	return -1;
 
-	data.src = src;
-	data.dst = dst;
-	data.blockTS = blockTS;
-	data.src_addr_inc = 0;
-	data.des_addr_inc = 0;
-	data.src_width = data_width;
-	data.des_width = data_width;
-	data.src_burstsize = 0;
-	data.des_burstsize = 0;
-	data.burst_len = burst_len;
-	data.size = size;
-
-	return ioctl(fd, MEM_TO_MEM, &data);
+found:
+	return dma_transfer(dmac, dst, src, size, DMAC_XFER_M2M);
 }

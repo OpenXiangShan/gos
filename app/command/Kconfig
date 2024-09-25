@@ -6,8 +6,6 @@ config APP_DEVMEM
 	bool "APP_DEVMEM"
 config APP_DMA_TEST
 	bool "APP_DMA_TEST"
-config APP_DMA_TEST_EXT
-	bool "APP_DMA_TEST_EXT"
 config APP_HELLO
 	bool "APP_HELLO"
 config APP_HISTORY

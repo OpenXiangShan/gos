@@ -31,6 +31,9 @@ int dma_mapping(struct device *dev, unsigned long addr,
 	unsigned long align_end_addr = ALIGN_SIZE(addr, PAGE_SIZE);
 	int align_nr = (align_end_addr - align_start_addr) / PAGE_SIZE;
 
+	if (align_nr == 0)
+		align_nr = 1;
+
 	if (!iommu || !iommu->ops->map_pages) {
 		*ret_iova = addr;
 		return 0;
