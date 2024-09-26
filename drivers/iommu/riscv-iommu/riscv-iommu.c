@@ -91,8 +91,7 @@ static struct riscv_iommu_dc *riscv_iommu_get_dc(struct riscv_iommu *iommu,
 		} else {
 			unsigned long new = (unsigned long)mm_alloc(4096);
 			if (!new) {
-				print("Out of memory -- %s %d\n", __FUNCTION__,
-				      __LINE__);
+				print("Error -- riscv-iommu: Alloc pte failed\n");
 				return NULL;
 			}
 			memset((char *)new, 0, 4096);
@@ -154,7 +153,7 @@ static unsigned long riscv_iommu_walk_pt(struct device *dev, unsigned long iova,
 
 	if (gstage) {
 		if (!iommu_dev->g_stage_enabled) {
-			print("%s -- g_stage_enabled is NULL\n", __FUNCTION__);
+			print("Error -- riscv-iommu: G_stage_enabled is NULL\n");
 			return -1;
 		}
 
@@ -165,6 +164,7 @@ static unsigned long riscv_iommu_walk_pt(struct device *dev, unsigned long iova,
 	return addr;
 }
 
+
 static int riscv_iommu_map_pages(struct device *dev, unsigned long iova,
 				 void *addr, unsigned int size, int gstage)
 {
@@ -174,7 +174,7 @@ static int riscv_iommu_map_pages(struct device *dev, unsigned long iova,
 
 	if (gstage) {
 		if (!iommu_dev->g_stage_enabled) {
-			print("%s -- g_stage_enabled is NULL\n", __FUNCTION__);
+			print("Error -- riscv-iommu: G_stage_enabled is NULL\n");
 			return -1;
 		}
 
@@ -189,6 +189,13 @@ static int riscv_iommu_map_pages(struct device *dev, unsigned long iova,
 		riscv_iommu_gstage_finalize(iommu_dev);
 
 	return ret;
+}
+
+static int riscv_iommu_map_msi_addr(struct device *dev, unsigned long msi_pa,
+				    unsigned long msi_iova, int len)
+{
+
+	return 0;
 }
 
 static void *riscv_iommu_alloc(struct device *dev, unsigned long iova,
@@ -212,12 +219,12 @@ static void *riscv_iommu_alloc(struct device *dev, unsigned long iova,
 
 	addr = (void *)virt_to_phy(mm_alloc_align(PAGE_SIZE, PAGE_SIZE));
 	if (!addr) {
-		print("%s - %s -- Out of memory\n", __FUNCTION__, __LINE__);
+		print("Error -- riscv-iommu: alloc failed\n");
 		return NULL;
 	}
 
 	if (riscv_iommu_map_pages(dev, iova, addr, size, 0)) {
-		print("riscv iommu: map pages failed\n");
+		print("Error -- riscv iommu: map pages failed\n");
 		return NULL;
 	}
 
@@ -240,7 +247,7 @@ static int riscv_iommu_probe_device(struct device *dev)
 
 	iommu_dev = (struct riscv_iommu_device *)mm_alloc(sizeof(struct riscv_iommu_device));
 	if (!iommu_dev) {
-		print("Out of memory -- %s\n", __FUNCTION__);
+		print("Error -- riscv-iommu: Alloc iommu_dev failed\n");
 		return -1;
 	}
 	memset((char *)iommu_dev, 0, sizeof(struct riscv_iommu_device));
@@ -260,22 +267,24 @@ static int riscv_iommu_finalize(struct device *dev, int pscid)
 	struct riscv_iommu_device *iommu_dev =
 	    (struct riscv_iommu_device *)dev->iommu->priv;
 	struct riscv_iommu_dc *dc;
+	struct riscv_iommu_msi_pte *msi_pte;
 	int pgd_size;
+	int i;
 
 	if (!iommu_dev) {
-		print("%s -- iommu_dev is NULL\n", __FUNCTION__);
+		print("Error -- riscv-iommu: Iommu_dev is NULL\n");
 		return -1;
 	}
 
 	dc = iommu_dev->dc;
 	if (!dc) {
-		print("%s -- dc is NULL\n", __FUNCTION__);
+		print("Error -- riscv-iommu: DC is NULL\n");
 		return -1;
 	}
 
 	gp = iommu_get_group(dev);
 	if (!gp) {
-		print("%s -- can not find iommu group\n", __FUNCTION__);
+		print("Error -- riscv-iommu: Can not find iommu group\n");
 		return -1;
 	}
 
@@ -289,14 +298,13 @@ static int riscv_iommu_finalize(struct device *dev, int pscid)
 		else if (iommu_dev->mode == RISCV_IOMMU_DC_FSC_IOSATP_MODE_SV57)
 			pgd_size = PAGE_SIZE;
 		else {
-			print("%s -- unsupported pt mode\n", __FUNCTION__);
+			print("Error -- riscv-iommu: unsupported pt mode\n");
 			return -1;
 		}
 
 		gp->pgdp = mm_alloc(pgd_size);
 		if (!gp->pgdp) {
-			print("%s -- Out of memory size:%d\n", __FUNCTION__,
-			      pgd_size);
+			print("Error -- riscv-iommu: Out of memory size:%d\n", pgd_size);
 			return -1;
 		}
 	}
@@ -312,16 +320,27 @@ static int riscv_iommu_finalize(struct device *dev, int pscid)
 			else if (iommu_dev->mode == RISCV_IOMMU_DC_FSC_IOSATP_MODE_SV57)
 				pgd_size = PAGE_SIZE * 4;
 			else {
-				print("%s -- unsupported pt mode\n", __FUNCTION__);
+				print("Error -- riscv-iommu: Unsupported pt mode\n");
 				return -1;
 			}
 
 			gp->pgdp_gstage = mm_alloc(pgd_size);
 			if (!gp->pgdp_gstage) {
-				print("%s -- Out of memory size:%d\n", __FUNCTION__,
+				print("Error -- riscv-iommu: Out of memory size:%d\n",
 				      pgd_size);
 				return -1;
 			}
+		}
+	}
+
+	if (!gp->msi_root) {
+		gp->msi_root = (struct riscv_iommu_msi_pte *)mm_alloc(PAGE_SIZE);
+		if (!gp->msi_root) {
+			print("Warning -- riscv-iommu: Alloc msi root failed\n");
+		}
+		for (i = 0; i < 256; i++) {
+			msi_pte = &gp->msi_root[i];
+			msi_pte->pte = IOMMU_MSI_PTE_V | IOMMU_MSI_PTE_M;
 		}
 	}
 
@@ -352,6 +371,7 @@ static int riscv_iommu_finalize(struct device *dev, int pscid)
 static struct iommu_ops riscv_iommu_ops = {
 	.alloc = riscv_iommu_alloc,
 	.map_pages = riscv_iommu_map_pages,
+	.map_msi_addr = riscv_iommu_map_msi_addr,
 	.walk_pt = riscv_iommu_walk_pt,
 	.probe_device = riscv_iommu_probe_device,
 	.finalize = riscv_iommu_finalize,

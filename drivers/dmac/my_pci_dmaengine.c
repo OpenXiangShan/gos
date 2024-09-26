@@ -43,24 +43,23 @@ static void my_pci_dmaengine_irq_handler(void *data)
 	my_dmac->done = 1;
 }
 
-#if 0
 static int wake_expr(void *data)
 {
 	int *wake = (int *)data;
 
 	return *wake == 1;
 }
-#endif
 
 static int my_pci_dmaengine_transfer_m2m(unsigned long src, unsigned long dst, int size, void *priv)
 {
+	int ret = 0;
+
 	writeq(my_dmac->base + MY_DMAENGINE_MMIO_CH0_SRC, src);
 	writeq(my_dmac->base + MY_DMAENGINE_MMIO_CH0_DST, dst);
 	writel(my_dmac->base + MY_DMAENGINE_MMIO_CH0_TRAN_SIZE, size);
 	writel(my_dmac->base + MY_DMAENGINE_MMIO_CH0_START, 1);
 	mb();
 
-#if 0
 	wait_for_event_timeout(&my_dmac->done, wake_expr, 5 * 1000 /* 5s */ );
 	if (my_dmac->done == 0)
 		ret = -1;
@@ -68,10 +67,8 @@ static int my_pci_dmaengine_transfer_m2m(unsigned long src, unsigned long dst, i
 		my_dmac->done = 0;
 		ret = 0;
 	}
-#else
-	my_dmaengine_wait_for_complete();
-#endif
-	return 0;
+
+	return ret;
 }
 
 static struct dmac_ops my_pci_dmaengine_ops = {
@@ -86,7 +83,7 @@ static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 	int size, i;
 	int irqs[32], nr;
 
-	print("pci-dev[0:%x:%x:%x]: vendor:0x%x device:0x%x\n",
+	print("my-pci-dmaengine(pci-dev[0:%x:%x:%x]): vendor:0x%x device:0x%x\n",
 	      pdev->bus->bus_number, PCI_SLOT(pdev->devfn),
 	      PCI_FUNC(pdev->devfn), pdev->vendor, pdev->device);
 

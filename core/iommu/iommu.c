@@ -24,6 +24,17 @@
 static LIST_HEAD(iommus);
 static LIST_HEAD(groups);
 
+int iommu_map_msi_addr(struct device *dev, unsigned long msi_pa,
+		       unsigned long msi_va, int len)
+{
+	struct iommu *iommu = dev->iommu;
+
+	if (!iommu || !iommu->ops->map_msi_addr)
+		return -1;
+
+	return iommu->ops->map_msi_addr(dev, msi_pa, msi_va, len);
+}
+
 int iommu_map_pages(struct device *dev, unsigned long iova, void *addr,
 		    unsigned int size, int gstage)
 {

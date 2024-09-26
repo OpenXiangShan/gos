@@ -95,6 +95,11 @@
 #define IOMMU_MSI_DATA_15_OFFSET    0x3f8
 #define IOMMU_MSI_VEC_CTL_15_OFFSET 0x3fc
 
+#define IOMMU_MSI_PTE_V          (1ULL << 0)
+#define IOMMU_MSI_PTE_M          (3ULL << 1)
+#define IOMMU_MSI_PTE_C          (1ULL << 63)
+#define IOMMU_MSI_PTE_PPN_SHIFT  10
+
 #define CQ_LOG2SZ_1     (5 )
 // Mask for cqb.PPN (cqb[53:10])
 #define CQB_PPN_MASK    (0x3FFFFFFFFFFC00ULL)
@@ -212,12 +217,18 @@ struct riscv_iommu_dc {
 	unsigned long _reserved;
 };
 
+struct riscv_iommu_msi_pte {
+	unsigned long pte;
+	unsigned long mrif;
+};
+
 struct riscv_iommu_device {
 	struct riscv_iommu_dc *dc;
 	unsigned pscid;
 	int g_stage_enabled;
 	int pasid_enabled;
 	int mode;
+	void *msi_root;
 	void *pgdp;
 	void *pgdp_gstage;
 };

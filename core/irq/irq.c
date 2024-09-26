@@ -25,6 +25,8 @@
 #include "mm.h"
 #include "vmap.h"
 #include "irq.h"
+#include "iommu.h"
+#include "dma-mapping.h"
 
 extern int mmu_is_on;
 
@@ -323,10 +325,18 @@ int domain_activate_irq(struct device *dev,
 		p_domain = p_domain->parent_domain;
 	}
 
-	if (p_domain && p_domain->domain_ops->get_msi_msg)
+	if (p_domain && p_domain->domain_ops->get_msi_msg) {
 		p_domain->domain_ops->get_msi_msg(dev, p_domain, hwirq,
 						  &msi_addr, &msi_data,
 						  p_domain->priv);
+		if (dev->iommu) {
+			if (dma_mapping(dev, msi_addr, &msi_addr, PAGE_SIZE, NULL)) {
+				print("warning -- Map msi addr failed, irq:%d msi_addr:0x%lx dev:%s\n",
+				      hwirq, msi_addr, dev->compatible);
+				return -1;
+			}
+		}
+	}
 
 	if (write_msi_msg) {
 		write_msi_msg(dev, msi_addr, msi_data, msi_irq, NULL);
