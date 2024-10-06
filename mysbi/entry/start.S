@@ -19,10 +19,6 @@
 .section ".text.boot"
 .global _start
 _start:
-	li a3, 0
-	la a4, wake
-	sd a3, 0(a4)
-
 	csrr a4, mhartid
 
 	/*
@@ -73,6 +69,7 @@ _run:
 	la a4, wake
 	li a3, 1
 	sd a3, 0(a4)
+	fence
 
 	li t0, 0x400
 	csrr a5, mscratch
@@ -97,5 +94,5 @@ stack_bottom:
 
 .align 4
 wake:
-	.skip 8
+	.dword 0
 
