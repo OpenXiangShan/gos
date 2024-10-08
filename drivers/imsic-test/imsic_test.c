@@ -115,7 +115,7 @@ int imsic_test_init(struct device *dev, void *data)
 	int hwirq;
 	struct driver *drv;
 
-	hwirq = msi_get_hwirq_affinity(dev, 3, imsic_test_write_msi_msg, 1, NULL);
+	hwirq = msi_get_hwirq_affinity(dev, 3, imsic_test_write_msi_msg, 0, NULL);
 	if (hwirq == -1) {
 		print("imsic test driver: imsic test driver: msi_get_hwirq failed\n", __FUNCTION__);
 		return -1;
