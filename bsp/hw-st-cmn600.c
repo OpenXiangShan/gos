@@ -60,7 +60,7 @@ static const struct device_init_entry __attribute__((used))
 #else
 	{
 	 "IMSIC_M",
-	 0x44000000,
+	 0x3a800000,
 	 0x1000,
 	 "INTC",
 	 { 0xFF,},
@@ -71,7 +71,7 @@ static const struct device_init_entry __attribute__((used))
 	  },
 	{
 	 "IMSIC",
-	 0x44200000,
+	 0x3b000000,
 	 //0x4000000,
 	 0x2000,
 	 "INTC",
