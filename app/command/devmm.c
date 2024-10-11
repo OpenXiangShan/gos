@@ -14,11 +14,13 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <asm/type.h>
-#include <print.h>
-#include <device.h>
-#include <string.h>
-#include <asm/mmio.h>
+#include "asm/mmio.h"
+#include "asm/pgtable.h"
+#include "asm/type.h"
+#include "print.h"
+#include "device.h"
+#include "string.h"
+#include "vmap.h"
 #include "../command.h"
 
 #define READ_MEM 0
@@ -39,24 +41,29 @@ static void wr_address(unsigned long address, int width, int wr,
 		       unsigned long value)
 {
 	unsigned long val;
+	unsigned long addr;
+
+	addr = (unsigned long)ioremap((void *)address, PAGE_SIZE, NULL);
 
 	if (wr == READ_MEM) {
 		if (width == 8)
-			val = readb(address);
+			val = readb(addr);
 		else if (width == 32)
-			val = readl(address);
+			val = readl(addr);
 		else if (width == 64)
-			val = readq(address);
+			val = readq(addr);
 
 		print("0x%x\n", val);
 	} else if (wr == WRITE_MEM) {
 		if (width == 8)
-			writeb(address, value);
+			writeb(addr, value);
 		else if (width == 32)
-			writel(address, value);
+			writel(addr, value);
 		else if (width == 64)
-			writeq(address, value);
+			writeq(addr, value);
 	}
+
+	iounmap((void *)addr, PAGE_SIZE);
 }
 
 static int cmd_devmm_handler(int argc, char *argv[], void *priv)
