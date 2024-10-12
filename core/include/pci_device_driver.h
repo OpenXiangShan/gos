@@ -52,6 +52,8 @@ struct pci_driver_init_entry {
 int pci_register_device(struct pci_device *pci_dev);
 void pci_set_device_iommu(struct pci_device *pdev);
 int pci_probe_driver(void);
+struct device *pci_get_device(char *name);
+void pci_device_init(struct pci_device *pdev);
 void walk_pci_devices(int print_conf);
 
 #endif

@@ -155,12 +155,6 @@ struct pci_priv_data {
 
 struct pci_bus;
 
-struct resource {
-	struct list_head list;
-	unsigned long base;
-	unsigned int end;
-};
-
 struct bar {
 	int mem_type;
 	int addr_type;

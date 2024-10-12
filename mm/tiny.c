@@ -21,6 +21,7 @@
 #include "asm/type.h"
 #include "asm/pgtable.h"
 #include "string.h"
+#include "align.h"
 
 static spinlock_t tiny_lock = __SPINLOCK_INITIALIZER;
 

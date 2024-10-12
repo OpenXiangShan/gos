@@ -17,6 +17,8 @@
 #ifndef __MY_PCI_DMAENGINE_H__
 #define __MY_PCI_DMAENGINE_H__
 
+#include "dmac.h"
+
 #define MY_DMAENGINE_MMIO_CH0_SRC        0x0
 #define MY_DMAENGINE_MMIO_CH0_DST        0x8
 #define MY_DMAENGINE_MMIO_CH0_TRAN_SIZE  0x100
@@ -28,8 +30,6 @@
 #define MY_DMAENGINE_MMIO_CH1_TRAN_SIZE  0x1100
 #define MY_DMAENGINE_MMIO_CH1_START      0x1200
 #define MY_DMAENGINE_MMIO_CH1_DONE       0x1010
-
-#include "dmac.h"
 
 struct dmac_my_pci_dmaengine {
 	struct dmac_device dmac;

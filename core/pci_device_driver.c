@@ -63,7 +63,7 @@ void pci_set_device_iommu(struct pci_device *pdev)
 	pdev->dev.dev_id = PCI_DEVID(pdev->bus->bus_number, pdev->devfn);
 
 	if (pdev->dev.iommu)
-		iommu_attach_device(&pdev->dev, pdev->dev.iommu);
+		iommu_attach_device(&pdev->dev, pdev->dev.iommu, 0);
 }
 
 int pci_register_device(struct pci_device *pci_dev)
@@ -107,6 +107,18 @@ int pci_probe_driver(void)
 	return 0;
 }
 
+struct device *pci_get_device(char *name)
+{
+	struct device *dev;
+
+	list_for_each_entry(dev, &pci_devices, list) {
+		if (!strncmp(dev->compatible, name, 128))
+			return dev;
+	}
+
+	return NULL;
+}
+
 void walk_pci_devices(int print_conf)
 {
 	struct device *dev;
@@ -142,4 +154,9 @@ void walk_pci_devices(int print_conf)
 			print("\n");
 		}
 	}
+}
+
+void pci_device_init(struct pci_device *pdev)
+{
+	pdev->dev.is_pci_device = 1;
 }

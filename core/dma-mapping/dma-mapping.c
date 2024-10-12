@@ -20,6 +20,7 @@
 #include "iova.h"
 #include "mm.h"
 #include "asm/pgtable.h"
+#include "align.h"
 
 int dma_mapping(struct device *dev, unsigned long addr,
 		unsigned long *ret_iova, int len, int gfp)

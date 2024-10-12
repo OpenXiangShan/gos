@@ -32,6 +32,8 @@ enum {
 	VIRT_CLINT,
 	VIRT_IMSIC,
 	VIRT_SCHEDULER,
+	VIRT_PCI_CONFIG,
+	VIRT_PCI_MMIO,
 };
 
 struct memory_region_ops {
@@ -67,6 +69,8 @@ struct virt_machine {
 	unsigned int device_entry_count;
 	unsigned long gstage_pgdp;
 	struct list_head extern_device_entry_list;
+	struct list_head pt_devices_res;
+	struct pci_generic_emulator *pci_emu;
 };
 
 struct extern_device_init_entry {

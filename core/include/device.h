@@ -30,6 +30,12 @@
 struct irq_domain;
 struct iommu;
 
+struct resource {
+	struct list_head list;
+	unsigned long base;
+	unsigned int end;
+};
+
 struct device {
 	struct list_head list;
 	int probe;
@@ -45,6 +51,7 @@ struct device {
 	struct iommu_group *iommu_group;
 	struct list_head iommu_group_list;
 	int dev_id;
+	int is_pci_device;
 };
 
 struct driver_ops {
@@ -95,8 +102,11 @@ struct driver_init_entry {
 #define for_each_driver(entry) \
 	list_for_each_entry(entry, get_drivers(), list)
 
+#define is_pci_device(dev) (dev->is_pci_device)
+
 struct list_head *get_devices(void);
 struct list_head *get_drivers(void);
+struct device *get_device(char *name);
 int device_driver_init(struct device_init_entry *hw);
 int earlycon_driver_init(void);
 int regist_device_irq(unsigned long hwirq, void (*handler)(void *data),
@@ -111,5 +121,6 @@ unsigned long get_cycles(void);
 
 struct driver *create_driver(struct driver_init_entry *entry);
 void add_driver(struct driver *drv);
+void device_get_resource(struct device *dev, struct resource *res);
 
 #endif

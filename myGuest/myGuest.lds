@@ -39,6 +39,11 @@ SECTIONS
 	__driver_init_table = .;
 	.driver_init_table : { *(.driver_init_table) }
 	__driver_init_table_end = .;
+
+	. = ALIGN(8);
+	__pci_driver_init_table = .;
+	.pci_driver_init_table : { *(.pci_driver_init_table) }
+	__pci_driver_init_table_end = .;
 	
 	bss_begin = .;
         .bss : { *(.bss*) }

@@ -24,6 +24,9 @@
 #include "mm.h"
 #include "cpu.h"
 
+static int pt = 0;
+static char pt_devices[16][64] = { 0 };
+
 static void Usage_run_at()
 {
 	print("vcpu_run_ext_at cpu=[cpu id] vmid=[vmid] [cmd] [params1] [params2] ...\n");
@@ -39,10 +42,21 @@ static int vcpu_start(void *data)
 {
 	struct vcpu *vcpu;
 	struct virt_run_params *params = (struct virt_run_params *)data;
+	int i;
+	struct device **p_dev;
 
-	vcpu = vcpu_create_force();
-	if (!vcpu)
-		return -1;
+	if (!pt) {
+		vcpu = vcpu_create_force();
+		if (!vcpu)
+			return -1;
+	}
+	else {
+		p_dev = (struct device **)mm_alloc(pt * 8);
+		for (i = 0; i < pt; i++)
+			p_dev[i] = get_device(pt_devices[i]);
+
+		vcpu = vcpu_create_ext(p_dev, pt);
+	}
 
 	vcpu_run(vcpu, params);
 
@@ -55,6 +69,9 @@ static int cmd_vcpu_run_ext_handler(int argc, char *argv[], void *priv)
 {
 	int i, cpu = 0, bg = 0, offset = 0;
 	struct virt_run_params *params;
+
+	pt = 0;
+	memset((char *)pt_devices, 0, 16*64);
 
 	if (argc == 0) {
 		Usage();
@@ -76,6 +93,25 @@ static int cmd_vcpu_run_ext_handler(int argc, char *argv[], void *priv)
 		char *tmp = argv[offset];
 		tmp += sizeof("bg=") - 1;
 		bg = atoi(tmp);
+		offset += 1;
+	}
+
+	if (!strncmp(argv[offset], "pt=", sizeof("pt=") - 1)) {
+		char *tmp = argv[offset];
+		char *device;
+		tmp += sizeof("pt=") - 1;
+		device = pt_devices[pt];
+		while (*tmp) {
+			if (*tmp == ',') {
+				*device = 0;
+				device = pt_devices[++pt];
+			}
+			else
+				*device++ = *tmp;
+			tmp++;
+		}
+		*device = 0;
+		pt++;
 		offset += 1;
 	}
 

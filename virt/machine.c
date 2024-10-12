@@ -29,6 +29,8 @@
 #include "clint_emulator.h"
 #include "imsic_emulator.h"
 #include "scheduler_emulator.h"
+#include "pci_generic_emulator.h"
+#include "vcpu_pt_remapping.h"
 #include "gos.h"
 
 static struct virt_machine_memmap virt_memmap[] = {
@@ -42,7 +44,11 @@ static struct virt_machine_memmap virt_memmap[] = {
 #if CONFIG_VIRT_ENABLE_AIA
 	[VIRT_IMSIC]  = { CONFIG_VIRT_IMSIC_BASE, CONFIG_VIRT_IMSIC_LEN },
 #endif
-	[VIRT_SCHEDULER] = { CONFIG_VIRT_SCHEDULER_BASE, CONFIG_VIRT_SCHEDULER_LEN },
+	[VIRT_SCHEDULER]  = { CONFIG_VIRT_SCHEDULER_BASE, CONFIG_VIRT_SCHEDULER_LEN },
+#if CONFIG_VIRT_ENABLE_PCI_GENERIC
+	[VIRT_PCI_CONFIG] = { CONFIG_VIRT_PCI_GENERIC_BASE, CONFIG_VIRT_PCI_GENERIC_LEN },
+	[VIRT_PCI_MMIO]   = { CONFIG_VIRT_PCI_MMIO_BASE, CONFIG_VIRT_PCI_MMIO_LEN },
+#endif
 };
 
 #define VIRT_MEMMAP_CNT (sizeof(virt_memmap)/sizeof(virt_memmap[0]))
@@ -164,9 +170,8 @@ void device_entry_data_redirect(struct virt_machine *machine)
 		entry_host_va = &device_entry_host_va[n];
 		entry->data += (unsigned long)machine->entry_data_gpa;
 		entry_host_va->data = entry->data;
-		print("entry_host_va %s 0x%lx data:0x%lx\n",
-		      entry_host_va->compatible, entry_host_va->start,
-		      entry_host_va->data);
+		print("entry_host_va device:%s entry_data:0x%lx\n",
+		      entry_host_va->compatible, entry_host_va->data);
 	}
 }
 
@@ -290,7 +295,7 @@ int machine_init(struct virt_machine *machine)
 			    virt_memmap[VIRT_CLINT].base,
 			    virt_memmap[VIRT_CLINT].size);
 	entry->data = (void *)((unsigned long)entry_data_len);
-	entry_data_len += create_clint_priv_data(entry_data_ptr);;
+	entry_data_len += create_clint_priv_data(entry_data_ptr + entry_data_len);
 #endif
 
 #if CONFIG_VIRT_ENABLE_AIA
@@ -313,6 +318,17 @@ int machine_init(struct virt_machine *machine)
 	create_scheduler_device(machine, VIRT_SCHEDULER,
 				virt_memmap[VIRT_SCHEDULER].base,
 				virt_memmap[VIRT_SCHEDULER].size);
+
+#if CONFIG_VIRT_ENABLE_PCI_GENERIC
+	/* create pci generic device */
+	entry = &device_entry[n++];
+	strcpy((char *)entry->compatible, "pci-generic-ecam");
+	entry->start = virt_memmap[VIRT_PCI_CONFIG].base;
+	entry->len = virt_memmap[VIRT_PCI_CONFIG].size;
+	create_pci_generic_device(machine);
+	entry->data = (void *)((unsigned long)entry_data_len);
+	entry_data_len += create_pci_generic_priv_data(machine, entry_data_ptr + entry_data_len);
+#endif
 	/* create extern devices */
 	list_for_each_entry(extern_entry, &machine->extern_device_entry_list, list) {
 		struct device_init_entry *e = &extern_entry->entry;

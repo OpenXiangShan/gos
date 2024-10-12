@@ -34,7 +34,7 @@ $(obj)/built-in.o: $(cur_objs) $(subdir_objs)
 
 %.o: %.c
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(TOPDIR)/include/ -I$(TOPDIR)/include/gos -I$(GOS_CORE_DIR)/include $(DEBUG) -c $< -o $@
+	@$(CC) $(COPS) -I$(TOPDIR)/include/ -I$(TOPDIR)/include/gos -I$(GOS_CORE_DIR)/include -I$(TOPDIR)/include/generic $(DEBUG) -c $< -o $@
 
 %_s.o: %.S
 	@echo "CC $@"

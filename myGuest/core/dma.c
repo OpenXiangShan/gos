@@ -14,13 +14,31 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ALIGN_H__
-#define __ALIGN_H__
+#include "asm/type.h"
+#include "asm/pgtable.h"
+#include "dma.h"
 
-#define ALIGN_MASK(x, mask) (((x) + (mask)) & ~(mask))
-#define ALIGN(p, a) ALIGN_MASK(p, (typeof(p))(a) - 1)
-#define PTR_ALIGN(p, a) (typeof(p))ALIGN((unsigned long)p, a)
+static struct dma_ops *dma_ops = NULL;
 
-#define RESIZE(v, up) ((v / up == 0) ?  (v) : ((v / up + 1)*up))
+int set_dma_ops(struct dma_ops *ops)
+{
+	if (dma_ops)
+		return -1;
 
-#endif
+	dma_ops = ops;
+
+	return 0;
+}
+
+int dma_m2m(void *src, void *dst, int size)
+{
+	unsigned long src_pa, dst_pa;
+
+	if (!dma_ops)
+		return -1;
+
+	src_pa = virt_to_phy(src);
+	dst_pa = virt_to_phy(dst);
+
+	return dma_ops->dma_m2m(src_pa, dst_pa, size);
+}

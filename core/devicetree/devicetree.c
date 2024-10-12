@@ -26,7 +26,7 @@
 #include "print.h"
 #include "asm/type.h"
 #include "../fdt/libfdt.h"
-#include "uapi/swab.h"
+#include "swab.h"
 
 static bool of_fdt_device_is_available(const void *blob, unsigned long node)
 {

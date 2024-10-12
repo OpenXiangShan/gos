@@ -27,13 +27,15 @@
 #include "cpu_tlb.h"
 #include "virt_vm_exit.h"
 #include "vcpu_timer.h"
-#include "uapi/align.h"
+#include "align.h"
 #include "vcpu_aia.h"
 #include "gos.h"
 #include "list.h"
 #include "percpu.h"
 #include "device.h"
 #include "irq.h"
+#include "iommu.h"
+#include "vcpu_pt_remapping.h"
 
 extern char guest_bin[];
 static DEFINE_PER_CPU(struct list_head, vcpu_list);
@@ -564,8 +566,6 @@ static struct vcpu *__vcpu_create(void)
 		guest_ctx->sstatus |= SR_FS;
 	}
 
-	//machine_init(&vcpu->machine);
-
 #if CONFIG_VIRT_ENABLE_TIMER
 	vcpu_timer_init(vcpu);
 #endif
@@ -605,6 +605,20 @@ create_vcpu:
 	return __vcpu_create();
 }
 
+struct vcpu *vcpu_create_ext(struct device **p_dev, int n)
+{
+	struct vcpu *vcpu;
+
+	vcpu = __vcpu_create();
+	if (!vcpu)
+		return NULL;
+
+#if CONFIG_VIRT_DEVICE_PASSTHROUGH
+	vcpu_attach_device_group(vcpu, p_dev, n);
+#endif
+	return vcpu;
+}
+
 int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 {
 	unsigned long start, end;
@@ -617,11 +631,17 @@ int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params)
 
 	machine_init(&vcpu->machine);
 
+#if CONFIG_VIRT_DEVICE_PASSTHROUGH
+	vcpu_create_pt_device(vcpu);
+#endif
 	if (vcpu_create_gstage_mapping(vcpu)) {
 		print("vcpu create gstage failed...\n");
 		return -1;
 	}
 
+#if CONFIG_VIRT_DEVICE_PASSTHROUGH
+	vcpu_create_pt_remapping(vcpu);
+#endif
 	vcpu_update_vmid(vcpu);
 	print("vmid: %d\n", vcpu->vmid);
 

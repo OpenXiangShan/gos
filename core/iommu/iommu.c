@@ -66,7 +66,7 @@ struct iommu_group *iommu_get_group(struct device *dev)
 	return dev->iommu_group;
 }
 
-void iommu_attach_device(struct device *dev, struct iommu *iommu)
+void iommu_attach_device(struct device *dev, struct iommu *iommu, int gstage)
 {
 	if (!dev->iommu_group) {
 		struct iommu_group *group;
@@ -79,6 +79,9 @@ void iommu_attach_device(struct device *dev, struct iommu *iommu)
 	if (iommu->ops->probe_device)
 		iommu->ops->probe_device(dev);
 
+	if (iommu->ops->enable_gstage)
+		iommu->ops->enable_gstage(dev, gstage);
+
 	if (iommu->ops->finalize)
 		iommu->ops->finalize(dev, 0);
 }
@@ -89,7 +92,7 @@ void iommu_device_attach_group(struct device *dev, struct iommu_group *group)
 	list_add_tail(&dev->iommu_group_list, &group->devices);
 }
 
-void iommu_device_detach_group(struct device *dev)
+void iommu_device_dettach_group(struct device *dev)
 {
 	struct iommu_group *group = dev->iommu_group;
 

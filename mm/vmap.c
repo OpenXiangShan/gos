@@ -21,6 +21,7 @@
 #include "mm.h"
 #include "print.h"
 #include "string.h"
+#include "align.h"
 #include "gos.h"
 
 #define VMAP_START 0xffffffc800000000

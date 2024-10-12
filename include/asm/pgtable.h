@@ -39,9 +39,6 @@ extern unsigned long va_pa_offset;
 #define PAGE_ALIGN_2M(addr) (((addr) + PAGE_2M_SIZE - 1) & PAGE_2M_MASK)
 #define PAGE_ALIGN_1G(addr) (((addr) + PAGE_1G_SIZE - 1) & PAGE_1G_MASK)
 
-#define ALIGN_SIZE(addr, size) (((addr) + size - 1) & (~((size) - 1)))
-#define ALIGN_SIZE_UP(addr, size) ((addr) & ~((size) - 1))
-
 #define N_PAGE(size)     size % PAGE_SIZE == 0 ? size/PAGE_SIZE : (size/PAGE_SIZE + 1)
 #define N_PAGE_EXT(size, page_size)  size % page_size == 0 ? size/page_size : (size/page_size + 1)
 

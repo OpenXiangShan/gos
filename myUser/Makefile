@@ -56,30 +56,30 @@ myUser: $(MYUSER_OBJ_FILES)
 
 $(MYUSER_ENTRY_DIR)/%_s.o: $(MYUSER_ENTRY_DIR)/%.S
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/asm -I$(TOPDIR)/include/uapi -c $< -o $@
 
 $(MYUSER_ENTRY_DIR)/%_c.o: $(MYUSER_ENTRY_DIR)/%.c
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/asm -I$(TOPDIR)/include/uapi -c $< -o $@
 
 $(MYUSER_CORE_DIR)/%_s.o: $(MYUSER_CORE_DIR)/%.S
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/asm -I$(TOPDIR)/include/uapi -c $< -o $@
 
 $(MYUSER_CORE_DIR)/%_c.o: $(MYUSER_CORE_DIR)/%.c
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/asm -I$(TOPDIR)/include/uapi -c $< -o $@
 
 $(MYUSER_LIB_DIR)/%_c.o: $(MYUSER_LIB_DIR)/%.c
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/asm -I$(TOPDIR)/include/uapi -c $< -o $@
 
 $(MYUSER_COMMAND_DIR)/%_c.o: $(MYUSER_COMMAND_DIR)/%.c
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/asm -I$(TOPDIR)/include/uapi -c $< -o $@
 $(MYUSER_COMMAND_DIR)/%_s.o: $(MYUSER_COMMAND_DIR)/%.S
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/uapi -c $< -o $@
+	@$(CC) $(COPS) -I$(MYUSER_DIR)/include -I$(TOPDIR)/include/asm -I$(TOPDIR)/include/uapi -c $< -o $@
 
 clean:
 	@rm -rf $(shell find -name "*.o")

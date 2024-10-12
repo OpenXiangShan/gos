@@ -23,6 +23,7 @@
 #include "devicetree.h"
 #include "vmap.h"
 #include "tiny_mm.h"
+#include "align.h"
 #include "gos.h"
 
 extern int mmu_is_on;

@@ -42,6 +42,25 @@ config VIRT_SCHEDULER_BASE
 config VIRT_SCHEDULER_LEN
 	hex "virt machine scheduler len"
 	default "0x1000"
+config VIRT_ENABLE_PCI_GENERIC
+	bool "virt machine pci generic device enable"
+	default y
+config VIRT_PCI_GENERIC_BASE
+	hex "virt machine pci generic base"
+	depends on VIRT_ENABLE_PCI_GENERIC
+	default "0x40000000"
+config VIRT_PCI_GENERIC_LEN
+	hex "virt machine pci generic len"
+	depends on VIRT_ENABLE_PCI_GENERIC
+	default "0x10000000"
+config VIRT_PCI_MMIO_BASE
+	hex "virt machine pci mmio base"
+	depends on VIRT_ENABLE_PCI_GENERIC
+	default "0x50000000"
+config VIRT_PCI_MMIO_LEN
+	hex "virt machine pci mmio len"
+	depends on VIRT_ENABLE_PCI_GENERIC
+	default "0x10000000"
 choice
 	prompt "Select vsatp mode"
 	config VIRT_SELECT_SV39

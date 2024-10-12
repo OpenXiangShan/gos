@@ -20,10 +20,11 @@
 #include "mm.h"
 #include "list.h"
 #include "string.h"
-#include "uapi/align.h"
+#include "align.h"
 #include "container_of.h"
 #include "pci_device_driver.h"
 #include "irq.h"
+#include "device.h"
 
 unsigned int pci_read_config_byte(struct pci_bus *bus, int devfn, int addr)
 {
@@ -260,36 +261,36 @@ static int pci_scan_slot(struct pci_bus *bus, int devfn)
 
 	for (fn = devfn; fn < devfn + 8; fn++) {
 		is_multifun = 0;
-		vendor_id = pci_read_dev_vendor_id(bus, devfn);
+		vendor_id = pci_read_dev_vendor_id(bus, fn);
 		if (vendor_id == 0xffffffff)
 			return -1;
 		
-		cmd = pci_read_config_word(bus, devfn, PCI_COMMAND);
+		cmd = pci_read_config_word(bus, fn, PCI_COMMAND);
 		if (cmd & (PCI_COMMAND_IO | PCI_COMMAND_MEMORY)) {
 			cmd &= ~PCI_COMMAND_IO;
 			cmd &= ~PCI_COMMAND_MEMORY;
-			pci_write_config_word(bus, devfn, PCI_COMMAND, cmd);
+			pci_write_config_word(bus, fn, PCI_COMMAND, cmd);
 		}
 
-		hdr_type = pci_read_hdr_type(bus, devfn);
+		hdr_type = pci_read_hdr_type(bus, fn);
 		if (hdr_type == PCI_HEADER_TYPE_NORMAL) {
-			dev = pci_setup_device(bus, devfn, vendor_id, &is_multifun);
-			dev->class = pci_read_config_dword(bus, devfn, PCI_CLASS_REVISION) >> 8;
+			dev = pci_setup_device(bus, fn, vendor_id, &is_multifun);
+			dev->class = pci_read_config_dword(bus, fn, PCI_CLASS_REVISION) >> 8;
 
 			pci_read_base_address(dev, 6);
 
 			print("pci: 0:%x:%x:%x: [%x:%x] type %x class %x\n", 
-			       bus->bus_number, PCI_SLOT(devfn),
-			       PCI_FUNC(devfn), dev->vendor,
+			       bus->bus_number, PCI_SLOT(fn),
+			       PCI_FUNC(fn), dev->vendor,
 			       dev->device, hdr_type, dev->class);
 
 		}
 		else if (hdr_type == PCI_HEADER_TYPE_BRIDGE) {
-			child = pci_setup_bridge(bus, devfn, vendor_id);
-			child->class = pci_read_config_dword(bus, devfn, PCI_CLASS_REVISION) >> 8;
+			child = pci_setup_bridge(bus, fn, vendor_id);
+			child->class = pci_read_config_dword(bus, fn, PCI_CLASS_REVISION) >> 8;
 			print("pci: 0:%x:%x:%x: [%x:%x] type %x class %x\n", 
-			       bus->bus_number, PCI_SLOT(devfn),
-			       PCI_FUNC(devfn), child->vendor,
+			       bus->bus_number, PCI_SLOT(fn),
+			       PCI_FUNC(fn), child->vendor,
 			       child->device, hdr_type, child->class);
 		}
 		else if (hdr_type == PCI_HEADER_TYPE_CARDBUS) {
@@ -312,6 +313,8 @@ static int __pci_create_device(struct pci_device *pci_dev)
 	sprintf(dev->name, "0:%x:%x:%x",
 		bus->bus_number, PCI_SLOT(pci_dev->devfn), PCI_FUNC(pci_dev->devfn));
 	sprintf(dev->compatible, "%x:%x", pci_dev->vendor, pci_dev->device);
+
+	pci_device_init(pci_dev);
 
 	pci_init_capabilities(pci_dev);
 
@@ -357,6 +360,8 @@ static int pci_dev_assign_resources(struct pci_bus *bus)
 
 		dev_res = container_of(r, struct pci_dev_res, res);
 		dev = dev_res->dev;
+		if (!dev)
+			continue;
 		b = &dev->bar[dev_res->bar];
 
 		pci_addr = r->base;
@@ -434,14 +439,21 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 	struct resource *r;
 	struct pci_bus *child;
 	unsigned long base = -1UL, limit = 0;
+	struct resource *allocated;
+	struct pci_dev_res *dev_res;
 
 	start = root->res.base;
 	end = root->res.end;
 
+	list_for_each_entry(allocated, &root->res_used, list) {
+		if (allocated->end > start)
+			start = allocated->end + 1;
+	}
+	start = ALIGN_SIZE(start, 1*1024*1024);
+
 	list_for_each_entry(r, &bus->res_used, list) {
 		int size = r->end - r->base + 1;
 		unsigned long last = start;
-		struct resource *allocated;
 
 		list_for_each_entry(allocated, &root->res_used, list) {
 			if (allocated->end > last)
@@ -472,6 +484,12 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 
 	bus->base = base;
 	bus->limit = limit;
+
+	dev_res = (struct pci_dev_res *)mm_alloc(sizeof(struct pci_dev_res));
+	dev_res->res.base = base;
+	dev_res->res.end = limit;
+	dev_res->dev = NULL;
+	list_add_tail(&dev_res->res.list, &root->res_used);
 
 	print("pci: bus%d -- base:0x%lx limit:0x%lx\n", bus->bus_number, base, limit);
 
@@ -608,8 +626,14 @@ void pci_get_resource(struct pci_device *dev, int bar, struct resource *res)
 
 	b = &dev->bar[bar];
 
-	res->base = b->base;
-	res->end = res->base + b->size - 1;
+	if (b->size == 0) {
+		res->base = 0;
+		res->end = 0;
+	}
+	else {
+		res->base = b->base;
+		res->end = res->base + b->size - 1;
+	}
 }
 
 int pci_probe_root_bus(struct pci_bus *bus)

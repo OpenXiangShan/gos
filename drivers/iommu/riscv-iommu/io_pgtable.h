@@ -17,15 +17,16 @@
 #ifndef IOPGTABLE_H
 #define IOPGTABLE_H
 
-unsigned long riscv_iommu_gstage_walk_pt(struct riscv_iommu_device *iommu_dev,
+unsigned long riscv_iommu_gstage_io_walk_pt(struct riscv_iommu_device *iommu_dev,
 					 unsigned long iova);
-unsigned long riscv_iommu_fstage_walk_pt(struct riscv_iommu_device *iommu_dev,
+unsigned long riscv_iommu_fstage_io_walk_pt(struct riscv_iommu_device *iommu_dev,
 					 unsigned long iova);
-int riscv_iommu_gstage_map_pages(struct riscv_iommu_device *iommu_dev,
+int riscv_iommu_gstage_io_map_pages(struct riscv_iommu_device *iommu_dev,
 			   unsigned long iova, void *addr, unsigned int size,
 			   int gfp);
-int riscv_iommu_fstage_map_pages(struct riscv_iommu_device *iommu_dev,
+int riscv_iommu_fstage_io_map_pages(struct riscv_iommu_device *iommu_dev,
 			   unsigned long iova, void *addr, unsigned int size,
 			   int gfp);
+int riscv_iommu_io_page_mapping(void *pgdp, unsigned long iova, void *addr, unsigned int size, int gfp);
 
 #endif

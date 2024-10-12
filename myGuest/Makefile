@@ -59,27 +59,27 @@ $(MYGUEST_ENTRY_DIR)/%_s.o: $(MYGUEST_ENTRY_DIR)/%.S
 
 $(MYGUEST_ENTRY_DIR)/%_c.o: $(MYGUEST_ENTRY_DIR)/%.c
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include -I$(TOPDIR)/include/generic $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_CORE_DIR)/%_c.o: $(MYGUEST_CORE_DIR)/%.c
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include -I$(TOPDIR)/include/generic $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_DRIVERS_DIR)/%_c.o: $(MYGUEST_DRIVERS_DIR)/%.c
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include -I$(TOPDIR)/include/generic $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_LIB_DIR)/%_c.o: $(MYGUEST_LIB_DIR)/%.c
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include -I$(TOPDIR)/include/generic $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_MM_DIR)/%_c.o: $(MYGUEST_MM_DIR)/%.c
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include -I$(TOPDIR)/include/generic $(USERINCLUDE) -c $< -o $@
 
 $(MYGUEST_COMMAND_DIR)/%_c.o: $(MYGUEST_COMMAND_DIR)/%.c
 	@echo "CC $@"
-	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include $(USERINCLUDE) -c $< -o $@
+	@$(CC) $(COPS) -I$(MYGUEST_DIR)/include -I$(TOPDIR)/include/generic $(USERINCLUDE) -c $< -o $@
 
 clean:
 	@rm -rf $(shell find -name "*.o")

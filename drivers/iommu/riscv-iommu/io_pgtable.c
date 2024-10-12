@@ -73,9 +73,9 @@ static unsigned long *riscv_iommu_pt_walk_alloc(unsigned long *ptp,
 					 pg_alloc, gfp);
 }
 
-unsigned long *riscv_iommu_pt_walk_fetch(unsigned long *ptp,
-					 unsigned long iova, unsigned int shift,
-					 int root)
+static unsigned long *riscv_iommu_pt_walk_fetch(unsigned long *ptp,
+						unsigned long iova, unsigned int shift,
+						int root)
 {
 	unsigned long *pte;
 
@@ -112,7 +112,7 @@ unsigned long *riscv_iommu_pt_walk_fetch(unsigned long *ptp,
 	return riscv_iommu_pt_walk_fetch(pte, iova, shift - 9, 0);
 }
 
-static unsigned long __riscv_iommu_walk_pt(struct riscv_iommu_device *iommu_dev,
+static unsigned long __riscv_iommu_io_walk_pt(struct riscv_iommu_device *iommu_dev,
 					   unsigned long iova, int gstage)
 {
 	void *pgdp;
@@ -138,14 +138,39 @@ static unsigned long __riscv_iommu_walk_pt(struct riscv_iommu_device *iommu_dev,
 	return (unsigned long)((pfn_to_phys(pte_pfn(*pte)) | (iova & (PAGE_SIZE - 1))));
 }
 
-static int __riscv_iommu_map_pages(struct riscv_iommu_device *iommu_dev,
-				   unsigned long iova, void *addr, unsigned int size,
-				   int gfp, int gstage)
+int riscv_iommu_io_page_mapping(void *pgdp, unsigned long iova, void *addr, unsigned int size, int gfp)
 {
 	pgprot_t pgprot;
 	int page_nr = N_PAGE(size);
 	unsigned long *pte;
 	unsigned long pfn, pte_val;
+
+	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
+
+	while (page_nr--) {
+		pfn = (unsigned long)addr >> PAGE_SHIFT;
+		pte =
+		    riscv_iommu_pt_walk_alloc((unsigned long *)virt_to_phy(pgdp),
+					      iova, PGDIR_SHIFT, PAGE_SIZE, 1,
+					      alloc_zero_page, gfp);
+		if (!pte)
+			return 0;
+
+		pte_val = pfn_pte(pfn, pgprot);
+
+		*pte = pte_val;
+
+		iova += PAGE_SIZE;
+		addr += PAGE_SIZE;
+	}
+
+	return 0;
+}
+
+static int __riscv_iommu_io_map_pages(struct riscv_iommu_device *iommu_dev,
+				   unsigned long iova, void *addr, unsigned int size,
+				   int gfp, int gstage)
+{
 	void *pgdp;
 
 	if (!iommu_dev) {
@@ -159,52 +184,34 @@ static int __riscv_iommu_map_pages(struct riscv_iommu_device *iommu_dev,
 		pgdp = iommu_dev->pgdp;
 	}
 
-	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
+	return riscv_iommu_io_page_mapping(pgdp, iova, addr, size, gfp);
 
-	while (page_nr--) {
-		pfn = (unsigned long)addr >> PAGE_SHIFT;
-		pte =
-		    riscv_iommu_pt_walk_alloc((unsigned long *)virt_to_phy(pgdp),
-					      iova, PGDIR_SHIFT, PAGE_SIZE, 1,
-					      alloc_zero_page, gfp);
-		if (!pte)
-			return NULL;
-
-		pte_val = pfn_pte(pfn, pgprot);
-
-		*pte = pte_val;
-
-		iova += PAGE_SIZE;
-		addr += PAGE_SIZE;
-	}
-
-	return 0;
 }
 
-unsigned long riscv_iommu_gstage_walk_pt(struct riscv_iommu_device *iommu_dev,
+unsigned long riscv_iommu_gstage_io_walk_pt(struct riscv_iommu_device *iommu_dev,
 					 unsigned long iova)
 {
-	return __riscv_iommu_walk_pt(iommu_dev, iova, RISCV_IOMMU_GSTAGE);
+	return __riscv_iommu_io_walk_pt(iommu_dev, iova, RISCV_IOMMU_GSTAGE);
 }
 
-unsigned long riscv_iommu_fstage_walk_pt(struct riscv_iommu_device *iommu_dev,
+unsigned long riscv_iommu_fstage_io_walk_pt(struct riscv_iommu_device *iommu_dev,
 					 unsigned long iova)
 {
-	return __riscv_iommu_walk_pt(iommu_dev, iova, RISCV_IOMMU_FIRST_STAGE);
+	return __riscv_iommu_io_walk_pt(iommu_dev, iova, RISCV_IOMMU_FIRST_STAGE);
 }
 
-int riscv_iommu_gstage_map_pages(struct riscv_iommu_device *iommu_dev,
+int riscv_iommu_gstage_io_map_pages(struct riscv_iommu_device *iommu_dev,
 				 unsigned long iova, void *addr, unsigned int size,
 				 int gfp)
 {
-	return __riscv_iommu_map_pages(iommu_dev, iova, addr, size, gfp,
+	return __riscv_iommu_io_map_pages(iommu_dev, iova, addr, size, gfp,
 				       RISCV_IOMMU_GSTAGE);
 }
 
-int riscv_iommu_fstage_map_pages(struct riscv_iommu_device *iommu_dev,
+int riscv_iommu_fstage_io_map_pages(struct riscv_iommu_device *iommu_dev,
 				 unsigned long iova, void *addr, unsigned int size,
 				 int gfp)
 {
-	return __riscv_iommu_map_pages(iommu_dev, iova, addr, size, gfp,
+	return __riscv_iommu_io_map_pages(iommu_dev, iova, addr, size, gfp,
 				       RISCV_IOMMU_FIRST_STAGE);
 }

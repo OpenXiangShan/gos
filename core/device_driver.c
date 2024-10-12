@@ -23,6 +23,7 @@
 #include "vmap.h"
 #include "list.h"
 #include "iommu.h"
+#include "pci_device_driver.h"
 
 extern int mmu_is_on;
 
@@ -57,6 +58,7 @@ static struct device *create_device(struct device_init_entry *entry)
 		print("%s -- alloc device failed!\n", __FUNCTION__);
 		return NULL;
 	}
+	memset((char *)new, 0, sizeof(struct device));
 
 	new->base = entry->start;
 	new->len = entry->len;
@@ -132,7 +134,7 @@ static int __probe_device_table(struct driver_init_entry *driver_head,
 		driver_nr_tmp = driver_nr;
 		dev = create_device(device_entry);
 		if (dev->iommu)
-			iommu_attach_device(dev, dev->iommu);
+			iommu_attach_device(dev, dev->iommu, 0);
 		for (driver_entry = driver_head; driver_nr_tmp;
 		     driver_entry++, driver_nr_tmp--) {
 			drv = create_driver(driver_entry);
@@ -237,6 +239,22 @@ find:
 	return drv->ops->ioctl(drv->dev, cmd, arg);
 }
 
+struct device *get_device(char *name)
+{
+	struct device *dev;
+
+	dev = pci_get_device(name);
+	if (dev)
+		return dev;
+
+	list_for_each_entry(dev, &_devices, list) {
+		if (!strncmp(dev->compatible, name, 128))
+			return dev;
+	}
+
+	return NULL;
+}
+
 struct list_head *get_devices(void)
 {
 	return &_devices;
@@ -270,4 +288,10 @@ void walk_devices()
 		print("    probe: %d\n", dev->probe);
 
 	}
+}
+
+void device_get_resource(struct device *dev, struct resource *res)
+{
+	res->base = dev->base;
+	res->end = dev->base + dev->len - 1;
 }

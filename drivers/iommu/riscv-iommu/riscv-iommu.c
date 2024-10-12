@@ -157,13 +157,18 @@ static unsigned long riscv_iommu_walk_pt(struct device *dev, unsigned long iova,
 			return -1;
 		}
 
-		addr = riscv_iommu_gstage_walk_pt(iommu_dev, iova);
+		addr = riscv_iommu_gstage_io_walk_pt(iommu_dev, iova);
 	} else
-		addr = riscv_iommu_fstage_walk_pt(iommu_dev, iova);
+		addr = riscv_iommu_fstage_io_walk_pt(iommu_dev, iova);
 
 	return addr;
 }
 
+static int riscv_iommu_page_mapping(void *pgdp, unsigned long iova, void *addr,
+				    unsigned int size, int gfp)
+{
+	return riscv_iommu_io_page_mapping(pgdp, iova, addr, size, gfp);
+}
 
 static int riscv_iommu_map_pages(struct device *dev, unsigned long iova,
 				 void *addr, unsigned int size, int gstage)
@@ -178,9 +183,9 @@ static int riscv_iommu_map_pages(struct device *dev, unsigned long iova,
 			return -1;
 		}
 
-		ret = riscv_iommu_gstage_map_pages(iommu_dev, iova, addr, size, 0);
+		ret = riscv_iommu_gstage_io_map_pages(iommu_dev, iova, addr, size, 0);
 	} else
-		ret = riscv_iommu_fstage_map_pages(iommu_dev, iova, addr, size, 0);
+		ret = riscv_iommu_fstage_io_map_pages(iommu_dev, iova, addr, size, 0);
 
 	if (ret)
 		return ret;
@@ -371,6 +376,7 @@ static int riscv_iommu_finalize(struct device *dev, int pscid)
 static struct iommu_ops riscv_iommu_ops = {
 	.alloc = riscv_iommu_alloc,
 	.map_pages = riscv_iommu_map_pages,
+	.page_mapping = riscv_iommu_page_mapping,
 	.map_msi_addr = riscv_iommu_map_msi_addr,
 	.walk_pt = riscv_iommu_walk_pt,
 	.probe_device = riscv_iommu_probe_device,

@@ -23,7 +23,7 @@
 #define VMAP_START 0xffffffc800000000
 
 #define VMAP_MAP_NR 8192	//2*1024*1024*1024/PAGE_SIZE/(sizeof(unsigned long)*8)
-#define VMAP_TOTAL_PAGE_NUM VMAP_MAP_NR * sizeof(unsigned long)
+#define VMAP_TOTAL_PAGE_NUM VMAP_MAP_NR * sizeof(unsigned long) * 8
 
 static spinlock_t vmem_lock = __SPINLOCK_INITIALIZER;
 static unsigned long vmem_maps[VMAP_MAP_NR] = { 0 };

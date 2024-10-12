@@ -8,6 +8,11 @@ menuconfig VIRT_ENABLE_AIA
 	depends on SELECT_AIA
 	default y
 
+config VIRT_DEVICE_PASSTHROUGH
+	bool "VIRT_DEVICE_PASSTHROUGH"
+	depends on VIRT_ENABLE_PCI_GENERIC
+	default y
+
 choice
 	prompt "Select Virt uart"
 

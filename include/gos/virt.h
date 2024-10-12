@@ -21,6 +21,7 @@
 #include "../virt/machine.h"
 #include "spinlocks.h"
 #include "gos.h"
+#include "device.h"
 
 enum {
 	VCPU_REQ_FENCE_GVMA_ALL,
@@ -192,6 +193,13 @@ struct vcpu {
 	unsigned int vs_interrupt_file_size;
 #endif
 	struct vcpu_gpa *v_gpa;
+	/* dma remapping */
+	struct iommu_group *iommu_group;
+	struct iommu *iommu[16];
+	struct device **pt_devices;
+	int pt_device_nr;
+	int iommu_nr;
+
 	int running;
 };
 
@@ -229,6 +237,7 @@ void vcpu_set_request(struct vcpu *vcpu, unsigned int req);
 void vcpu_clear_request(struct vcpu *vcpu, unsigned int req);
 struct vcpu *vcpu_create(void);
 struct vcpu *vcpu_create_force(void);
+struct vcpu *vcpu_create_ext(struct device **p_dev, int n);
 int vcpu_run(struct vcpu *vcpu, struct virt_run_params *params);
 void vcpu_switch_to(struct cpu_context *cpu_ctx);
 void __vcpu_switch_return(void);

@@ -24,6 +24,7 @@
 #include "gos.h"
 #include "asm/bitops.h"
 #include "irq.h"
+#include "align.h"
 
 static void *pgdp = NULL;
 
