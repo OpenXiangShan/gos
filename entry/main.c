@@ -99,9 +99,9 @@ void start_gos(unsigned int hart_id,
 	end = sbi_get_cpu_cycles();
 	print("gos startup success, cost: %d(cycles)\n", end - start);
 
-	enable_local_irq();
-
 	set_print_time(0);
 
 	create_task("shell_init", shell_init, NULL, 0, NULL, 0, NULL);
+
+	enable_local_irq();
 }
