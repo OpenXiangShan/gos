@@ -82,9 +82,9 @@ void start_gos(unsigned int hart_id,
 
 	irq_init();
 
-	irqchip_setup(hw);
-
 	init_timer(hw);
+
+	irqchip_setup(hw);
 
 	device_driver_init(hw);
 
