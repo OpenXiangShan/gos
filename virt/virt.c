@@ -508,7 +508,7 @@ static void __dump_vcpu_info(int cpu)
 		print("- pass through devices info:\n");
 		if (vcpu->iommu_group) {
 			list_for_each_entry(dev, &vcpu->iommu_group->devices, iommu_group_list) {
-				print("    device[%d]: %s\n", dev->compatible, n++);
+				print("    device[%d]: %s\n", n++, dev->compatible);
 			}
 		}
 #endif
