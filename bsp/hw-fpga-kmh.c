@@ -40,7 +40,7 @@ static const struct device_init_entry __attribute__((used))
 #else
 	 "APLIC_S",
 #endif
-	 { 40,},
+	 { 10,},
 	 1,
 	 " ",
 	 0,
