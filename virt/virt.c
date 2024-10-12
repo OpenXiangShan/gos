@@ -473,6 +473,8 @@ static void __dump_vcpu_info(int cpu)
 {
 	struct vcpu *vcpu;
 	struct list_head *vcpus;
+	struct device *dev;
+	int n;
 
 	vcpus = &per_cpu(vcpu_list, cpu);
 	if (!vcpus) {
@@ -501,6 +503,14 @@ static void __dump_vcpu_info(int cpu)
 		print("    vs_interrupt_file_hpa : 0x%lx\n", vcpu->vs_interrupt_file_pa);
 		print("    vs_interrupt_file_gpa : 0x%lx\n", vcpu->vs_interrupt_file_gpa);
 		print("    vs_interrupt_file_size : 0x%x\n", vcpu->vs_interrupt_file_size);
+#endif
+#if CONFIG_VIRT_DEVICE_PASSTHROUGH
+		print("- pass through devices info:\n");
+		if (vcpu->iommu_group) {
+			list_for_each_entry(dev, &vcpu->iommu_group->devices, iommu_group_list) {
+				print("    device[%d]: %s\n", dev->compatible, n++);
+			}
+		}
 #endif
 		print("\n");
 	}
