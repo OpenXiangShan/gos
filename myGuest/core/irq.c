@@ -95,7 +95,6 @@ int register_irq_handler(int hwirq, int (*handler)(void *data), void *data)
 	if (!desc)
 		return -1;
 
-	print("%s hwirq:%d\n", __FUNCTION__, hwirq);
 	desc->hwirq = hwirq;
 	desc->irq_handler = handler;
 	desc->data = data;
