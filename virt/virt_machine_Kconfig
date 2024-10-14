@@ -44,7 +44,7 @@ config VIRT_SCHEDULER_LEN
 	default "0x1000"
 config VIRT_ENABLE_PCI_GENERIC
 	bool "virt machine pci generic device enable"
-	default y
+	default n
 config VIRT_PCI_GENERIC_BASE
 	hex "virt machine pci generic base"
 	depends on VIRT_ENABLE_PCI_GENERIC
