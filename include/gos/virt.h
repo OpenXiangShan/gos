@@ -252,6 +252,8 @@ void dump_vcpu_info_on_cpu(int cpu);
 struct vcpu *get_vcpu(int vmid, int cpu);
 int vcpu_add_machine_device(struct vcpu *vcpu,
 			    struct vcpu_machine_device *device);
+void do_for_each_vcpu(void (*handler)(struct vcpu *vcpu, void *data, void *ret),
+		      void *data, void *ret);
 void vcpu_enable_hgei(int hgei);
 void vcpu_disable_hgei(int hgei);
 void vcpu_init(void);

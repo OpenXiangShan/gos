@@ -86,13 +86,47 @@ void vcpu_create_pt_remapping(struct vcpu *vcpu)
 	vcpu_create_dma_remapping(vcpu, vcpu->iommu_group);
 }
 
+static void check_pt_device_valid(struct vcpu *vcpu, void *data, void *ret)
+{
+	struct device *dev = (struct device *)data;
+	struct device *tmp;
+	int *invalid = (int *)ret;
+
+	if (!vcpu->iommu_group)
+		return;
+
+	list_for_each_entry(tmp, &vcpu->iommu_group->devices, iommu_group_list) {
+		if (tmp == dev)
+			*invalid = 1;
+	}
+}
+
+static int vcpu_pt_check_device_valid(struct device *dev)
+{
+	int invalid = 0;
+
+	do_for_each_vcpu(check_pt_device_valid, dev, &invalid);
+
+	return !invalid;
+}
+
 int vcpu_attach_device_group(struct vcpu *vcpu, struct device **p_dev, int n)
 {
 	struct iommu_group *iommu_group;
-	int i, j;
+	int i, j, pt_num = 0;
 
-	for (i = 0; i < n; i++)
+	for (i = 0; i < n; i++) {
+		if (!vcpu_pt_check_device_valid(p_dev[i])) {
+			print("warning: vcpu-pt-remapping: %s can not pass through to vm%d , make sure it do not be passed to any vm already...\n",
+			      p_dev[i]->compatible, vcpu->vmid);
+			continue;
+		}
 		iommu_device_dettach_group(p_dev[i]);
+		pt_num++;
+	}
+
+	if (pt_num == 0)
+		return 0;
 
 	iommu_group = iommu_alloc_group();
 	if (!iommu_group)

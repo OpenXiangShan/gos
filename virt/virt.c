@@ -43,6 +43,23 @@ static DEFINE_PER_CPU(unsigned long, vmid_bitmap);
 static LIST_HEAD(vgpa_list);
 static spinlock_t vcpu_req_lock = __SPINLOCK_INITIALIZER;
 
+void do_for_each_vcpu(void (*handler)(struct vcpu *vcpu, void *data, void *ret),
+		      void *data, void *ret)
+{
+	int cpu;
+	struct list_head *vcpus;
+	struct vcpu *vcpu;
+
+	for_each_online_cpu(cpu) {
+		vcpus = &per_cpu(vcpu_list, cpu);
+		list_for_each_entry(vcpu, vcpus, list) {
+			if (handler)
+				handler(vcpu, data, ret);
+		}
+	}
+
+}
+
 void append_vcpu_vgpalist(struct vcpu_gpa *t)
 {
 	spin_lock(&vcpu_req_lock);
