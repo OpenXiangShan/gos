@@ -14,6 +14,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "asm/type.h"
+#include "asm/pgtable.h"
 #include "iommu.h"
 #include "virt.h"
 #include "mm.h"
@@ -24,10 +25,11 @@
 #include "device.h"
 #include "list.h"
 #include "pci.h"
+#include "string.h"
 #include "vcpu_pt_remapping.h"
 #include "pci_device_driver.h"
 #include "pci_generic_emulator.h"
-#include "asm/pgtable.h"
+#include "../drivers/irqchip/aia/imsic/imsic.h"
 
 static int vcpu_create_dma_remapping(struct vcpu *vcpu, struct iommu_group *group)
 {
@@ -47,6 +49,29 @@ static int vcpu_create_dma_remapping(struct vcpu *vcpu, struct iommu_group *grou
 						 vcpu->guest_memory_pa,
 						 (void *)vcpu->host_memory_pa,
 						 vcpu->memory_size, NULL);
+		}
+	}
+
+	return 0;
+}
+
+int vcpu_create_interrupt_remapping(struct vcpu *vcpu)
+{
+	int i;
+	struct iommu *iommu;
+	unsigned long msi_addr_gpa, msi_addr_hpa;
+	unsigned int msi_addr_size;
+	struct iommu_group *group = vcpu->iommu_group;
+
+	msi_addr_gpa = get_machine_memmap_base(VIRT_IMSIC);
+	msi_addr_size = get_machine_memmap_size(VIRT_IMSIC);
+	msi_addr_hpa = imsic_get_interrupt_file_base(vcpu->cpu, vcpu->hgei);
+
+	for (i = 0; i < vcpu->iommu_nr; i++) {
+		iommu = vcpu->iommu[i];
+		if (iommu->ops->map_msi_addr) {
+			iommu->ops->map_msi_addr(group, iommu, msi_addr_hpa,
+						 msi_addr_gpa, msi_addr_size);
 		}
 	}
 
@@ -122,6 +147,117 @@ static unsigned long get_pci_bar_mask(unsigned int sz)
 	return mask;
 }
 
+static unsigned int pci_find_cap_ptr(struct pci_device_function_emulator *func, int start, int len)
+{
+	unsigned long cap_ptr = 0x40;
+	unsigned char *in_used = func->inused_bitmap;
+	int i;
+
+	if ((!start) && (start >= 0x40) && (start <= 0xff)) {
+		cap_ptr = start;
+		for (i = cap_ptr; i < len; i++) {
+			if (in_used[i] != 0)
+				return 0;
+		}
+		for (i = cap_ptr; i < len; i++) {
+			in_used[i] = 1;
+		}
+	} else {
+		while (cap_ptr < 0xff - len) {
+			for (i = cap_ptr; i < len; i++) {
+				if (in_used[i] != 0)
+					goto next;
+			}
+			for (i = cap_ptr; i < len; i++) {
+				in_used[i] = 1;
+			}
+			return cap_ptr;
+
+next:
+			cap_ptr += i - cap_ptr + 1;
+		}
+	}
+
+	return 0;
+}
+
+static int pci_add_cap(struct pci_device_function_emulator *func, int cap_id, unsigned int cap_ptr)
+{
+	struct type0_cfg *cfg = &func->cfg_space.type0_cfg;
+	char *ptr;
+	char cap = cfg->cap_ptr;
+	unsigned char next_pos;
+
+	ptr = (char *)((char *)cfg + cap);
+	next_pos = *(ptr + 1);
+	while (next_pos) {
+		ptr = (char *)((unsigned long)next_pos + 1);
+		if (*ptr == cap_id)
+			return -1;
+		next_pos = *(ptr + 1);
+	}
+
+	*(ptr + 1) = cap_ptr;
+
+	return 0;
+}
+
+static void pcie_msix_init(struct pci_device_function_emulator *func,
+			   unsigned int cap_ptr, int nr_irq,
+			   int table_bar, unsigned int table_offset,
+			   int pba_bar, unsigned int pba_offset)
+{
+	struct type0_cfg *cfg = &func->cfg_space.type0_cfg;
+	unsigned int msix_cap;
+	struct msix_cap *ptr;
+	unsigned short msg_ctrl = 0;
+	int table_size;
+
+	msix_cap = pci_find_cap_ptr(func, cap_ptr, MSIX_CAP_LENGTH);
+	if (!msix_cap) {
+		print("warning -- pcie-msix-init fail\n");
+		return;
+	}
+	ptr = (struct msix_cap *)((char *)cfg + msix_cap);
+	memset((char *)ptr, 0, MSIX_CAP_LENGTH);
+
+	table_size = nr_irq - 1;
+	msg_ctrl = table_size;
+
+	ptr->cap_id = PCI_CAP_ID_MSIX;
+	ptr->next_cap = 0;
+	ptr->msg_ctrl = msg_ctrl;
+	ptr->table_offset = (table_offset & PCI_MSIX_TABLE_OFFSET) |
+			    (table_bar & PCI_MSIX_TABLE_BIR);
+	ptr->pba_offset = (pba_offset & PCI_MSIX_PBA_OFFSET) |
+			  (pba_bar & PCI_MSIX_PBA_BIR);
+
+	pci_add_cap(func, PCI_CAP_ID_MSIX, msix_cap);
+}
+
+static void pcie_pt_device_msix_init(struct pci_device *pdev,
+				     struct pci_device_function_emulator *func)
+{
+	int msi_vec_count;
+	unsigned int table_offset, pba_offset;
+	int table_bar, pba_bar;
+
+	msi_vec_count = pci_msix_get_vec_count(pdev);
+	table_offset = pci_read_config_dword(pdev->bus, pdev->devfn,
+					     pdev->msix_cap_pos + PCI_MSIX_TABLE);
+	table_bar = table_offset & PCI_MSIX_TABLE_BIR;
+	table_offset &= PCI_MSIX_TABLE_OFFSET;
+
+	pba_offset = pci_read_config_dword(pdev->bus, pdev->devfn,
+					   pdev->msix_cap_pos + PCI_MSIX_PBA);
+	pba_bar = pba_offset & PCI_MSIX_PBA_BIR;
+	pba_offset &= PCI_MSIX_PBA_OFFSET;
+
+	pcie_msix_init(func, 0x40, msi_vec_count,
+		       table_bar, table_offset,
+		       pba_bar, pba_offset);
+}
+
 static void pci_func_bar_init(struct pci_device *pdev,
 			      struct pci_device_function_emulator *func)
 {
@@ -158,6 +294,17 @@ static void pci_func_bar_init(struct pci_device *pdev,
 			func->bar_mask[pos] = sz_mask;
 		}
 	}
+}
+
+static void pcie_cap_init(struct pci_device_function_emulator *func, unsigned int cap)
+{
+	struct type0_cfg *cfg = &func->cfg_space.type0_cfg;
+	char *exp_cap;
+
+	cfg->cap_ptr = cap;
+	exp_cap = (char *)(cfg + cap);
+	*exp_cap = PCI_CAP_ID_EXP;
+	*(exp_cap + 1) = 0x0;
 }
 
 static int find_free_pci_slot_and_plugin(struct pci_generic_emulator *pci_emulator,
@@ -303,6 +450,8 @@ static int create_pci_pt_devices(struct virt_machine *machine,
 	func->offset = machine->pci_emu->cpu_addr - machine->pci_emu->pci_addr;
 	func->data = (void *)machine;
 	pci_func_bar_init(pdev, func);
+	pcie_cap_init(func, 0xe0);
+	pcie_pt_device_msix_init(pdev, func);
 
 	dev_emu->function[0] = func;
 	if (find_free_pci_slot_and_plugin(machine->pci_emu, dev_emu)) {

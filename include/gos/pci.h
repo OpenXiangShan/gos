@@ -228,5 +228,6 @@ unsigned int pci_write_config_word(struct pci_bus *bus, int devfn, int addr, uns
 unsigned int pci_write_config_dword(struct pci_bus *bus, int devfn, int addr, unsigned int val);
 void pci_get_config(struct pci_device *dev, char *out);
 int pci_msix_enable(struct pci_device *pdev, int *irqs);
+int pci_msix_get_vec_count(struct pci_device *pdev);
 
 #endif

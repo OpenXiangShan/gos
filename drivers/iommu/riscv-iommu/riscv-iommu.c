@@ -196,9 +196,55 @@ static int riscv_iommu_map_pages(struct device *dev, unsigned long iova,
 	return ret;
 }
 
-static int riscv_iommu_map_msi_addr(struct device *dev, unsigned long msi_pa,
-				    unsigned long msi_iova, int len)
+static void riscv_iommu_get_msi_mask_and_pattern(unsigned long msi_gpa, unsigned long msi_hpa,
+						 unsigned long *addr_mask, unsigned long *addr_pattern)
 {
+	*addr_mask = 0;
+	*addr_pattern = msi_gpa >> 12;
+}
+
+static int riscv_iommu_map_msi_addr(struct iommu_group *gp, struct iommu *iommu,
+				    unsigned long msi_hpa,
+				    unsigned long msi_gpa, int len)
+{
+	int i;
+	static struct riscv_iommu_dc *dc;
+	struct riscv_iommu_msi_pte *msi_pte;
+	struct riscv_iommu_device *iommu_dev =
+	    (struct riscv_iommu_device *)iommu->priv;
+
+	if (!iommu_dev) {
+		print("Error -- riscv-iommu: Iommu_dev is NULL\n");
+		return -1;
+	}
+
+	if (!gp) {
+		print("Error -- riscv-iommu: Can not find iommu group\n");
+		return -1;
+	}
+
+	dc = iommu_dev->dc;
+	if (!dc) {
+		print("Error -- riscv-iommu: DC is NULL\n");
+		return -1;
+	}
+
+	if (!gp->msi_root) {
+		gp->msi_root = (struct riscv_iommu_msi_pte *)mm_alloc(PAGE_SIZE);
+		if (!gp->msi_root) {
+			print("Warning -- riscv-iommu: Alloc msi root failed\n");
+		}
+		for (i = 0; i < 256; i++) {
+			msi_pte = &gp->msi_root[i];
+			msi_pte->pte = IOMMU_MSI_PTE_V | IOMMU_MSI_PTE_M | phys_to_ppn(msi_hpa);
+		}
+	}
+
+	riscv_iommu_get_msi_mask_and_pattern(msi_gpa, msi_hpa,
+					     &iommu_dev->dc->msi_addr_mask,
+					     &iommu_dev->dc->msi_addr_pattern);
+	iommu_dev->dc->msiptp = (virt_to_phy(gp->msi_root) >> 12) | RISCV_IOMMU_MSIPTP_MODE_FLAT;
+	mb();
 
 	return 0;
 }
@@ -272,9 +318,7 @@ static int riscv_iommu_finalize(struct device *dev, int pscid)
 	struct riscv_iommu_device *iommu_dev =
 	    (struct riscv_iommu_device *)dev->iommu->priv;
 	struct riscv_iommu_dc *dc;
-	struct riscv_iommu_msi_pte *msi_pte;
 	int pgd_size;
-	int i;
 
 	if (!iommu_dev) {
 		print("Error -- riscv-iommu: Iommu_dev is NULL\n");
@@ -335,17 +379,6 @@ static int riscv_iommu_finalize(struct device *dev, int pscid)
 				      pgd_size);
 				return -1;
 			}
-		}
-	}
-
-	if (!gp->msi_root) {
-		gp->msi_root = (struct riscv_iommu_msi_pte *)mm_alloc(PAGE_SIZE);
-		if (!gp->msi_root) {
-			print("Warning -- riscv-iommu: Alloc msi root failed\n");
-		}
-		for (i = 0; i < 256; i++) {
-			msi_pte = &gp->msi_root[i];
-			msi_pte->pte = IOMMU_MSI_PTE_V | IOMMU_MSI_PTE_M;
 		}
 	}
 

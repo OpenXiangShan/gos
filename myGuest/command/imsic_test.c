@@ -22,6 +22,13 @@
 #include "vmap.h"
 #include "asm/pgtable.h"
 
+static int imsic_test_irq_handler(void *data)
+{
+	print("%s -- test pass!!\n", __FUNCTION__);
+
+	return 0;
+}
+
 static int cmd_imsic_test_handler(int argc, char *argv[], void *priv)
 {
 	int hwirq = 0;
@@ -35,6 +42,8 @@ static int cmd_imsic_test_handler(int argc, char *argv[], void *priv)
 
 	if (compose_msi_msg(hwirq, &msi_addr, &msi_data))
 		return -1;
+
+	register_irq_handler(hwirq, imsic_test_irq_handler, NULL);
 
 	myGuest_print("msi_addr:0x%lx msi_data:0x%lx\n", msi_addr, msi_data);
 

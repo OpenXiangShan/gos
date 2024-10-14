@@ -21,6 +21,8 @@
 #include "print.h"
 #include "list.h"
 #include "align.h"
+#include "vmap.h"
+#include "irq.h"
 
 static struct pci_simple_root_bus *root = NULL;
 
@@ -92,6 +94,29 @@ int pci_simple_write_config_word(int devfn, int reg, unsigned int val)
 int pci_simple_write_config_dword(int devfn, int reg, unsigned int val)
 {
 	return pci_simple_config_write(devfn, reg, 4, val);
+}
+
+unsigned int pci_simple_find_capability(int devfn, int cap)
+{
+	unsigned char pos;
+	unsigned char cap_id;
+
+	pos = pci_simple_read_config_byte(devfn, PCI_CAPABILITY_START);
+	while (pos) {
+		cap_id = pci_simple_read_config_byte(devfn, pos);
+		if (cap_id == cap)
+			return pos;
+		pos = pci_simple_read_config_byte(devfn, pos + 1);
+	}
+
+	return pos;
+}
+
+static void pci_simple_msix_init(struct pci_device *dev)
+{
+	dev->msix_cap_pos = pci_simple_find_capability(dev->devfn, PCI_CAP_ID_MSIX);
+
+	print("msix_cap_pos: 0x%lx\n", dev->msix_cap_pos);
 }
 
 static unsigned int pci_simple_read_vendor_id(int devfn)
@@ -240,6 +265,7 @@ static void pci_simple_assign_device_resource(void)
 				pci_simple_write_config_dword(dev->devfn, reg + 4, val);
 			}
 		}
+		pci_simple_msix_init(dev);
 	}
 }
 
@@ -280,6 +306,91 @@ static void pci_probe_driver(void)
 			}
 		}
 	}
+}
+
+static unsigned long pci_simple_msix_map(struct pci_device *pdev, int count)
+{
+	unsigned int msix_table_offset;
+	int bar;
+	unsigned long addr;
+	struct resource res;
+
+	msix_table_offset = pci_simple_read_config_dword(pdev->devfn, pdev->msix_cap_pos + PCI_MSIX_TABLE);
+	bar = msix_table_offset & PCI_MSIX_TABLE_BIR;
+	msix_table_offset &= PCI_MSIX_TABLE_OFFSET;
+
+	pci_simple_get_resource(pdev, bar, &res);
+
+	print("msi_table_offset:0x%lx bar:%d\n", msix_table_offset, bar);
+
+	addr = (unsigned long)ioremap((void *)(res.base + msix_table_offset),
+				      count * PCI_MSIX_ENTRY_SIZE, NULL);
+
+	return addr;
+}
+
+static int pci_simple_msix_get_vec_count(struct pci_device *pdev)
+{
+	unsigned short msg_ctrl;
+
+	if (!pdev->msix_cap_pos)
+		return 0;
+
+	msg_ctrl = pci_simple_read_config_word(pdev->devfn, pdev->msix_cap_pos + PCI_MSIX_FLAGS);
+
+	return ((msg_ctrl & PCI_MSIX_FLAGS_QSIZE) + 1);
+}
+
+static void pci_simple_write_msix_msg(struct pci_device *dev, int index,
+				      unsigned long msi_addr, unsigned long msi_data)
+{
+	unsigned int msi_addr_lo, msi_addr_hi;
+	unsigned long addr = dev->msix_base;
+	unsigned int vector_ctrl;
+
+	msi_addr_lo = (unsigned int)(msi_addr & 0xFFFFFFFF);
+	msi_addr_hi = (unsigned int)(msi_addr >> 32);
+
+	vector_ctrl = readl(addr + PCI_MSIX_ENTRY_VECTOR_CTRL);
+	if (!(vector_ctrl & PCI_MSIX_ENTRY_CTRL_MASKBIT))
+		writel(addr + PCI_MSIX_ENTRY_VECTOR_CTRL,
+		       vector_ctrl | PCI_MSIX_ENTRY_CTRL_MASKBIT);
+
+	writel(addr + PCI_MSIX_ENTRY_LOWER_ADDR, msi_addr_lo);
+	writel(addr + PCI_MSIX_ENTRY_UPPER_ADDR, msi_addr_hi);
+	writel(addr + PCI_MSIX_ENTRY_DATA, msi_data);
+
+	writel(addr + PCI_MSIX_ENTRY_VECTOR_CTRL, vector_ctrl & (~PCI_MSIX_ENTRY_CTRL_MASKBIT));
+}
+
+int pci_simple_msix_enable(struct pci_device *dev, int *irqs)
+{
+	int count, hwirq, i;
+	unsigned short msg_ctrl;
+	unsigned long msi_addr, msi_data;
+
+	count = pci_simple_msix_get_vec_count(dev);
+	if (count == 0)
+		return 0;
+	dev->msix_base = pci_simple_msix_map(dev, count);
+
+	msg_ctrl = pci_simple_read_config_word(dev->devfn,
+				dev->msix_cap_pos + PCI_MSIX_FLAGS);
+	msg_ctrl |= PCI_MSIX_FLAGS_ENABLE;
+
+	hwirq = alloc_msi_irqs(count);
+	if (hwirq == -1)
+		return 0;
+
+	for (i = 0; i < count; i++) {
+		if (compose_msi_msg(hwirq + i, &msi_addr, &msi_data))
+			return 0;
+		pci_simple_write_msix_msg(dev, i, msi_addr, msi_data);
+		irqs[i] = hwirq + i;
+	}
+	pci_simple_write_config_word(dev->devfn, dev->msix_cap_pos + PCI_MSIX_FLAGS, msg_ctrl);
+
+	return count;
 }
 
 int pci_simple_get_resource(struct pci_device *dev, int bar, struct resource *res)

@@ -21,7 +21,8 @@ struct iommu_ops {
 			 unsigned int size, int gfp);
 	int (*page_mapping)(void *pgdp, unsigned long iova, void *addr,
 			    unsigned int size, int gfp);
-	int (*map_msi_addr)(struct device *dev, unsigned long msi_pa, unsigned long msi_iova, int len);
+	int (*map_msi_addr)(struct iommu_group *gp, struct iommu *iommu,
+			    unsigned long msi_hpa, unsigned long msi_gpa, int len);
 	unsigned long (*walk_pt)(struct device *dev, unsigned long iova, int gstage);
 	int (*probe_device)(struct device * dev);
 	int (*finalize)(struct device * dev, int pscid);
@@ -35,8 +36,6 @@ struct iommu {
 	void *priv;
 };
 
-int iommu_map_msi_addr(struct device *dev, unsigned long msi_pa,
-		       unsigned long msi_va, int len);
 int iommu_map_pages(struct device *dev, unsigned long iova, void *addr, unsigned int size, int gstage);
 struct iommu *find_iommu(char *name);
 struct iommu *find_default_iommu(void);

@@ -31,6 +31,7 @@
 #define PCI_STATUS 0x06
 #define PCI_CLASS_REVISION 0x08
 #define PCI_HEAD_TYPE 0x0e
+#define PCI_CAPABILITY_START 0x34
 
 #define PCI_BASE_ADDRESS_0  0x10
 #define PCI_BASE_ADDRESS_1  0x14
@@ -49,6 +50,29 @@
 #define  PCI_BASE_ADDRESS_MEM_PREFETCH	0x08	/* prefetchable? */
 #define  PCI_BASE_ADDRESS_MEM_MASK	(~0x0fUL)
 #define  PCI_BASE_ADDRESS_IO_MASK	(~0x03UL)
+
+#define  PCI_CAP_ID_MSIX	0x11	/* MSI-X */
+
+/* MSI-X registers (in MSI-X capability) */
+#define  PCI_MSIX_FLAGS		2	/* Message Control */
+#define  PCI_MSIX_FLAGS_QSIZE	0x07FF	/* Table size */
+#define  PCI_MSIX_FLAGS_MASKALL	0x4000	/* Mask all vectors for this function */
+#define  PCI_MSIX_FLAGS_ENABLE	0x8000	/* MSI-X enable */
+#define  PCI_MSIX_TABLE		4	/* Table offset */
+#define  PCI_MSIX_TABLE_BIR	0x00000007 /* BAR index */
+#define  PCI_MSIX_TABLE_OFFSET	0xfffffff8 /* Offset into specified BAR */
+#define  PCI_MSIX_PBA		8	/* Pending Bit Array offset */
+#define  PCI_MSIX_PBA_BIR	0x00000007 /* BAR index */
+#define  PCI_MSIX_PBA_OFFSET	0xfffffff8 /* Offset into specified BAR */
+#define  PCI_MSIX_FLAGS_BIRMASK	PCI_MSIX_PBA_BIR /* deprecated */
+#define  PCI_CAP_MSIX_SIZEOF	12	/* size of MSIX registers */
+
+#define PCI_MSIX_ENTRY_SIZE		16
+#define PCI_MSIX_ENTRY_LOWER_ADDR	0x0  /* Message Address */
+#define PCI_MSIX_ENTRY_UPPER_ADDR	0x4  /* Message Upper Address */
+#define PCI_MSIX_ENTRY_DATA		0x8  /* Message Data */
+#define PCI_MSIX_ENTRY_VECTOR_CTRL	0xc  /* Vector Control */
+#define  PCI_MSIX_ENTRY_CTRL_MASKBIT	0x00000001
 
 #define PCI_HEADER_TYPE_NORMAL  0
 #define PCI_HEADER_TYPE_BRIDGE  1
@@ -82,6 +106,9 @@ struct pci_device {
 	unsigned int device;
 	unsigned int class;
 	struct bar bar[6];
+	unsigned int msi_cap_pos;
+	unsigned int msix_cap_pos;
+	unsigned long msix_base;
 };
 
 struct resource {
@@ -118,8 +145,10 @@ unsigned int pci_simple_read_config_dword(int devfn, int reg);
 int pci_simple_write_config_byte(int devfn, int reg, unsigned int val);
 int pci_simple_write_config_word(int devfn, int reg, unsigned int val);
 int pci_simple_write_config_dword(int devfn, int reg, unsigned int val);
+unsigned int pci_simple_find_capability(int devfn, int cap);
 int pci_simple_get_resource(struct pci_device *dev, int bar, struct resource *res);
 int pci_simple_probe_root_bus(void);
 int pci_simple_register_root_bus(unsigned long ecam_addr, unsigned long mmio, unsigned int size);
+int pci_simple_msix_enable(struct pci_device *dev, int *irqs);
 
 #endif

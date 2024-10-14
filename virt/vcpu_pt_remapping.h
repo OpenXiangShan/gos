@@ -16,5 +16,6 @@ struct pt_device_resource {
 void vcpu_create_pt_remapping(struct vcpu *vcpu);
 void vcpu_create_pt_device(struct vcpu *vcpu);
 int vcpu_attach_device_group(struct vcpu *vcpu, struct device **p_dev, int n);
+int vcpu_create_interrupt_remapping(struct vcpu *vcpu);
 
 #endif

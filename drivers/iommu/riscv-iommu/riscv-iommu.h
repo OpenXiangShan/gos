@@ -153,6 +153,8 @@
 #define RISCV_IOMMU_CAP_MSI_FLAT (1UL << 22)
 #define RISCV_IOMMU_DDTE_VALID  (1UL << 0)
 
+#define RISCV_IOMMU_MSIPTP_MODE_FLAT (1UL << 60)
+
 /* RISC-V IOMMU PPN <> PHYS address conversions, PHYS <=> PPN[53:10] */
 #define phys_to_ppn(pa)  (((pa) >> 2) & (((1ULL << 44) - 1) << 10))
 #define ppn_to_phys(pn)  (((pn) << 2) & (((1ULL << 44) - 1) << 12))

@@ -475,8 +475,9 @@ static void __dump_vcpu_info(int cpu)
 	struct list_head *vcpus;
 #if CONFIG_VIRT_DEVICE_PASSTHROUGH
 	struct device *dev;
-	int n;
+	int n = 0;
 #endif
+
 	vcpus = &per_cpu(vcpu_list, cpu);
 	if (!vcpus) {
 		print("invalid hart id: %d\n", cpu);

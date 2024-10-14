@@ -14,19 +14,20 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "asm/type.h"
+#include "asm/trap.h"
+#include "asm/bitops.h"
+#include "asm/csr.h"
 #include "vcpu_aia.h"
 #include "virt.h"
 #include "percpu.h"
-#include "asm/csr.h"
 #include "mm.h"
 #include "../drivers/irqchip/aia/imsic/imsic.h"
-#include "asm/type.h"
 #include "vmap.h"
 #include "imsic_emulator.h"
 #include "machine.h"
-#include "asm/bitops.h"
 #include "irq.h"
-#include "asm/trap.h"
+#include "vcpu_pt_remapping.h"
 
 static DEFINE_PER_CPU(unsigned long, hgei_bitmap);
 
@@ -63,6 +64,15 @@ static void hgei_irq_handler(void *data)
 	print("%s %d\n", __FUNCTION__, __LINE__);
 	print("hgeie: 0x%lx\n", read_csr(CSR_HGEIE));
 	print("hgeip: 0x%lx\n", read_csr(CSR_HGEIP));
+}
+
+static void vcpu_imsic_interrupt_file_migrate(struct vcpu *vcpu)
+{
+	/*
+	   because of the vcpu tasks are only scheduled to run on the same
+	   core on gos, there is no need for interrupt file migration
+	 */
+	print("vcpu-aia: imsic interrupt file update is Todo ...\n");
 }
 
 void vcpu_enable_hgei(int hgei)
@@ -122,6 +132,10 @@ int vcpu_interrupt_file_update(struct vcpu *vcpu)
 			     vcpu->vs_interrupt_file_pa,
 			     get_machine_memmap_base(VIRT_IMSIC),
 			     get_machine_memmap_size(VIRT_IMSIC));
+
+	vcpu_create_interrupt_remapping(vcpu);
+
+	vcpu_imsic_interrupt_file_migrate(vcpu);
 
 	return 0;
 }

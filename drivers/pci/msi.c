@@ -45,7 +45,7 @@ static struct msi_desc *get_msi_desc(struct irq_domain *d, int irq)
 	return desc;
 }
 
-static int pci_msix_get_vec_count(struct pci_device *pdev)
+int pci_msix_get_vec_count(struct pci_device *pdev)
 {
 	unsigned short msg_ctrl;
 
@@ -108,7 +108,7 @@ static void pci_msix_write_msi_msg(struct device *dev, unsigned long msi_addr,
 
 void pci_msi_init(struct pci_device *pdev)
 {
-	pdev->msix_cap_pos = pci_find_capability(pdev, PCI_CAP_ID_MSI);
+	pdev->msi_cap_pos = pci_find_capability(pdev, PCI_CAP_ID_MSI);
 }
 
 void pci_msix_init(struct pci_device *pdev)
@@ -154,7 +154,7 @@ int pci_msix_enable(struct pci_device *pdev, int *irqs)
 				pdev->msix_cap_pos + PCI_MSIX_FLAGS);
 	msg_ctrl |= PCI_MSIX_FLAGS_ENABLE;
 	pci_write_config_word(pdev->bus, pdev->devfn,
-				pdev->msix_cap_pos + PCI_MSIX_FLAGS, msg_ctrl);	
+			      pdev->msix_cap_pos + PCI_MSIX_FLAGS, msg_ctrl);
 
 	return count;
 }

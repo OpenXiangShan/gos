@@ -57,6 +57,9 @@ static int cmd_dma_test_handler(int argc, char *argv[], void *priv)
 
 	print("dma_test (memory to memory) -- test pass!!\n");
 
+	mm_free((void *)src, 4096);
+	mm_free((void *)dst, 4096);
+
 	return 0;
 }
 

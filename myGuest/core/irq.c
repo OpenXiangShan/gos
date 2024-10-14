@@ -17,7 +17,10 @@
 #include "irq.h"
 #include "asm/type.h"
 #include "print.h"
+#include "list.h"
+#include "mm.h"
 
+static LIST_HEAD(irq_descs);
 static do_irq_handler_t do_irq_handler = NULL;
 static struct msi_irq_ops *msi_ops = NULL;
 
@@ -70,4 +73,34 @@ void set_msi_irq_ops(struct msi_irq_ops *ops)
 void set_irq_handler(do_irq_handler_t handler)
 {
 	do_irq_handler = handler;
+}
+
+int do_device_irq_handler(int hwirq)
+{
+	struct irq_desc *desc;
+
+	list_for_each_entry(desc, &irq_descs, list) {
+		if (desc->hwirq == hwirq)
+			return desc->irq_handler(desc->data);
+	}
+
+	return 0;
+}
+
+int register_irq_handler(int hwirq, int (*handler)(void *data), void *data)
+{
+	struct irq_desc *desc;
+
+	desc = (struct irq_desc *)mm_alloc(sizeof(struct irq_desc));
+	if (!desc)
+		return -1;
+
+	print("%s hwirq:%d\n", __FUNCTION__, hwirq);
+	desc->hwirq = hwirq;
+	desc->irq_handler = handler;
+	desc->data = data;
+
+	list_add_tail(&desc->list, &irq_descs);
+
+	return 0;
 }

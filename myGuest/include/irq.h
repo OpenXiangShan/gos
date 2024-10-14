@@ -17,6 +17,15 @@
 #ifndef __GUEST_IRQ_H__
 #define __GUEST_IRQ_H__
 
+#include "list.h"
+
+struct irq_desc {
+	struct list_head list;
+	int hwirq;
+	int (*irq_handler)(void *data);
+	void *data;
+};
+
 typedef int (*do_irq_handler_t)(void);
 
 struct msi_irq_ops {
@@ -33,5 +42,7 @@ int alloc_msi_irqs(int nr);
 int compose_msi_msg(int hwirq, unsigned long *msi_addr,
 		    unsigned long *msi_data);
 void set_irq_handler(do_irq_handler_t handler);
+int register_irq_handler(int hwirq, int (*handler)(void *data), void *data);
+int do_device_irq_handler(int hwirq);
 
 #endif

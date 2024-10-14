@@ -192,7 +192,7 @@ static int imsic_do_irq_handler(void)
 
 	while ((hwirq = csr_swap(CSR_TOPEI, 0))) {
 		hwirq = hwirq >> TOPEI_ID_SHIFT;
-		myGuest_print("%s -- hwirq:%d\n", __FUNCTION__, hwirq);
+		do_device_irq_handler(hwirq);
 	}
 
 	return 0;
@@ -231,7 +231,7 @@ static int imsic_alloc_ids_fix(struct imsic *p_imsic, int id)
 
 static int imsic_alloc_ids(int nr_irqs, struct imsic *p_imsic)
 {
-	int index = 0, nr = 0;
+	int index = 0, nr = 0, base;
 	unsigned long ids;
 	int per_ids = sizeof(unsigned long) * 8;
 
@@ -241,6 +241,7 @@ static int imsic_alloc_ids(int nr_irqs, struct imsic *p_imsic)
 			if (++nr == nr_irqs)
 				goto alloc_success;
 		} else {
+			base = index + 1;
 			nr = 0;
 		}
 
@@ -250,10 +251,12 @@ static int imsic_alloc_ids(int nr_irqs, struct imsic *p_imsic)
 	return -1;
 
 alloc_success:
-	ids |= (1 << (index % per_ids));
-	p_imsic->ids_used_bits[index / per_ids] = ids;
+	for (index = base; index < base + nr; index++) {
+		ids |= (1UL << (index % per_ids));
+		p_imsic->ids_used_bits[index / per_ids] = ids;
+	}
 
-	return (index - nr_irqs + 1);
+	return base;
 }
 
 static int imsic_id_set_target(struct imsic *p_imsic, int id, int cpu)

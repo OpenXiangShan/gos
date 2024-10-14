@@ -1,6 +1,17 @@
 #ifndef __PCI_GENERIC_EMULATOR_H__
 #define __PCI_GENERIC_EMULATOR_H__
 
+#define MSIX_CAP_LENGTH 12
+#define MSIX_ENTRY_SIZE 16
+
+struct msix_cap {
+	char cap_id;
+	char next_cap;
+	unsigned short msg_ctrl;
+	unsigned int table_offset;
+	unsigned int pba_offset;
+};
+
 union pci_config_addr {
 	struct {
 		unsigned reg_number    : 12;
@@ -98,6 +109,7 @@ struct pci_device_function_emulator {
 	struct pci_devfn_emu_ops *ops;
 	struct pt_device_resource *res;
 	union pci_cfg_space cfg_space;
+	unsigned char inused_bitmap[256];
 	void *data;
 };
 

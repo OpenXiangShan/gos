@@ -19,6 +19,8 @@
 #include "print.h"
 #include "mm.h"
 #include "vmap.h"
+#include "irq.h"
+#include "event.h"
 #include "pci_simple.h"
 #include "dma.h"
 
@@ -35,17 +37,44 @@
 #define MY_DMAENGINE_MMIO_CH1_DONE       0x1010
 
 static unsigned long base_addr;
+static int done = 0;
+
+static int my_pci_dmaengine_irq_handler(void *data)
+{
+	while (readl(base_addr + MY_DMAENGINE_MMIO_CH0_DONE)) ;
+	mb();
+
+	done = 1;
+
+	return 0;
+}
+
+static int wake_expr(void *data)
+{
+	int *wake = (int *)data;
+
+	return *wake == 1;
+}
 
 static int my_pci_dmaengine_m2m(unsigned long src, unsigned long dst, int size)
 {
+	int ret = 0;
+
 	writeq(base_addr + MY_DMAENGINE_MMIO_CH0_SRC, src);
 	writeq(base_addr + MY_DMAENGINE_MMIO_CH0_DST, dst);
 	writel(base_addr + MY_DMAENGINE_MMIO_CH0_TRAN_SIZE, size);
 	writel(base_addr + MY_DMAENGINE_MMIO_CH0_START, 1);
 
-	while (readl(base_addr + MY_DMAENGINE_MMIO_CH0_DONE)) ;
+	wait_for_event_timeout(&done, wake_expr, 5 * 1000);
 
-	return 0;
+	if (done == 0)
+		ret = -1;
+	else {
+		done = 0;
+		ret = 0;
+	}
+
+	return ret;
 }
 
 static struct dma_ops my_pci_dmaengine_ops = {
@@ -55,6 +84,7 @@ static struct dma_ops my_pci_dmaengine_ops = {
 static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 {
 	struct resource res;
+	int irqs[32], nr, i;
 
 	print("my-pci-dmaengine[%x:%x] init\n", pdev->vendor, pdev->device);
 
@@ -64,6 +94,12 @@ static int my_pci_dmaengine_init(struct pci_device *pdev, void *data)
 	}
 
 	base_addr = (unsigned long)ioremap((void *)res.base, res.end - res.base + 1, NULL);
+
+	nr = pci_simple_msix_enable(pdev, irqs);
+	for (i = 0; i < nr; i++) {
+		register_irq_handler(irqs[i], my_pci_dmaengine_irq_handler, NULL);
+	}
+
 	if (set_dma_ops(&my_pci_dmaengine_ops)) {
 		print("%s -- set_dma_ops fail\n", __FUNCTION__);
 		return -1;

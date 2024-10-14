@@ -122,7 +122,7 @@ static int imsic_alloc_ids(int nr_irqs, struct imsic *p_imsic)
 
 alloc_success:
 	for (index = base; index < base + nr; index++) {
-		ids |= (1 << (index % per_ids));
+		ids |= (1UL << (index % per_ids));
 		p_imsic->ids_used_bits[index / per_ids] = ids;
 	}
 
