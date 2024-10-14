@@ -133,8 +133,9 @@ int vcpu_interrupt_file_update(struct vcpu *vcpu)
 			     get_machine_memmap_base(VIRT_IMSIC),
 			     get_machine_memmap_size(VIRT_IMSIC));
 
+#if CONFIG_VIRT_DEVICE_PASSTHROUGH
 	vcpu_create_interrupt_remapping(vcpu);
-
+#endif
 	vcpu_imsic_interrupt_file_migrate(vcpu);
 
 	return 0;
