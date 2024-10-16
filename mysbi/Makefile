@@ -42,7 +42,7 @@ MYSBI_OBJ_FILES += $(SBI_LIB_C_FILES:$(MYSBI_LIB_DIR)/%.c=$(MYSBI_LIB_DIR)/%_c.o
 
 mysbi: $(MYSBI_OBJ_FILES)
 	@mkdir -p $(BUILD_DIR)
-	@$(LD) -T $(MYSBI_DIR)/mysbi.lds -o $(BUILD_DIR)/$(SBI_TARGET) $(MYSBI_OBJ_FILES) -Map $(BUILD_DIR)/mysbi.map --no-warn-rwx-segments
+	$(LD) -T $(MYSBI_DIR)/mysbi.lds --defsym $(KBUILD_CFLAGS) -o $(BUILD_DIR)/$(SBI_TARGET) $(MYSBI_OBJ_FILES) -Map $(BUILD_DIR)/mysbi.map --no-warn-rwx-segments
 	@$(RISCV_COPY) $(BUILD_DIR)/$(SBI_TARGET) -O binary $(BUILD_DIR)/$(SBI_TARGET_BIN)
 
 $(MYSBI_ENTRY_DIR)/%_s.o: $(MYSBI_ENTRY_DIR)/%.S

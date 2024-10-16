@@ -101,3 +101,12 @@ config TASK_SCHEDULER_PERIOD
 config ENABLE_SHELL
 	bool "Enable Shell"
 	default y
+
+config MELLITE_FPGA
+	bool "Mellite fpga"
+	default n
+
+config MEM_START
+	hex "Config Mem start"
+	default 0x1000000000 if MELLITE_FPGA
+	default 0x80000000

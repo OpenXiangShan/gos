@@ -13,12 +13,13 @@
  * You should have received a copy of the GNU General Public License along with
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "gos-auto/autoconf.h"
 
 OUTPUT_ARCH("riscv")
 ENTRY(_start)
 SECTIONS
 {	
-	. = 0x80000000,
+	. = CONFIG_MEM_START,
 	.text.boot : { *(.text.boot) }
 	.text : { *(.text) }
 	.data : { *(.data) }
@@ -32,10 +33,10 @@ SECTIONS
 	.device_init_table : { *(.device_init_table) }
 	__device_init_table_end = .;
 
-	. = 0x801f0000,
+	. = CONFIG_MEM_START + 0x1f0000,
 	__boot_option_start = .;
 
-	. = 0x80200000,
+	. = CONFIG_MEM_START + 0x200000,
 	__payload_start = .;
 
 }
