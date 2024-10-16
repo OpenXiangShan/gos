@@ -52,6 +52,7 @@ defconfig: scripts/kconfig/conf FORCE
 	scripts/kconfig/conf -D configs/$@ Kconfig
 
 autoconf: scripts/kconfig/conf FORCE
+	echo "Running autoconf..."
 	@mkdir -p include/config
 	@mkdir -p include/linux
 	@$< -s Kconfig
@@ -63,6 +64,9 @@ autoconf: scripts/kconfig/conf FORCE
 
 menuconfig: scripts/kconfig/mconf
 	$< Kconfig
+
+KBUILD_CFLAGS +=CONFIG_MEM_START=$(CONFIG_MEM_START)
+export KBUILD_CFLAGS
 
 # build gos
 GOS_CORE_DIR = $(TOPDIR)/core
