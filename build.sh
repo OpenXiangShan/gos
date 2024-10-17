@@ -78,4 +78,5 @@ if [ "$1" = "mellite" ];then
 	make mellite_fpga_defconfig 
     make autoconf
     make mysbi_bin
+    ./bin2fpgadata -i build/mysbi.bin
 fi

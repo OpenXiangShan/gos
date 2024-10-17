@@ -89,19 +89,6 @@ void boot_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 	sbi_print("%s hartid: %d, ctx:%x\n", __FUNCTION__, hart, ctx);
 
 	fpu_init();
-#if CONFIG_ENABLE_SSTC
-	sstc_init();
-#else
-	sstc_disable();
-#endif
-
-#if CONFIG_ENABLE_SVPBMT
-	svpbmt_init();
-#endif
-
-#if CONFIG_ENABLE_ZICBOM
-	zicbom_init();
-#endif
 	sbi_jump_to_next(ctx);
 }
 
@@ -112,19 +99,6 @@ void other_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 	sbi_print("%s hartid: %d, ctx:%x\n", __FUNCTION__, hart, ctx);
 
 	fpu_init();
-#if CONFIG_ENABLE_SSTC
-	sstc_init();
-#else
-	sstc_disable();
-#endif
-
-#if CONFIG_ENABLE_SVPBMT
-	svpbmt_init();
-#endif
-
-#if CONFIG_ENABLE_ZICBOM
-	zicbom_init();
-#endif
 	sbi_secondary_init(hart, ctx);
 
 	while (ctx->wait_var == 0) {
