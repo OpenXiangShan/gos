@@ -76,6 +76,10 @@ config ENABLE_SVPBMT
 	bool "Enable Svpbmt"
 	default y
 
+config ENABLE_VECTOR
+	bool "Enable V"
+	default y
+
 config ENABLE_VS_SSTC
 	bool "Enable Sstc in vs mode"
 	default y

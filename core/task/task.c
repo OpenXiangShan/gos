@@ -128,6 +128,7 @@ int create_task(char *name, int (*fn)(void *data), void *data, int cpu,
 	int online_cpu;
 
 #ifndef CONFIG_ENABLE_MULTI_TASK
+	enable_local_irq();
 	return fn(data);
 #endif
 	for_each_online_cpu(online_cpu) {
@@ -175,6 +176,11 @@ continue_to_run:
 	/* Enable FPU in S-mode task context accordingly */
 	if (read_csr(sstatus) & SR_FS)
 		new->regs.sstatus |= SR_FS;
+
+#if CONFIG_ENABLE_VECTOR
+	if (read_csr(sstatus) & SR_VS)
+		new->regs.sstatus |= SR_VS;
+#endif
 
 	if (mmu_is_on) {
 		if (pgd) {

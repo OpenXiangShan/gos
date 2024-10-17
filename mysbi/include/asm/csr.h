@@ -22,8 +22,11 @@
 #define INSERT_FIELD(val, which, fieldval) \
 	(((val) & ~(which)) | ((fieldval) * ((which) & ~((which)-1))))
 
-#define MSTATUS_FS_SHIFT	13
-#define MSTATUS_FS	(3UL << MSTATUS_FS_SHIFT)
+#define MSTATUS_V_SHFIT 9
+#define MSTATUS_V      (3UL << MSTATUS_V_SHFIT)
+
+#define MSTATUS_FS_SHIFT     13
+#define MSTATUS_FS	     (3UL << MSTATUS_FS_SHIFT)
 
 #define MENVCFG_STCE_SHIFT  63
 #define MENVCFG_STCE        (1UL << MENVCFG_STCE_SHIFT)

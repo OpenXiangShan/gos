@@ -15,6 +15,8 @@
  */
 
 #include "asm/asm-offsets.h"
+#include "asm/csr.h"
+#include "gos.h"
 
 .align 2
 .global do_exception_vector
@@ -84,7 +86,32 @@ do_exception_vector:
 	fsd f29, PT_F29(sp)
 	fsd f30, PT_F30(sp)
 	fsd f31, PT_F31(sp)
+#if CONFIG_ENABLE_VECTOR
+	csrr s1, CSR_VTYPE
+	sd s1, PT_VTYPE(sp)
 
+	csrr s1, CSR_VL
+	sd s1, PT_VL(sp)
+
+	csrr s1, CSR_VLENB
+	sd s1, PT_VLENB(sp)
+
+	csrr s1, CSR_VCSR
+	sd s1, PT_VCSR(sp)
+
+	csrr s1, CSR_VSTART
+	sd s1, PT_VSTART(sp)
+	vsetvli t0, x0, e8, m8, ta, ma
+
+	addi s3, sp, PT_V0
+	vse8.v v0, (s3)
+	add s3, s3, t0
+	vse8.v v8, (s3)
+	add s3, s3, t0
+	vse8.v v16, (s3)
+	add s3, s3, t0
+	vse8.v v24, (s3)
+#endif
 	/* save sstatus */
 	csrr s1, sstatus
 	sd s1, PT_SSTATUS(sp)
@@ -120,6 +147,29 @@ do_exception_vector:
 	call do_exception
 
 	/* restore */
+#if CONFIG_ENABLE_VECTOR
+	vsetvli t0, x0, e8, m8, ta, ma
+
+	addi s3, sp, PT_V0
+	vle8.v v0, (s3)
+	add s3, s3, t0
+	vle8.v v8, (s3)
+	add s3, s3, t0
+	vle8.v v16, (s3)
+	add s3, s3, t0
+	vle8.v v24, (s3)
+
+
+	ld s3, PT_VTYPE(sp)
+	ld s4, PT_VL(sp)
+	vsetvl x0, s4, s3
+
+	ld s3, PT_VCSR(sp)
+	csrw CSR_VCSR, s3
+
+	ld s3, PT_VSTART(sp)
+	csrw CSR_VSTART, s3
+#endif
 	ld a0, PT_SSTATUS(sp)
 	csrw sstatus, a0
 

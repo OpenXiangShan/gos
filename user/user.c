@@ -31,6 +31,7 @@
 #include "asm/pgtable.h"
 #include "asm/tlbflush.h"
 #include "task.h"
+#include "gos.h"
 
 #define USER_SPACE_SHARE_MEMORY 0x0
 #define USER_SPACE_SHARE_MEMORY_SIZE 0x1000
@@ -100,6 +101,14 @@ static struct user *__user_create(void)
 	u_context->sstatus = read_csr(CSR_SSTATUS);
 	u_context->sstatus &= ~SR_SPP;
 	u_context->sstatus |= SR_SPIE;
+
+	if (read_csr(sstatus) & SR_FS)
+		u_context->sstatus |= SR_FS;
+
+#if CONFIG_ENABLE_VECTOR
+	if (read_csr(sstatus) & SR_VS)
+		u_context->sstatus |= SR_VS;
+#endif
 
 	INIT_LIST_HEAD(&user->memory_region);
 	__SPINLOCK_INIT(&user->lock);

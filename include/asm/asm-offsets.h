@@ -17,7 +17,7 @@
 #ifndef __ASM_OFFSETS_H__
 #define __ASM_OFFSETS_H__
 
-#define PT_SIZE 552		/* sizeof(struct pt_regs) */
+#define PT_SIZE 1120		/* sizeof(struct pt_regs) */
 #define PT_SEPC 0		/* offsetof(struct pt_regs, sepc) */
 #define PT_RA 8			/* offsetof(struct pt_regs, ra) */
 #define PT_FP 64		/* offsetof(struct pt_regs, s0) */
@@ -89,6 +89,44 @@
 #define PT_F29 528 /* offsetof(struct pt_regs, f29) */
 #define PT_F30 536 /* offsetof(struct pt_regs, f30) */
 #define PT_F31 544 /* offsetof(struct pt_regs, f31) */
+#define PT_VTYPE    552 /* offsetof(struct pt_regs, vtype) */
+#define PT_VLENB    560 /* offsetof(struct pt_regs, vlenb) */
+#define PT_VL       568 /* offsetof(struct pt_regs, vl) */
+#define PT_VSTART   576 /* offsetof(struct pt_regs, vstart) */
+#define PT_VCSR     584 /* offsetof(struct pt_regs, vxstate) */
+#define PT_VXRM     592 /* offsetof(struct pt_regs, vxrm) */
+#define PT_V0       608 /* offsetof(struct pt_regs, v0) */
+#define PT_V1       624 /* offsetof(struct pt_regs, v1) */
+#define PT_V2       640 /* offsetof(struct pt_regs, v2) */
+#define PT_V3       656 /* offsetof(struct pt_regs, v3) */
+#define PT_V4       672 /* offsetof(struct pt_regs, v4) */
+#define PT_V5       688 /* offsetof(struct pt_regs, v5) */
+#define PT_V6       704 /* offsetof(struct pt_regs, v6) */
+#define PT_V7       720 /* offsetof(struct pt_regs, v7) */
+#define PT_V8       736 /* offsetof(struct pt_regs, v8) */
+#define PT_V9       752 /* offsetof(struct pt_regs, v9) */
+#define PT_V10      768 /* offsetof(struct pt_regs, v10) */
+#define PT_V11      784 /* offsetof(struct pt_regs, v11) */
+#define PT_V12      800 /* offsetof(struct pt_regs, v12) */
+#define PT_V13      816 /* offsetof(struct pt_regs, v13) */
+#define PT_V14      832 /* offsetof(struct pt_regs, v14) */
+#define PT_V15      848 /* offsetof(struct pt_regs, v15) */
+#define PT_V16      864 /* offsetof(struct pt_regs, v16) */
+#define PT_V17      880 /* offsetof(struct pt_regs, v17) */
+#define PT_V18      896 /* offsetof(struct pt_regs, v18) */
+#define PT_V19      912 /* offsetof(struct pt_regs, v19) */
+#define PT_V20      928 /* offsetof(struct pt_regs, v20) */
+#define PT_V21      944 /* offsetof(struct pt_regs, v21) */
+#define PT_V22      960 /* offsetof(struct pt_regs, v22) */
+#define PT_V23      976 /* offsetof(struct pt_regs, v23) */
+#define PT_V24      992 /* offsetof(struct pt_regs, v24) */
+#define PT_V25      1008 /* offsetof(struct pt_regs, v25) */
+#define PT_V26      1024 /* offsetof(struct pt_regs, v26) */
+#define PT_V27      1040 /* offsetof(struct pt_regs, v27) */
+#define PT_V28      1056 /* offsetof(struct pt_regs, v28) */
+#define PT_V29      1072 /* offsetof(struct pt_regs, v29) */
+#define PT_V30      1088 /* offsetof(struct pt_regs, v30) */
+#define PT_V31      1104 /* offsetof(struct pt_regs, v31) */
 
 #define VIRT_CPU_HOST_ZERO 0	/* offsetof(struct cpu_context, host_context.zero) */
 #define VIRT_CPU_HOST_RA   8	/* offsetof(struct cpu_context, host_context.ra) */
@@ -369,7 +407,85 @@
 #define USER_U_F30  1056 /* offsetof(struct cpu_context, u_floating.f30) */
 #define USER_U_F31  1064 /* offsetof(struct cpu_context, u_floating.f31) */
 
-#define USER_CPU_S_SSCRATCH 1072	/* offsetof(struct cpu_context, host_scratch) */
-#define USER_CPU_S_STVEC    1080	/* offsetof(struct cpu_context, host_stvec) */
+#define USER_S_VTYPE   1072 /* offsetof(struct cpu_context, s_vector.vtype) */
+#define USER_S_VLENB   1080 /* offsetof(struct cpu_context, s_vector.vlenb) */
+#define USER_S_VL      1088 /* offsetof(struct cpu_context, s_vector.vl) */
+#define USER_S_VSTART  1096 /* offsetof(struct cpu_context, s_vector.vstart) */
+#define USER_S_VCSR    1104 /* offsetof(struct cpu_context, s_vector.vxstate) */
+#define USER_S_VXRM    1112 /* offsetof(struct cpu_context, s_vector.vxrm) */
+#define USER_S_V0      1128 /* offsetof(struct cpu_context, s_vector.v0) */
+#define USER_S_V1      1144 /* offsetof(struct cpu_context, s_vector.v1) */
+#define USER_S_V2      1160 /* offsetof(struct cpu_context, s_vector.v2) */
+#define USER_S_V3      1176 /* offsetof(struct cpu_context, s_vector.v3) */
+#define USER_S_V4      1192 /* offsetof(struct cpu_context, s_vector.v4) */
+#define USER_S_V5      1208 /* offsetof(struct cpu_context, s_vector.v5) */
+#define USER_S_V6      1224 /* offsetof(struct cpu_context, s_vector.v6) */
+#define USER_S_V7      1240 /* offsetof(struct cpu_context, s_vector.v7) */
+#define USER_S_V8      1256 /* offsetof(struct cpu_context, s_vector.v8) */
+#define USER_S_V9      1272 /* offsetof(struct cpu_context, s_vector.v9) */
+#define USER_S_V10     1288 /* offsetof(struct cpu_context, s_vector.v10) */
+#define USER_S_V11     1304 /* offsetof(struct cpu_context, s_vector.v11) */
+#define USER_S_V12     1320 /* offsetof(struct cpu_context, s_vector.v12) */
+#define USER_S_V13     1336 /* offsetof(struct cpu_context, s_vector.v13) */
+#define USER_S_V14     1352 /* offsetof(struct cpu_context, s_vector.v14) */
+#define USER_S_V15     1368 /* offsetof(struct cpu_context, s_vector.v15) */
+#define USER_S_V16     1384 /* offsetof(struct cpu_context, s_vector.v16) */
+#define USER_S_V17     1400 /* offsetof(struct cpu_context, s_vector.v17) */
+#define USER_S_V18     1416 /* offsetof(struct cpu_context, s_vector.v18) */
+#define USER_S_V19     1432 /* offsetof(struct cpu_context, s_vector.v19) */
+#define USER_S_V20     1448 /* offsetof(struct cpu_context, s_vector.v20) */
+#define USER_S_V21     1464 /* offsetof(struct cpu_context, s_vector.v21) */
+#define USER_S_V22     1480 /* offsetof(struct cpu_context, s_vector.v22) */
+#define USER_S_V23     1496 /* offsetof(struct cpu_context, s_vector.v23) */
+#define USER_S_V24     1512 /* offsetof(struct cpu_context, s_vector.v24) */
+#define USER_S_V25     1528 /* offsetof(struct cpu_context, s_vector.v25) */
+#define USER_S_V26     1544 /* offsetof(struct cpu_context, s_vector.v26) */
+#define USER_S_V27     1560 /* offsetof(struct cpu_context, s_vector.v27) */
+#define USER_S_V28     1576 /* offsetof(struct cpu_context, s_vector.v28) */
+#define USER_S_V29     1592 /* offsetof(struct cpu_context, s_vector.v29) */
+#define USER_S_V30     1608 /* offsetof(struct cpu_context, s_vector.v30) */
+#define USER_S_V31     1624 /* offsetof(struct cpu_context, s_vector.v31) */
+
+#define USER_U_VTYPE   1632 /* offsetof(struct cpu_context, u_vector.vtype) */
+#define USER_U_VLENB   1640 /* offsetof(struct cpu_context, u_vector.vlenb) */
+#define USER_U_VL      1648 /* offsetof(struct cpu_context, u_vector.vl) */
+#define USER_U_VSTART  1656 /* offsetof(struct cpu_context, u_vector.vstart) */
+#define USER_U_VCSR    1664 /* offsetof(struct cpu_context, u_vector.vxstart) */
+#define USER_U_VXRM    1672 /* offsetof(struct cpu_context, u_vector.vxrm) */
+#define USER_U_V0      1688 /* offsetof(struct cpu_context, u_vector.v0) */
+#define USER_U_V1      1704 /* offsetof(struct cpu_context, u_vector.v1) */
+#define USER_U_V2      1720 /* offsetof(struct cpu_context, u_vector.v2) */
+#define USER_U_V3      1736 /* offsetof(struct cpu_context, u_vector.v3) */
+#define USER_U_V4      1752 /* offsetof(struct cpu_context, u_vector.v4) */
+#define USER_U_V5      1768 /* offsetof(struct cpu_context, u_vector.v5) */
+#define USER_U_V6      1784 /* offsetof(struct cpu_context, u_vector.v6) */
+#define USER_U_V7      1800 /* offsetof(struct cpu_context, u_vector.v7) */
+#define USER_U_V8      1816 /* offsetof(struct cpu_context, u_vector.v8) */
+#define USER_U_V9      1832 /* offsetof(struct cpu_context, u_vector.v9) */
+#define USER_U_V10     1848 /* offsetof(struct cpu_context, u_vector.v10) */
+#define USER_U_V11     1864 /* offsetof(struct cpu_context, u_vector.v11) */
+#define USER_U_V12     1880 /* offsetof(struct cpu_context, u_vector.v12) */
+#define USER_U_V13     1896 /* offsetof(struct cpu_context, u_vector.v13) */
+#define USER_U_V14     1912 /* offsetof(struct cpu_context, u_vector.v14) */
+#define USER_U_V15     1928 /* offsetof(struct cpu_context, u_vector.v15) */
+#define USER_U_V16     1944 /* offsetof(struct cpu_context, u_vector.v16) */
+#define USER_U_V17     1960 /* offsetof(struct cpu_context, u_vector.v17) */
+#define USER_U_V18     1976 /* offsetof(struct cpu_context, u_vector.v18) */
+#define USER_U_V19     1992 /* offsetof(struct cpu_context, u_vector.v19) */
+#define USER_U_V20     2008 /* offsetof(struct cpu_context, u_vector.v20) */
+#define USER_U_V21     2024 /* offsetof(struct cpu_context, u_vector.v21) */
+#define USER_U_V22     2040 /* offsetof(struct cpu_context, u_vector.v22) */
+#define USER_U_V23     2056 /* offsetof(struct cpu_context, u_vector.v23) */
+#define USER_U_V24     2072 /* offsetof(struct cpu_context, u_vector.v24) */
+#define USER_U_V25     2088 /* offsetof(struct cpu_context, u_vector.v25) */
+#define USER_U_V26     2104 /* offsetof(struct cpu_context, u_vector.v26) */
+#define USER_U_V27     2120 /* offsetof(struct cpu_context, u_vector.v27) */
+#define USER_U_V28     2136 /* offsetof(struct cpu_context, u_vector.v28) */
+#define USER_U_V29     2152 /* offsetof(struct cpu_context, u_vector.v29) */
+#define USER_U_V30     2168 /* offsetof(struct cpu_context, u_vector.v30) */
+#define USER_U_V31     2184 /* offsetof(struct cpu_context, u_vector.v31) */
+
+#define USER_CPU_S_SSCRATCH 2200	/* offsetof(struct cpu_context, host_scratch) */
+#define USER_CPU_S_STVEC    2208	/* offsetof(struct cpu_context, host_stvec) */
 
 #endif

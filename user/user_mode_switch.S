@@ -87,9 +87,43 @@ __user_mode_switch_return:
 	fsd f30, (USER_U_F30)(a0)
 	fsd f31, (USER_U_F31)(a0)
 
-	ld t1, (USER_CPU_S_STVEC)(a0)
-	ld t2, (USER_CPU_S_SSCRATCH)(a0)
-	ld t5, (USER_CPU_S_SSTATUS)(a0)
+#if CONFIG_ENABLE_VECTOR
+	csrr s1, CSR_VTYPE
+	sd s1, USER_U_VTYPE(a0)
+
+	csrr s1, CSR_VL
+	sd s1, USER_U_VL(a0)
+
+	csrr s1, CSR_VLENB
+	sd s1, USER_U_VLENB(a0)
+
+	csrr s1, CSR_VCSR
+	sd s1, USER_U_VCSR(a0)
+
+	csrr s1, CSR_VSTART
+	sd s1, USER_U_VSTART(a0)
+
+	vsetvli t0, x0, e8, m8, ta, ma
+	addi s3, a0, USER_U_V0
+	vse8.v v0, (s3)
+	add s3, s3, t0
+	vse8.v v8, (s3)
+	add s3, s3, t0
+	vse8.v v16, (s3)
+	add s3, s3, t0
+	vse8.v v24, (s3)
+#endif
+	li s3, USER_CPU_S_STVEC
+	add s3, a0, s3
+	ld t1, (s3)
+
+	li s3, USER_CPU_S_SSCRATCH
+	add s3, a0, s3
+	ld t2, (s3)
+
+	li s3, USER_CPU_S_SSTATUS
+	add s3, a0, s3
+	ld t5, (s3)
 
 	csrr t0, CSR_SEPC
 	csrw CSR_STVEC, t1
@@ -100,6 +134,27 @@ __user_mode_switch_return:
 	sd t2, (USER_CPU_U_A0)(a0)
 	sd t5, (USER_CPU_U_SSTATUS)(a0)
 
+#if CONFIG_ENABLE_VECTOR
+	vsetvli t0, x0, e8, m8, ta, ma
+	addi s3, a0, USER_S_V0
+	vle8.v v0, (s3)
+	add s3, s3, t0
+	vle8.v v8, (s3)
+	add s3, s3, t0
+	vle8.v v16, (s3)
+	add s3, s3, t0
+	vle8.v v24, (s3)
+
+	ld s3, USER_S_VTYPE(a0)
+	ld s4, USER_S_VL(a0)
+	vsetvl x0, s4, s3
+
+	ld s3, USER_U_VCSR(a0)
+	csrw CSR_VCSR, s3
+
+	ld s3, USER_U_VSTART(a0)
+	csrw CSR_VSTART, s3
+#endif
 	ld ra, (USER_CPU_S_RA)(a0)
 	ld sp, (USER_CPU_S_SP)(a0)
 	ld gp, (USER_CPU_S_GP)(a0)
@@ -219,6 +274,32 @@ user_mode_switch_to:
 	fsd f30, (USER_S_F30)(a0)
 	fsd f31, (USER_S_F31)(a0)
 
+#if CONFIG_ENABLE_VECTOR
+	csrr s1, CSR_VTYPE
+	sd s1, USER_S_VTYPE(a0)
+
+	csrr s1, CSR_VL
+	sd s1, USER_S_VL(a0)
+
+	csrr s1, CSR_VLENB
+	sd s1, USER_S_VLENB(a0)
+
+	csrr s1, CSR_VCSR
+	sd s1, USER_S_VCSR(a0)
+
+	csrr s1, CSR_VSTART
+	sd s1, USER_S_VSTART(a0)
+
+	vsetvli t0, x0, e8, m8, ta, ma
+	addi s3, a0, USER_S_V0
+	vse8.v v0, (s3)
+	add s3, s3, t0
+	vse8.v v8, (s3)
+	add s3, s3, t0
+	vse8.v v16, (s3)
+	add s3, s3, t0
+	vse8.v v24, (s3)
+#endif
 	ld t0, (USER_CPU_U_SSTATUS)(a0)
 	la t4, __user_mode_switch_return
 	ld t5, (USER_CPU_U_SEPC)(a0)
@@ -229,11 +310,43 @@ user_mode_switch_to:
 
 	csrrw t3, CSR_SSCRATCH, a0
 
-	sd t0, (USER_CPU_S_SSTATUS)(a0)
-	sd t1, (USER_CPU_S_HSTATUS)(a0)
-	sd t3, (USER_CPU_S_SSCRATCH)(a0)
-	sd t4, (USER_CPU_S_STVEC)(a0)
-	
+	li s3, USER_CPU_S_SSTATUS
+	add s3, a0, s3
+	sd t0, (s3)
+
+	li s3, USER_CPU_S_HSTATUS
+	add s3, a0, s3
+	sd t1, (s3)
+
+	li s3, USER_CPU_S_SSCRATCH
+	add s3, a0, s3
+	sd t3, (s3)
+
+	li s3, USER_CPU_S_STVEC
+	add s3, a0, s3
+	sd t4, (s3)
+
+#if CONFIG_ENABLE_VECTOR
+	vsetvli t0, x0, e8, m8, ta, ma
+	addi s3, a0, USER_U_V0
+	vle8.v v0, (s3)
+	add s3, s3, t0
+	vle8.v v8, (s3)
+	add s3, s3, t0
+	vle8.v v16, (s3)
+	add s3, s3, t0
+	vle8.v v24, (s3)
+
+	ld s3, USER_U_VTYPE(a0)
+	ld s4, USER_U_VL(a0)
+	vsetvl x0, s4, s3
+
+	ld s3, USER_U_VCSR(a0)
+	csrw CSR_VCSR, s3
+
+	ld s3, USER_U_VSTART(a0)
+	csrw CSR_VSTART, s3
+#endif
 	ld ra, (USER_CPU_U_RA)(a0)
 	ld sp, (USER_CPU_U_SP)(a0)
 	ld gp, (USER_CPU_U_GP)(a0)

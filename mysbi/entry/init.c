@@ -71,6 +71,17 @@ static void sstc_disable()
 }
 #endif
 
+#if CONFIG_ENABLE_VECTOR
+void v_init()
+{
+	unsigned long val;
+
+	val = read_csr(mstatus);
+	val |= MSTATUS_V;
+	write_csr(mstatus, val);
+}
+#endif
+
 void fpu_init()
 {
 	unsigned long val;
@@ -89,6 +100,11 @@ void boot_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 	sbi_print("%s hartid: %d, ctx:%x\n", __FUNCTION__, hart, ctx);
 
 	fpu_init();
+
+#if CONFIG_ENABLE_VECTOR
+	v_init();
+#endif
+
 #if CONFIG_ENABLE_SSTC
 	sstc_init();
 #else
@@ -112,6 +128,11 @@ void other_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 	sbi_print("%s hartid: %d, ctx:%x\n", __FUNCTION__, hart, ctx);
 
 	fpu_init();
+
+#if CONFIG_ENABLE_VECTOR
+	v_init();
+#endif
+
 #if CONFIG_ENABLE_SSTC
 	sstc_init();
 #else

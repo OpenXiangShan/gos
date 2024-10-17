@@ -39,6 +39,7 @@
 #define SR_SPP 0x100UL		/* Previously Supervisor */
 #define SR_SUM	0x40000UL	/* Supervisor may access User Memory */
 #define SR_FS  0x6000UL		/* Floating-point Status */
+#define SR_VS  0x600UL
 #define SR_XS  0x00018000UL	/* Extension Status */
 
 /* Interrupt causes */
@@ -242,6 +243,12 @@
 #define CSR_PMPADDR5	0x3b5
 #define CSR_PMPADDR6	0x3b6
 #define CSR_PMPADDR7	0x3b7
+
+#define CSR_VSTART              0x8
+#define CSR_VCSR                0xf
+#define CSR_VL                  0xc20
+#define CSR_VTYPE               0xc21
+#define CSR_VLENB               0xc22
 
 #define PMP_R	0x01UL
 #define PMP_W	0x02UL
