@@ -17,17 +17,27 @@
 #include "mm.h"
 #include "asm/pgtable.h"
 #include "task.h"
+#include "gos.h"
 
 int user_page_mapping(unsigned long phy, unsigned long virt, unsigned int size)
 {
-	struct task *task = get_current_task();
 	pgprot_t pgprot;
+	unsigned long *pgdp;
+#ifdef CONFIG_ENABLE_MULTI_TASK
+	struct task *task = get_current_task();
+#endif
+
+#ifdef CONFIG_ENABLE_MULTI_TASK
+	pgdp = task->pgdp;
+#else
+	pgdp = (unsigned long *)get_default_pgd();
+#endif
 
 	pgprot =
 	    __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC |
 		     _PAGE_DIRTY | _PAGE_USER);
 
-	return mmu_user_page_mapping(task->pgdp, phy, virt, size, pgprot);
+	return mmu_user_page_mapping(pgdp, phy, virt, size, pgprot);
 }
 
 int user_page_mapping_pg(unsigned long phy, unsigned long virt, unsigned int size,

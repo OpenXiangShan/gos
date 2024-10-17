@@ -320,8 +320,11 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 	}
         memset((char *)regs, 0, sizeof(struct pt_regs));
 
+#ifndef CONFIG_ENABLE_MULTI_TASK
+	user->pgdp = (void *)phy_to_virt(get_default_pgd());
+#else
 	user->pgdp = get_current_task()->pgdp;
-
+#endif
 	while (1) {
 		user_update_run_params(user);
 		disable_local_irq();
