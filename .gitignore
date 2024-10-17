@@ -1,1 +1,7 @@
 *.o
+.config
+build/
+include/config/
+include/gos-auto/
+.config.old
+

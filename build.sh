@@ -72,8 +72,10 @@ if [ "$#" -eq 1 ];then
 fi
 
 make clean
-make
 
-if [ "$1" = "fpga" ];then
-	make fpga
+if [ "$1" = "mellite" ];then
+    make clean
+	make mellite_fpga_defconfig 
+    make autoconf
+    make mysbi_bin
 fi
