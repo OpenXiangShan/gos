@@ -25,8 +25,9 @@
 #include "asm/bitops.h"
 #include "irq.h"
 #include "align.h"
+#include "task.h"
 
-static void *pgdp = NULL;
+static void *default_pgdp_pa = NULL;
 
 int pgtable_l4_enabled = 0;
 int pgtable_l5_enabled = 0;
@@ -153,6 +154,7 @@ static unsigned long *mmu_pt_walk_fetch(unsigned long *ptp, unsigned long va,
 static void *__walk_pt_va_to_pa(unsigned long va, int page_size)
 {
 	unsigned long *pte;
+	unsigned long *pgdp = (unsigned long *)get_default_pgd();
 
 	pte = mmu_pt_walk_fetch(pgdp, va, PGDIR_SHIFT, 1);
 
@@ -233,6 +235,7 @@ static int __mmu_page_mapping_1G(unsigned long *_pgdp, unsigned long phy,
 unsigned long *mmu_get_pte(unsigned long virt_addr)
 {
 	unsigned long *pte;
+	unsigned long *pgdp = (unsigned long *)get_default_pgd();
 
 	pte = mmu_pt_walk_fetch(pgdp, virt_addr, PGDIR_SHIFT, 1);
 
@@ -242,7 +245,7 @@ unsigned long *mmu_get_pte(unsigned long virt_addr)
 void mmu_walk_and_print_pte(unsigned long virt_addr)
 {
 	unsigned long *pte;
-	unsigned long *p = pgdp;
+	unsigned long *p = (unsigned long *)get_default_pgd();
 	unsigned int shift = PGDIR_SHIFT;
 
 	print("================= dump page table =================\n");
@@ -269,7 +272,7 @@ _return:
 unsigned long *mmu_get_pte_level(unsigned long virt_addr, int lvl)
 {
 	unsigned long *pte;
-	unsigned long *p = pgdp;
+	unsigned long *p = (unsigned long *)get_default_pgd();
 	unsigned int shift = PGDIR_SHIFT;
 
 	pte = mmu_pt_walk_fetch_one(p, virt_addr, shift, 1);
@@ -296,6 +299,7 @@ int mmu_page_mapping_lazy(unsigned long virt, unsigned int size,
 	unsigned long *pte;
 	unsigned long pte_val;
 	unsigned long virt_addr = virt;
+	unsigned long *pgdp = (unsigned long *)get_default_pgd();
 
 	while (page_nr--) {
 		pte =
@@ -351,6 +355,8 @@ int mmu_gstage_page_mapping_1G(unsigned long *_pgdp, unsigned long phy,
 int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 		     pgprot_t pgprot)
 {
+	unsigned long *pgdp = (unsigned long *)get_default_pgd();
+
 	if (__mmu_page_mapping_4k((unsigned long *)pgdp, phy, virt, size, pgprot))
 		return -1;
 
@@ -362,6 +368,8 @@ int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 int mmu_page_mapping_2M(unsigned long phy, unsigned long virt, unsigned int size,
 		        pgprot_t pgprot)
 {
+	unsigned long *pgdp = (unsigned long *)get_default_pgd();
+
 	if (__mmu_page_mapping_2M((unsigned long *)pgdp, phy, virt, size, pgprot))
 		return -1;
 
@@ -373,6 +381,8 @@ int mmu_page_mapping_2M(unsigned long phy, unsigned long virt, unsigned int size
 int mmu_page_mapping_1G(unsigned long phy, unsigned long virt, unsigned int size,
 		        pgprot_t pgprot)
 {
+	unsigned long *pgdp = (unsigned long *)get_default_pgd();
+
 	if (__mmu_page_mapping_1G((unsigned long *)pgdp, phy, virt, size, pgprot))
 		return -1;
 
@@ -406,6 +416,7 @@ static int __mmu_page_mapping_napot(unsigned long phy, unsigned long virt, unsig
 	pgprot_t new_pg;
 	unsigned long napot_bits, napot_mask;
 	unsigned long *pte;
+	unsigned long *pgdp = (unsigned long *)get_default_pgd();
 
 	order = get_napot_order(page_size);
 	if (order == -1) {
@@ -488,6 +499,8 @@ int mmu_page_mapping_64k(unsigned long phy, unsigned long virt, unsigned int siz
 int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt, unsigned int size,
 			       pgprot_t pgprot)
 {
+	unsigned long *pgdp = (unsigned long *)get_default_pgd();
+
 	return __mmu_page_mapping_4k((unsigned long *)pgdp, phy, virt, size, pgprot);
 }
 
@@ -573,6 +586,8 @@ static int mmu_code_page_mapping()
 
 void enable_mmu(int on)
 {
+	unsigned long *pgdp = (unsigned long *)get_default_pgd();
+
 	if (!on) {
 		write_csr(satp, 0);
 		mmu_is_on = 0;
@@ -605,9 +620,15 @@ unsigned long alloc_zero_page(int gfp)
 
 int paging_init(struct device_init_entry *hw)
 {
+	unsigned long *pgdp = (unsigned long *)get_default_pgd();
+
 	if (!pgdp) {
 		pgdp = mm_alloc(PAGE_SIZE);
 		memset((char *)pgdp, 0, PAGE_SIZE);
+		if (!mmu_is_on)
+			default_pgdp_pa = pgdp;
+		else
+			default_pgdp_pa = (void *)virt_to_phy(pgdp);
 	}
 
 	mmu_code_page_mapping();
@@ -652,5 +673,17 @@ int do_page_fault(unsigned long addr)
 
 unsigned long get_default_pgd(void)
 {
-	return (unsigned long)pgdp;
+	return (unsigned long)default_pgdp_pa;
+}
+
+unsigned long get_current_pgd(void)
+{
+	struct task *task;
+
+	task = get_current_task();
+	if (!task) {
+		return get_default_pgd();
+	}
+
+	return (unsigned long)task->pgdp;
 }

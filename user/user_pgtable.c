@@ -22,16 +22,7 @@
 int user_page_mapping(unsigned long phy, unsigned long virt, unsigned int size)
 {
 	pgprot_t pgprot;
-	unsigned long *pgdp;
-#ifdef CONFIG_ENABLE_MULTI_TASK
-	struct task *task = get_current_task();
-#endif
-
-#ifdef CONFIG_ENABLE_MULTI_TASK
-	pgdp = task->pgdp;
-#else
-	pgdp = (unsigned long *)get_default_pgd();
-#endif
+	unsigned long *pgdp = (unsigned long *)get_current_pgd();
 
 	pgprot =
 	    __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC |
@@ -43,7 +34,7 @@ int user_page_mapping(unsigned long phy, unsigned long virt, unsigned int size)
 int user_page_mapping_pg(unsigned long phy, unsigned long virt, unsigned int size,
 		pgprot_t pgprot)
 {
-	struct task *task = get_current_task();
+	unsigned long *pgdp = (unsigned long *)get_current_pgd();
 
-	return mmu_user_page_mapping(task->pgdp, phy, virt, size, pgprot);
+	return mmu_user_page_mapping(pgdp, phy, virt, size, pgprot);
 }

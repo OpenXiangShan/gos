@@ -96,6 +96,7 @@ unsigned long *mmu_get_pte_level(unsigned long virt_addr, int lvl);
 void mmu_walk_and_print_pte(unsigned long virt_addr);
 unsigned long *mmu_get_pte(unsigned long virt_addr);
 unsigned long get_default_pgd(void);
+unsigned long get_current_pgd(void);
 void walk_unused_mem_and_print(void);
 void unused_mem_walk(void (*fn)(unsigned long addr, unsigned int nr, void *data), void *data);
 int mem_range_is_free(unsigned long addr, unsigned int size);

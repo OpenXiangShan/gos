@@ -229,9 +229,7 @@ int create_user_task(char *name, int (*fn)(void *data), void *data, int cpu,
 
 static void switch_mm(struct task *task)
 {
-	int asid = task->id;
-
-	local_flush_tlb_all_asid(asid);
+	local_flush_tlb_all();
 }
 
 static void task_scheduler_event_handler(void *data)
@@ -356,6 +354,9 @@ struct task *get_current_task(void)
 {
 	int cpu = sbi_get_cpu_id();
 	struct task_scheduler *sc = &per_cpu(schedulers, cpu);
+
+	if (!sc)
+		return NULL;
 
 	return sc->current_task;
 }
