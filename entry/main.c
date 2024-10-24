@@ -55,6 +55,7 @@ void start_gos(unsigned int hart_id,
 #endif
 	print("    uname: %s@%s\n", BUILD_USER, CONFIG_UNAME_RELEASE);
 	print("    time : %s\n", BUILD_TIME);
+	print("    git-info: %s\n", BUILD_GIT_INFO);
 
 	print("Hello, gos!\n");
 	print("boot option:\n");

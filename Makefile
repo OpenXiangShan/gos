@@ -58,6 +58,7 @@ autoconf: scripts/kconfig/conf FORCE
 	@mv include/linux include/gos-auto
 	@echo "#define BUILD_TIME \"$(shell date '+%Y-%m-%d %H:%M:%S')\"" >> include/gos-auto/autoconf.h
 	@echo "#define BUILD_USER \"$(shell id -un)\"" >> include/gos-auto/autoconf.h
+	@echo "#define BUILD_GIT_INFO \"$(shell git log --oneline -1)\"" >> include/gos-auto/autoconf.h
 
 menuconfig: scripts/kconfig/mconf
 	$< Kconfig
