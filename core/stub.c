@@ -23,13 +23,29 @@
 #include "asm/tlbflush.h"
 #include "asm/type.h"
 #include "asm/ptregs.h"
+#include "spinlocks.h"
 #include "kallsyms.h"
 #include "stub.h"
 
+static spinlock_t stubs_lock = __SPINLOCK_INITIALIZER;
 static LIST_HEAD(stubs);
+static spinlock_t stub_slots_lock = __SPINLOCK_INITIALIZER;
 static LIST_HEAD(stub_slots);
 
 extern int mmu_is_on;
+
+static void put_free_stub_addr(struct stub_slot *slot, void *addr, int size)
+{
+	unsigned long bitmap;
+	int index = (addr - slot->slot_addr) / STUB_SLOT_PER_SIZE;
+	int i;
+
+	for (i = index; i < size / STUB_SLOT_PER_SIZE; i++) {
+		bitmap = slot->free_bitmap[i / 64];
+		bitmap &= ~((1UL) << (i % 64));
+		slot->free_bitmap[i / 64] = bitmap;
+	}
+}
 
 static void *get_free_stub_addr(int size)
 {
@@ -37,7 +53,9 @@ static void *get_free_stub_addr(int size)
 	unsigned long bitmap;
 	int i = 0, nr = 0, size_nr = size / STUB_SLOT_PER_SIZE;
 	unsigned long ret;
+	int flags;
 
+	spin_lock_irqsave(&stub_slots_lock, flags);
 	list_for_each_entry(slot, &stub_slots, list) {
 		ret = (unsigned long)slot->slot_addr;
 		while (i < STUB_SLOT_TOTAL) {
@@ -52,11 +70,13 @@ static void *get_free_stub_addr(int size)
 			i++;
 		}
 	}
+	spin_unlock_irqrestore(&stub_slots_lock, flags);
 
 	return NULL;
 find:
 	bitmap |= (1UL << (i % 64));
 	slot->free_bitmap[i / 64] = bitmap;
+	spin_unlock_irqrestore(&stub_slots_lock, flags);
 
 	return (void *)ret;
 }
@@ -66,6 +86,7 @@ static int alloc_stub_buffer(void)
 	struct stub_slot *s;
 	void *insn_va, *insn_pa;
 	pgprot_t pgprot;
+	int flags;
 
 	s = (struct stub_slot *)mm_alloc(sizeof(struct stub_slot));
 	if (!s) {
@@ -97,7 +118,10 @@ static int alloc_stub_buffer(void)
 	}
 
 	s->slot_addr = insn_va;
+
+	spin_lock_irqsave(&stub_slots_lock, flags);
 	list_add_tail(&s->list, &stub_slots);
+	spin_unlock_irqrestore(&stub_slots_lock, flags);
 
 	return 0;
 
@@ -109,6 +133,21 @@ free:
 	mm_free(insn_pa, PAGE_SIZE);
 
 	return -1;
+}
+
+static void free_insn_buffer(void *addr, int size)
+{
+	struct stub_slot *slot;
+	int flags;
+
+	spin_lock_irqsave(&stub_slots_lock, flags);
+	list_for_each_entry(slot, &stub_slots, list) {
+		if ((addr >= slot->slot_addr) &&
+		    ((addr + size) <= slot->slot_addr + PAGE_SIZE)) {
+			put_free_stub_addr(slot, addr, size);
+		}
+	}
+	spin_unlock_irqrestore(&stub_slots_lock, flags);
 }
 
 static void *alloc_insn_buffer(int size)
@@ -140,6 +179,7 @@ static int setup_stub_insn(struct stub *s)
 
 	size = 8;
 	s->previous_insn = alloc_insn_buffer(size);
+	s->previous_insn_size = size;
 	*((unsigned int *)s->previous_insn) = *((unsigned int *)s->addr);
 	*((unsigned int *)s->addr) = __EBREAK_INSN;
 	s->insn_len = insn_len;
@@ -158,7 +198,9 @@ int gos_stub_do_process(struct pt_regs *regs)
 	struct stub *s;
 	void *addr = (void *)regs->sepc;
 	int ret = -1;
+	int flags;
 
+	spin_lock_irqsave(&stubs_lock, flags);
 	list_for_each_entry(s, &stubs, list) {
 		if (s->addr == addr) {
 			if (!strcmp(s->name, "handle_exception"))
@@ -174,6 +216,7 @@ int gos_stub_do_process(struct pt_regs *regs)
 			ret = 0;
 		}
 	}
+	spin_unlock_irqrestore(&stubs_lock, flags);
 
 	return ret;
 }
@@ -183,6 +226,7 @@ register_stub(const char *name, void (*stub_handler)(struct pt_regs * regs))
 {
 	struct stub *s;
 	void *addr;
+	int flags;
 
 	addr = (void *)kallsyms_lookup_name(name);
 	if (!addr)
@@ -199,7 +243,38 @@ register_stub(const char *name, void (*stub_handler)(struct pt_regs * regs))
 
 	setup_stub_insn(s);
 
+	spin_lock_irqsave(&stubs_lock, flags);
 	list_add_tail(&s->list, &stubs);
+	spin_unlock_irqrestore(&stubs_lock, flags);
+	return 0;
+}
+
+static void restore_stub(struct stub *s)
+{
+	unsigned int *addr = s->addr;
+	unsigned int *pre = s->previous_insn;
+
+	*addr = *pre;
+
+	local_flush_icache_all();
+}
+
+int __attribute__((section(".gos_stub_func")))
+unregister_stub(const char *name)
+{
+	struct stub *s, *n;
+	int flags;
+
+	spin_lock_irqsave(&stubs_lock, flags);
+	list_for_each_entry_safe(s, n, &stubs, list) {
+		if (!strcmp(s->name, (char *)name)) {
+			restore_stub(s);
+			free_insn_buffer(s->previous_insn, s->previous_insn_size);
+			list_del(&s->list);
+			mm_free(s, sizeof(struct stub));
+		}
+	}
+	spin_unlock_irqrestore(&stubs_lock, flags);
 
 	return 0;
 }
@@ -214,4 +289,16 @@ int __attribute__((section(".gos_stub_func")))
 register_ebreak_stub_handler(void (*handler)(struct pt_regs * regs))
 {
 	return register_stub("do_ebreak", handler);
+}
+
+int __attribute__((section(".gos_stub_func")))
+unregister_handle_exception_stub_handler(void)
+{
+	return unregister_stub("handle_exception");
+}
+
+int __attribute__((section(".gos_stub_func")))
+unregister_ebreak_stub_handler(void)
+{
+	return unregister_stub("do_ebreak");
 }

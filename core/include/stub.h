@@ -25,6 +25,7 @@ struct stub {
 	int insn_len;
 	void *addr;
 	void *previous_insn;
+	int previous_insn_size;
 	void (*handler)(struct pt_regs * regs);
 };
 
@@ -39,9 +40,12 @@ struct stub_slot {
 };
 
 int gos_stub_do_process(struct pt_regs *regs);
+int unregister_stub(const char *name);
 int register_stub(const char *name,
 		  void (*stub_handler)(struct pt_regs * regs));
 int register_handle_exception_stub_handler(void (*handler)(struct pt_regs * regs));
 int register_ebreak_stub_handler(void (*handler)(struct pt_regs * regs));
+int unregister_handle_exception_stub_handler(void);
+int unregister_ebreak_stub_handler(void);
 
 #endif
