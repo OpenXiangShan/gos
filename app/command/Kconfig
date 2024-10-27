@@ -110,3 +110,6 @@ config APP_LSPCI
 config APP_LSDMAC
 	bool "APP_LSDMAC"
 	default y
+config APP_STUB_TEST
+	bool "APP_STUB_TEST"
+	default y

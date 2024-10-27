@@ -54,3 +54,4 @@ obj-$(CONFIG_APP_ZICOND_TEST) += zicond_test.o
 obj-$(CONFIG_APP_HPM_TEST) += hpm_test.o
 obj-$(CONFIG_APP_LSPCI) += lspci.o
 obj-$(CONFIG_APP_LSDMAC) += lsdmac.o
+obj-$(CONFIG_APP_STUB_TEST) += stub_test.o
