@@ -22,6 +22,7 @@
 #include "task.h"
 #include "asm/pgtable.h"
 #include "mm.h"
+#include "stub.h"
 
 extern void do_exception_vector(void);
 
@@ -123,6 +124,23 @@ static struct fault_info *ec_to_fault_info(unsigned int scause)
 	return fault_info + (scause & SCAUSE_EC);
 }
 
+static void do_ebreak(struct pt_regs *regs)
+{
+	struct fault_info *fi;
+
+	fi = ec_to_fault_info(EXC_BREAKPOINT);
+	if (fi)
+		fi->fn(regs, fi->name);
+}
+
+static void do_breakpoint(struct pt_regs *regs)
+{
+	if (!gos_stub_do_process(regs))
+		return;
+
+	do_ebreak(regs);
+}
+
 static int handle_exception(struct pt_regs *regs, unsigned long cause)
 {
 	struct fault_info *fi;
@@ -159,7 +177,10 @@ int do_exception(struct pt_regs *regs, unsigned long scause)
 		handle_irq(scause);
 		task_scheduler_exit(regs);
 	} else {
-		if (handle_exception(regs, scause)) {
+		if (scause == EXC_BREAKPOINT) {
+			do_breakpoint(regs);
+		}
+		else if (handle_exception(regs, scause)) {
 			fi = ec_to_fault_info(scause);
 			if (fi)
 				fi->fn(regs, fi->name);

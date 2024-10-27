@@ -17,6 +17,11 @@
 #ifndef __TLB_FLUSH_H__
 #define __TLB_FLUSH_H__
 
+static inline void local_flush_icache_all(void)
+{
+        __asm__ __volatile__("fence.i":::"memory");
+}
+
 static inline void local_flush_tlb_all(void)
 {
 	__asm__ __volatile__("sfence.vma":::"memory");

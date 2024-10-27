@@ -57,5 +57,8 @@ typedef signed long long s64;
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef signed short s16;
+typedef unsigned long size_t;
+
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 #endif

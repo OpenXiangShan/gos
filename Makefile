@@ -18,6 +18,7 @@ TOPDIR := $(shell pwd)
 
 CC := $(GNU)gcc
 LD := $(GNU)ld
+NM := $(GNU)nm
 RISCV_COPY := $(GNU)objcopy
 RISCV_COPY_FLAGS := --set-section-flags .bss=alloc,contents --set-section-flags .sbss=alloc,contents -O binary
 RISCV_DUMP := $(GNU)objdump
@@ -82,11 +83,37 @@ obj-y += app/
 obj-$(CONFIG_VIRT) += virt/
 obj-$(CONFIG_USER) += user/
 
-gos: autoconf mysbi_bin myUser_bin myGuest_bin $(GOS_OBJ_FILES)
+GOS_DIR = gos
+GOS_C_FILES = $(wildcard $(GOS_DIR)/*.c)
+GOS_ASM_FILES = $(wildcard $(GOS_DIR)/*.S)
+GOS_OBJ_FILES = $(GOS_C_FILES:$(GOS_DIR)/%.c=$(GOS_DIR)/%_c.o)
+GOS_OBJ_FILES += $(GOS_ASM_FILES:$(GOS_DIR)/%.S=$(GOS_DIR)/%_s.o)
+
+gos: gos-tmp $(GOS_OBJ_FILES) $(GOS_DIR)/tmp_kallsyms_s.o
+	@$(LD) -T ./gos.lds -o $(BUILD_DIR)/$(GOS_TARGET) built-in.o $(GOS_OBJ_FILES) $(GOS_DIR)/tmp_kallsyms_s.o -Map $(BUILD_DIR)/gos.map --no-warn-rwx-segments
+	@$(RISCV_COPY) $(BUILD_DIR)/$(GOS_TARGET) -O binary $(BUILD_DIR)/$(GOS_TARGET_BIN)
+
+gos-tmp: autoconf mysbi_bin myUser_bin myGuest_bin
 	@mkdir -p $(BUILD_DIR)
 	@make -f $(TOPDIR)/Makefile.build obj=. --no-print-directory
-	@$(LD) -T ./gos.lds -o $(BUILD_DIR)/$(GOS_TARGET) $(GOS_OBJ_FILES) built-in.o -Map $(BUILD_DIR)/gos.map --no-warn-rwx-segments
-	@$(RISCV_COPY) $(BUILD_DIR)/$(GOS_TARGET) -O binary $(BUILD_DIR)/$(GOS_TARGET_BIN)
+	@$(LD) -T ./gos.lds -o $(BUILD_DIR)/.tmp_gos.elf built-in.o -Map $(BUILD_DIR)/.tmp_gos.map --no-warn-rwx-segments
+	@$(NM) $(BUILD_DIR)/.tmp_gos.elf > $(BUILD_DIR)/.tmp_gos_label
+	@scripts/kallsyms --all-symbols $(BUILD_DIR)/.tmp_gos_label > $(GOS_DIR)/tmp_kallsyms.S
+	@rm $(BUILD_DIR)/.tmp_gos_label
+	@rm $(BUILD_DIR)/.tmp_gos.elf
+	@rm $(BUILD_DIR)/.tmp_gos.map
+
+$(GOS_DIR)/%_c.o: $(GOS_DIR)/%.c
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(TOPDIR)/include/gos -I$(TOPDIR)/include -c $< -o $@
+
+$(GOS_DIR)/%_s.o: $(GOS_DIR)/%.S
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(TOPDIR)/include/gos -I$(TOPDIR)/include -c $< -o $@
+
+$(GOS_DIR)/tmp_kallsyms_s.o: $(GOS_DIR)/tmp_kallsyms.S gos-tmp
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(TOPDIR)/include/gos -I$(TOPDIR)/include -c $< -o $@
 
 mysbi_bin: autoconf
 	@make -C mysbi --no-print-directory
@@ -113,6 +140,7 @@ clean: mysbi-clean myGuest-clean myUser-clean
 	@rm -rf include/config
 	@rm -rf include/gos-auto
 	@rm -f $(DTS_DIR)/*.dtb
+	@rm $(GOS_DIR)/tmp_kallsyms.S
 
 %.dtb: $(DTS_DIR)/$(patsubst %.dtb,%.dts,$@)
 	dtc -O dtb -I dts -o $(DTS_DIR)/$@ $(DTS_DIR)/$(patsubst %.dtb,%.dts,$@)
@@ -122,13 +150,13 @@ ifeq ($(CONFIG_SELECT_QEMU), y)
 ifeq ($(CONFIG_SELECT_PLIC), y)
 run:
 	./qemu-system-riscv64 -nographic \
-	-machine virt -smp 2 \
+	-machine virt -smp 1 \
 	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on -m 8G \
 	-device my_dmaengine \
 	-bios out/Image.bin
 run-debug:
 	./qemu-system-riscv64 -nographic \
-	-machine virt -smp 2 \
+	-machine virt -smp 1 \
 	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on -m 8G \
 	-device my_dmaengine \
 	-bios out/Image.bin \
@@ -136,7 +164,7 @@ run-debug:
 else ifeq ($(CONFIG_SELECT_AIA), y)
 run:
 	./qemu-system-riscv64 -nographic \
-        -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
+        -machine virt,aia=aplic-imsic,aia-guests=7 -smp 1 \
 	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,x-zicond=on,v=on -m 8G \
 	-device my_dmaengine \
 	-bios out/Image.bin

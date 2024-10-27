@@ -43,7 +43,6 @@ typedef unsigned long volatile ulv;
 typedef unsigned char volatile u8v;
 typedef unsigned short volatile u16v;
 typedef unsigned int uint32_t;
-typedef unsigned long size_t;
 
 #define rand64()    get_clocksource_counter_us()
 #define TEST_NARROW_WRITES

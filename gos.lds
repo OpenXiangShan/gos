@@ -19,8 +19,10 @@ ENTRY(__start_gos)
 SECTIONS
 {	
 	. = 0x80200000,
+	_text = .;
 	.text.boot : { *(.text.boot) }
 	.text : { *(.text) }
+	.gos_stub_func : { *(.gos_stub_func) }
 	.data : { 
 		*(.data)
 		. = ALIGN(4096);
