@@ -113,3 +113,7 @@ config APP_LSDMAC
 config APP_STUB_TEST
 	bool "APP_STUB_TEST"
 	default y
+config APP_INTR_TEST
+	bool "APP_INTR_TEST"
+	depends on SELECT_VCS
+	default y

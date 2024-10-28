@@ -22,6 +22,7 @@
 #include "asm/pgtable.h"
 #include "asm/tlbflush.h"
 #include "asm/type.h"
+#include "asm/csr.h"
 #include "asm/ptregs.h"
 #include "spinlocks.h"
 #include "kallsyms.h"

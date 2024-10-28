@@ -55,3 +55,4 @@ obj-$(CONFIG_APP_HPM_TEST) += hpm_test.o
 obj-$(CONFIG_APP_LSPCI) += lspci.o
 obj-$(CONFIG_APP_LSDMAC) += lsdmac.o
 obj-$(CONFIG_APP_STUB_TEST) += stub_test.o
+obj-$(CONFIG_APP_INTR_TEST) += intr_test.o

@@ -10,14 +10,6 @@
 
 #define __EBREAK_INSN       (0x00100073)
 
-#define GET_INSN_LENGTH(insn)						\
-({									\
-	unsigned long __len;						\
-	__len = ((insn & __INSN_LENGTH_MASK) == __INSN_LENGTH_32) ?	\
-		4UL : 2UL;						\
-	__len;								\
-})
-
 struct stub {
 	struct list_head list;
 	char name[64];

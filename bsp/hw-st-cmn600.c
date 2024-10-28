@@ -128,6 +128,19 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 &st_clint_hw_data,
 	  },
+#ifdef CONFIG_APP_INTR_TEST
+	{
+	 "intr,test",
+	 0x0,
+	 0x0,
+	 "APLIC_S",
+	 { 10,},
+	 1,
+	 " ",
+	 0,
+	 0,
+	 },
+#endif
 	{
 	 "THE END",
 	 0xFF,

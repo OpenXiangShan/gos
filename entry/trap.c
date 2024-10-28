@@ -23,6 +23,7 @@
 #include "asm/pgtable.h"
 #include "mm.h"
 #include "stub.h"
+#include "trap.h"
 
 extern void do_exception_vector(void);
 
@@ -141,6 +142,19 @@ static void do_breakpoint(struct pt_regs *regs)
 	do_ebreak(regs);
 }
 
+static int do_illegal_inst_fault(struct pt_regs *regs)
+{
+	unsigned long badaddr = regs->sbadaddr;
+	int ret = -1;
+
+	if (badaddr == BOSC_DEBUG_INST) {
+		regs->sepc += GET_INSN_LENGTH(regs->sepc);
+		ret = 0;
+	}
+
+	return ret;
+}
+
 static int handle_exception(struct pt_regs *regs, unsigned long cause)
 {
 	struct fault_info *fi;
@@ -153,6 +167,9 @@ static int handle_exception(struct pt_regs *regs, unsigned long cause)
 		ret = do_page_fault(regs->sbadaddr);
 		if (ret)
 			dump_fault_addr_pt(regs->sbadaddr);
+		break;
+	case EXC_INST_ILLEGAL:
+		ret = do_illegal_inst_fault(regs);
 		break;
 	default:
 		fi = ec_to_fault_info(cause);
