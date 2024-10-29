@@ -25,8 +25,8 @@
 #include "irq.h"
 #include "uart.h"
 
-#define UART_CLK          50000000
-#define UART_DEFAULT_BAUD 115200
+#define UART_CLK          10000000
+#define UART_DEFAULT_BAUD 9600
 
 static unsigned long base_address;
 static int wakeup = 0;

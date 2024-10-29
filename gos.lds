@@ -18,7 +18,7 @@ OUTPUT_ARCH("riscv")
 ENTRY(__start_gos)
 SECTIONS
 {	
-	. = 0x80200000,
+	. = CONFIG_MEM_START + 0x200000,
 	_text = .;
 	.text.boot : { *(.text.boot) }
 	.text : { *(.text) }

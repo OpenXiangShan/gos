@@ -61,7 +61,7 @@ int shell_init(void *data)
 	}
 
 	print("open %s as console...\n", SHELL_DEVICE_NAME);
-
+#if !CONFIG_SELECT_MELLITE_FPGA
 	wait_for_ms(1000);
 	for (; left > 0; left--) {
 		print_backspace(sizeof
@@ -80,6 +80,7 @@ int shell_init(void *data)
 	print("\n");
 
 	test_cmd_auto_run();
+#endif
 
 run_shell:
 	print("Shell >> ");

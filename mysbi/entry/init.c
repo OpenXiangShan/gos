@@ -99,8 +99,8 @@ void boot_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 {
 	sbi_print("%s hartid: %d, ctx:%x\n", __FUNCTION__, hart, ctx);
 
+#if !CONFIG_SELECT_MELLITE_FPGA
 	fpu_init();
-
 #if CONFIG_ENABLE_VECTOR
 	v_init();
 #endif
@@ -118,6 +118,7 @@ void boot_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 #if CONFIG_ENABLE_ZICBOM
 	zicbom_init();
 #endif
+#endif //!CONFIG_SELECT_MELLITE_FPGA
 	sbi_jump_to_next(ctx);
 }
 
@@ -127,6 +128,7 @@ void other_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 
 	sbi_print("%s hartid: %d, ctx:%x\n", __FUNCTION__, hart, ctx);
 
+#if !CONFIG_SELECT_MELLITE_FPGA
 	fpu_init();
 
 #if CONFIG_ENABLE_VECTOR
@@ -146,6 +148,7 @@ void other_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 #if CONFIG_ENABLE_ZICBOM
 	zicbom_init();
 #endif
+#endif //!CONFIG_SELECT_MELLITE_FPGA
 	sbi_secondary_init(hart, ctx);
 
 	while (ctx->wait_var == 0) {
