@@ -222,6 +222,12 @@ int gos_stub_do_process(struct pt_regs *regs)
 	return ret;
 }
 
+void default_stub_handler(struct pt_regs *regs)
+{
+	print("############### default-stub -- sepc:0x%lx a0:0x%lx a1:0x%lx ra:0x%lx\n",
+		regs->sepc, regs->a0, regs->a1, regs->ra);
+}
+
 int __attribute__((section(".gos_stub_func")))
 register_stub(const char *name, void (*stub_handler)(struct pt_regs * regs))
 {

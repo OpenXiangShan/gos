@@ -192,6 +192,74 @@ static int kallsyms_lookup_names(const char *name,
 	return 0;
 }
 
+static unsigned long get_symbol_pos(unsigned long addr,
+				    unsigned long *symbolsize,
+				    unsigned long *offset)
+{
+	unsigned long symbol_start = 0, symbol_end = 0;
+	unsigned long i, low, high, mid;
+
+	/* Do a binary search on the sorted kallsyms_addresses array. */
+	low = 0;
+	high = kallsyms_num_syms;
+
+	while (high - low > 1) {
+		mid = low + (high - low) / 2;
+		if (kallsyms_sym_address(mid) <= addr)
+			low = mid;
+		else
+			high = mid;
+	}
+
+	/*
+	 * Search for the first aliased symbol. Aliased
+	 * symbols are symbols with the same address.
+	 */
+	while (low && kallsyms_sym_address(low-1) == kallsyms_sym_address(low))
+		--low;
+
+	symbol_start = kallsyms_sym_address(low);
+
+	/* Search for next non-aliased symbol. */
+	for (i = low + 1; i < kallsyms_num_syms; i++) {
+		if (kallsyms_sym_address(i) > symbol_start) {
+			symbol_end = kallsyms_sym_address(i);
+			break;
+		}
+	}
+
+	/* If we found no next symbol, we use the end of the section. */
+	if (!symbol_end)
+		return -1;
+
+	if (symbolsize)
+		*symbolsize = symbol_end - symbol_start;
+	if (offset)
+		*offset = addr - symbol_start;
+
+	return low;
+}
+
+int __attribute__((section(".gos_stub_func")))
+    lookup_symbol_name(unsigned long addr, char *symname)
+{
+	int res = -1;
+	unsigned long pos;
+
+	symname[0] = '\0';
+	symname[KSYM_NAME_LEN - 1] = '\0';
+
+	pos = get_symbol_pos(addr, NULL, NULL);
+	if (pos == -1)
+		return res;
+	/* Grab name */
+	kallsyms_expand_symbol(get_symbol_offset(pos),
+			       symname, KSYM_NAME_LEN);
+
+	cleanup_symbol_name(symname);
+	return 0;
+}
+
 unsigned long __attribute__((section(".gos_stub_func")))
     kallsyms_lookup_name(const char *name)
 {

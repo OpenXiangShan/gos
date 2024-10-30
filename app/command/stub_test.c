@@ -46,6 +46,10 @@ static void handle_task_scheduler_event_stub_handler(struct pt_regs *regs)
 
 static int cmd_stub_test_handler(int argc, char *argv[], void *priv)
 {
+	if (argc == 0) {
+		print("Please input the stub function name\n");
+		return -1;
+	}
 
 	if (!strncmp(argv[0], "handle_exception", sizeof("handle_exception"))) {
 		register_handle_exception_stub_handler(handle_exception_stub_handler);
@@ -57,6 +61,11 @@ static int cmd_stub_test_handler(int argc, char *argv[], void *priv)
 			    sizeof("task_scheduler_event_handler"))) {
 		register_stub("task_scheduler_event_handler",
 			      handle_task_scheduler_event_stub_handler);
+	}
+	else {
+		if (register_stub(argv[0], default_stub_handler)) {
+			print("insert a stub into %s fail\n", argv[0]);
+		}
 	}
 
 	return 0;

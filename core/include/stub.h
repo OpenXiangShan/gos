@@ -31,6 +31,7 @@ struct stub_slot {
 	void *slot_addr;
 };
 
+void default_stub_handler(struct pt_regs *regs);
 int gos_stub_do_process(struct pt_regs *regs);
 int unregister_stub(const char *name);
 int register_stub(const char *name,
