@@ -53,6 +53,6 @@
 #define SIRE 0X40
 #define CTS  0X10
 
-void uart_ns16550a_init(unsigned long base, struct sbi_uart_ops *ops);
+void uart_ns16550a_init(unsigned long base, struct sbi_uart_ops *ops, void *data);
 
 #endif

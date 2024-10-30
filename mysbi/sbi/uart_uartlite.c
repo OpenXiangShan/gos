@@ -28,7 +28,7 @@ static void uartlite_putc(char c)
 	writeb(base_address + UARTLITE_TX_FIFO, c);
 }
 
-void uart_uartlite_init(unsigned long base, struct sbi_uart_ops *ops)
+void uart_uartlite_init(unsigned long base, struct sbi_uart_ops *ops, void *data)
 {
 	base_address = base;
 

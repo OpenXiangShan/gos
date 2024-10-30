@@ -24,12 +24,14 @@
 #include "imsic_data.h"
 #include "aplic_data.h"
 #include "pci_data.h"
+#include "uart_data.h"
 
 extern struct clint_data clint_hw_data;
 extern struct clint_data qemu_clint_hw_data;
 extern struct plic_data plic_hw_data;
 extern struct riscv_iommu_data riscv_iommu_data;
 extern struct pci_data generic_ecam_pci_data;
+extern struct uart_data qemu8250_uart_data;
 
 static const struct device_init_entry __attribute__((used))
     device_info[] __attribute__((section(".device_init_table"))) = {
@@ -46,7 +48,7 @@ static const struct device_init_entry __attribute__((used))
 	 1,
 	 " ",
 	 0,
-	 0,
+	 &qemu8250_uart_data,
 	  },
 	{
 	 "riscv,iommu",

@@ -25,10 +25,13 @@
 #include "vmap.h"
 #include "irq.h"
 #include "uart.h"
+#include "../bsp/uart_data.h"
 
 static unsigned long base_address;
 static unsigned int size;
 static int wakeup = 0;
+static unsigned int UART_DEFAULT_BAUD;
+static unsigned int uart16550_clock;
 
 unsigned long qemu_8250_get_base(void)
 {
@@ -62,10 +65,8 @@ static char qemu_8250_get(void)
 		return -1;
 }
 
-#define UART_DEFAULT_BAUD  115200
 static int qemu_8250_init(unsigned long base, int len)
 {
-	unsigned int uart16550_clock = 1843200;
 	unsigned int divisor = uart16550_clock / (16 * UART_DEFAULT_BAUD);
 
 	base_address = (unsigned long)ioremap((void *)base, len, 0);
@@ -160,8 +161,13 @@ int qemu_8250_driver_init(struct device *dev, void *data)
 DRIVER_REGISTER(qemu_8250, qemu_8250_driver_init, "qemu-8250");
 
 int qemu_8250_earlycon_init(unsigned long base, int len,
-			    struct early_print_device *device)
+			    struct early_print_device *device,
+			    void *data)
 {
+	struct uart_data *priv = (struct uart_data *)(data);
+
+	UART_DEFAULT_BAUD = priv->baud;
+	uart16550_clock = priv->clk;
 	qemu_8250_init(base, len);
 	device->write = qemu_8250_puts;
 

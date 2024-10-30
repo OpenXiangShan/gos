@@ -54,7 +54,8 @@ static int __uartlite_init(unsigned long base, int len)
 }
 
 int uartlite_earlycon_init(unsigned long base, int len,
-			   struct early_print_device *device)
+			   struct early_print_device *device,
+			   void *data)
 {
 	__uartlite_init(base, len);
 	device->write = uartlite_puts;

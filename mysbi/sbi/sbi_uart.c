@@ -52,17 +52,17 @@ static int __sbi_uart_init(struct sbi_trap_hw_context *ctx)
 	     nr; device_entry++, nr--) {
 		if (!strncmp(device_entry->compatible, "qemu-8250", 128)) {
 			ctx->uart_base = device_entry->start;
-			uart_qemu_8250_init(device_entry->start, &ops);
+			uart_qemu_8250_init(device_entry->start, &ops, device_entry->data);
 			return 0;
 		}
 		if (!strncmp(device_entry->compatible, "ns16550a", 128)) {
 			ctx->uart_base = device_entry->start;
-			uart_ns16550a_init(device_entry->start, &ops);
+			uart_ns16550a_init(device_entry->start, &ops, device_entry->data);
 			return 0;
 		}
 		if (!strncmp(device_entry->compatible, "uartlite", 128)) {
 			ctx->uart_base = device_entry->start;
-			uart_uartlite_init(device_entry->start, &ops);
+			uart_uartlite_init(device_entry->start, &ops, device_entry->data);
 			return 0;
 		}
 	}

@@ -26,6 +26,6 @@
 #define UARTLITE_TX_FULL  0x08
 #define UARTLITE_RX_VALID 0x01
 
-void uart_uartlite_init(unsigned long base, struct sbi_uart_ops *ops);
+void uart_uartlite_init(unsigned long base, struct sbi_uart_ops *ops, void *data);
 
 #endif

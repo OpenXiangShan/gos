@@ -38,6 +38,6 @@
 #define UART_LSR_OE	    0x02
 #define UART_LSR_DR	    0x01
 
-void uart_qemu_8250_init(unsigned long base, struct sbi_uart_ops *ops);
+void uart_qemu_8250_init(unsigned long base, struct sbi_uart_ops *ops, void *data);
 
 #endif

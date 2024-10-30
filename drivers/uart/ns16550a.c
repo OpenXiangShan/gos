@@ -24,9 +24,10 @@
 #include "vmap.h"
 #include "irq.h"
 #include "uart.h"
+#include "../bsp/uart_data.h"
 
-#define UART_CLK          10000000
-#define UART_DEFAULT_BAUD 9600
+static unsigned int UART_CLK;
+static unsigned int UART_DEFAULT_BAUD;
 
 static unsigned long base_address;
 static int wakeup = 0;
@@ -140,8 +141,14 @@ static int __ns16550a_init(unsigned long base, int len)
 }
 
 int ns16550a_earlycon_init(unsigned long base, int len,
-			   struct early_print_device *device)
+			   struct early_print_device *device,
+			   void *data)
 {
+	struct uart_data *priv = (struct uart_data *)(data);
+
+	UART_DEFAULT_BAUD = priv->baud;
+	UART_CLK = priv->clk;
+
 	__ns16550a_init(base, len);
 	device->write = ns16550a_puts;
 

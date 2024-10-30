@@ -18,9 +18,10 @@
 #include <asm/mmio.h>
 #include <device.h>
 #include "uart_ns16550a.h"
+#include "../../bsp/uart_data.h"
 
-#define UART_CLK          10000000 
-#define UART_DEFAULT_BAUD 9600
+static unsigned int UART_CLK;
+static unsigned int UART_DEFAULT_BAUD;
 
 static unsigned long base_address;
 
@@ -44,9 +45,14 @@ static void ns16550a_putc(char c)
 	writel(base_address + THR, c);
 }
 
-void uart_ns16550a_init(unsigned long base, struct sbi_uart_ops *ops)
+void uart_ns16550a_init(unsigned long base, struct sbi_uart_ops *ops, void *data)
 {
-	unsigned int divisor = UART_CLK / (16 * UART_DEFAULT_BAUD);
+	struct uart_data *priv = (struct uart_data *)(data);
+	unsigned int divisor;
+
+	UART_DEFAULT_BAUD = priv->baud;
+	UART_CLK = priv->clk;
+	divisor = UART_CLK / (16 * UART_DEFAULT_BAUD);
 
 	base_address = base;
 

@@ -18,8 +18,10 @@
 #include <asm/mmio.h>
 #include <device.h>
 #include "uart_qemu-8250.h"
+#include "../../bsp/uart_data.h"
 
-#define UART_DEFAULT_BAUD  115200
+static unsigned int UART_DEFAULT_BAUD;
+static unsigned int uart16550_clock;
 
 static unsigned long base_address;
 
@@ -30,10 +32,15 @@ static void qemu_8250_putc(char c)
 	writeb(base_address + UART_DAT, c);
 }
 
-void uart_qemu_8250_init(unsigned long base, struct sbi_uart_ops *ops)
+void uart_qemu_8250_init(unsigned long base, struct sbi_uart_ops *ops, void *data)
 {
-	unsigned int uart16550_clock = 1843200;
-	unsigned int divisor = uart16550_clock / (16 * UART_DEFAULT_BAUD);
+	unsigned int divisor;
+	struct uart_data *priv = (struct uart_data *)(data);
+
+	UART_DEFAULT_BAUD = priv->baud;
+	uart16550_clock = priv->clk;
+
+	divisor = uart16550_clock / (16 * UART_DEFAULT_BAUD);
 
 	base_address = base;
 

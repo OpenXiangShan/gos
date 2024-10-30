@@ -78,7 +78,7 @@ int early_print_setup(struct device_init_entry *hw)
 			    (driver_entry->compatible, device_entry->compatible,
 			     128)) {
 
-				driver_entry->init(device_entry->start, device_entry->len, &earlycon);
+				driver_entry->init(device_entry->start, device_entry->len, &earlycon, device_entry->data);
 				earlycon.early_print_enable = 1;
 			}
 		}

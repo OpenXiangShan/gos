@@ -29,7 +29,8 @@ struct early_print_device {
 };
 
 typedef int (*earlycon_init)(unsigned long base, int len,
-			     struct early_print_device * device);
+			     struct early_print_device * device,
+			     void *data);
 
 struct earlycon_init_entry {
 	char compatible[128];
