@@ -14,6 +14,8 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gos.h"
+
 .section .rodata
 .global guest_bin
 .global __guest_payload_start
@@ -21,6 +23,8 @@
 
 .align 2
 __guest_payload_start:
+#ifdef CONFIG_MYGUEST
 guest_bin:
 	.incbin "build/myGuest.bin"
+#endif
 __guest_payload_end:

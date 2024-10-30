@@ -72,6 +72,7 @@ if [ "$#" -eq 1 ];then
 fi
 
 make clean
+make autoconf
 make
 
 if [ "$1" = "fpga" ];then

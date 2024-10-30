@@ -76,9 +76,9 @@ static void vs_sstc_init(struct vcpu *vcpu)
 
 void vcpu_timer_save(struct vcpu *vcpu)
 {
+#if CONFIG_ENABLE_SSTC
 	struct vcpu_timer *t = &vcpu->timer;
 
-#if CONFIG_ENABLE_SSTC
 	t->timecmp = read_csr(CSR_VSTIMECMP);
 	t->htimedelta = read_csr(CSR_HTIMEDELTA);
 #endif
@@ -86,9 +86,9 @@ void vcpu_timer_save(struct vcpu *vcpu)
 
 void vcpu_timer_restore(struct vcpu *vcpu)
 {
+#if CONFIG_ENABLE_SSTC
 	struct vcpu_timer *t = &vcpu->timer;
 
-#if CONFIG_ENABLE_SSTC
 	write_csr(CSR_VSTIMECMP, t->timecmp);
 	write_csr(CSR_HTIMEDELTA, t->htimedelta);
 #endif

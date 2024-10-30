@@ -389,8 +389,9 @@ static int cmd_csr_ctl_handler(int argc, char *argv[], void *priv)
 	unsigned int mode;
 	unsigned long csr_num;
 	unsigned long value;
+#if CONFIG_VIRT
 	struct vcpu *vcpu;
-
+#endif
 	if (argc < 2) {
 		Usage();
 		print("invalid input param.\n");
@@ -409,10 +410,12 @@ static int cmd_csr_ctl_handler(int argc, char *argv[], void *priv)
 	print("-----> Modfiy mode:%d ,csr %d, value:0x%lx \n", mode, csr_num,
 	      value);
 #endif
+
+#if CONFIG_VIRT
 	vcpu = vcpu_create();
 	if (!vcpu)
 		return -1;
-
+#endif
 	if (mode == 1)
 		csr_read(csr_num);
 	else if (mode == 2)
@@ -420,13 +423,18 @@ static int cmd_csr_ctl_handler(int argc, char *argv[], void *priv)
 	else if (mode == 3){
 		if (csr_num == 0)
 			print("mcounteren:0x%lx \n", sbi_get_cpu_mcounteren());
+#if CONFIG_VIRT
 		else if (csr_num == 1)
 			print("hcounteren: 0x%lx \n", vcpu->cpu_ctx.hcounteren);
-	}else if (mode == 4) {
+#endif
+	}
+	else if (mode == 4) {
 		if (csr_num == 0)
 			sbi_set_mcounteren(value);
+#if CONFIG_VIRT
 		else if (csr_num == 1)
 			vcpu->cpu_ctx.hcounteren =  value;
+#endif
 	}
 
 	print("\n");

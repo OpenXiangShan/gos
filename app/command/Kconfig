@@ -15,6 +15,7 @@ config APP_IMSIC_TEST
 	depends on SELECT_AIA
 config APP_VS_IMSIC_MULTI_TEST
 	bool "APP_VS_IMSIC_MULTI_TEST"
+	depends on VIRT
 	depends on SELECT_AIA
 config APP_LS
 	bool "APP_LS"
@@ -79,6 +80,7 @@ config APP_MEM_TESTER
 	bool "APP_MEM_TESTER"
 config APP_G_STAGE_TEST
 	bool "APP_G_STAGE_TEST"
+	depends on VIRT
 	default y
 config APP_SVPBMT_TEST
 	bool "APP_SVPBMT_TEST"

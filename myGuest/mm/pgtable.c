@@ -357,6 +357,8 @@ static int mmu_direct_page_mapping()
 	ret = mmu_page_mapping_2M(phy_start, phy_to_virt(phy_start), size, pgprot);
 #elif CONFIG_SELECT_1G_GUEST_VS_STAGE_MEM_MAPPING
 	ret = mmu_page_mapping_1G(phy_start, phy_to_virt(phy_start), size, pgprot);
+#else
+	ret = mmu_page_mapping(phy_start, phy_to_virt(phy_start), size, pgprot);	
 #endif
 	return ret;
 }

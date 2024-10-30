@@ -93,7 +93,7 @@ gos: gos-tmp $(GOS_OBJ_FILES) $(GOS_DIR)/tmp_kallsyms_s.o
 	@$(LD) -T ./gos.lds -o $(BUILD_DIR)/$(GOS_TARGET) built-in.o $(GOS_OBJ_FILES) $(GOS_DIR)/tmp_kallsyms_s.o -Map $(BUILD_DIR)/gos.map --no-warn-rwx-segments
 	@$(RISCV_COPY) $(BUILD_DIR)/$(GOS_TARGET) -O binary $(BUILD_DIR)/$(GOS_TARGET_BIN)
 
-gos-tmp: autoconf mysbi_bin myUser_bin myGuest_bin
+gos-tmp: mysbi_bin myUser_bin myGuest_bin
 	@mkdir -p $(BUILD_DIR)
 	@make -f $(TOPDIR)/Makefile.build obj=. --no-print-directory
 	@$(LD) -T ./gos.lds -o $(BUILD_DIR)/.tmp_gos.elf built-in.o -Map $(BUILD_DIR)/.tmp_gos.map --no-warn-rwx-segments
@@ -115,14 +115,18 @@ $(GOS_DIR)/tmp_kallsyms_s.o: $(GOS_DIR)/tmp_kallsyms.S gos-tmp
 	@echo "CC $@"
 	@$(CC) $(COPS) -I$(TOPDIR)/include/gos -I$(TOPDIR)/include -c $< -o $@
 
-mysbi_bin: autoconf
+mysbi_bin:
 	@make -C mysbi --no-print-directory
 
-myUser_bin: autoconf
+myUser_bin:
+ifdef CONFIG_MYUSER
 	@make -C myUser --no-print-directory
+endif
 
-myGuest_bin: autoconf
+myGuest_bin:
+ifdef CONFIG_MYGUEST
 	@make -C myGuest --no-print-directory
+endif
 
 mysbi-clean:
 	@make -C mysbi clean --no-print-directory
@@ -151,13 +155,13 @@ ifeq ($(CONFIG_SELECT_PLIC), y)
 run:
 	./qemu-system-riscv64 -nographic \
 	-machine virt -smp 4 \
-	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on -m 8G \
+	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,x-zicond=on -m 8G \
 	-device my_dmaengine \
 	-bios out/Image.bin
 run-debug:
 	./qemu-system-riscv64 -nographic \
 	-machine virt -smp 4 \
-	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on -m 8G \
+	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,x-zicond=on -m 8G \
 	-device my_dmaengine \
 	-bios out/Image.bin \
 	-S -s

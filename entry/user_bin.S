@@ -14,6 +14,8 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gos.h"
+
 .section .rodata
 .global user_bin
 .global __user_payload_start
@@ -21,6 +23,8 @@
 
 .align 2
 __user_payload_start:
+#ifdef CONFIG_MYUSER
 user_bin:
 	.incbin "build/myUser.bin"
+#endif
 __user_payload_end:

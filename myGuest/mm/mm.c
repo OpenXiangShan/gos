@@ -70,6 +70,8 @@ void mm_init(struct device_init_entry *hw)
 	unsigned long start = PAGE_ALIGN_2M((unsigned long)(&bss_end));
 #elif CONFIG_SELECT_1G_GUEST_VS_STAGE_MEM_MAPPING
 	unsigned long start = PAGE_ALIGN_1G((unsigned long)(&bss_end));
+#else
+	unsigned long start = 0;
 #endif
 	unsigned long end = get_ddr_end(hw);
 	unsigned long nr_free_pages = 0;

@@ -193,7 +193,6 @@ struct user {
 	void *pgdp;
 };
 
-#if CONFIG_USER
 struct user *user_create(void);
 struct user *user_create_force(void);
 int user_mode_run(struct user *user, struct user_run_params *params);
@@ -205,14 +204,5 @@ void user_init(void);
 void dump_user_info_on_all_cpu(void);
 void dump_user_info_on_cpu(int cpu);
 struct user *get_user(int userid, int cpu);
-#else
-void user_init(void) {return};
-struct user *user_create(void) {return NULL;}
-struct user *user_create_force(void) {return NULL;}
-int user_mode_run(struct user *user, struct user_run_params *params) {return -1;}
-void dump_user_info_on_all_cpu(void) {return;}
-void dump_user_info_on_cpu(int cpu) {return;}
-struct user *get_user(int userid, int cpu) {return NULL;}
-#endif
 
 #endif

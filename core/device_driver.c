@@ -66,7 +66,9 @@ static struct device *create_device(struct device_init_entry *entry)
 	for(i = 0; i < entry->irq_num; i++)
 		new->irqs[i] = entry->irq[i];
 	new->irq_domain = find_irq_domain(entry->irq_parent);
+#if CONFIG_IOMMU
 	new->iommu = find_iommu(entry->iommu);
+#endif
 	strcpy(new->compatible, entry->compatible);
 
 	list_add_tail(&new->list, &_devices);
@@ -242,11 +244,11 @@ find:
 struct device *get_device(char *name)
 {
 	struct device *dev;
-
+#if CONFIG_PCI
 	dev = pci_get_device(name);
 	if (dev)
 		return dev;
-
+#endif
 	list_for_each_entry(dev, &_devices, list) {
 		if (!strncmp(dev->compatible, name, 128))
 			return dev;

@@ -47,6 +47,7 @@ endchoice
 
 config VIRT
 	bool "Virt"
+	depends on MYGUEST
 	default y
 	if VIRT
 		source "virt/Kconfig"
@@ -54,6 +55,7 @@ config VIRT
 
 config USER
 	bool "User"
+	depends on MYUSER
 	default y
 
 config MYGUEST

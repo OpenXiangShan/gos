@@ -93,10 +93,13 @@ void start_gos(unsigned int hart_id,
 
 	percpu_tasks_init(0);
 
+#ifdef CONFIG_VIRT
 	vcpu_init();
+#endif
 
+#ifdef CONFIG_USER
 	user_init();
-
+#endif
 	end = sbi_get_cpu_cycles();
 	print("gos startup success, cost: %d(cycles)\n", end - start);
 
