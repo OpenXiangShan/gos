@@ -85,7 +85,11 @@ run_shell:
 	print("Shell >> ");
 	tmp = shell_command;
 	while (1) {
+#if CONFIG_USE_UART_POLL
+		ret = read(fd, buf, 0, 64, NONBLOCK);
+#else
 		ret = read(fd, buf, 0, 64, BLOCK);
+#endif
 		for (i = 0; i < ret; i++) {
 			if (buf[i] < 0 || buf[i] == 255)
 				continue;

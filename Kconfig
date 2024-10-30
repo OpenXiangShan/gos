@@ -93,6 +93,10 @@ config ENABLE_ZICBOM
 	bool "Enable Zicbom"
 	default y
 
+config USE_UART_POLL
+	bool "Use uart poll"
+	default n
+
 config ENABLE_MULTI_TASK
 	bool "Enable Multi task"
 	default y
