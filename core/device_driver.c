@@ -24,6 +24,7 @@
 #include "list.h"
 #include "iommu.h"
 #include "pci_device_driver.h"
+#include "gos.h"
 
 extern int mmu_is_on;
 
