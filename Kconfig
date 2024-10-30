@@ -12,6 +12,8 @@ choice
 		tristate "Select NanHu FPGA"
 	config SELECT_KMH_FPGA
 		tristate "Select KunMingHu FPGA"
+	config SELECT_MELLITE_FPGA
+		tristate "Select Mellite FPGA"
 	config SELECT_VCS
 		tristate "Select VCS"
 endchoice
@@ -105,18 +107,14 @@ config ENABLE_MULTI_TASK
 
 config TASK_SCHEDULER_PERIOD
 	int "Task scheduler period(ms)"
-	default "30"
+	default "10"
 	depends on ENABLE_MULTI_TASK
 
 config ENABLE_SHELL
 	bool "Enable Shell"
 	default y
 
-config MELLITE_FPGA
-	bool "Mellite fpga"
-	default n
-
 config MEM_START
 	hex "Config Mem start"
-	default 0x1000000000 if MELLITE_FPGA
+	default 0x1000000000 if SELECT_MELLITE_FPGA
 	default 0x80000000
