@@ -38,9 +38,17 @@ BUILD_DIR = build
 CONFIGS_DIR = $(TOPDIR)/configs
 DTS_DIR = $(CONFIGS_DIR)/dts
 
+-include include/config/auto.conf
+
+ifdef CONFIG_SELECT_MELLITE_FPGA
+default: gos pack-mellite.sh
+	@echo "Packing..."
+	@./pack-mellite.sh
+else
 default: gos pack.sh
 	@echo "Packing..."
 	@./pack.sh
+endif
 
 fpga:
 	./bin2fpgadata -i out/Image.bin
@@ -75,8 +83,6 @@ export GOS_CORE_DIR
 GOS_TARGET := gos.elf
 GOS_TARGET_BIN := gos.bin
 
--include include/config/auto.conf
-
 obj-y += entry/
 obj-y += lib/
 obj-y += fdt/
@@ -94,7 +100,11 @@ GOS_OBJ_FILES = $(GOS_C_FILES:$(GOS_DIR)/%.c=$(GOS_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_ASM_FILES:$(GOS_DIR)/%.S=$(GOS_DIR)/%_s.o)
 
 gos: gos-tmp $(GOS_OBJ_FILES) $(GOS_DIR)/tmp_kallsyms_s.o
+ifdef CONFIG_SELECT_MELLITE_FPGA
+	@$(LD) -T ./gos-mellite.lds --defsym $(KBUILD_CFLAGS) -o $(BUILD_DIR)/$(GOS_TARGET) built-in.o $(GOS_OBJ_FILES) $(GOS_DIR)/tmp_kallsyms_s.o -Map $(BUILD_DIR)/gos.map --no-warn-rwx-segments
+else
 	@$(LD) -T ./gos.lds --defsym $(KBUILD_CFLAGS) -o $(BUILD_DIR)/$(GOS_TARGET) built-in.o $(GOS_OBJ_FILES) $(GOS_DIR)/tmp_kallsyms_s.o -Map $(BUILD_DIR)/gos.map --no-warn-rwx-segments
+endif
 	@$(RISCV_COPY) $(BUILD_DIR)/$(GOS_TARGET) -O binary $(BUILD_DIR)/$(GOS_TARGET_BIN)
 
 gos-tmp: mysbi_bin myUser_bin myGuest_bin
