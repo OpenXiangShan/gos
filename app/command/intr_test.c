@@ -25,8 +25,8 @@ static void intr_test_irq_handler(void *data)
 {
 	static int num = 0;
 
-	print("%s\n", __FUNCTION__, ++num);
-	if (num == 10)
+	print("%s count: %d\n", __FUNCTION__, num);
+	if (++num >= 10)
 		__asm__ __volatile__("li a0, 1;" ".word 0x5006b;");
 }
 
@@ -40,11 +40,13 @@ static int cmd_intr_test_handler(int argc, char *argv[], void *priv)
 		return -1;
 	}
 
+	disable_local_irq();
 	nr_irqs = get_hwirq(dev, irqs);
 	print("nr_irqs:%d irq:%d\n", nr_irqs, irqs[0]);
 	for (i = 0; i < nr_irqs; i++)
 		register_device_irq(dev, dev->irq_domain, irqs[i],
 				    intr_test_irq_handler, NULL);
+	enable_local_irq();
 
 	return 0;
 }
