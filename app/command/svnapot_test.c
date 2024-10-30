@@ -32,12 +32,10 @@ static int cmd_svnapot_test_handler(int argc, char *argv[], void *priv)
 	unsigned long *pte;
 
 	addr = (char *)vmem_alloc_huge(size, PAGE_64K_SIZE, NULL);
-	addr[0] = 66;
-	addr[size - 1] = 88;
 
 	for (i = 0; i < pnum; i++) {
-		addr[i * PAGE_SIZE] = 66;
-		addr[i * PAGE_SIZE + PAGE_SIZE - 1] = 88;
+		addr[i * PAGE_SIZE] = i;
+		addr[i * PAGE_SIZE + PAGE_SIZE - 1] = 2*i;
 		pte = mmu_get_pte((unsigned long)(addr + i * PAGE_SIZE));
 		print("pte:0x%lx\n", *pte);
 		print("addr[%d]:%d addr[%d]:%d\n",
