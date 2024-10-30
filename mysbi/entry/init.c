@@ -25,6 +25,7 @@ void gos_init(unsigned int hart, struct sbi_trap_hw_context *ctx)
 	sbi_init(hart, ctx);
 }
 
+#if !CONFIG_SELECT_MELLITE_FPGA
 #if CONFIG_ENABLE_ZICBOM
 static void zicbom_init()
 {
@@ -69,6 +70,7 @@ static void sstc_disable()
 	val &= ~MENVCFG_STCE;
 	write_csr(menvcfg, val);
 }
+#endif
 #endif
 
 #if CONFIG_ENABLE_VECTOR

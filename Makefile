@@ -94,13 +94,13 @@ GOS_OBJ_FILES = $(GOS_C_FILES:$(GOS_DIR)/%.c=$(GOS_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_ASM_FILES:$(GOS_DIR)/%.S=$(GOS_DIR)/%_s.o)
 
 gos: gos-tmp $(GOS_OBJ_FILES) $(GOS_DIR)/tmp_kallsyms_s.o
-	@$(LD) -T ./gos.lds -o $(BUILD_DIR)/$(GOS_TARGET) built-in.o $(GOS_OBJ_FILES) $(GOS_DIR)/tmp_kallsyms_s.o -Map $(BUILD_DIR)/gos.map --no-warn-rwx-segments
+	@$(LD) -T ./gos.lds --defsym $(KBUILD_CFLAGS) -o $(BUILD_DIR)/$(GOS_TARGET) built-in.o $(GOS_OBJ_FILES) $(GOS_DIR)/tmp_kallsyms_s.o -Map $(BUILD_DIR)/gos.map --no-warn-rwx-segments
 	@$(RISCV_COPY) $(BUILD_DIR)/$(GOS_TARGET) -O binary $(BUILD_DIR)/$(GOS_TARGET_BIN)
 
 gos-tmp: mysbi_bin myUser_bin myGuest_bin
 	@mkdir -p $(BUILD_DIR)
 	@make -f $(TOPDIR)/Makefile.build obj=. --no-print-directory
-	@$(LD) -T ./gos.lds -o $(BUILD_DIR)/.tmp_gos.elf built-in.o -Map $(BUILD_DIR)/.tmp_gos.map --no-warn-rwx-segments
+	@$(LD) -T ./gos.lds --defsym $(KBUILD_CFLAGS) -o $(BUILD_DIR)/.tmp_gos.elf built-in.o -Map $(BUILD_DIR)/.tmp_gos.map --no-warn-rwx-segments
 	@$(NM) $(BUILD_DIR)/.tmp_gos.elf > $(BUILD_DIR)/.tmp_gos_label
 	@scripts/kallsyms --all-symbols $(BUILD_DIR)/.tmp_gos_label > $(GOS_DIR)/tmp_kallsyms.S
 	@rm $(BUILD_DIR)/.tmp_gos_label

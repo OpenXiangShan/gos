@@ -15,7 +15,7 @@
  */
 
 #include "gos.h"
-#ifdef CONFIG_SELECT_KMH_FPGA
+#ifdef CONFIG_SELECT_MELLITE_FPGA
 
 #include <device.h>
 #include "plic.h"
@@ -33,14 +33,14 @@ static const struct device_init_entry __attribute__((used))
     device_info[] __attribute__((section(".device_init_table"))) = {
 	{
 	 "ns16550a",
-	 0x310b0000,
+	 0x50000,
 	 0x10000,
 #ifndef CONFIG_SELECT_AIA
 	 "PLIC",
 #else
 	 "APLIC_S",
 #endif
-	 { 10,},
+	 { 61,},
 	 1,
 	 " ",
 	 0,

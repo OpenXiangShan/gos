@@ -80,9 +80,9 @@ int shell_init(void *data)
 	print("\n");
 
 	test_cmd_auto_run();
-#endif
 
 run_shell:
+#endif
 	print("Shell >> ");
 	tmp = shell_command;
 	while (1) {
