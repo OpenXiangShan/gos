@@ -31,7 +31,6 @@ int shell_init(void *data)
 {
 #ifdef CONFIG_ENABLE_SHELL
 	int i;
-	int left = 5;
 	int fd;
 	char buf[64];
 	char *shell_command = NULL;
@@ -62,6 +61,7 @@ int shell_init(void *data)
 
 	print("open %s as console...\n", SHELL_DEVICE_NAME);
 #if !CONFIG_SELECT_MELLITE_FPGA
+	int left = 5;
 	wait_for_ms(1000);
 	for (; left > 0; left--) {
 		print_backspace(sizeof
