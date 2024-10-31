@@ -46,7 +46,7 @@ void start_gos(unsigned int hart_id,
 
 	early_print_setup(hw);
 
-#ifndef CONFIG_SELECT_VCS
+#ifdef CONFIG_PRINT_LOGO
 	print(logo);
 #endif
 	print("complier info:\n");

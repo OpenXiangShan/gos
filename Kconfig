@@ -114,6 +114,10 @@ config ENABLE_SHELL
 	bool "Enable Shell"
 	default y
 
+config PRINT_LOGO
+	bool "Enable print logo"
+	default y
+
 config MEM_START
 	hex "Config Mem start"
 	default 0x1000000000 if SELECT_MELLITE_FPGA
