@@ -69,6 +69,9 @@ if [ "$#" -eq 1 ];then
 	elif [ "$1" = "mellite-fpga" ];then
 		make gos-mellite.dtb
 		make mellite_defconfig
+	elif [ "$1" = "vcs-aia-minimum" ];then
+		make gos-minimum.dtb
+		make vcs_aia_minimum_defconfig
 	else
 		make $1
 	fi
