@@ -29,6 +29,7 @@
 #include "string.h"
 #include "mm.h"
 #include "irq.h"
+#include "gos.h"
 
 #define TEST_COUNT 1
 
@@ -84,6 +85,7 @@ static int cmd_imsic_test_handler(int argc, char *argv[], void *priv)
 	return 0;
 }
 
+#if CONFIG_VIRT
 #define MSI_DEVICE_MMIO_BASE 0x30000
 #define MSI_DEVICE_MMIO_LEN  0x1000
 
@@ -314,12 +316,15 @@ static int cmd_imsic_multi_test_handler(int argc, char *argv[], void *priv)
 
 	return 0;
 }
+#endif
 
+#if CONFIG_VIRT
 static const struct command cmd_imsic_multi_test = {
 	.cmd = "imsic_test_multi",
 	.handler = cmd_imsic_multi_test_handler,
 	.priv = NULL,
 };
+#endif
 
 static const struct command cmd_imsic_m_test = {
 	.cmd = "imsic_test_m",
@@ -336,8 +341,9 @@ int command_imsic_test_init()
 {
 	register_command(&cmd_imsic_test);
 	register_command(&cmd_imsic_m_test);
+#if CONFIG_VIRT
 	register_command(&cmd_imsic_multi_test);
-
+#endif
 	return 0;
 }
 
