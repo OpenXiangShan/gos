@@ -6,11 +6,14 @@ menuconfig VIRT_ENABLE_TIMER
 menuconfig VIRT_ENABLE_AIA
 	bool "VIRT_AIA"
 	depends on SELECT_AIA
+	depends on AIA
 	default y
 
 config VIRT_DEVICE_PASSTHROUGH
 	bool "VIRT_DEVICE_PASSTHROUGH"
 	depends on VIRT_ENABLE_PCI_GENERIC
+	depends on SELECT_AIA
+	depends on AIA
 	default y
 
 choice

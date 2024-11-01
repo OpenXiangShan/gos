@@ -136,6 +136,9 @@ int get_hwirq(struct device *dev, int *ret_irq)
 	struct irq_domain *irq_domain = dev->irq_domain;
 	int *irqs = dev->irqs, i, num, hwirq;
 
+	if (!irq_domain)
+		return 0;
+
 	if (dev->irq_num > MAX_IRQ_NUM)
 		num = MAX_IRQ_NUM;
 	else
@@ -210,6 +213,9 @@ int msi_get_hwirq_affinity(struct device *dev, int nr_irqs,
 	int i, hwirq;
 	struct irq_domain *irq_domain = dev->irq_domain;
 
+	if (!irq_domain)
+		return 0;
+
 	hwirq = irq_domain->domain_ops->alloc_irqs(dev, nr_irqs, irq_domain->priv);
 	if (hwirq == -1)
 		return 0;
@@ -254,6 +260,9 @@ int msi_get_hwirq(struct device *dev, int nr_irqs,
 	struct irq_domain *irq_domain = dev->irq_domain;
 	int i, hwirq;
 
+	if (!irq_domain)
+		return 0;
+
 	if (!irq_domain->domain_ops->alloc_irqs)
 		return 0;
 
@@ -287,6 +296,9 @@ int register_device_irq(struct device *dev, struct irq_domain *irq_domain, unsig
 {
 	struct irq_info *irq_info = NULL;
 	struct irq_domain *domain;
+
+	if (!irq_domain)
+		return -1;
 
 	if (irq_domain->link_domain)
 		domain = irq_domain->link_domain;
