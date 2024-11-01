@@ -69,6 +69,9 @@ if [ "$#" -eq 1 ];then
 	elif [ "$1" = "mellite-fpga" ];then
 		make gos-mellite.dtb
 		make mellite_defconfig
+	elif [ "$1" = "mellite-sram" ];then
+		make gos-mellite-sram.dtb
+		make mellite_zebu_sram_defconfig
 	else
 		make $1
 	fi
