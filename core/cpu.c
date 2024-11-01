@@ -28,6 +28,7 @@
 #include "cpu.h"
 #include "devicetree.h"
 #include "../fdt/libfdt.h"
+#include "gos.h"
 
 extern char dtb_bin[];
 extern int mmu_is_on;
@@ -40,6 +41,9 @@ static spinlock_t notifier_lock = __SPINLOCK_INITIALIZER;
 unsigned long online_cpu_mask = 0;
 static LIST_HEAD(notifier_list);
 extern char secondary_start_sbi[];
+
+unsigned int secondary_cpus_init_stack_size = 0;
+unsigned long secondary_cpus_init_stack = 0;
 
 static int sbi_cpu_start(unsigned int hartid)
 {
@@ -124,6 +128,18 @@ void bringup_secondary_cpus(struct device_init_entry *hw)
 
 	cpu_count = get_cpu_count();
 
+	if (cpu_count == 1)
+		return;
+
+	secondary_cpus_init_stack = (unsigned long)mm_alloc((cpu_count - 1) * 4096);
+	if (!secondary_cpus_init_stack) {
+		print("cpu: Warning!! alloc secondary cpus init stack fail\n");
+		print("cpu: bringup secondary cpus fail\n");
+		return;
+	}
+
+	secondary_cpus_init_stack_size = (cpu_count - 1) * 4096;
+
 	for (i = 1; i < cpu_count; i++) {
 		if (!sbi_cpu_start(i)) {
 			set_online_cpumask(i);
@@ -163,8 +179,6 @@ static int cpu_hotplug_notify_callback(int cpu)
 void secondary_cpus_init(unsigned int hart_id, unsigned long stack)
 {
 	write_csr(sie, -1);
-
-	enable_mmu(1);
 
 	cpu_hotplug_notify_callback(hart_id);
 

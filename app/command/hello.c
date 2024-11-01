@@ -18,10 +18,11 @@
 #include <print.h>
 #include <device.h>
 #include "../command.h"
+#include "asm/sbi.h"
 
 static int cmd_hello_handler(int argc, char *argv[], void *priv)
 {
-	print("Hello Bosc gos Shell!!!\n");
+	print("Hello Bosc gos Shell!!! cpu:%d\n", sbi_get_cpu_id());
 	print("TEST PASS\n");
 	return 0;
 }

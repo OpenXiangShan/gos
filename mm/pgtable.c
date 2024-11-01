@@ -27,7 +27,7 @@
 #include "align.h"
 #include "task.h"
 
-static void *default_pgdp_pa = NULL;
+void *default_pgdp_pa = NULL;
 
 int pgtable_l4_enabled = 0;
 int pgtable_l5_enabled = 0;
