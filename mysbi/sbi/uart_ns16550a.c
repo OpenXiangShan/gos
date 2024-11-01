@@ -52,7 +52,12 @@ void uart_ns16550a_init(unsigned long base, struct sbi_uart_ops *ops, void *data
 
 	UART_DEFAULT_BAUD = priv->baud;
 	UART_CLK = priv->clk;
+
+#ifdef CONFIG_ZEBU_ENV
+	divisor = 108;
+#else
 	divisor = UART_CLK / (16 * UART_DEFAULT_BAUD);
+#endif
 
 	base_address = base;
 

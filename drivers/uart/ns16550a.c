@@ -122,7 +122,11 @@ static int ns16550a_read(struct device *dev, char *buf, unsigned long offset,
 
 static int __ns16550a_init(unsigned long base, int len)
 {
+#ifdef CONFIG_ZEBU_ENV
+	unsigned int divisor = 108;
+#else
 	unsigned int divisor = UART_CLK / (16 * UART_DEFAULT_BAUD);
+#endif
 
 	base_address = (unsigned long)ioremap((void *)base, len, 0);
 
