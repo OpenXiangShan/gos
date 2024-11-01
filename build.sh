@@ -40,7 +40,7 @@ if [ "$#" -eq 1 ];then
 		make minimum_defconfig
 
 	elif [ "$1" = "default" ];then
-		make gos-dualcore.dtb
+		make gos-qualcore.dtb
 		make defconfig
 
 	elif [ "$1" = "fpga" ];then
