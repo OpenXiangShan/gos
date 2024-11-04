@@ -17,6 +17,7 @@
 #ifndef IOPGTABLE_H
 #define IOPGTABLE_H
 
+void riscv_iommu_set_pg_shift(int mode);
 unsigned long riscv_iommu_gstage_io_walk_pt(struct riscv_iommu_device *iommu_dev,
 					 unsigned long iova);
 unsigned long riscv_iommu_fstage_io_walk_pt(struct riscv_iommu_device *iommu_dev,

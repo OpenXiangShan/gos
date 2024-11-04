@@ -22,6 +22,8 @@
 
 extern int mmu_is_on;
 
+static int iommu_pg_shift = PGDIR_SHIFT_L3;
+
 static unsigned long *riscv_iommu_pt_walk_alloc(unsigned long *ptp,
 						unsigned long iova,
 						unsigned int shift, int pgsize,
@@ -129,7 +131,7 @@ static unsigned long __riscv_iommu_io_walk_pt(struct riscv_iommu_device *iommu_d
 		pgdp = iommu_dev->pgdp;
 	}
 
-	pte = riscv_iommu_pt_walk_fetch((unsigned long *)virt_to_phy(pgdp), iova, PGDIR_SHIFT, 1);
+	pte = riscv_iommu_pt_walk_fetch((unsigned long *)virt_to_phy(pgdp), iova, iommu_pg_shift, 1);
 	if (!pte)
 		return -1UL;
 	if (!pmd_present(*pte))
@@ -151,7 +153,7 @@ int riscv_iommu_io_page_mapping(void *pgdp, unsigned long iova, void *addr, unsi
 		pfn = (unsigned long)addr >> PAGE_SHIFT;
 		pte =
 		    riscv_iommu_pt_walk_alloc((unsigned long *)virt_to_phy(pgdp),
-					      iova, PGDIR_SHIFT, PAGE_SIZE, 1,
+					      iova, iommu_pg_shift, PAGE_SIZE, 1,
 					      alloc_zero_page, gfp);
 		if (!pte)
 			return 0;
@@ -214,4 +216,14 @@ int riscv_iommu_fstage_io_map_pages(struct riscv_iommu_device *iommu_dev,
 {
 	return __riscv_iommu_io_map_pages(iommu_dev, iova, addr, size, gfp,
 				       RISCV_IOMMU_FIRST_STAGE);
+}
+
+void riscv_iommu_set_pg_shift(int mode)
+{
+	if (mode == 8)
+		iommu_pg_shift = PGDIR_SHIFT_L3;
+	else if (mode == 9)
+		iommu_pg_shift = PGDIR_SHIFT_L4;
+	else if (mode == 0xa)
+		iommu_pg_shift = PGDIR_SHIFT_L5;
 }

@@ -452,6 +452,8 @@ int riscv_iommu_init(struct device *dev, void *data)
 
 	riscv_iommu_enable(riscv_iommu);
 
+	riscv_iommu_set_pg_shift(riscv_iommu->pg_mode);
+
 	riscv_iommu->iommu.ops = &riscv_iommu_ops;
 
 	iommu_register(&riscv_iommu->iommu);
