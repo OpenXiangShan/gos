@@ -29,15 +29,25 @@
 
 static struct dmac_dw_axi *dw_axi_dmac;
 
+static void wait_for_dmac_complete(void)
+{
+	unsigned int tmp;
+	tmp = readl(dw_axi_dmac->base + DMAC_AXI0_CH1_INTR_STATUS);
+	while((tmp & 0x2) == 0x0)
+	{
+		tmp = readl(dw_axi_dmac->base + DMAC_AXI0_CH1_INTR_STATUS);
+	}
+}
+
 static void dw_dmac_irq_handler(void *data)
 {
 	dw_axi_dmac->done = 1;
-
+	wait_for_dmac_complete();
 	writel(dw_axi_dmac->base + DMAC_AXI0_CH1_INTR_CLEAR, 0x3);
 }
 
-static int dw_dmac_mem_to_mem(unsigned int src_addr,
-			      unsigned int des_addr,
+static int dw_dmac_mem_to_mem(unsigned long src_addr,
+			      unsigned long des_addr,
 			      unsigned int blockTS,
 			      unsigned int src_addr_inc,
 			      unsigned int des_addr_inc,
@@ -52,12 +62,12 @@ static int dw_dmac_mem_to_mem(unsigned int src_addr,
 	unsigned long ch1_ctl;
 	unsigned long ch1_ctl_hi;
 	unsigned int type = 0;
-	unsigned int src_hs = 0;
-	unsigned int des_hs = 0;
+	unsigned long src_hs = 0;
+	unsigned long des_hs = 0;
 	unsigned long base = dw_axi_dmac->base;
 
 	print
-	    ("src_addr: 0x%x des_addr: 0x%x blockTS: %d src_addr_inc: %d des_addr_inc: %d src_width: %d des_width: %d src_burstsize: %d des_burstsize: %d burst_len: %d\n",
+	    ("src_addr: 0x%lx des_addr: 0x%lx blockTS: %d src_addr_inc: %d des_addr_inc: %d src_width: %d des_width: %d src_burstsize: %d des_burstsize: %d burst_len: %d\n",
 	     src_addr, des_addr, blockTS, src_addr_inc, des_addr_inc, src_width,
 	     des_width, src_burstsize, des_burstsize, burst_len);
 
@@ -92,9 +102,9 @@ static int dw_dmac_mem_to_mem(unsigned int src_addr,
 	writel(base + DMAC_AXI0_CH1_CFG + 0x4, ch1_cfg_high);
 
 	/* CHANNEL_SRC_ADDR */
-	writel(base + DMAC_AXI0_CH1_SAR, src_addr);	// src address -> 0x0
+	writeq(base + DMAC_AXI0_CH1_SAR, src_addr);	// src address -> 0x0
 	/* CHANNEL_DES_ADDR */
-	writel(base + DMAC_AXI0_CH1_DAR, des_addr);	// des address -> 0x1f0000
+	writeq(base + DMAC_AXI0_CH1_DAR, des_addr);	// des address -> 0x1f0000
 
 	/* TRANSFER_BLOCK_SIZE */
 	writel(base + DMAC_AXI0_CH1_BLOCK_TS, blockTS);	// block size 14*32bit = 56 bytes
@@ -153,8 +163,8 @@ static int dw_axi_dmac_transfer_m2m(unsigned long src, unsigned long dst, int si
 	unsigned int des_burstsize = info->des_burstsize;
 	unsigned int burst_len = info->burst_len;
 
-	dw_dmac_mem_to_mem((unsigned int)src_addr,
-			   (unsigned int)des_addr,
+	dw_dmac_mem_to_mem(src_addr,
+			   des_addr,
 			   blockTS,
 			   src_addr_inc,
 			   des_addr_inc,
@@ -169,7 +179,6 @@ static int dw_axi_dmac_transfer_m2m(unsigned long src, unsigned long dst, int si
 		dw_axi_dmac->done = 0;
 		ret = 0;
 	}
-
 	return ret;
 }
 
