@@ -169,7 +169,7 @@ unsigned long atoi(char *in)
 {
 	char *tmp = in;
 	int i = 0;
-	int ratio = 1;
+	unsigned long ratio = 1;
 	unsigned long val = 0;
 	unsigned long ret = 0;
 	int nbit = 0, hex_xbit = 0;
