@@ -117,13 +117,13 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 &clint_kmh_hw_data,
 	  },
-#if 0
+#ifdef CONFIG_DMAC
 	{
 	 "dw,dmac",
-	 0x30040000,
+	 0x4200000,
 	 0x10000,
 	 "PLIC",
-	 { 4,},
+	 { 5,},
 	 1,
 	 " ",
 	 0,
