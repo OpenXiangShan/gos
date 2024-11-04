@@ -25,6 +25,7 @@
 #include "irq.h"
 #include "uart.h"
 #include "../bsp/uart_data.h"
+#include "gos.h"
 
 static unsigned int UART_CLK;
 static unsigned int UART_DEFAULT_BAUD;

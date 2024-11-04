@@ -19,6 +19,7 @@
 #include <device.h>
 #include "uart_ns16550a.h"
 #include "../../bsp/uart_data.h"
+#include "autoconf.h"
 
 static unsigned int UART_CLK;
 static unsigned int UART_DEFAULT_BAUD;
