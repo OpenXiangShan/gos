@@ -121,7 +121,7 @@ do_exception_vector:
 	sd s2, PT_SEPC(sp)
 
 	/* save sbadaddr */
-	csrr s3, sbadaddr
+	csrr s3, stval
 	sd s3, PT_SBADADDR(sp)
 
 	/* save scause */
@@ -177,7 +177,7 @@ do_exception_vector:
 	csrw sepc, a2
 
 	ld s3, PT_SBADADDR(sp)
-	csrw sbadaddr, s3
+	csrw stval, s3
 
 	ld s3, PT_SATP(sp)
 	csrw satp, s3
