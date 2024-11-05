@@ -9,6 +9,7 @@
 #define __INSN_LENGTH_32    (0x3UL)
 
 #define __EBREAK_INSN       (0x00100073)
+#define __C_EBREAK_INSN     (0x9002)
 
 struct stub {
 	struct list_head list;

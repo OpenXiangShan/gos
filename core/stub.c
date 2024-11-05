@@ -183,8 +183,12 @@ static int setup_stub_insn(struct stub *s)
 	size = 8;
 	s->previous_insn = alloc_insn_buffer(size);
 	s->previous_insn_size = size;
-	*((unsigned int *)s->previous_insn) = *((unsigned int *)s->addr);
-	*((unsigned int *)s->addr) = __EBREAK_INSN;
+
+	insn = (unsigned short *)s->addr;
+	*((unsigned int *)s->previous_insn) = (*insn) |
+					      ((*(insn + 1)) << 16);
+	*((unsigned short *)s->addr) = __C_EBREAK_INSN;
+
 	s->insn_len = insn_len;
 
 	next_insn = (unsigned int *)(s->previous_insn + 4);
