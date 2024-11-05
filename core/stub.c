@@ -96,27 +96,29 @@ static int alloc_stub_buffer(void)
 	}
 	memset((char *)s, 0, sizeof(struct stub_slot));
 
-	insn_va = vmap_alloc(PAGE_SIZE);
-	if (!insn_va) {
-		print("stub -- vmap_alloc fail\n");
-		return 0;
-	}
 	insn_pa = mm_alloc(PAGE_SIZE);
 	if (!insn_pa) {
 		print("stub -- mm_alloc fail\n");
 		return 0;
 	}
-	if (mmu_is_on)
+
+	if (mmu_is_on) {
+		insn_va = vmap_alloc(PAGE_SIZE);
+		if (!insn_va) {
+			print("stub -- vmap_alloc fail\n");
+			return 0;
+		}
 		insn_pa = (void *)virt_to_phy(insn_pa);
-	pgprot =
-	    __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC |
-		     _PAGE_DIRTY);
-	if (mmu_page_mapping
-	    ((unsigned long)insn_pa, (unsigned long)insn_va, PAGE_SIZE,
-	     pgprot)) {
-		print("stub -- mmu_page_mapping fail\n");
-		goto free;
+		pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE |
+				  _PAGE_EXEC | _PAGE_DIRTY);
+		if (mmu_page_mapping((unsigned long)insn_pa, (unsigned long)insn_va,
+				     PAGE_SIZE, pgprot)) {
+			print("stub -- mmu_page_mapping fail\n");
+			goto free;
+		}
 	}
+	else
+		insn_va = insn_pa;
 
 	s->slot_addr = insn_va;
 
