@@ -241,6 +241,16 @@ register_stub(const char *name, void (*stub_handler)(struct pt_regs * regs))
 	void *addr;
 	int flags;
 
+	spin_lock_irqsave(&stubs_lock, flags);
+	list_for_each_entry(s, &stubs, list) {
+		if (!strcmp(name, s->name)) {
+			print("stub is already exit in %s\n", name);
+			spin_unlock_irqrestore(&stubs_lock, flags);
+			return -1;
+		}
+	}
+	spin_unlock_irqrestore(&stubs_lock, flags);
+
 	addr = (void *)kallsyms_lookup_name(name);
 	if (!addr)
 		return -1;
@@ -259,6 +269,7 @@ register_stub(const char *name, void (*stub_handler)(struct pt_regs * regs))
 	spin_lock_irqsave(&stubs_lock, flags);
 	list_add_tail(&s->list, &stubs);
 	spin_unlock_irqrestore(&stubs_lock, flags);
+
 	return 0;
 }
 
