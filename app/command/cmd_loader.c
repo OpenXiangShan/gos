@@ -70,6 +70,7 @@ static int cmd_loader_handler(int argc, char *argv[], void *priv)
 	} else {
 		print("Invalid params...\n");
 		Usage();
+		return -1;
 	}
 
 	lp = (struct cmd_loader_param *)

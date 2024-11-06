@@ -116,7 +116,7 @@ static struct riscv_iommu_dc *riscv_iommu_get_dc(struct riscv_iommu *iommu,
 
 static int riscv_iommu_enable(struct riscv_iommu *iommu)
 {
-	unsigned long ddtp;
+	unsigned long ddtp = 0;
 	unsigned long ddtp_pa;
 
 	switch (iommu->ddt_mode) {

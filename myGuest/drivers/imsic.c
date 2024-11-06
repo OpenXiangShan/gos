@@ -231,7 +231,7 @@ static int imsic_alloc_ids_fix(struct imsic *p_imsic, int id)
 
 static int imsic_alloc_ids(int nr_irqs, struct imsic *p_imsic)
 {
-	int index = 0, nr = 0, base;
+	int index = 0, nr = 0, base = -1;
 	unsigned long ids;
 	int per_ids = sizeof(unsigned long) * 8;
 

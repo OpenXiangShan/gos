@@ -388,7 +388,7 @@ static int cmd_csr_ctl_handler(int argc, char *argv[], void *priv)
 {
 	unsigned int mode;
 	unsigned long csr_num;
-	unsigned long value;
+	unsigned long value = 0;
 #if CONFIG_VIRT
 	struct vcpu *vcpu;
 #endif

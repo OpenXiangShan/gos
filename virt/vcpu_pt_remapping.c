@@ -423,7 +423,7 @@ static int pci_pt_device_emu_cfg_write(struct pci_device_function_emulator *func
 static unsigned long pci_pt_device_emu_cfg_read(struct pci_device_function_emulator *func,
 						unsigned int reg, int len)
 {
-	unsigned long data;
+	unsigned long data = 0;
 
 	if (len == 1)
 		data = *(func->cfg_space.data + reg);

@@ -149,6 +149,8 @@ static int _decode_bar(struct bar *b, unsigned int val)
 	case PCI_BASE_ADDRESS_MEM_TYPE_64:
 		addr_type = pci_addr_type_mem_64;
 		break;
+	default:
+		return -1;
 	}
 
 	b->mem_type = mem_type;

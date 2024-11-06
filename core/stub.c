@@ -264,10 +264,11 @@ register_stub(const char *name, void (*stub_handler)(struct pt_regs * regs))
 
 static void restore_stub(struct stub *s)
 {
-	unsigned int *addr = s->addr;
-	unsigned int *pre = s->previous_insn;
+	unsigned short *addr = s->addr;
+	unsigned short *pre = s->previous_insn;
 
 	*addr = *pre;
+	*(addr + 1) = *(pre + 1);
 
 	local_flush_icache_all();
 }

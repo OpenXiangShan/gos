@@ -25,7 +25,7 @@ static struct early_print_device earlycon = { 0, };
 
 void uart_putc(char c)
 {
-	char str[2];
+	char str[3];
 
 	if (earlycon.early_print_enable != 1)
 		return;

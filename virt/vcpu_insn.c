@@ -141,6 +141,8 @@ int vcpu_mmio_load(struct vcpu *vcpu, unsigned long fault_addr,
 
 	if (region->ops && region->ops->read)
 		data = region->ops->read(region, fault_addr, len);
+	else
+		return -1;
 
 	SET_RD(insn, &vcpu->cpu_ctx.guest_context, data << shift >> shift);
 

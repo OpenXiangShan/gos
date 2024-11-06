@@ -92,8 +92,10 @@ static void page_table_flag_test(char *param, char *cflag)
 	unsigned long pte_val;
 	int pte_flag, fence_flag;
 
-	if (strlen(param) == 0)  //param is empty
+	if (strlen(param) == 0)  {//param is empty
 		print("Please set pet flag value! \n");
+		return;
+	}
 	else
 		pte_flag = atoi(param);
 
@@ -122,8 +124,10 @@ static void page_table_flag_test(char *param, char *cflag)
          *
          */
 	if (pte_flag != DIS_PAGE_TABLE) {
-		if (strlen(cflag) == 0)  //control is empty
+		if (strlen(cflag) == 0) { //control is empty
 			print("Please set pet control! \n");
+			return;
+		}
 		else
 			fence_flag = atoi(cflag);
 
@@ -153,7 +157,8 @@ static int v_p_address_mapping(void *va, char *c1, char *c2, char flag,  pgprot_
 	addr = mm_alloc(PAGE_SIZE);
 	if (!addr) {
 		print("%s -- Out of memory\n", __FUNCTION__);
-		goto ret1;
+		mm_free(addr, PAGE_SIZE);
+		return -1;
 	}
 	pa1 = (void *)virt_to_phy(addr);
 	strcpy((char *)addr, (char *)c1);
@@ -162,7 +167,8 @@ static int v_p_address_mapping(void *va, char *c1, char *c2, char flag,  pgprot_
 	addr = mm_alloc(PAGE_SIZE);
 	if (!addr) {
 		print("%s -- Out of memory\n", __FUNCTION__);
-		goto ret2;
+		mm_free(addr, PAGE_SIZE);
+		return -1;
 	}
 	pa2 = (void *)virt_to_phy(addr);
 	strcpy((char *)addr, (char *)c2);
@@ -212,9 +218,7 @@ static int v_p_address_mapping(void *va, char *c1, char *c2, char flag,  pgprot_
 	print("test start --> load 0x%lx(after sinval.vma)\n", va);
 	print("0x%lx : %s\n", va, (char *)va);
 
-ret2:
 	mm_free((void *)phy_to_virt(pa2), PAGE_SIZE);
-ret1:
 	mm_free((void *)phy_to_virt(pa1), PAGE_SIZE);
 
 	return 0;
@@ -263,10 +267,11 @@ static void sinval_param_test(char flag)
 			goto err1;
 		print("TEST PASS\n");
 	}
-err:
-	vmap_free(va, PAGE_SIZE);
+
 err1:
 	vmap_free(va1, PAGE_SIZE);
+err:
+	vmap_free(va, PAGE_SIZE);
 }
 
 static int sinval_g_test(char *param)
@@ -304,7 +309,7 @@ static void sinval_vma_all_test(void)
 	void *addr;
 	void *va, *pa1, *pa2;
 	int i = 0;
-	unsigned long mask1, mask2;
+	unsigned long mask1 = 0, mask2 = 0;
 
 	addr = mm_alloc(PAGE_SIZE);
 	if (!addr) {

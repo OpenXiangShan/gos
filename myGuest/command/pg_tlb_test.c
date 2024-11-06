@@ -86,7 +86,8 @@ static int v_p_address_mapping(void *va, char *c1, char *c2, char flag,  pgprot_
 	addr = mm_alloc(PAGE_SIZE);
 	if (!addr) {
 		print("%s -- Out of memory\n", __FUNCTION__);
-		goto ret1;
+		mm_free(addr, PAGE_SIZE);
+		return -1;
 	}
 	pa1 = (void *)virt_to_phy(addr);
 	strcpy((char *)addr, (char *)c1);
@@ -95,7 +96,8 @@ static int v_p_address_mapping(void *va, char *c1, char *c2, char flag,  pgprot_
 	addr = mm_alloc(PAGE_SIZE);
 	if (!addr) {
 		print("%s -- Out of memory\n", __FUNCTION__);
-		goto ret2;
+		mm_free(addr, PAGE_SIZE);
+		return -1;
 	}
 	pa2 = (void *)virt_to_phy(addr);
 	strcpy((char *)addr, (char *)c2);
@@ -141,9 +143,7 @@ static int v_p_address_mapping(void *va, char *c1, char *c2, char flag,  pgprot_
 	print("test start --> load 0x%lx(after hfence.vma)\n", va);
 	print("0x%lx : %s\n", va, (char *)va);
 
-ret2:
 	mm_free((void *)phy_to_virt(pa2), PAGE_SIZE);
-ret1:
 	mm_free((void *)phy_to_virt(pa1), PAGE_SIZE);
 
 	return 0;
@@ -190,10 +190,11 @@ static void hfence_param_test(char flag)
 		if (ret == -1)
 			goto err1;
 	}
-err:
-	vmap_free(va, PAGE_SIZE);
+
 err1:
 	vmap_free(va1, PAGE_SIZE);
+err:
+	vmap_free(va, PAGE_SIZE);
 }
 
 static int hfence_g_test(char *param)
@@ -238,8 +239,10 @@ static int page_table_flag_test(char *param, char *cflag)
 	int pte_flag, fence_flag;
 	pgprot_t pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY | _PAGE_GLOBAL);
 
-	if (strlen(param) == 0)  //param is empty
+	if (strlen(param) == 0) { //param is empty
 		print("Please set pet flag value! \n");
+		return -1;
+	}
 	else
 		pte_flag = atoi(param);
 
@@ -276,8 +279,10 @@ static int page_table_flag_test(char *param, char *cflag)
          *
          */
 	if (pte_flag != DIS_PAGE_TABLE) {
-		if (strlen(cflag) == 0)  //control is empty
+		if (strlen(cflag) == 0) {//control is empty
 			print("Please set pet control! \n");
+			return -1;
+		}
 		else
 			fence_flag = atoi(cflag);
 

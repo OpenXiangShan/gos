@@ -30,7 +30,7 @@ static void Usage()
 
 static int user_cmd_vector_test_handler(int argc, char *argv[], void *priv)
 {
-	int i, ret;
+	int i, ret = 0;
 
 	if (argc < 1) {
 		Usage();
@@ -55,6 +55,9 @@ static int user_cmd_vector_test_handler(int argc, char *argv[], void *priv)
 			if (ret)
 				break;
 		}
+	} else {
+		printf("Invalid option\n");
+		return -1;
 	}
 
 	printf("%s test complete -- times:%d ret:%d\n", argv[0], i, ret);

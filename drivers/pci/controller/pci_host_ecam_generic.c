@@ -45,7 +45,7 @@ static unsigned int pci_host_generic_ecam_config_read(struct pci_bus *bus,
 				int devfn, int addr, int size)
 {
 	void *ecam_addr;
-	unsigned int ret;
+	unsigned int ret = 0;
 
 	ecam_addr = bus->ops->map(bus, devfn, addr);
 	if (!ecam_addr) {

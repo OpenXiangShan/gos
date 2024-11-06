@@ -125,6 +125,9 @@ static int cmd_prefetch_handler(int argc, char *argv[], void *priv)
 
 	if (argc == 2)
 		base = atoi(argv[1]);
+	else
+		return -1;
+
 	if (!strncmp(argv[0], "i", sizeof("i"))) {
 		prefetch_i(base);
 	} else if (!strncmp(argv[0], "w", sizeof("w"))) {

@@ -129,7 +129,8 @@ static unsigned long __riscv_iommu_io_walk_pt(struct riscv_iommu_device *iommu_d
 		pgdp = iommu_dev->pgdp_gstage;
 	} else if (gstage == RISCV_IOMMU_FIRST_STAGE) {
 		pgdp = iommu_dev->pgdp;
-	}
+	} else
+		return 0;
 
 	pte = riscv_iommu_pt_walk_fetch((unsigned long *)virt_to_phy(pgdp), iova, iommu_pg_shift, 1);
 	if (!pte)
