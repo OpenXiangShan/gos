@@ -42,7 +42,7 @@ void show_guest_regs(struct virt_cpu_context *regs)
 	print(" t5 : 0x%lx t6 : 0x%lx\n", regs->t5, regs->t6);
 }
 
-static void do_trap_error(struct vcpu *vcpu, unsigned long saus)
+static void vcpu_do_trap_error(struct vcpu *vcpu, unsigned long saus)
 {
 	struct virt_cpu_context *regs;
 
@@ -112,7 +112,7 @@ int vcpu_process_vm_exit(struct vcpu *vcpu)
 	case EXC_STORE_GUEST_PAGE_FAULT:
 		if (guest_ctx->hstatus & HSTATUS_SPV) {
 			if(gstage_page_fault(vcpu, scause)){
-				do_trap_error(vcpu, scause);
+				vcpu_do_trap_error(vcpu, scause);
 				return -1;
 			}
 		}else

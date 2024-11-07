@@ -53,6 +53,24 @@ static void handle_task_scheduler_event_stub_handler(struct pt_regs *regs)
 	print("schedule task: %s\n", task->name);
 }
 
+
+ static void guest_implicit_load_event_handler(struct pt_regs *regs)
+ {
+	if(EXC_LOAD_GUEST_PAGE_FAULT==regs->a1)
+	{
+		print("TEST PASS, scause: 0x%lx\n",regs->a1);
+	}
+ }
+
+ static void guest_implicit_store_event_handler(struct pt_regs *regs)
+ {
+	if(EXC_STORE_GUEST_PAGE_FAULT==regs->a1)
+	{
+		print("TEST PASS, scause: 0x%lx\n",regs->a1);
+	}
+ }
+
+
 static int stub_del(char *name)
 {
 	struct stub_info *si, *n;
@@ -141,6 +159,14 @@ static int cmd_stub_test_handler(int argc, char *argv[], void *priv)
 			    sizeof("task_scheduler_event_handler"))) {
 		register_stub("task_scheduler_event_handler",
 			      handle_task_scheduler_event_stub_handler);
+	} else if (!strncmp(argv[0], "guest_implicit_load_event_handler",
+			    sizeof("guest_implicit_load_event_handler"))) {
+		register_stub("vcpu_do_trap_error",
+			      guest_implicit_load_event_handler);
+	} else if (!strncmp(argv[0], "guest_implicit_store_event_handler",
+			    sizeof("guest_implicit_store_event_handler"))) {
+		register_stub("vcpu_do_trap_error",
+			      guest_implicit_store_event_handler);
 	}
 
 	return 0;
