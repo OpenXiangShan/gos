@@ -4,5 +4,6 @@
 int vadd_vi_0_start();
 int vasubu_vv_8_start();
 int vsadd_vv_2_start();
+int v_zicclsm_test();
 
 #endif

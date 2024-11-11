@@ -26,6 +26,7 @@ static void Usage()
 	printf("    vadd_vi_0\n");
 	printf("    vasubu_vv_8\n");
 	printf("    vsadd_vv_2\n");
+	printf("    v_zicclsm \n");
 }
 
 static int user_cmd_vector_test_handler(int argc, char *argv[], void *priv)
@@ -52,6 +53,12 @@ static int user_cmd_vector_test_handler(int argc, char *argv[], void *priv)
 	} else if (!strncmp(argv[0], "vsadd_vv_2", sizeof("vsadd_vv_2"))) {
 		for (i = 0; i < 100; i++) {
 			ret = vsadd_vv_2_start();
+			if (ret)
+				break;
+		}
+	} else if (!strncmp(argv[0], "v_zicclsm", sizeof("v_zicclsm"))) {
+		for (i = 0; i < 100; i++) {
+			ret = v_zicclsm_test();
 			if (ret)
 				break;
 		}

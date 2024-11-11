@@ -256,6 +256,12 @@ void sbi_trap_handler(struct sbi_trap_regs *regs)
 	case CAUSE_FETCH_ACCESS:
 		msg = "Instruction access fault";
 		break;
+	case CAUSE_MISALIGNED_STORE:
+		msg = "address misaligned st fault";
+		break;
+	case CAUSE_MISALIGNED_FETCH:
+		msg = "address misaligned ld fault";
+		break;
 	default:
 		break;
 	}
