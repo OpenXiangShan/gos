@@ -114,6 +114,7 @@
  *          will override the default size of 10M with a new size of 100M elements
  *          per array.
  */
+#define STREAM_ARRAY_SIZE   128
 #ifndef STREAM_ARRAY_SIZE
 #define STREAM_ARRAY_SIZE	2097152
 #endif

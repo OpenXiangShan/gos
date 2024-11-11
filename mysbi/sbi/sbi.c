@@ -27,6 +27,7 @@
 #include "sbi_trap.h"
 #include "autoconf.h"
 #include "hpmdriver.h"
+#include <asm/mmio.h>
 
 static struct sbi_trap_hw_context *h_context[8] = { 0 };
 extern void exception_vector(void);
@@ -107,8 +108,8 @@ static void hpm_test()
     se_cc_double(19, MODE_M, OPTYPE_ADD, MemBlock_loadpipe0_load_req, MemBlock_loadpipe1_load_req);
 
     // === tmp workload ===
-    volatile uint64_t a = 0;
-    for(uint64_t i = 0; i < 1000; i++) {
+    volatile unsigned long a = 0;
+    for(unsigned long i = 0; i < 1000; i++) {
         a += a + i;
     }
     printf("%lu\n",a);
@@ -439,6 +440,80 @@ void sbi_secondary_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 	delegate_traps();
 }
 
+// System Fabric Mapping
+#define ddr_cru_base         (0x4125000)
+#define apc_ctrl_base        (0x4110000)
+#define soc_cru_base         (0x4102000)
+#define xs_core_ctrl_base    (0x4104000)
+
+void pll_cru_cfg(unsigned long cru_addr, unsigned int fout)
+{
+	unsigned int a;
+	unsigned long b;
+	unsigned char c;
+	unsigned int val;
+
+	if (fout >= 1250000) {
+		fout = fout * 2;
+		c = 1;
+	} else if (fout >= 625000) {
+		fout = fout * 4;
+		c = 3;
+	} else {
+		fout = fout * 8;
+		c = 7;
+	}
+	a = fout / 0x5dc0;
+	b = fout % 0x5dc0;
+	b = b * 0x1000000;
+	b = b / 0x5dc0;
+	writel(cru_addr + 0x4    , a  );
+	writel(cru_addr + 0x8    , b  );
+	writel(cru_addr + 0xc    , c  );
+	writel(cru_addr + 0x10   , 1  );
+	writel(cru_addr          , 0xb);
+	while (1) {
+		val = readl(cru_addr + 0x14   );
+		if (val != 0) {
+			break;
+		}
+	}
+	writel(cru_addr  , 0x3b );
+}
+
+void config_pll(unsigned int f_ddr, unsigned int f_soc, unsigned int f_apc, unsigned int f_xs_core) 
+{
+    unsigned int val;
+
+    pll_cru_cfg(ddr_cru_base , f_ddr );
+    sbi_print("DDR PLL config to %d\r\n", f_ddr);
+    pll_cru_cfg(soc_cru_base , f_soc );
+    sbi_print("SOC PLL config to %d\r\n", f_soc);
+    pll_cru_cfg(apc_ctrl_base , f_apc );
+    sbi_print("APC PLL config to %d\r\n", f_apc);
+    pll_cru_cfg(xs_core_ctrl_base , f_xs_core );
+    sbi_print("XS CORE PLL config to %d\r\n", f_xs_core);
+
+    val = readl(soc_cru_base + 0x104);
+    writel(soc_cru_base + 0x100, 0);
+    val = readl(soc_cru_base + 0x104);
+
+    writel(ddr_cru_base + 0x104, 0x1);
+
+    val = readl(apc_ctrl_base + 0x100);
+    val |= 0x5;
+    writel(apc_ctrl_base + 0x100, val);
+    val = readl(apc_ctrl_base + 0x110);
+    val = readl(apc_ctrl_base + 0x120);
+    val = readl(apc_ctrl_base + 0x128);
+    val = readl(apc_ctrl_base + 0x12c);
+    val = readl(apc_ctrl_base + 0x180);
+
+    val = readl(xs_core_ctrl_base + 0x100);
+    val |= 0x4;
+    writel(xs_core_ctrl_base + 0x100, val);
+}
+
 void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 {
 	h_context[hart_id] = ctx;
@@ -448,6 +523,12 @@ void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 
 	sbi_print("complier time : %s\n", BUILD_TIME);
 	sbi_print("sbi init... hartid: %d, ctx:%x\n", hart_id, ctx);
+
+    config_pll(0x86470, 0xc3500, 0xdbba0, 0xc3500);
+	if (-1 == sbi_uart_update_baud(hart_id, ctx))
+		return;
+
+	sbi_print("sbi_uart_update_baud update .\n");
 
 	sbi_trap_init();
 	sbi_setup_pmp();

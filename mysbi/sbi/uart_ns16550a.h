@@ -55,4 +55,5 @@
 
 void uart_ns16550a_init(unsigned long base, struct sbi_uart_ops *ops, void *data);
 
+void uart_ns16550a_update_baud(unsigned long base, struct sbi_uart_ops *ops, void *data);
 #endif

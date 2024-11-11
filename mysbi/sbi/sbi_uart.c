@@ -72,5 +72,30 @@ static int __sbi_uart_init(struct sbi_trap_hw_context *ctx)
 
 int sbi_uart_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 {
-	return __sbi_uart_init(ctx);
+       return __sbi_uart_init(ctx);
+}
+
+static int __sbi_uart_update_baud(struct sbi_trap_hw_context *ctx)
+{
+	extern unsigned long DEVICE_INIT_TABLE, DEVICE_INIT_TABLE_END;
+	int nr =
+	    (struct device_init_entry *)&DEVICE_INIT_TABLE_END -
+	    (struct device_init_entry *)&DEVICE_INIT_TABLE;
+	struct device_init_entry *device_entry;
+
+	for (device_entry = (struct device_init_entry *)&DEVICE_INIT_TABLE;
+	     nr; device_entry++, nr--) {
+		if (!strncmp(device_entry->compatible, "ns16550a", 128)) {
+			ctx->uart_base = device_entry->start;
+			uart_ns16550a_update_baud(device_entry->start, &ops, device_entry->data);
+			return 0;
+		}
+	}
+
+	return -1;
+}
+
+int sbi_uart_update_baud(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
+{
+	return __sbi_uart_update_baud(ctx);
 }

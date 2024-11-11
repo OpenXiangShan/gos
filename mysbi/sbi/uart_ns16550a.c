@@ -24,6 +24,8 @@
 static unsigned int UART_CLK;
 static unsigned int UART_DEFAULT_BAUD;
 
+#define DW_UART_WAIT_POLL_CNT_MAX 1024
+
 static unsigned long base_address;
 
 static void ns16550a_delay(unsigned int loops)
@@ -52,13 +54,9 @@ void uart_ns16550a_init(unsigned long base, struct sbi_uart_ops *ops, void *data
 	unsigned int divisor;
 
 	UART_DEFAULT_BAUD = priv->baud;
-	UART_CLK = priv->clk;
+	UART_CLK = 24000000;//24M
 
-#ifdef CONFIG_ZEBU_ENV
-	divisor = 108;
-#else
 	divisor = UART_CLK / (16 * UART_DEFAULT_BAUD);
-#endif
 
 	base_address = base;
 
@@ -74,4 +72,62 @@ void uart_ns16550a_init(unsigned long base, struct sbi_uart_ops *ops, void *data
 	writel(base_address + MCR, (RTS | DTR));
 
 	ops->putc = ns16550a_putc;
+}
+
+void uart_ns16550a_update_baud(unsigned long base, struct sbi_uart_ops *ops, void *data)
+{
+	struct uart_data *priv = (struct uart_data *)(data);
+	unsigned int divisor;
+
+	UART_DEFAULT_BAUD = priv->baud;
+	UART_CLK = priv->clk;
+
+	divisor = priv->clk / (16 * priv->baud);
+
+	base_address = base;
+	unsigned long val;
+	int poll_cnt;
+
+	poll_cnt = 0;
+	do {
+		poll_cnt++;
+		if (poll_cnt >= DW_UART_WAIT_POLL_CNT_MAX) return;
+
+		/* Clear data received if any */
+		val = readl(base_address + 0x14);
+		if ((val & 0x03) != 0) {
+			val = readl(base_address + 0x00);
+			continue;
+		}
+
+		/* Wait until line not busy */
+		val = readl(base_address + 0x7C);
+		if ((val & 0x01) != 0) {
+			continue;
+		}
+
+		/* Try to latch */
+		val = readl(base_address + 0x0C);
+		val |= 0x80;
+		writel(base_address + 0x0C, val);
+		val = readl(base_address + 0x0C);
+	} while ((val & 0x80) == 0);
+
+	/* Update new divisor */
+	val = divisor & 0xFF; writel(base_address + 0x00, val);	// DLL
+	val = divisor >> 8;   writel(base_address + 0x04, val);	// DLH
+
+	/* Wait to clear */
+	poll_cnt = 0;
+	do {
+		val = readl(base_address + 0x0C);
+		val &= 0x7F;
+		writel(base_address + 0x0C, val);
+		val = readl(base_address + 0x0C);
+		poll_cnt++;
+		if (poll_cnt >= DW_UART_WAIT_POLL_CNT_MAX) return;
+	} while ((val & 0x80) != 0);
+
+	ops->putc = ns16550a_putc;
+	return;
 }

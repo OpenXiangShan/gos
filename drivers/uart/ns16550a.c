@@ -26,6 +26,7 @@
 #include "uart.h"
 #include "../bsp/uart_data.h"
 #include "gos.h"
+#include <asm/sbi.h>
 
 static unsigned int UART_CLK;
 static unsigned int UART_DEFAULT_BAUD;
@@ -175,6 +176,7 @@ int ns16550a_init(struct device *dev, void *data)
 	print("ns16550a: base: 0x%lx, len: %d, irq: %d\n",
 	      dev->base, dev->len, dev->irqs[0]);
 
+#if 0
 	while (readl(base_address + USR) & 0x1) ;
 
 	writel(base_address + IER, 1);
@@ -184,6 +186,7 @@ int ns16550a_init(struct device *dev, void *data)
 		register_device_irq(dev, dev->irq_domain, irqs[i],
 				    ns16550a_irq_handler, NULL);
 
+#endif
 	drv = dev->drv;
 	strcpy(dev->name, "UART0");
 	strcpy(drv->name, "UART0");

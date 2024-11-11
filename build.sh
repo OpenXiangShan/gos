@@ -78,6 +78,9 @@ if [ "$#" -eq 1 ];then
 	elif [ "$1" = "vcs-qual-minimum" ];then
 		make gos-qualcore-minimum.dtb
 		make vcs_aia_minimum_defconfig
+	elif [ "$1" = "nhv3" ];then
+		make gos-nhv3-sram.dtb
+		make nhv3_defconfig 
 	else
 		make $1
 	fi
