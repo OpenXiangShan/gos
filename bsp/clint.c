@@ -24,6 +24,10 @@ struct clint_data clint_kmh_hw_data = {
 	.clint_freq = 1000000,
 };
 
+struct clint_data clint_nhv3_hw_data = {
+	.clint_freq = 24000000,
+};
+
 struct clint_data qemu_clint_hw_data = {
 	.clint_freq = 10000000,
 };

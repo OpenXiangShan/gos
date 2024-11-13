@@ -26,6 +26,7 @@
 #include "uart_data.h"
 
 extern struct clint_data clint_kmh_hw_data;
+extern struct clint_data clint_nhv3_hw_data;
 extern struct clint_data qemu_clint_hw_data;
 extern struct plic_data plic_hw_data;
 extern struct riscv_iommu_data riscv_iommu_data;
@@ -115,7 +116,7 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	 " ",
 	 0,
-	 &clint_kmh_hw_data,
+	 &clint_nhv3_hw_data,
 	  },
 #ifdef CONFIG_DMAC
 	{
