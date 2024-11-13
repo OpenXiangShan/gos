@@ -18,8 +18,12 @@ subdir-y := $(addprefix $(obj)/,$(subdir-y))
 
 subdir_objs := $(foreach f, $(subdir-y), $(f)/built-in.o)
 
+static_libs := $(filter-out %/, $(lib-y))
+static_libs := $(addprefix $(obj)/,$(static_libs))
+
 cur_objs := $(filter-out %/, $(obj-y))
 cur_objs := $(addprefix $(obj)/,$(cur_objs))
+
 
 PHONY += $(subdir-y)
 
@@ -30,7 +34,7 @@ $(subdir-y):
 
 $(obj)/built-in.o: $(cur_objs) $(subdir_objs)
 	@echo "LD $@"
-	@$(LD) -r -o $@ $^
+	@$(LD) -r -o $@ $^ -L. $(static_libs)
 
 %.o: %.c
 	@echo "CC $@"

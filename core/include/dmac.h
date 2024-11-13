@@ -36,6 +36,7 @@ struct dmac_device {
 	void *priv;
 };
 
+struct dmac_device *get_dmac(char *name);
 int register_dmac_device(struct dmac_device *dmac);
 void walk_all_dmac(void);
 int memcpy_hw(char *name, char *dst, char *src, unsigned int size);

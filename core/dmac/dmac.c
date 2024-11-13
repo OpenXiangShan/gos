@@ -45,6 +45,18 @@ static int find_free_dmac_index(void)
 	return pos;
 }
 
+struct dmac_device *get_dmac(char *name)
+{
+	struct dmac_device *dmac;
+
+	list_for_each_entry(dmac, &dmacs, list){
+		if (!strcmp(dmac->name, name))
+			return dmac;
+	}
+
+	return NULL;
+}
+
 void walk_all_dmac(void)
 {
 	struct dmac_device *dmac;
