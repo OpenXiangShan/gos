@@ -71,6 +71,8 @@ static int dw_dmac_mem_to_mem(unsigned long src_addr,
 	     src_addr, des_addr, blockTS, src_addr_inc, des_addr_inc, src_width,
 	     des_width, src_burstsize, des_burstsize, burst_len);
 
+    /* dw_axi_dmac enable */
+	writel(base + DMAC_AXI0_COMMON_CFG, 0x1);
 	/* check dmac reset complete */
 	while ((readl(base + DMAC_AXI0_COMMON_RST_REG) & 0x01) != 0) ;
 
@@ -179,6 +181,7 @@ static int dw_axi_dmac_transfer_m2m(unsigned long src, unsigned long dst, int si
 		dw_axi_dmac->done = 0;
 		ret = 0;
 	}
+
 	return ret;
 }
 
