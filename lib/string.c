@@ -404,6 +404,7 @@ static int my_vsprintf(char *out, const char *fmt, va_list ap)
 			break;
 		}
 	}
+    *out = 0;
 
 	return 0;
 }
