@@ -51,7 +51,7 @@ static int cmd_iommu_lib_test_handler(int argc, char *argv[], void *priv)
 	info.pasid = 0;
 	info.sv_mode = RISCV_IOMMU_DC_FSC_IOSATP_MODE_SV39;
 	info.ddt_mode = DDTP_MODE_3LEVEL;
-	info.pdt_mode = PDTP_MODE_1LEVEL;
+	info.pdt_mode = PDTP_MODE_3LEVEL;
 	info.cap = 0;
 
 	iommu = rv_iommu_pgtable_setup_init(&info, &err);
