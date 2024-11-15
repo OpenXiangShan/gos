@@ -11,7 +11,7 @@ int sh3add_test(void);
 int sh3add_uw_test(void);
 int slli_uw_test(void);
 
-rtests tests_zba[] = {
+static rtests tests_zba[] = {
 	{"sh1add test",sh1add_test},
 	{"add_uw test",add_uw_test},
 	{"sh1add_uw test",sh1add_uw_test},
@@ -23,13 +23,13 @@ rtests tests_zba[] = {
 };
 static int test_zba(void)
 {
-	for(int i=0;; i++){
+	for(int i=0;i < (sizeof(tests_zba)/sizeof(rtests)); i++){
 		if(!tests_zba[i].name)
 			break;
 		if(!tests_zba[i].fp()){
-			printf("%s pass \n", tests_zba[i].name);
+			printf("%s TEST_SUCCESS \n", tests_zba[i].name);
 		}else{
-			printf("ERROR: %s fail \n", tests_zba[i].name);
+			printf("ERROR: %s TEST FAIL \n", tests_zba[i].name);
 		}
 	}
 	return 0;

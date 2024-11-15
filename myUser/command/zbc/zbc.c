@@ -6,20 +6,20 @@ int clmul_test(void);
 int clmulh_test(void);
 int clmulr_test(void);
 
-rtests tests_zbc[] = {
+static rtests tests_zbc[] = {
 	{"clmul test",clmul_test},
 	{"clmulh test",clmulh_test},
 	{"clmulr test",clmulr_test},
 };
 static int test_zbc(void)
 {
-	for(int i=0;; i++){
+	for(int i=0;i < (sizeof(tests_zbc)/sizeof(rtests)); i++){
 		if(!tests_zbc[i].name)
 			break;
 		if(!tests_zbc[i].fp()){
-			printf("%s pass \n", tests_zbc[i].name);
+			printf("%s TEST_SUCCESS \n", tests_zbc[i].name);
 		}else{
-			printf("ERROR: %s fail \n", tests_zbc[i].name);
+			printf("ERROR: %s TEST FAIL \n", tests_zbc[i].name);
 		}
 	}
 	return 0;

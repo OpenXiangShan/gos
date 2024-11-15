@@ -27,7 +27,7 @@ int sext_h_test(void);
 int xnor_test(void);
 int zext_h_test(void);
 
-rtests tests_zbb[] = {
+static rtests tests_zbb[] = {
 	{"andn test",andn_test},
 	{"clz test",clz_test},
 	{"clzw test",clzw_test},
@@ -55,13 +55,13 @@ rtests tests_zbb[] = {
 };
 static int test_zbb(void)
 {
-	for(int i=0;; i++){
+	for(int i=0;i < (sizeof(tests_zbb)/sizeof(rtests)); i++){
 		if(!tests_zbb[i].name)
 			break;
 		if(!tests_zbb[i].fp()){
-			printf("%s pass \n", tests_zbb[i].name);
+			printf("%s TEST_SUCCESS \n", tests_zbb[i].name);
 		}else{
-			printf("ERROR: %s fail \n", tests_zbb[i].name);
+			printf("ERROR: %s TEST FAIL \n", tests_zbb[i].name);
 		}
 	}
 	return 0;

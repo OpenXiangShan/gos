@@ -11,7 +11,7 @@ int binvi_test(void);
 int bset_test(void);
 int bseti_test(void);
 
-rtests tests_zbs[] = {
+static rtests tests_zbs[] = {
 	{"bclr test",bclr_test},
 	{"bclri test",bclri_test},
 	{"bext test",bext_test},
@@ -23,13 +23,13 @@ rtests tests_zbs[] = {
 };
 static int test_zbs(void)
 {
-	for(int i=0;; i++){
+	for(int i=0;i < (sizeof(tests_zbs)/sizeof(rtests)); i++){
 		if(!tests_zbs[i].name)
 			break;
 		if(!tests_zbs[i].fp()){
-			printf("%s pass \n", tests_zbs[i].name);
+			printf("%s TEST_SUCCESS \n", tests_zbs[i].name);
 		}else{
-			printf("ERROR: %s fail \n", tests_zbs[i].name);
+			printf("ERROR: %s TEST FAIL \n", tests_zbs[i].name);
 		}
 	}
 	return 0;
