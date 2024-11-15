@@ -25,9 +25,7 @@ static int cmd_hello_handler(int argc, char *argv[], void *priv)
 	for (int i = 0; i < argc; i++)
 		print("cmd%d: %s\n", i, argv[i]);
 
-        print("TEST PASS\n");
-
-	return 0;
+	return TEST_PASS;
 }
 
 static const struct command cmd_hello = {

@@ -13,23 +13,32 @@ static rtests tests_zbc[] = {
 };
 static int test_zbc(void)
 {
-	for(int i=0;i < (sizeof(tests_zbc)/sizeof(rtests)); i++){
+	int r = 0;
+
+	for(int i=0;; i++){
 		if(!tests_zbc[i].name)
 			break;
 		if(!tests_zbc[i].fp()){
 			print("%s TEST_SUCCESS \n", tests_zbc[i].name);
 		}else{
-			print("ERROR: %s TEST FAIL \n", tests_zbc[i].name);
+			print("ERROR: %s fail \n", tests_zbc[i].name);
+			r++;
 		}
 	}
-	return 0;
+
+	return r;
 }
 static int cmd_zbc_handler(int argc, char *argv[], void *priv)
 {
+	int r;
+
 	print("zbc testing ......\n");
-	test_zbc();
+	r = test_zbc();
 	print("zbc test...... end\n");
-	return 0;
+	if (r)
+		return TEST_FAIL;
+	else
+		return TEST_PASS;
 }
 
 static const struct command cmd_zbc_test = {

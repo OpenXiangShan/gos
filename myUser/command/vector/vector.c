@@ -68,7 +68,10 @@ static int user_cmd_vector_test_handler(int argc, char *argv[], void *priv)
 	}
 
 	print("%s test complete -- times:%d ret:%d\n", argv[0], i, ret);
-	return 0;
+	if (ret == 0)
+		return TEST_PASS;
+	else
+		return TEST_FAIL;
 }
 
 static const struct command user_cmd_vector_test = {

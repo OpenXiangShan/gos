@@ -17,6 +17,8 @@
 #ifndef __USER_COMMAND_H
 #define __USER_COMMAND_H
 
+#include "result.h"
+
 #define COMMAND_INIT_TABLE __command_init_table
 #define COMMAND_INIT_TABLE_END __command_init_table_end
 

@@ -17,6 +17,8 @@
 #ifndef _COMMAND_H
 #define _COMMAND_H
 
+#include "asm/result.h"
+
 #define COMMAND_INIT_TABLE __command_init_table
 #define COMMAND_INIT_TABLE_END __command_init_table_end
 

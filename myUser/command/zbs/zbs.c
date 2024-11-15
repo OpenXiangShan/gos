@@ -23,23 +23,31 @@ static rtests tests_zbs[] = {
 };
 static int test_zbs(void)
 {
-	for(int i=0;i < (sizeof(tests_zbs)/sizeof(rtests)); i++){
+	int r = 0;
+
+	for(int i=0;; i++){
 		if(!tests_zbs[i].name)
 			break;
 		if(!tests_zbs[i].fp()){
 			print("%s TEST_SUCCESS \n", tests_zbs[i].name);
 		}else{
-			print("ERROR: %s TEST FAIL \n", tests_zbs[i].name);
+			print("ERROR: %s fail \n", tests_zbs[i].name);
+			r++;
 		}
 	}
-	return 0;
+	return r;
 }
 static int cmd_zbs_handler(int argc, char *argv[], void *priv)
 {
+	int r;
+
 	print("zbs testing ......\n");
-	test_zbs();
+	r = test_zbs();
 	print("zbs test...... end\n");
-	return 0;
+	if (r)
+		return TEST_FAIL;
+	else
+		return TEST_PASS;
 }
 
 static const struct command cmd_zbs_test = {

@@ -60,16 +60,16 @@ static int cmd_svpbmt_test_handler(int argc, char *argv[], void *priv)
 	
 	print("cost: %d ticks\n", cache_time = get_system_tick() - start);
 	
+	vmem_free(addr, 4096);
+
 	if(cache_time < nocache_time)
 	{
-		print("TEST PASS\n");
+		return TEST_PASS;
 	}
 	else
 	{
-		print("TEST FAIL\n");
+		return TEST_FAIL;
 	}
-
-	vmem_free(addr, 4096);
 
 	return 0;
 }
