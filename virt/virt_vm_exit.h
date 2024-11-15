@@ -14,7 +14,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __VIRT_VM_EXTI_H
+#ifndef __VIRT_VM_EXIT_H
 #define __VIRT_VM_EXIT_H
 
 int vcpu_process_vm_exit(struct vcpu *vcpu);

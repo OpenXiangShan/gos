@@ -14,7 +14,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _APLILC_DATA_H
+#ifndef _APLIC_DATA_H
 #define _APLIC_DATA_H
 
 #include "imsic_data.h"
