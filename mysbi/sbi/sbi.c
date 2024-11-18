@@ -524,11 +524,20 @@ void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 	sbi_print("complier time : %s\n", BUILD_TIME);
 	sbi_print("sbi init... hartid: %d, ctx:%x\n", hart_id, ctx);
 
+    /*
+     * The default value of the PLIC enable reg is random,
+     * to prevent accidents, and is initialized to0
+     */
+    writel( 0x3c002000,0); //disable irq 0~31 on context0
+    writel( 0x3c002004,0); //disable irq 32~63 on context0
+    writel( 0x3c002008,0); //disable irq 64~95 on context0
+    writel( 0x3c00200c,0); //disable irq 65~127 on context0
+
     config_pll(0x86470, 0xc3500, 0xdbba0, 0xc3500);
 	if (-1 == sbi_uart_update_baud(hart_id, ctx))
 		return;
 
-	sbi_print("sbi_uart_update_baud update .\n");
+	sbi_print("sbi_uart_update_baud update  200M/115200.\n");
 
 	sbi_trap_init();
 	sbi_setup_pmp();

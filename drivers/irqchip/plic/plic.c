@@ -128,8 +128,6 @@ static int __plic_init(struct plic *plic, int cpu)
 
 	for (hwirq = 1; hwirq <= nr; hwirq++) {
 		plic_enable_irq(cpu, hwirq, 0);
-
-		plic_set_prority(hwirq, 0);
 	}
 
 	csr_set(sie, SIE_SEIE);
