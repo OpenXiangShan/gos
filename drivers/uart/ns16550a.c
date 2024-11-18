@@ -168,6 +168,66 @@ static const struct driver_ops ns16550a_ops = {
 	.read = ns16550a_read,
 };
 
+#define DW_UART_WAIT_POLL_CNT_MAX 1024
+
+void uart_enable_irq(void *data)
+{
+	struct uart_data *priv = (struct uart_data *)(data);
+	unsigned int divisor;
+
+	UART_DEFAULT_BAUD = priv->baud;
+	UART_CLK = priv->clk;
+
+	divisor = priv->clk / (16 * priv->baud);
+
+	unsigned long val;
+	int poll_cnt;
+
+	poll_cnt = 0;
+	do {
+		poll_cnt++;
+		if (poll_cnt >= DW_UART_WAIT_POLL_CNT_MAX) return;
+
+		/* Clear data received if any */
+		val = readl(base_address + 0x14);
+		if ((val & 0x03) != 0) {
+			val = readl(base_address + 0x00);
+			continue;
+		}
+
+		/* Wait until line not busy */
+		val = readl(base_address + 0x7C);
+		if ((val & 0x01) != 0) {
+			continue;
+		}
+
+        writel(base_address + IER, 1);
+
+		/* Try to latch */
+		val = readl(base_address + 0x0C);
+		val |= 0x80;
+		writel(base_address + 0x0C, val);
+		val = readl(base_address + 0x0C);
+	} while ((val & 0x80) == 0);
+
+	/* Update new divisor */
+	val = divisor & 0xFF; writel(base_address + 0x00, val);	// DLL
+	val = (divisor >> 8) & 0xff;   writel(base_address + 0x04, val);	// DLH
+
+	/* Wait to clear */
+	poll_cnt = 0;
+	do {
+		val = readl(base_address + 0x0C);
+		val &= 0x7F;
+		writel(base_address + 0x0C, val);
+		val = readl(base_address + 0x0C);
+		poll_cnt++;
+		if (poll_cnt >= DW_UART_WAIT_POLL_CNT_MAX) return;
+	} while ((val & 0x80) != 0);
+
+	return;
+}
+
 int ns16550a_init(struct device *dev, void *data)
 {
 	struct driver *drv;
@@ -176,17 +236,13 @@ int ns16550a_init(struct device *dev, void *data)
 	print("ns16550a: base: 0x%lx, len: %d, irq: %d\n",
 	      dev->base, dev->len, dev->irqs[0]);
 
-#if 0
-	while (readl(base_address + USR) & 0x1) ;
-
-	writel(base_address + IER, 1);
+    uart_enable_irq(data);
 
 	nr_irqs = get_hwirq(dev, irqs);
 	for (i = 0; i < nr_irqs; i++)
 		register_device_irq(dev, dev->irq_domain, irqs[i],
 				    ns16550a_irq_handler, NULL);
 
-#endif
 	drv = dev->drv;
 	strcpy(dev->name, "UART0");
 	strcpy(drv->name, "UART0");

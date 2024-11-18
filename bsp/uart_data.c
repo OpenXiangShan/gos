@@ -3,6 +3,7 @@
 
 #if CONFIG_SELECT_MELLITE_FPGA
 struct uart_data ns16550_uart_data = {
+	//.clk = 24000000, //cpu default freq
 	.clk = 200000000,
 	.baud = 115200,
 };

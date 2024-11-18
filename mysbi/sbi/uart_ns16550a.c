@@ -64,8 +64,8 @@ void uart_ns16550a_init(unsigned long base, struct sbi_uart_ops *ops, void *data
 
 	while (readl(base_address + USR) & 0x1) ;
 
-	writel(base_address + DLH, 0);
-	writel(base_address + DLL, divisor);
+	writel(base_address + DLH, (divisor >> 8) & 0xff);
+	writel(base_address + DLL, divisor & 0xff);
 	writel(base_address + LCR, 0x03);
 	writel(base_address + FCR, 0x01);
 	writel(base_address + IER, 0);
@@ -115,7 +115,7 @@ void uart_ns16550a_update_baud(unsigned long base, struct sbi_uart_ops *ops, voi
 
 	/* Update new divisor */
 	val = divisor & 0xFF; writel(base_address + 0x00, val);	// DLL
-	val = divisor >> 8;   writel(base_address + 0x04, val);	// DLH
+	val = (divisor >> 8) & 0xff;   writel(base_address + 0x04, val);	// DLH
 
 	/* Wait to clear */
 	poll_cnt = 0;
