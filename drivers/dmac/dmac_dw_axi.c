@@ -72,7 +72,7 @@ static int dw_dmac_mem_to_mem(unsigned long src_addr,
 	     des_width, src_burstsize, des_burstsize, burst_len);
 
     /* dw_axi_dmac enable */
-	writel(base + DMAC_AXI0_COMMON_CFG, 0x1);
+	writel(base + DMAC_AXI0_COMMON_CFG, 0x3);
 	/* check dmac reset complete */
 	while ((readl(base + DMAC_AXI0_COMMON_RST_REG) & 0x01) != 0) ;
 
