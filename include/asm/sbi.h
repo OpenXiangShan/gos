@@ -29,6 +29,7 @@
 #define SBI_GET_CPU_CYCLE 0x200
 #define SBI_GET_CPU_ID 0x201
 #define SBI_GET_CPU_MCOUNTEREN 0x202
+#define SBI_GET_CPU_MINSTRET 0x203
 #define SBI_HART_START 0x300
 #define SBI_SET_CSR_MIE 0x400
 #define SBI_GET_CSR_MIE 0x401
@@ -76,6 +77,11 @@ static inline void sbi_put_string(char *str)
 static inline unsigned long sbi_get_cpu_cycles()
 {
 	return SBI_CALL_0(SBI_GET_CPU_CYCLE);
+}
+
+static inline unsigned long sbi_get_cpu_instret()
+{
+	return SBI_CALL_0(SBI_GET_CPU_MINSTRET);
 }
 
 static inline int sbi_get_cpu_id()

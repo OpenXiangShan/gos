@@ -139,6 +139,9 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 	case SBI_GET_CPU_CYCLE:
 		ret_value = read_csr(mcycle);
 		break;
+	case SBI_GET_CPU_MINSTRET:
+		ret_value = read_csr(minstret);
+		break;
 	case SBI_GET_CPU_ID:
 		ret_value = read_csr(mhartid);
 		break;
