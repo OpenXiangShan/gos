@@ -61,7 +61,6 @@ static void imsic_test_write_msi_msg(struct device *dev, unsigned long msi_addr,
 	    ("imsic test driver: ##### %s %d base_hwirq:%d hwirq:%d msi_addr:0x%x msi_data:0x%x\n",
 	     __FUNCTION__, __LINE__, base_hwirq, hwirq, msi_addr, msi_data);
 
-	base_hwirq = 2;
 	if (ii++ == 0)
 		base_hwirq = hwirq;
 
