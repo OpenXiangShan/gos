@@ -170,6 +170,8 @@ void *ioremap(void *addr, unsigned int size, int gfp)
 		return NULL;
 	}
 
+	virt |= ((unsigned long)addr) & (PAGE_SIZE - 1);
+
 	__asm__ __volatile("sfence.vma":::"memory");
 	return (void *)virt;
 }
