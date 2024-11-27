@@ -18,6 +18,12 @@ choice
 		tristate "Select VCS"
 endchoice
 
+if SELECT_MELLITE_FPGA
+config  ZEBU_ENV
+	bool "ZEBU_ENV"
+	default n
+endif
+
 choice
 	prompt "Select irqchip"
 
@@ -123,10 +129,6 @@ config TASK_SCHEDULER_PERIOD
 config ENABLE_SHELL
 	bool "Enable Shell"
 	default y
-
-config ZEBU_ENV 
-	bool "ZEBU_ENV"
-	default n
 
 config PRINT_LOGO
 	bool "Enable print logo"
