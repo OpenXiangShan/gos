@@ -66,6 +66,9 @@ int send_ipi(int cpu, int id, void *data)
 	struct ipi_msg *msg;
 	int flags;
 
+	if (!cpu_is_online(cpu))
+		return -1;
+
 	ctrl = &per_cpu(ipi_msg_ctrls, cpu);
 	if (!ctrl)
 		return -1;
