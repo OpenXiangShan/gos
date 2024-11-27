@@ -14,16 +14,21 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <print.h>
-#include <string.h>
-#include <asm/trap.h>
-#include <asm/csr.h>
+#include "print.h"
+#include "string.h"
+#include "asm/trap.h"
+#include "asm/csr.h"
+#include "asm/mmio.h"
+#include "asm/sbi.h"
 #include "mm.h"
 #include "device.h"
 #include "imsic.h"
 #include "imsic_reg.h"
 #include "cpu.h"
 #include "vmap.h"
+#include "ipi.h"
+#include "irq.h"
+#include "gos.h"
 
 static struct imsic imsic;
 extern int mmu_is_on;
@@ -288,6 +293,52 @@ static int imsic_set_affinity(struct device *dev, int hwirq, int cpu)
 	return imsic_id_set_target(&imsic, hwirq, cpu);
 }
 
+#if CONFIG_SELECT_AIA_IPI
+static int imsic_send_ipi(int cpu, int id, void *data)
+{
+	unsigned long msi_addr, msi_addr_va, msi_data;
+
+	if (!cpu_is_online(cpu))
+		return -1;
+
+	msi_addr = imsic.interrupt_file_base[cpu][0];
+	msi_data = 1;
+
+	msi_addr_va = (unsigned long)ioremap((void *)msi_addr, PAGE_SIZE, 0);
+
+	writel(msi_addr_va, msi_data);
+
+	iounmap((void *)msi_addr_va, PAGE_SIZE);
+
+	return 0;
+}
+
+static void imsic_ipi_handler(void *data)
+{
+	process_ipi(sbi_get_cpu_id());
+}
+
+static struct ipi_ops imsic_ipi_ops = {
+	.send_ipi = imsic_send_ipi,
+};
+
+static int imsic_register_ipi(struct imsic *imsic)
+{
+	int hwirq;
+
+	hwirq = imsic_alloc_ids_fix(imsic, 1);
+	if (hwirq == -1)
+		return -1;
+	imsic_enable_id(imsic, hwirq);
+
+	register_device_irq(NULL, &imsic->irq_domain, hwirq, imsic_ipi_handler, NULL);
+
+	register_ipi(&imsic_ipi_ops);
+
+	return 0;
+}
+#endif //CONFIG_SELECT_AIA_IPI
+
 static struct irq_domain_ops imsic_irq_domain_ops = {
 	.alloc_irqs = imsic_alloc_irqs,
 	.mask_irq = imsic_mask_irq,
@@ -336,6 +387,9 @@ int imsic_init(char *name, unsigned long base, int len,
 	for (i = 0; i < imsic.nr_ids; i++)
 		imsic_enable_id(&imsic, i);
 
+#if CONFIG_SELECT_AIA_IPI
+	imsic_register_ipi(&imsic);
+#endif
 	cpu_hotplug_notify_register(&imsic_cpuhp_notifier);
 
 	print("imsic: init success irq_domain:0x%x\n", &imsic.irq_domain);

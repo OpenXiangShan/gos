@@ -37,7 +37,13 @@ static unsigned long get_clint_base(void)
 	return 0;
 }
 
-void sbi_timer_process(void)
+void clint_soft_process(struct sbi_trap_hw_context *ctx)
+{
+	writel(ctx->ipi, 0);
+	csr_set(mip, MIP_SSIP);
+}
+
+void clint_timer_process(struct sbi_trap_hw_context *ctx)
 {
 	csr_clear(mie, MIP_MTIP);
 	//csr_clear(mip, MIP_MTIP);

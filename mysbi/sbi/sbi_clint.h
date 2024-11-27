@@ -19,7 +19,8 @@
 
 #include "sbi_trap.h"
 
-void sbi_timer_process(void);
+void clint_soft_process(struct sbi_trap_hw_context *ctx);
+void clint_timer_process(struct sbi_trap_hw_context *ctx);
 void clint_timer_event_start(struct sbi_trap_hw_context *ctx,
 			     unsigned long next_event);
 int sbi_clint_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx);

@@ -47,6 +47,16 @@ choice
 		tristate "Select 1g mapping"
 endchoice
 
+choice
+	prompt "Select ipi type"
+	if SELECT_AIA
+	config SELECT_AIA_IPI
+		tristate "Select aia ipi"
+	endif
+	config SELECT_CLINT_IPI
+		tristate "Select clint ipi"
+endchoice
+
 config VIRT
 	bool "Virt"
 	depends on MYGUEST

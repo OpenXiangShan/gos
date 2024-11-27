@@ -14,22 +14,24 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <irq.h>
-#include <device.h>
-#include <asm/type.h>
-#include <asm/trap.h>
-#include <asm/mmio.h>
-#include <asm/csr.h>
-#include <print.h>
-#include <asm/sbi.h>
-#include <timer.h>
+#include "asm/type.h"
+#include "asm/trap.h"
+#include "asm/mmio.h"
+#include "asm/csr.h"
+#include "asm/sbi.h"
+#include "print.h"
+#include "irq.h"
+#include "device.h"
+#include "timer.h"
 #include "cpu.h"
 #include "clock.h"
 #include "gos.h"
 #include "vmap.h"
+#include "ipi.h"
 
 #define HZ 1000
 
+#define CLINT_IPI       0x0
 #define CLINT_TIMER_CMP 0x4000
 #define CLINT_TIMER_VAL 0xbff8
 
@@ -39,6 +41,43 @@ static unsigned long base_address;
 struct clint_priv_data {
 	unsigned long clint_freq;
 };
+
+#if CONFIG_SELECT_CLINT_IPI
+static void clint_ipi_handler(void *data)
+{
+	int cpu = sbi_get_cpu_id();
+
+	process_ipi(cpu);
+
+	csr_clear(sip, SIE_SSIE);
+}
+
+static int clint_send_ipi(int cpu, int id, void *data)
+{
+	writel(base_address + CLINT_IPI + cpu * 4, 1);
+
+	return 0;
+}
+
+static struct ipi_ops clint_ipi_ops = {
+	.send_ipi = clint_send_ipi,
+};
+
+static int clint_register_ipi(void)
+{
+	struct irq_domain *domain = get_intc_domain();
+
+	if (!domain)
+		return -1;
+
+	register_device_irq(NULL, domain, INTERRUPT_CAUSE_SOFTWARE,
+			    clint_ipi_handler, NULL);
+
+	register_ipi(&clint_ipi_ops);
+
+	return 0;
+}
+#endif //CONFIG_SELECT_CLINT_IPI
 
 unsigned long get_cycles(void)
 {
@@ -171,6 +210,9 @@ int clint_timer_init(unsigned long base, int len, struct irq_domain *d, void *pr
 	register_clock_source(&clock_source_info, 0);
 	register_device_irq(NULL, d, INTERRUPT_CAUSE_TIMER, timer_handle_irq, NULL);
 
+#if CONFIG_SELECT_CLINT_IPI
+	clint_register_ipi();
+#endif
 	cpu_hotplug_notify_register(&timer_cpuhp_notifier);
 
 	return 0;

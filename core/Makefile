@@ -25,5 +25,6 @@ obj-y += event.o
 obj-y += cpu.o
 obj-y += percpu.o
 obj-y += clock.o
+obj-y += ipi.o
 obj-$(CONFIG_PCI) += pci_device_driver.o
 obj-y += stub.o

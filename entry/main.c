@@ -33,6 +33,7 @@
 #include "virt.h"
 #include "user.h"
 #include "uart.h"
+#include "ipi.h"
 #include "../app/command.h"
 
 extern const char logo[];
@@ -92,6 +93,8 @@ void start_gos(unsigned int hart_id,
 	bringup_secondary_cpus(hw);
 
 	percpu_tasks_init(0);
+
+	ipi_percpu_init();
 
 #ifdef CONFIG_VIRT
 	vcpu_init();

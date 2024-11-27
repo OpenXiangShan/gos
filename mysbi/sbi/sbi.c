@@ -204,9 +204,24 @@ static void sbi_ext_process()
 	//csr_set(mip, MIP_SEIP);
 }
 
-static void sbi_soft_process()
+static void sbi_soft_process(void)
 {
+	struct sbi_trap_hw_context *ctx;
+	int hartid = read_csr(mhartid);
 
+	ctx = h_context[hartid];
+
+	clint_soft_process(ctx);
+}
+
+static void sbi_timer_process(void)
+{
+	struct sbi_trap_hw_context *ctx;
+	int hartid = read_csr(mhartid);
+
+	ctx = h_context[hartid];
+
+	clint_timer_process(ctx);
 }
 
 void sbi_register_ext_irq_handler(do_ext_irq_t fn)
