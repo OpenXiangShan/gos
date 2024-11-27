@@ -121,6 +121,9 @@ config APP_INTR_TEST
 	bool "APP_INTR_TEST"
 	depends on SELECT_VCS
 	default y
+config APP_IPI_TEST
+	bool "APP_IPI_TEST"
+	default y
 if !ENABLE_MMU && !IOMMU
 config APP_IOMMU_LIB_TEST
 	bool "APP_IOMMU_LIB_TEST"
