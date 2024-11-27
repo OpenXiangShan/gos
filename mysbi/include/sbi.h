@@ -38,15 +38,19 @@
 #define SBI_GET_M_MSI_ADDR_IPI 0x503
 #define SBI_HPM_TEST 0x600
 
-typedef int (*do_ext_irq_t)(void);
-
 struct sbi_trap_hw_context;
 struct sbi_trap_regs;
+
+typedef int (*do_ext_irq_t)(void);
+typedef void (*do_timer_irq_t)(struct sbi_trap_hw_context *ctx);
+typedef void (*do_soft_irq_t)(struct sbi_trap_hw_context *ctx);
 
 void sbi_jump_to_next(struct sbi_trap_hw_context *ctx);
 void sbi_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx);
 void sbi_trap_handler(struct sbi_trap_regs *regs);
 void sbi_secondary_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx);
 void sbi_register_ext_irq_handler(do_ext_irq_t fn);
+void sbi_register_timer_irq_handler(do_timer_irq_t fn);
+void sbi_register_ipi_irq_handler(do_soft_irq_t fn);
 
 #endif

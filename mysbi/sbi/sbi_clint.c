@@ -20,6 +20,7 @@
 #include <asm/mmio.h>
 #include <asm/csr.h>
 #include "sbi_trap.h"
+#include "sbi.h"
 
 static unsigned long get_clint_base(void)
 {
@@ -37,13 +38,13 @@ static unsigned long get_clint_base(void)
 	return 0;
 }
 
-void clint_soft_process(struct sbi_trap_hw_context *ctx)
+static void clint_soft_process(struct sbi_trap_hw_context *ctx)
 {
 	writel(ctx->ipi, 0);
 	csr_set(mip, MIP_SSIP);
 }
 
-void clint_timer_process(struct sbi_trap_hw_context *ctx)
+static void clint_timer_process(struct sbi_trap_hw_context *ctx)
 {
 	csr_clear(mie, MIP_MTIP);
 	//csr_clear(mip, MIP_MTIP);
@@ -69,6 +70,9 @@ int sbi_clint_init(unsigned int hart_id, struct sbi_trap_hw_context *ctx)
 
 	ctx->timer_cmp = base + 0x4000 + hart_id * 8;
 	ctx->ipi = base + hart_id * 4;
+
+	sbi_register_ipi_irq_handler(clint_soft_process);
+	sbi_register_timer_irq_handler(clint_timer_process);
 
 	return rc;
 }

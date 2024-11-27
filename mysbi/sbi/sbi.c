@@ -31,6 +31,8 @@
 static struct sbi_trap_hw_context *h_context[8] = { 0 };
 extern void exception_vector(void);
 static do_ext_irq_t do_ext_irq = 0;
+static do_timer_irq_t do_timer_irq = 0;
+static do_soft_irq_t do_soft_irq = 0;
 
 void sbi_panic()
 {
@@ -209,9 +211,12 @@ static void sbi_soft_process(void)
 	struct sbi_trap_hw_context *ctx;
 	int hartid = read_csr(mhartid);
 
+	if (!do_soft_irq)
+		return;
+
 	ctx = h_context[hartid];
 
-	clint_soft_process(ctx);
+	do_soft_irq(ctx);
 }
 
 static void sbi_timer_process(void)
@@ -219,9 +224,28 @@ static void sbi_timer_process(void)
 	struct sbi_trap_hw_context *ctx;
 	int hartid = read_csr(mhartid);
 
+	if (!do_timer_irq)
+		return;
+
 	ctx = h_context[hartid];
 
-	clint_timer_process(ctx);
+	do_timer_irq(ctx);
+}
+
+void sbi_register_ipi_irq_handler(do_soft_irq_t fn)
+{
+	if (do_soft_irq)
+		return;
+
+	do_soft_irq = fn;
+}
+
+void sbi_register_timer_irq_handler(do_timer_irq_t fn)
+{
+	if (do_timer_irq)
+		return;
+
+	do_timer_irq = fn;
 }
 
 void sbi_register_ext_irq_handler(do_ext_irq_t fn)
