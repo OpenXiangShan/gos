@@ -124,6 +124,13 @@ config APP_INTR_TEST
 config APP_IPI_TEST
 	bool "APP_IPI_TEST"
 	default y
+
+if !ENABLE_MULTI_TASK
+config APP_WFI_TEST
+	bool "APP_WFI_TEST"
+	default y
+endif
+
 if !ENABLE_MMU && !IOMMU
 config APP_IOMMU_LIB_TEST
 	bool "APP_IOMMU_LIB_TEST"

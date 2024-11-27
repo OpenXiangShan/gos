@@ -57,4 +57,5 @@ obj-$(CONFIG_APP_LSDMAC) += lsdmac.o
 obj-$(CONFIG_APP_STUB_TEST) += stub_test.o
 obj-$(CONFIG_APP_INTR_TEST) += intr_test.o
 obj-$(CONFIG_APP_IPI_TEST)  += ipi_test.o
+obj-$(CONFIG_APP_WFI_TEST)  += wfi_test.o
 obj-$(CONFIG_APP_IOMMU_LIB_TEST) += iommu_lib_test/
