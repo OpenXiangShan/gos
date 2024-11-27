@@ -30,7 +30,7 @@ struct cmd_loader_param {
 
 static void Usage()
 {
-	print("load cpuid=[cpuid] [command] [params1] [params2] ...\n");
+	print("load cpu=[cpuid] [command] [params1] [params2] ...\n");
 }
 
 static int cmd_loader_start(void *data)
