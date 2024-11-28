@@ -5,7 +5,7 @@ mm模块向gos提供了内存分配（虚拟内存分配 & 物理内存分配）
 
 # 二、相关接口
 ## 1、物理内存分配
- 	采用bitmap的内存管理策略，⼀个bit代表⼀个PAGE_SIZE的物理内存页，因此该内存分配器的粒度 为PAGE_SIZE：
+采用bitmap的内存管理策略，⼀个bit代表⼀个PAGE_SIZE的物理内存页，因此该内存分配器的粒度 为PAGE_SIZE：
 
 ### mm_alloc(size) 
 分配大小为size（会向上对齐到PAGE_SIZE粒度）的物理地址，根据是否使能mmu， 返回物理/线性映射区的虚拟地址
