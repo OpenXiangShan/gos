@@ -61,3 +61,5 @@ vcpu_run_ext_at cpu=[cpu id] vmid=[vmid] [cmd] [params1] [params2] ...
 
 该命令不会创建新的vcpu，只会在"cpu="指定的cpu上运行的"vmid="指定的vcpu上执行cmd，参数为param1、param2 ... .如果不存在该vcpu则返回错误
 
+## vcpu_info
+显示gos中当前存在的所有vcpu
