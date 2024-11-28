@@ -22,7 +22,8 @@ aplic：driver/irqchip/aplic/
 
 # 三、相关接口
 ##  1、中断控制器初始化：  
- irqchip_setup —— __irqchip_init_table段中的中断控制器驱动与device_init_entry中的设备信息匹 配，匹配成功则运⾏相应中断控制器驱动的init_fn函数。  
+## irqchip_setup
+__irqchip_init_table段中的中断控制器驱动与device_init_entry中的设备信息匹 配，匹配成功则运⾏相应中断控制器驱动的init_fn函数。
 
 ##  2、中断控制器注册接口：  
 ### irq_domain_init
