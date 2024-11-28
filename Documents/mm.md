@@ -38,6 +38,7 @@ mm模块向gos提供了内存分配（虚拟内存分配 & 物理内存分配）
 
 ### vmem_alloc_lazy(unsigned int size, int gfp); 
 从vmap虚拟内存区域分配虚拟内存，并建立页表，但没有分配物理内存（真正访问引起缺页异常时分配）  
+其中，gfp参数可以配置内存属性（基于svpbmt扩展）,目前支持：GFP_NOCACHE 、GFP_IO
 
 ## 4、分页
 ### mmu_page_mapping
