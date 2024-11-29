@@ -20,8 +20,8 @@
 #define ALIGN_MASK(x, mask) (((x) + (mask)) & ~(mask))
 #define ALIGN(p, a) ALIGN_MASK(p, (typeof(p))(a) - 1)
 #define PTR_ALIGN(p, a) (typeof(p))ALIGN((unsigned long)p, a)
-#define ALIGN_SIZE(addr, size) (((addr) + size - 1) & (~((size) - 1)))
-#define ALIGN_SIZE_UP(addr, size) ((addr) & ~((size) - 1))
+#define ALIGN_SIZE(addr, size) (((addr) + (size) - 1) & (~((unsigned long)(size) - 1)))
+#define ALIGN_SIZE_UP(addr, size) ((addr) & ~((unsigned long)(size) - 1))
 
 
 #define RESIZE(v, up) ((v / up == 0) ?  (v) : ((v / up + 1)*up))
