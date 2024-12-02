@@ -14,6 +14,8 @@ choice
 		tristate "Select KunMingHu FPGA"
 	config SELECT_MELLITE_FPGA
 		tristate "Select Mellite FPGA"
+	config SELECT_NANHU_BOARD
+		tristate "Select NANHU Board"
 	config SELECT_VCS
 		tristate "Select VCS"
 endchoice

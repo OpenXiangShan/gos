@@ -101,7 +101,7 @@ void boot_hart_start(unsigned int hart, struct sbi_trap_hw_context *ctx)
 {
 	sbi_print("%s hartid: %d, ctx:%x\n", __FUNCTION__, hart, ctx);
 
-#if !CONFIG_SELECT_MELLITE_FPGA
+#if (!CONFIG_SELECT_MELLITE_FPGA) && (!CONFIG_SELECT_NANHU_BOARD)
 	fpu_init();
 #if CONFIG_ENABLE_VECTOR
 	v_init();
