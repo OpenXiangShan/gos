@@ -33,5 +33,6 @@ void memcpy(char *dst, char *src, unsigned int size);
 unsigned long atoi(char *in);
 int is_digit(char *in);
 int sprintf(char *out, const char *fmt, ...);
+void char_array_to_uuid(const char *data, char *uuid);
 
 #endif

@@ -419,3 +419,14 @@ int sprintf(char *out, const char *fmt, ...)
 
 	return 0;
 }
+
+void char_array_to_uuid(const char *data, char *uuid)
+{
+	sprintf(uuid,
+		"%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+		data[0], data[1], data[2], data[3],
+		data[4], data[5],
+		data[6], data[7],
+		data[8], data[9],
+		data[10], data[11], data[12], data[13], data[14], data[15]);
+}

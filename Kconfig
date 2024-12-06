@@ -128,6 +128,19 @@ config TASK_SCHEDULER_PERIOD
 	default "10"
 	depends on ENABLE_MULTI_TASK
 
+config ENABLE_FS
+	bool "Enable File System"
+	default y
+
+config ENABLE_INIT_FS
+	bool "Enable Init File System"
+	depends on ENABLE_FS
+	default n
+
+config INIT_FS
+	string "Init File System"
+	depends on ENABLE_INIT_FS
+
 config ENABLE_SHELL
 	bool "Enable Shell"
 	default y

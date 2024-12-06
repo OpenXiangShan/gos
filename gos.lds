@@ -67,6 +67,11 @@ SECTIONS
 	.pci_driver_init_table : { *(.pci_driver_init_table) }
 	__pci_driver_init_table_end = .;
 
+	. = ALIGN(8);
+	__fs_init_table = .;
+	.fs_init_table : { *(.fs_init_table) }
+	__fs_init_table_end = .;
+
 	bss_begin = .;
         .bss : { *(.bss*) }
         bss_end = .;

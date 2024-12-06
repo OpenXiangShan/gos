@@ -89,6 +89,7 @@ obj-y += fdt/
 obj-y += drivers/
 obj-y += core/
 obj-y += mm/
+obj-$(CONFIG_ENABLE_FS) += fs/
 obj-y += app/
 obj-$(CONFIG_VIRT) += virt/
 obj-$(CONFIG_USER) += user/

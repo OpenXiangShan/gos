@@ -20,3 +20,4 @@ obj-y += guest_bin_s.o
 obj-y += logo_s.o
 obj-y += start_s.o
 obj-y += user_bin_s.o
+obj-y += init_fs_s.o

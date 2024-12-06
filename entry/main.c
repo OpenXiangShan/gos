@@ -34,6 +34,7 @@
 #include "user.h"
 #include "uart.h"
 #include "ipi.h"
+#include "fs.h"
 #include "../app/command.h"
 
 extern const char logo[];
@@ -90,6 +91,9 @@ void start_gos(unsigned int hart_id,
 
 	device_driver_init(hw);
 
+#ifdef CONFIG_ENABLE_FS
+	fs_init();
+#endif
 	bringup_secondary_cpus(hw);
 
 	percpu_tasks_init(0);
@@ -106,6 +110,9 @@ void start_gos(unsigned int hart_id,
 	end = sbi_get_cpu_cycles();
 	print("gos startup success, cost: %d(cycles)\n", end - start);
 
+#ifdef CONFIG_ENABLE_INIT_FS
+	mount_init_fs();
+#endif
 	set_print_time(0);
 
 	create_task("shell_init", shell_init, NULL, 0, NULL, 0, NULL);
