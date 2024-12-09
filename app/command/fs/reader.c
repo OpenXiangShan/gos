@@ -232,6 +232,8 @@ wait_for_input:
 				line = 0;
 		} else if (input == 't') {
 			show_line_num = 1;
+			reader_print(ptr, line, reader.width, reader.height,
+				     show_line_num, line_num_count);
 		} else if (input == 'q') {
 			print("\n");
 			break;
