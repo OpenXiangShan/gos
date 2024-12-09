@@ -22,6 +22,7 @@
 #include "../../command.h"
 #include "fs.h"
 #include "fs_shell.h"
+#include "reader.h"
 
 static int fs_ls(struct dir_entry **dir, char *path, int argc, char *argv[])
 {
@@ -122,6 +123,32 @@ static int fs_cat(struct dir_entry **dir, char *path, int argc, char *argv[])
 	return 0;
 }
 
+static int fs_reader(struct dir_entry **dir, char *path, int argc, char *argv[])
+{
+	char *file_name;
+	struct dir_entry *_dir = *dir;
+	struct file_entry *file_e;
+
+	if (argc == 0)
+		return -1;
+
+	reader_init();
+
+	file_name = argv[0];
+
+	list_for_each_entry(file_e, &_dir->file_entry, list) {
+		if (!strcmp(file_e->name, file_name)) {
+			load_file(file_e, reader_load_file);
+			break;
+		}
+	}
+
+	reader_enter();
+	reader_exit();
+
+	return 0;
+}
+
 static int fs_exit(struct dir_entry **dir, char *path, int argc, char *argv[])
 {
 	return FS_SHELL_EXIT;
@@ -131,6 +158,7 @@ struct fs_command command_fs[] = {
 	{ "ls", fs_ls },
 	{ "cd", fs_cd },
 	{ "cat", fs_cat },
+	{ "reader", fs_reader},
 	{ "exit", fs_exit },
 };
 
