@@ -90,6 +90,7 @@ void ls_all_fs_node(void)
 
 	list_for_each_entry(entry, &fs_root_nodes, list) {
 		print("fs%d:\n", entry->id);
+		print("ID: %d\n", entry->id);
 		fs = entry->fs;
 		if (fs && fs->ops && fs->ops->print_fs_info)
 			fs->ops->print_fs_info(entry);
