@@ -78,7 +78,7 @@ extern unsigned long va_pa_offset;
 #define PAGE_64K_MASK       (~(PAGE_64K_SIZE - 1))
 
 #define _PAGE_PFN_SHIFT 10
-#define _PAGE_PFN_MASK (0xFFFFFC00ULL)
+#define _PAGE_PFN_MASK  (0x3FFFFFFFFFFC00ULL)
 
 #define PGDIR_SHIFT     (pgtable_l5_enabled ? PGDIR_SHIFT_L5 : \
                 (pgtable_l4_enabled ? PGDIR_SHIFT_L4 : PGDIR_SHIFT_L3))
