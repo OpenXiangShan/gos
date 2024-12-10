@@ -50,8 +50,6 @@ static void vcpu_do_trap_error(struct vcpu *vcpu, unsigned long saus)
 		print("Oops - %s\n", "EXC_LOAD_GUEST_PAGE_FAULT");
 	else if (saus == EXC_STORE_GUEST_PAGE_FAULT)
 		print("Oops - %s\n", "EXC_STORE_GUEST_PAGE_FAULT");
-	else
-		return;
 
 	regs = &(vcpu->cpu_ctx.guest_context);
 	show_guest_regs(regs);
@@ -67,7 +65,7 @@ static int gstage_page_fault(struct vcpu *vcpu, unsigned long reason)
 	unsigned long fault_addr;
 	unsigned long htval, stval;
 	unsigned long htinst;
-	int ret = 0;
+	int ret = -1;
 
 	htval = read_csr(CSR_HTVAL);
 	stval = read_csr(CSR_STVAL);
