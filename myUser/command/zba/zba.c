@@ -27,18 +27,18 @@ static int test_zba(void)
 		if(!tests_zba[i].name)
 			break;
 		if(!tests_zba[i].fp()){
-			printf("%s TEST_SUCCESS \n", tests_zba[i].name);
+			print("%s TEST_SUCCESS \n", tests_zba[i].name);
 		}else{
-			printf("ERROR: %s TEST FAIL \n", tests_zba[i].name);
+			print("ERROR: %s TEST FAIL \n", tests_zba[i].name);
 		}
 	}
 	return 0;
 }
 static int cmd_zba_handler(int argc, char *argv[], void *priv)
 {
-	printf("zba testing ......\n");
+	print("zba testing ......\n");
 	test_zba();
-	printf("zba test...... end\n");
+	print("zba test...... end\n");
 	return 0;
 }
 

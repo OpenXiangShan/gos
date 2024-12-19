@@ -95,7 +95,7 @@ void walk_and_print_command()
 	for_each_command(entry, _commands.p_commands, nr) {
 		if (!entry->in_used)
 			continue;
-		printf("%s\n", entry->command->cmd);
+		print("%s\n", entry->command->cmd);
 	}
 }
 

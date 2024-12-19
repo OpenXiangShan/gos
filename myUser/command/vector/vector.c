@@ -22,11 +22,11 @@
 
 static void Usage()
 {
-	printf("Input test case:\n");
-	printf("    vadd_vi_0\n");
-	printf("    vasubu_vv_8\n");
-	printf("    vsadd_vv_2\n");
-	printf("    v_zicclsm \n");
+	print("Input test case:\n");
+	print("    vadd_vi_0\n");
+	print("    vasubu_vv_8\n");
+	print("    vsadd_vv_2\n");
+	print("    v_zicclsm \n");
 }
 
 static int user_cmd_vector_test_handler(int argc, char *argv[], void *priv)
@@ -63,11 +63,11 @@ static int user_cmd_vector_test_handler(int argc, char *argv[], void *priv)
 				break;
 		}
 	} else {
-		printf("Invalid option\n");
+		print("Invalid option\n");
 		return -1;
 	}
 
-	printf("%s test complete -- times:%d ret:%d\n", argv[0], i, ret);
+	print("%s test complete -- times:%d ret:%d\n", argv[0], i, ret);
 	return 0;
 }
 

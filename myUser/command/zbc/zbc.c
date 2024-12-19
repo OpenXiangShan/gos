@@ -17,18 +17,18 @@ static int test_zbc(void)
 		if(!tests_zbc[i].name)
 			break;
 		if(!tests_zbc[i].fp()){
-			printf("%s TEST_SUCCESS \n", tests_zbc[i].name);
+			print("%s TEST_SUCCESS \n", tests_zbc[i].name);
 		}else{
-			printf("ERROR: %s TEST FAIL \n", tests_zbc[i].name);
+			print("ERROR: %s TEST FAIL \n", tests_zbc[i].name);
 		}
 	}
 	return 0;
 }
 static int cmd_zbc_handler(int argc, char *argv[], void *priv)
 {
-	printf("zbc testing ......\n");
+	print("zbc testing ......\n");
 	test_zbc();
-	printf("zbc test...... end\n");
+	print("zbc test...... end\n");
 	return 0;
 }
 

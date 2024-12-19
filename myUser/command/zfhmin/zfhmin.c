@@ -15,18 +15,18 @@ static int test_zfhmin(void)
 		if(!tests_zfhmin[i].name)
 			break;
 		if(!tests_zfhmin[i].fp()){
-			printf("%s TEST_SUCCESS \n", tests_zfhmin[i].name);
+			print("%s TEST_SUCCESS \n", tests_zfhmin[i].name);
 		}else{
-			printf("ERROR: %s TEST FAIL \n", tests_zfhmin[i].name);
+			print("ERROR: %s TEST FAIL \n", tests_zfhmin[i].name);
 		}
 	}
 	return 0;
 }
 static int cmd_zfhmin_handler(int argc, char *argv[], void *priv)
 {
-	printf("zfhmin testing ......\n");
+	print("zfhmin testing ......\n");
 	test_zfhmin();
-	printf("zfhmin test...... end\n");
+	print("zfhmin test...... end\n");
 	return 0;
 }
 

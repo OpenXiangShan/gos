@@ -21,7 +21,7 @@ typedef unsigned long int uint64_t;
 
 #define csr_read read_csr
 #define csr_write write_csr
-#define printf sbi_print
+#define print sbi_print
 //#include <klib.h>
 //#include <csr.h> // nexus-am/am/src/xs/include/csr.h
 #include "events.h"
@@ -61,12 +61,12 @@ typedef unsigned long int uint64_t;
 #define SET(reg, field, value) (reg) = ((reg) & ~((uint64_t)(field##_MASK) << (field##_OFFSET))) | ((uint64_t)(value) << (field##_OFFSET));
 
 #define clear_event(id) csr_write(mhpmevent##id, 0x0UL)
-#define print_event(id) printf("mhpmevent%d: %lx\n", id, csr_read(mhpmevent##id))
+#define print_event(id) print("mhpmevent%d: %lx\n", id, csr_read(mhpmevent##id))
 #define clear_counter(id) csr_write(mhpmcounter##id, 0x0UL)
-#define print_counter(id) printf("mhpmcounter%d: %lx\n", id, csr_read(mhpmcounter##id))
-#define printd_csr(csr) printf(#csr": %lx\n", csr_read(csr))
-#define printu_csr(csr) printf(#csr": %lx\n", csr_read(csr))
-#define printx_csr(csr) printf(#csr": %lx\n", csr_read(csr))
+#define print_counter(id) print("mhpmcounter%d: %lx\n", id, csr_read(mhpmcounter##id))
+#define printd_csr(csr) print(#csr": %lx\n", csr_read(csr))
+#define printu_csr(csr) print(#csr": %lx\n", csr_read(csr))
+#define printx_csr(csr) print(#csr": %lx\n", csr_read(csr))
 
 #define set_event_quad(csr_id, mode, optype2, optype1, optype0, event3, event2, event1, event0) \
     {   \

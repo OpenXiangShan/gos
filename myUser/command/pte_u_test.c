@@ -33,14 +33,14 @@ static int set_pte(pgprot_t pgprot, char *c)
 {
 	void *va;
 
-	printf("%s \n", (char *)c);
+	print("%s \n", (char *)c);
 	va = malloc_pte(PAGE_SIZE, pgprot);
 	if (!va) {
-		printf("%s -- page mapping failed\n", __FUNCTION__);
+		print("%s -- page mapping failed\n", __FUNCTION__);
 		return -1;
 	}
 	strcpy(va, "Hello");
-	printf("%s\n", va);
+	print("%s\n", va);
 	memset((void *)va, 0, PAGE_SIZE);
 
 	return 0;
@@ -51,10 +51,10 @@ static int user_cmd_pte_handler(int argc, char *argv[], void *priv)
 {
 	int ret = 0;
 
-	printf("Hello MyUesr!! argc:%d\n", argc);
+	print("Hello MyUesr!! argc:%d\n", argc);
 
 	for (int i = 0; i < argc; i++)
-		printf("cmd%d: %s\n", i, argv[i]);
+		print("cmd%d: %s\n", i, argv[i]);
 
 	ret = set_pte(pgprot, str[0]);
 	if (ret == -1)

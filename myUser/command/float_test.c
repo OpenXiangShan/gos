@@ -96,7 +96,7 @@ static int read_f(int pid, unsigned long value)
 		}
 		if(f_data[i] != value)
 		{
-			printf("ERROR:pid=%d f%d data is error data= %X \n",pid,i,f_data[i]);
+			print("ERROR:pid=%d f%d data is error data= %X \n",pid,i,f_data[i]);
 			return 1;
 		}
 	}
@@ -109,9 +109,9 @@ static int float_start1(void* data)
 	while(1){
 		ret = read_f(0x1, 0x1234);
 		if(ret !=0){
-			printf("float_test1 is ERROR\n");
+			print("float_test1 is ERROR\n");
 		}else{
-			printf("float_test1 is ok \n");
+			print("float_test1 is ok \n");
 		}
 	}
 	return 0;
@@ -119,7 +119,7 @@ static int float_start1(void* data)
 
 static int user_cmd_float_handler(int argc, char *argv[], void *priv)
 {
-	printf("Floating testing \n");
+	print("Floating testing \n");
 	float_start1(NULL);
 	return 0;
 }

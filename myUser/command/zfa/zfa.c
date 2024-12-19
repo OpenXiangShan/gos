@@ -24,18 +24,18 @@ static int test_zfa(void)
 		if(!tests_zfa[i].name)
 			break;
 		if(!tests_zfa[i].fp()){
-			printf("%s TEST_SUCCESS \n", tests_zfa[i].name);
+			print("%s TEST_SUCCESS \n", tests_zfa[i].name);
 		}else{
-			printf("ERROR: %s TEST FAIL \n", tests_zfa[i].name);
+			print("ERROR: %s TEST FAIL \n", tests_zfa[i].name);
 		}
 	}
 	return 0;
 }
 static int cmd_zfa_handler(int argc, char *argv[], void *priv)
 {
-	printf("zfa testing ......\n");
+	print("zfa testing ......\n");
 	test_zfa();
-	printf("zfa test...... end\n");
+	print("zfa test...... end\n");
 	return 0;
 }
 

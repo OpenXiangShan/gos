@@ -95,7 +95,7 @@ static int sbi_hart_start(unsigned int hartid, unsigned long jump_addr)
 
 static void hpm_test()
 {
-    printf("Hello, XiangShan!\n");
+    print("Hello, XiangShan!\n");
     printu_csr(marchid);
     printx_csr(mcountinhibit);
     printx_csr(mcounteren);
@@ -113,7 +113,7 @@ static void hpm_test()
     for(uint64_t i = 0; i < 1000; i++) {
         a += a + i;
     }
-    printf("%lu\n",a);
+    print("%lu\n",a);
 
     print_event(3);
     print_counter(3);

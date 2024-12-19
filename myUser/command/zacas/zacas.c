@@ -13,18 +13,18 @@ static int test_zacas(void)
 		if(!tests_zacas[i].name)
 			break;
 		if(!tests_zacas[i].fp()){
-			printf("%s TEST_SUCCESS \n", tests_zacas[i].name);
+			print("%s TEST_SUCCESS \n", tests_zacas[i].name);
 		}else{
-			printf("ERROR: %s TEST FAIL \n", tests_zacas[i].name);
+			print("ERROR: %s TEST FAIL \n", tests_zacas[i].name);
 		}
 	}
 	return 0;
 }
 static int cmd_zacas_handler(int argc, char *argv[], void *priv)
 {
-	printf("zacas testing ......\n");
+	print("zacas testing ......\n");
 	test_zacas();
-	printf("zacas test...... end\n");
+	print("zacas test...... end\n");
 	return 0;
 }
 

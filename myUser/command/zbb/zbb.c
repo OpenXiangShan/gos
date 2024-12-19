@@ -59,18 +59,18 @@ static int test_zbb(void)
 		if(!tests_zbb[i].name)
 			break;
 		if(!tests_zbb[i].fp()){
-			printf("%s TEST_SUCCESS \n", tests_zbb[i].name);
+			print("%s TEST_SUCCESS \n", tests_zbb[i].name);
 		}else{
-			printf("ERROR: %s TEST FAIL \n", tests_zbb[i].name);
+			print("ERROR: %s TEST FAIL \n", tests_zbb[i].name);
 		}
 	}
 	return 0;
 }
 static int cmd_zbb_handler(int argc, char *argv[], void *priv)
 {
-	printf("zbb testing ......\n");
+	print("zbb testing ......\n");
 	test_zbb();
-	printf("zbb test...... end\n");
+	print("zbb test...... end\n");
 	return 0;
 }
 

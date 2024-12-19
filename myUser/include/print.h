@@ -17,7 +17,7 @@
 #ifndef __USER_PRINT_H
 #define __USER_PRINT_H
 
-void printf(const char *fmt, ...);
+void print(const char *fmt, ...);
 void user_print_info_init(int userid, int cpu, int bg);
 
 #endif

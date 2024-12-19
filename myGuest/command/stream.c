@@ -24,7 +24,6 @@
 /* Keep the original source code unchanged as much as possible:
  * https://github.com/OpenXiangShan/nexus-am/blob/master/apps/stream/src/stream.c
  */
-#define printf print
 #define uptime get_clocksource_counter_us
 
 /*-----------------------------------------------------------------------*/
@@ -240,61 +239,61 @@ int stream_main()
 	a = (STREAM_TYPE *) mm_alloc(sizeof(STREAM_TYPE) *
 				     (STREAM_ARRAY_SIZE + OFFSET));
 	if (!a) {
-		printf("No enouch memory for a[], skip test!!!\n");
+		print("No enouch memory for a[], skip test!!!\n");
 		goto no_mem_a;
 	}
 	b = (STREAM_TYPE *) mm_alloc(sizeof(STREAM_TYPE) *
 				     (STREAM_ARRAY_SIZE + OFFSET));
 	if (!b) {
-		printf("No enouch memory for b[], skip test!!!\n");
+		print("No enouch memory for b[], skip test!!!\n");
 		goto no_mem_b;
 	}
 	c = (STREAM_TYPE *) mm_alloc(sizeof(STREAM_TYPE) *
 				     (STREAM_ARRAY_SIZE + OFFSET));
 	if (!c) {
-		printf("No enouch memory for c[], skip test!!!\n");
+		print("No enouch memory for c[], skip test!!!\n");
 		goto no_mem_c;
 	}
 
-	printf("Array a[] base address: 0x%lx\n", a);
-	printf("Array b[] base address: 0x%lx\n", b);
-	printf("Array c[] base address: 0x%lx\n", c);
+	print("Array a[] base address: 0x%lx\n", a);
+	print("Array b[] base address: 0x%lx\n", b);
+	print("Array c[] base address: 0x%lx\n", c);
 
 	/* --- SETUP --- determine precision and check timing --- */
 
-	printf(HLINE);
-	printf("STREAM version $Revision: 5.10 $\n");
-	printf(HLINE);
+	print(HLINE);
+	print("STREAM version $Revision: 5.10 $\n");
+	print(HLINE);
 	BytesPerWord = sizeof(STREAM_TYPE);
-	printf("This system uses %d bytes per array element.\n", BytesPerWord);
+	print("This system uses %d bytes per array element.\n", BytesPerWord);
 
-	printf(HLINE);
+	print(HLINE);
 #ifdef N
-	printf("*****  WARNING: ******\n");
-	printf
+	print("*****  WARNING: ******\n");
+	print
 	    ("      It appears that you set the preprocessor variable N when compiling this code.\n");
-	printf
+	print
 	    ("      This version of the code uses the preprocesor variable STREAM_ARRAY_SIZE to control the array size\n");
-	printf("      Reverting to default value of STREAM_ARRAY_SIZE=%l\n",
+	print("      Reverting to default value of STREAM_ARRAY_SIZE=%l\n",
 	       (unsigned long long)STREAM_ARRAY_SIZE);
-	printf("*****  WARNING: ******\n");
+	print("*****  WARNING: ******\n");
 #endif
 
-	printf("Array size = %lu (elements), Offset = %d (elements)\n",
+	print("Array size = %lu (elements), Offset = %d (elements)\n",
 	       (unsigned long long)STREAM_ARRAY_SIZE, OFFSET);
-	printf("Memory per array = %f MiB (= %f GiB).\n",
+	print("Memory per array = %f MiB (= %f GiB).\n",
 	       BytesPerWord * ((double)STREAM_ARRAY_SIZE / 1024.0 / 1024.0),
 	       BytesPerWord * ((double)STREAM_ARRAY_SIZE / 1024.0 / 1024.0 /
 			       1024.0));
-	printf("Total memory required = %f MiB (= %f GiB).\n",
+	print("Total memory required = %f MiB (= %f GiB).\n",
 	       (3.0 * BytesPerWord) * ((double)STREAM_ARRAY_SIZE / 1024.0 /
 				       1024.),
 	       (3.0 * BytesPerWord) * ((double)STREAM_ARRAY_SIZE / 1024.0 /
 				       1024. / 1024.));
-	printf("Each kernel will be executed %d times.\n", NTIMES);
-	printf
+	print("Each kernel will be executed %d times.\n", NTIMES);
+	print
 	    (" The *best* time for each kernel (excluding the first iteration)\n");
-	printf(" will be used to compute the reported bandwidth.\n");
+	print(" will be used to compute the reported bandwidth.\n");
 
 	/* Get initial value for system clock. */
 	for (j = 0; j < STREAM_ARRAY_SIZE; j++) {
@@ -303,13 +302,13 @@ int stream_main()
 		c[j] = 0.0;
 	}
 
-	printf(HLINE);
+	print(HLINE);
 
 	if ((quantum = checktick()) >= 1)
-		printf("Your clock granularity/precision appears to be "
+		print("Your clock granularity/precision appears to be "
 		       "%d microseconds.\n", quantum);
 	else {
-		printf("Your clock granularity appears to be "
+		print("Your clock granularity appears to be "
 		       "less than one microsecond.\n");
 		quantum = 1;
 	}
@@ -319,18 +318,18 @@ int stream_main()
 		a[j] = 2.0E0 * a[j];
 	t = 1.0E6 * (mysecond() - t);
 
-	printf("Each test below will take on the order"
+	print("Each test below will take on the order"
 	       " of %d microseconds.\n", (int)t);
-	printf("   (= %d clock ticks)\n", (int)(t / quantum));
-	printf("Increase the size of the arrays if this shows that\n");
-	printf("you are not getting at least 20 clock ticks per test.\n");
+	print("   (= %d clock ticks)\n", (int)(t / quantum));
+	print("Increase the size of the arrays if this shows that\n");
+	print("you are not getting at least 20 clock ticks per test.\n");
 
-	printf(HLINE);
+	print(HLINE);
 
-	printf("WARNING -- The above is only a rough guideline.\n");
-	printf("For best results, please be sure you know the\n");
-	printf("precision of your system timer.\n");
-	printf(HLINE);
+	print("WARNING -- The above is only a rough guideline.\n");
+	print("For best results, please be sure you know the\n");
+	print("precision of your system timer.\n");
+	print(HLINE);
 
 	/*  --- MAIN LOOP --- repeat test cases NTIMES times --- */
 
@@ -383,23 +382,23 @@ int stream_main()
 		}
 	}
 
-	printf
+	print
 	    ("Function    Best Rate MB/s  Avg time     Min time     Max time\n");
 	for (j = 0; j < 4; j++) {
 		avgtime[j] = avgtime[j] / (double)(NTIMES - 1);
 
-		printf("%s%f  %f  %f  %f\n", label[j],
+		print("%s%f  %f  %f  %f\n", label[j],
 		       1.0E-06 * bytes[j] / mintime[j],
 		       avgtime[j], mintime[j], maxtime[j]);
 	}
-	printf(HLINE);
-	printf(HLINE);
+	print(HLINE);
+	print(HLINE);
 
 	/* --- Check Results --- */
 	checkSTREAMresults(a, b, c);
-	printf(HLINE);
-	printf(HLINE);
-	printf(HLINE);
+	print(HLINE);
+	print(HLINE);
+	print(HLINE);
 
 	mm_free((void *)c, sizeof(STREAM_TYPE) * (STREAM_ARRAY_SIZE + OFFSET));
 no_mem_c:
@@ -494,7 +493,7 @@ void checkSTREAMresults(STREAM_TYPE * a, STREAM_TYPE * b, STREAM_TYPE * c)
 		aSumErr += abs(a[j] - aj);
 		bSumErr += abs(b[j] - bj);
 		cSumErr += abs(c[j] - cj);
-		// if (j == 417) printf("Index 417: c[j]: %f, cj: %f\n",c[j],cj);       // MCCALPIN
+		// if (j == 417) print("Index 417: c[j]: %f, cj: %f\n",c[j],cj);       // MCCALPIN
 	}
 	aAvgErr = aSumErr / (STREAM_TYPE) STREAM_ARRAY_SIZE;
 	bAvgErr = bSumErr / (STREAM_TYPE) STREAM_ARRAY_SIZE;
@@ -505,7 +504,7 @@ void checkSTREAMresults(STREAM_TYPE * a, STREAM_TYPE * b, STREAM_TYPE * c)
 	} else if (sizeof(STREAM_TYPE) == 8) {
 		epsilon = 1.e-13;
 	} else {
-		printf("WEIRD: sizeof(STREAM_TYPE) = %l\n",
+		print("WEIRD: sizeof(STREAM_TYPE) = %l\n",
 		       sizeof(STREAM_TYPE));
 		epsilon = 1.e-6;
 	}
@@ -513,10 +512,10 @@ void checkSTREAMresults(STREAM_TYPE * a, STREAM_TYPE * b, STREAM_TYPE * c)
 	err = 0;
 	if (abs(aAvgErr / aj) > epsilon) {
 		err++;
-		printf
+		print
 		    ("Failed Validation on array a[], AvgRelAbsErr > epsilon (%f)\n",
 		     epsilon);
-		printf
+		print
 		    ("     Expected Value: %f, AvgAbsErr: %f, AvgRelAbsErr: %f\n",
 		     aj, aAvgErr, abs(aAvgErr) / aj);
 		ierr = 0;
@@ -525,7 +524,7 @@ void checkSTREAMresults(STREAM_TYPE * a, STREAM_TYPE * b, STREAM_TYPE * c)
 				ierr++;
 #ifdef VERBOSE
 				if (ierr < 10) {
-					printf
+					print
 					    ("         array a: index: %d, expected: %f, observed: %f, relative error: %f\n",
 					     j, aj, a[j],
 					     abs((aj - a[j]) / aAvgErr));
@@ -533,24 +532,24 @@ void checkSTREAMresults(STREAM_TYPE * a, STREAM_TYPE * b, STREAM_TYPE * c)
 #endif
 			}
 		}
-		printf("     For array a[], %d errors were found.\n", ierr);
+		print("     For array a[], %d errors were found.\n", ierr);
 	}
 	if (abs(bAvgErr / bj) > epsilon) {
 		err++;
-		printf
+		print
 		    ("Failed Validation on array b[], AvgRelAbsErr > epsilon (%f)\n",
 		     epsilon);
-		printf
+		print
 		    ("     Expected Value: %f, AvgAbsErr: %f, AvgRelAbsErr: %f\n",
 		     bj, bAvgErr, abs(bAvgErr) / bj);
-		printf("     AvgRelAbsErr > Epsilon (%f)\n", epsilon);
+		print("     AvgRelAbsErr > Epsilon (%f)\n", epsilon);
 		ierr = 0;
 		for (j = 0; j < STREAM_ARRAY_SIZE; j++) {
 			if (abs(b[j] / bj - 1.0) > epsilon) {
 				ierr++;
 #ifdef VERBOSE
 				if (ierr < 10) {
-					printf
+					print
 					    ("         array b: index: %l, expected: %f, observed: %f, relative error: %f\n",
 					     j, bj, b[j],
 					     abs((bj - b[j]) / bAvgErr));
@@ -558,24 +557,24 @@ void checkSTREAMresults(STREAM_TYPE * a, STREAM_TYPE * b, STREAM_TYPE * c)
 #endif
 			}
 		}
-		printf("     For array b[], %d errors were found.\n", ierr);
+		print("     For array b[], %d errors were found.\n", ierr);
 	}
 	if (abs(cAvgErr / cj) > epsilon) {
 		err++;
-		printf
+		print
 		    ("Failed Validation on array c[], AvgRelAbsErr > epsilon (%f)\n",
 		     epsilon);
-		printf
+		print
 		    ("     Expected Value: %f, AvgAbsErr: %f, AvgRelAbsErr: %f\n",
 		     cj, cAvgErr, abs(cAvgErr) / cj);
-		printf("     AvgRelAbsErr > Epsilon (%f)\n", epsilon);
+		print("     AvgRelAbsErr > Epsilon (%f)\n", epsilon);
 		ierr = 0;
 		for (j = 0; j < STREAM_ARRAY_SIZE; j++) {
 			if (abs(c[j] / cj - 1.0) > epsilon) {
 				ierr++;
 #ifdef VERBOSE
 				if (ierr < 10) {
-					printf
+					print
 					    ("         array c: index: %d, expected: %f, observed: %f, relative error: %f\n",
 					     j, cj, c[j],
 					     abs((cj - c[j]) / cAvgErr));
@@ -583,18 +582,18 @@ void checkSTREAMresults(STREAM_TYPE * a, STREAM_TYPE * b, STREAM_TYPE * c)
 #endif
 			}
 		}
-		printf("     For array c[], %d errors were found.\n", ierr);
+		print("     For array c[], %d errors were found.\n", ierr);
 	}
 	if (err == 0) {
-		printf
+		print
 		    ("Solution Validates: avg error less than %f on all three arrays\n",
 		     epsilon);
 	}
 #ifdef VERBOSE
-	printf("Results Validation Verbose Results: \n");
-	printf("    Expected a(1), b(1), c(1): %f %f %f \n", aj, bj, cj);
-	printf("    Observed a(1), b(1), c(1): %f %f %f \n", a[1], b[1], c[1]);
-	printf("    Rel Errors on a, b, c:     %f %f %f \n", abs(aAvgErr / aj),
+	print("Results Validation Verbose Results: \n");
+	print("    Expected a(1), b(1), c(1): %f %f %f \n", aj, bj, cj);
+	print("    Observed a(1), b(1), c(1): %f %f %f \n", a[1], b[1], c[1]);
+	print("    Rel Errors on a, b, c:     %f %f %f \n", abs(aAvgErr / aj),
 	       abs(bAvgErr / bj), abs(cAvgErr / cj));
 #endif
 }
@@ -634,11 +633,11 @@ void tuned_STREAM_Triad(STREAM_TYPE scalar)
 
 static int cmd_stream_handler(int argc, char *argv[], void *priv)
 {
-	printf("vs stream test begin\n");
+	print("vs stream test begin\n");
 
 	stream_main();
 
-	printf("vs stream test end\n");
+	print("vs stream test end\n");
 
 	return 0;
 }

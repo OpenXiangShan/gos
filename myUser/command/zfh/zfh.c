@@ -32,18 +32,18 @@ static int test_zfh(void)
 		if(!tests_zfh[i].name)
 			break;
 		if(!tests_zfh[i].fp()){
-			printf("%s TEST_SUCCESS \n", tests_zfh[i].name);
+			print("%s TEST_SUCCESS \n", tests_zfh[i].name);
 		}else{
-			printf("ERROR: %s TEST FAIL \n", tests_zfh[i].name);
+			print("ERROR: %s TEST FAIL \n", tests_zfh[i].name);
 		}
 	}
 	return 0;
 }
 static int cmd_zfh_handler(int argc, char *argv[], void *priv)
 {
-	printf("zfh testing ......\n");
+	print("zfh testing ......\n");
 	test_zfh();
-	printf("zfh test...... end\n");
+	print("zfh test...... end\n");
 	return 0;
 }
 

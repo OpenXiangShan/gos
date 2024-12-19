@@ -32,13 +32,13 @@ static int user_cmd_sum_handler(int argc, char *argv[], void *priv)
 			sum += i;
 
 		if (sum != 5050) {
-			printf("%s -- test failed!!! test count:%dtimes\n",
+			print("%s -- test failed!!! test count:%dtimes\n",
 			       __FUNCTION__, count);
 			break;
 		}
 
 		if (++count == TEST_COUNT) {
-			printf("%s -- test pass!! test count:%dtimes\n",
+			print("%s -- test pass!! test count:%dtimes\n",
 			       __FUNCTION__, count);
 			break;
 		}

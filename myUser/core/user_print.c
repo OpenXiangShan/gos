@@ -192,7 +192,7 @@ static int my_vprintf(const char *fmt, va_list ap)
 	return 0;
 }
 
-void printf(const char *fmt, ...)
+void print(const char *fmt, ...)
 {
 	va_list ap;
 	char user_log[128] = { 0 };
