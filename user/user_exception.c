@@ -15,6 +15,7 @@
  */
 
 #include "user.h"
+#include "stub.h"
 #include "asm/csr.h"
 #include "print.h"
 #include "uaccess.h"
@@ -71,6 +72,19 @@ void show_user_regs(struct pt_regs *regs)
 	print(" t5 : 0x%lx t6 : 0x%lx\n", regs->t5, regs->t6);
 }
 
+static int do_user_illegal_inst_fault(struct pt_regs *regs, struct user_cpu_context *u_context)
+{
+	unsigned long badaddr = regs->sbadaddr;
+	int ret = -1;
+
+	if (badaddr == BOSC_DEBUG_INST) {
+		u_context->sepc += 4;
+		ret = 0;
+	}
+
+	return ret;
+}
+
 int do_user_exception(struct user *user, struct pt_regs *regs)
 {
 	struct user_cpu_context *u_context = &user->cpu_context.u_context;
@@ -87,6 +101,10 @@ int do_user_exception(struct user *user, struct pt_regs *regs)
 		switch (regs->scause) {
 		case EXC_SYSCALL:
 			ret = syscall_handler(u_context);
+			u_context->sepc += 4;
+			break;
+		case EXC_INST_ILLEGAL:
+			ret = do_user_illegal_inst_fault(regs, u_context);
 			u_context->sepc += 4;
 			break;
 		default:

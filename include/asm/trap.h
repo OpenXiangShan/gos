@@ -57,6 +57,7 @@
 
 #define SBI_HW_CTX_SIZE   0x100
 #define SBI_HW_STACK_SIZE 0x400
+#define BOSC_DEBUG_INST 0x5006b
 
 struct fault_info {
         int (*fn)(struct pt_regs * regs, const char *name);
