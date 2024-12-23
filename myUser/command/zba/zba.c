@@ -25,7 +25,7 @@ static int test_zba(void)
 {
 	int r = 0;
 
-	for(int i=0;; i++){
+	for(int i=0; i < sizeof(tests_zba)/sizeof(tests_zba[0]); i++){
 		if(!tests_zba[i].name)
 			break;
 		if(!tests_zba[i].fp()){

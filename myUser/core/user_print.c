@@ -25,8 +25,8 @@ static int print_info_userid;
 static int print_info_cpu;
 static int print_info_bg;
 
-static char log_buf[MAX_PRINT_LENGTH];
-static unsigned int pos;
+static char log_buf[MAX_PRINT_LENGTH] = {0};
+static unsigned int pos = 0;
 
 typedef __builtin_va_list __gnuc_va_list;
 typedef __gnuc_va_list va_list;

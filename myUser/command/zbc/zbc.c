@@ -15,7 +15,7 @@ static int test_zbc(void)
 {
 	int r = 0;
 
-	for(int i=0;; i++){
+	for(int i=0; i < sizeof(tests_zbc)/sizeof(tests_zbc[0]); i++){
 		if(!tests_zbc[i].name)
 			break;
 		if(!tests_zbc[i].fp()){
