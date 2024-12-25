@@ -45,7 +45,7 @@ static void plic_set_prority(int hwirq, int pro)
 {
 	unsigned long reg = plic.base_address + PRIORITY_PER_ID * hwirq;
 
-	writel(reg, 1);
+	writel(reg, pro);
 }
 
 static int plic_enable_irq(int cpu, int hwirq, int enable)
@@ -126,11 +126,8 @@ static int __plic_init(struct plic *plic, int cpu)
 
 	writel(info->base + CONTEXT_THRESHOLD, 0);
 
-	for (hwirq = 1; hwirq <= nr; hwirq++) {
+	for (hwirq = 1; hwirq <= nr; hwirq++)
 		plic_enable_irq(cpu, hwirq, 0);
-
-		plic_set_prority(hwirq, 0);
-	}
 
 	csr_set(sie, SIE_SEIE);
 
@@ -159,6 +156,7 @@ int plic_init(char *name, unsigned long base, int len,
 {
 	struct plic_priv_data *priv = (struct plic_priv_data *)data;
 	unsigned long addr;
+	int hwirq;
 
 	memset((char *)&plic, 0, sizeof(struct plic));
 
@@ -175,6 +173,9 @@ int plic_init(char *name, unsigned long base, int len,
 	      plic.max_priority, plic.ndev);
 
 	__plic_init(&plic, 0);
+
+	for (hwirq = 1; hwirq <= plic.ndev; hwirq++)
+		plic_set_prority(hwirq, 0);
 
 	cpu_hotplug_notify_register(&plic_cpuhp_notifier);
 
