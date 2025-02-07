@@ -36,7 +36,10 @@
 #define CLINT_TIMER_VAL 0xbff8
 
 unsigned long clint_freq;
+
+#if !CONFIG_USE_RISCV_TIMER
 static unsigned long base_address;
+#endif
 
 struct clint_priv_data {
 	unsigned long clint_freq;
@@ -81,7 +84,11 @@ static int clint_register_ipi(void)
 
 unsigned long get_cycles(void)
 {
+#if CONFIG_USE_RISCV_TIMER
+	return read_csr(CSR_TIME);
+#else
 	return readq(base_address + CLINT_TIMER_VAL);
+#endif
 }
 
 static void timer_handle_irq(void *data)
@@ -113,7 +120,11 @@ static void timer_evt_handler(struct clock_event *evt)
 
 static unsigned long timer_counter_read(struct clock_source *src)
 {
+#if CONFIG_USE_RISCV_TIMER
+	return read_csr(CSR_TIME);
+#else
 	return readq(base_address + CLINT_TIMER_VAL);
+#endif
 }
 
 static struct clock_event clock_event_info = {
@@ -197,9 +208,9 @@ int clint_timer_init(unsigned long base, int len, struct irq_domain *d, void *pr
 		print("clint: can not find clint info...\n");
 		return -1;
 	}
-
+#if !CONFIG_USE_RISCV_TIMER
 	base_address = (unsigned long)ioremap((void *)base, len, 0);
-
+#endif
 	clint_freq = data->clint_freq;
 
 	__timer_init();

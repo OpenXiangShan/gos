@@ -61,8 +61,12 @@ choice
 	config SELECT_AIA_IPI
 		tristate "Select aia ipi"
 	endif
+	if !USE_RISCV_TIMER
 	config SELECT_CLINT_IPI
 		tristate "Select clint ipi"
+	endif
+	config SELECT_NONE
+		tristate "None ipi"
 endchoice
 
 config VIRT
@@ -94,6 +98,15 @@ config ENABLE_SSTC
 	bool "Enable Sstc"
 	default n
 
+config ENABLE_VS_SSTC
+	bool "Enable Sstc in vs mode"
+	default y
+	depends on ENABLE_SSTC
+
+config USE_RISCV_TIMER
+	bool "Use riscv timer"
+	default n
+
 config ENABLE_SVPBMT
 	bool "Enable Svpbmt"
 	default y
@@ -102,10 +115,6 @@ config ENABLE_VECTOR
 	bool "Enable V"
 	default y
 
-config ENABLE_VS_SSTC
-	bool "Enable Sstc in vs mode"
-	default y
-	depends on ENABLE_SSTC
 
 config SVNAPOT
 	bool "Enable svnapot"
