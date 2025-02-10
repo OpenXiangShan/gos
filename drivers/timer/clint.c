@@ -215,7 +215,7 @@ int clint_timer_init(unsigned long base, int len, struct irq_domain *d, void *pr
 	base_address = (unsigned long)ioremap((void *)base, len, 0);
 #else
 	mcounteren = sbi_get_cpu_mcounteren();
-	mcounteren = mcounteren | (1UL << 0);
+	mcounteren = mcounteren | (1UL << 1);
 	sbi_set_mcounteren(mcounteren);
 #endif
 	clint_freq = data->clint_freq;

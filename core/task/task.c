@@ -297,7 +297,9 @@ static void _schedule(int status)
 		enable_local_irq();
 		return;
 	}
-	sc->current_task->status = status;
+
+	if (sc->current_task)
+		sc->current_task->status = status;
 	sc->timer_evt.expiry_time = get_system_time();
 	clock_set_next_event(sc->timer_evt.expiry_time);
 	enable_local_irq();
