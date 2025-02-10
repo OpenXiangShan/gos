@@ -200,6 +200,9 @@ static struct cpu_hotplug_notifier timer_cpuhp_notifier = {
 int clint_timer_init(unsigned long base, int len, struct irq_domain *d, void *priv)
 {
 	struct clint_priv_data *data = (struct clint_priv_data *)priv;
+#if CONFIG_USE_RISCV_TIMER
+	unsigned long mcounteren;
+#endif
 
 	print("clint: timer init -- base:0x%lx, clint_freq:0x%x\n", base,
 	      data->clint_freq);
@@ -210,6 +213,10 @@ int clint_timer_init(unsigned long base, int len, struct irq_domain *d, void *pr
 	}
 #if !CONFIG_USE_RISCV_TIMER
 	base_address = (unsigned long)ioremap((void *)base, len, 0);
+#else
+	mcounteren = sbi_get_cpu_mcounteren();
+	mcounteren = mcounteren | (1UL << 0);
+	sbi_set_mcounteren(mcounteren);
 #endif
 	clint_freq = data->clint_freq;
 

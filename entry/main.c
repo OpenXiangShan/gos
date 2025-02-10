@@ -118,4 +118,6 @@ void start_gos(unsigned int hart_id,
 	create_task("shell_init", shell_init, NULL, 0, NULL, 0, NULL);
 
 	enable_local_irq();
+
+	schedule();
 }
