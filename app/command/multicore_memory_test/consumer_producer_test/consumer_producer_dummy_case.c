@@ -15,8 +15,10 @@ static int dummy_consumer_producer_check_data(struct data_pool *p)
 
 	for (i = 0; i < BUFFER_SIZE; i++) {
 		data = get_data_by_pos_u8(p, i);
-		if (data != (char)i)
+		if (data != (char)i) {
+			print("An error has occurred!! data:%d expected:%d\n", data, (char)i);
 			return -1;
+		}
 	}
 
 	return 0;
@@ -31,8 +33,12 @@ static int dummy_consumer_thread(void *data)
 
 	while (1) {
 		consumer_producer_cond_wait(&p->producer_complete);
-		dummy_consumer_producer_check_data(p);
-		print("%s %dtimes cpu:%d check pass!!\n", __FUNCTION__, nn++, sbi_get_cpu_id());
+		if (!dummy_consumer_producer_check_data(p))
+			print("%s %dtimes cpu:%d check pass!!\n", __FUNCTION__, nn++, sbi_get_cpu_id());
+		else {
+			print("%s %dtimes cpu:%d check fail!!\n", __FUNCTION__, nn++, sbi_get_cpu_id());
+			return -1;
+		}
 		consumer_producer_cond_signal(&p->consumer_complete);
 	}
 
