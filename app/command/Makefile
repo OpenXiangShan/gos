@@ -60,3 +60,4 @@ obj-$(CONFIG_APP_IPI_TEST)  += ipi_test.o
 obj-$(CONFIG_APP_WFI_TEST)  += wfi_test.o
 obj-$(CONFIG_ENABLE_FS)     += fs/
 obj-$(CONFIG_APP_IOMMU_LIB_TEST) += iommu_lib_test/
+obj-$(CONFIG_MULTICORE_MEMORY_TEST) += multicore_memory_test/

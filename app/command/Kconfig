@@ -124,6 +124,12 @@ config APP_INTR_TEST
 config APP_IPI_TEST
 	bool "APP_IPI_TEST"
 	default y
+menuconfig MULTICORE_MEMORY_TEST
+	bool "MULTI_CORE_MEMORY_TEST"
+	default y
+	if MULTICORE_MEMORY_TEST
+		source "app/command/multicore_memory_test/Kconfig"
+	endif
 
 if !ENABLE_MULTI_TASK
 config APP_WFI_TEST
@@ -135,4 +141,5 @@ if !ENABLE_MMU && !IOMMU
 config APP_IOMMU_LIB_TEST
 	bool "APP_IOMMU_LIB_TEST"
 	default n
+
 endif
