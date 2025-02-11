@@ -35,6 +35,7 @@ struct clock_source {
 struct clock_event {
 	int cpu;
 	int hwirq;
+	unsigned long expiry;
 	void (*evt_handler)(struct clock_event * evt);
 	int (*set_next_event)(unsigned long next, struct clock_event * evt);
 	struct list_head timer_list;

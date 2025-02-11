@@ -253,6 +253,7 @@ again:
 	task = list_entry(list_first(&task_ctl->head), struct task, list);
 	list_del(&task->list);
 	list_add_tail(&task->list, &task_ctl->head);
+
 	if (task->status == TASK_STATUS_SLEEP)
 		goto again;
 	if (!strncmp(task->name, "idle", sizeof("idle"))) {
@@ -290,19 +291,38 @@ static int task_scheduler_clock_event_init(struct task_scheduler *ts)
 static void _schedule(int status)
 {
 	int cpu = sbi_get_cpu_id();
+	int irq_is_on = local_irq_is_on();
 	struct task_scheduler *sc = &per_cpu(schedulers, cpu);
+	struct task_ctrl *task_ctl = &per_cpu(tasks, cpu);
+	struct task *task, *task_tmp;
 
-	disable_local_irq();
-	if (!strncmp(sc->current_task->name, "idle", sizeof("idle"))) {
-		enable_local_irq();
+	if (irq_is_on)
+		disable_local_irq();
+#if 0
+	if (sc->current_task && !strncmp(sc->current_task->name, "idle", sizeof("idle"))) {
+		if (irq_is_on)
+			enable_local_irq();
 		return;
 	}
-
-	if (sc->current_task)
+#endif
+	if (sc->current_task) {
 		sc->current_task->status = status;
+		spin_lock(&task_ctl->lock);
+		list_for_each_entry_safe(task, task_tmp, &task_ctl->head, list) {
+			if (sc->current_task == task) {
+				list_del(&task->list);
+				break;
+			}
+		}
+		list_add_tail(&task->list, &task_ctl->head);
+		spin_unlock(&task_ctl->lock);
+	}
+
 	sc->timer_evt.expiry_time = get_system_time();
 	clock_set_next_event(sc->timer_evt.expiry_time);
-	enable_local_irq();
+
+	if (irq_is_on)
+		enable_local_irq();
 }
 
 void schedule(void)

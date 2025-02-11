@@ -35,4 +35,9 @@ static inline void __disable_local_irq(void)
 	csr_clear(sstatus, SR_SIE);
 }
 
+static inline int __local_irq_is_on(void)
+{
+	return (read_csr(sstatus) & SR_SIE);
+}
+
 #endif

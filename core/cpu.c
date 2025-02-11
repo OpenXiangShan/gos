@@ -26,6 +26,7 @@
 #include "list.h"
 #include "spinlocks.h"
 #include "cpu.h"
+#include "ipi.h"
 #include "devicetree.h"
 #include "../fdt/libfdt.h"
 #include "gos.h"
@@ -176,15 +177,30 @@ static int cpu_hotplug_notify_callback(int cpu)
 	return 0;
 }
 
+#if CONFIG_USE_RISCV_TIMER
+void cpu_set_stime_counteren(void)
+{
+	unsigned long mcounteren;
+
+	mcounteren = sbi_get_cpu_mcounteren();
+	mcounteren = mcounteren | (1UL << 1);
+	sbi_set_mcounteren(mcounteren);
+}
+#endif
+
 void secondary_cpus_init(unsigned int hart_id, unsigned long stack)
 {
 	write_csr(sie, -1);
 
 	cpu_hotplug_notify_callback(hart_id);
-
+#if CONFIG_USE_RISCV_TIMER
+	cpu_set_stime_counteren();
+#endif
 	percpu_tasks_init(hart_id);
 
 	create_task("idle", do_idle, NULL, hart_id, NULL, 0, NULL);
+
+	schedule();
 
 	enable_local_irq();
 }
@@ -220,4 +236,11 @@ int cpu_hotplug_init(int cpu)
 	set_online_cpumask(cpu);
 
 	return 0;
+}
+
+int cpu_remote_kick(int cpu)
+{
+	int id = IPI_DO_YIELD;
+
+	return send_ipi(cpu, id, NULL);
 }

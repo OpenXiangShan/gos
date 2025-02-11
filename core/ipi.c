@@ -20,6 +20,8 @@
 #include "list.h"
 #include "mm.h"
 #include "print.h"
+#include "task.h"
+#include "asm/sbi.h"
 
 static struct ipi_ops *ipi_ops = NULL;
 static DEFINE_PER_CPU(struct ipi_msg_ctrl, ipi_msg_ctrls);
@@ -31,8 +33,14 @@ static void ipi_do_nothing(int cpu, void *data)
 	print("%s cpu%d\n", __FUNCTION__, cpu);
 }
 
+static void ipi_do_yield(int cpu, void *data)
+{
+	schedule();
+}
+
 static ipi_handler_t ipi_handler[] = {
 	ipi_do_nothing,
+	ipi_do_yield,
 };
 
 #define IPI_HANDLER_CNT (sizeof(ipi_handler) / sizeof(ipi_handler[0]))
@@ -54,6 +62,7 @@ int process_ipi(int cpu)
 		}
 		ipi_handler[msg->id] (cpu, msg->data);
 		list_del(&msg->list);
+		mm_free((void *)msg, sizeof(struct ipi_msg));
 	}
 	spin_unlock(&ctrl->lock);
 

@@ -5,6 +5,11 @@
 #include "list.h"
 #include "spinlocks.h"
 
+enum {
+	IPI_DO_NOTHING = 0,
+	IPI_DO_YIELD,
+};
+
 struct ipi_msg {
 	struct list_head list;
 	int id;

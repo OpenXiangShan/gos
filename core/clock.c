@@ -25,6 +25,9 @@
 static struct clock_source *clock_src = NULL;
 static DEFINE_PER_CPU(struct clock_event, clock_event);
 
+static int program_next_event(struct clock_event *event,
+			      unsigned long expiry_time);
+
 unsigned long get_clock_source_freq(void)
 {
 	return clock_src->freq;
@@ -47,56 +50,38 @@ unsigned long ms_to_cycles(unsigned long ms, unsigned long freq_hz)
 
 static int clock_event_do_timer_list(struct clock_event *event)
 {
-	struct timer_event_info *te;
-	struct timer_event_info *freeze_te[16];
+	struct timer_event_info *te, *tmp;
 	irq_flags_t flags;
-	int restart = 0, i, freeze_nr = 0;
-	unsigned long restart_ptr[16];
+	unsigned int incoming_expiry_time = 0xffffffff;
 
 	spin_lock_irqsave(&event->lock, flags);
 
-	while (!list_empty(&event->timer_list)) {
-		te = list_entry(list_first(&event->timer_list),
-				struct timer_event_info, list);
-
-		if (te->freeze == 1) {
-			list_del(&te->list);
-			freeze_te[freeze_nr++] = te;
-			if (freeze_nr >= 16)
-				break;
+	list_for_each_entry_safe(te, tmp, &event->timer_list, list) {
+		if (te->freeze == 1)
 			continue;
-		}
 
 		if (te->expiry_time <= get_clocksource_counter()) {
-			list_del(&te->list);
-
 			te->handler(te->data);
 
 			if (!te->restart) {
 				if (te->del_cb)
 					te->del_cb(te);
+				list_del(&te->list);
 			} else {
 				te->expiry_time =
 				    get_system_time() + te->period;
-				restart_ptr[restart++] = (unsigned long)te;
-
-				if (restart >= 16)
-					break;
+				if (te->expiry_time < incoming_expiry_time)
+					incoming_expiry_time = te->expiry_time;
 			}
-		} else
-			break;
-	}
-	if (freeze_nr > 0) {
-		for (i = 0; i < freeze_nr; i++)
-			list_add_tail(&freeze_te[i]->list, &event->timer_list);
+		}
+		else {
+			if (te->expiry_time < incoming_expiry_time)
+				incoming_expiry_time = te->expiry_time;
+		}
 	}
 	spin_unlock_irqrestore(&event->lock, flags);
 
-	if (restart > 0) {
-		for (i = 0; i < restart; i++)
-			register_timer_event((struct timer_event_info *)
-					     restart_ptr[i], event->cpu);
-	}
+	program_next_event(event, incoming_expiry_time);
 
 	return 0;
 }
@@ -109,6 +94,7 @@ static int program_next_event(struct clock_event *event,
 	if (!clock_src)
 		return -1;
 
+	event->expiry = expiry_time;
 	value = ms_to_cycles(expiry_time, clock_src->freq);
 
 	return event->set_next_event(value, event);
@@ -127,26 +113,12 @@ void clock_set_next_event(unsigned long expiry_time)
 
 void do_clock_event_handler(void)
 {
-	struct timer_event_info *te;
 	int cpu = sbi_get_cpu_id();
 	struct clock_event *event = &per_cpu(clock_event, cpu);
-	irq_flags_t flags;
 
 	event->evt_handler(event);
 
 	clock_event_do_timer_list(event);
-
-	spin_lock_irqsave(&event->lock, flags);
-	if (list_empty(&event->timer_list)) {
-		spin_unlock_irqrestore(&event->lock, flags);
-		return;
-	}
-	te = list_entry(list_first(&event->timer_list), struct timer_event_info,
-			list);
-
-	spin_unlock_irqrestore(&event->lock, flags);
-
-	program_next_event(event, te->expiry_time);
 }
 
 unsigned long get_system_clock_freq(void)
@@ -223,42 +195,27 @@ int unregister_timer_event(struct timer_event_info *timer, int cpu)
 
 int register_timer_event(struct timer_event_info *timer_event, int cpu)
 {
-	int found = 0, first = 0;
 	struct timer_event_info *te;
 	struct clock_event *event = &per_cpu(clock_event, cpu);
 	irq_flags_t flags;
+	unsigned long incoming = event->expiry;
 
 	if (!event)
 		return -1;
 
 	spin_lock_irqsave(&event->lock, flags);
-	if (list_empty(&event->timer_list)) {
-		first = 1;
-		goto add;
-	}
+
+	list_add_tail(&timer_event->list, &event->timer_list);
 
 	list_for_each_entry(te, &event->timer_list, list) {
-		if (timer_event->expiry_time < te->expiry_time) {
-			found = 1;
-			break;
-		}
+		if (te->expiry_time < incoming)
+			incoming = te->expiry_time;
 	}
-
-add:
-	if (found)
-		list_add_tail(&timer_event->list, &te->list);
-	else
-		list_add_tail(&timer_event->list, &event->timer_list);
 
 	spin_unlock_irqrestore(&event->lock, flags);
 
-	if (first) {
-		spin_lock_irqsave(&event->lock, flags);
-		te = list_entry(list_first(&event->timer_list),
-				struct timer_event_info, list);
-		spin_unlock_irqrestore(&event->lock, flags);
-		program_next_event(event, te->expiry_time);
-	}
+	if (incoming < event->expiry)
+		program_next_event(event, incoming);
 
 	return 0;
 }
@@ -272,6 +229,7 @@ int register_clock_event(struct clock_event *evt, int cpu)
 
 	event->cpu = cpu;
 	event->hwirq = evt->hwirq;
+	event->expiry = (-1UL);
 	event->evt_handler = evt->evt_handler;
 	event->set_next_event = evt->set_next_event;
 	INIT_LIST_HEAD(&event->timer_list);

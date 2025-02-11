@@ -30,6 +30,7 @@
 
 #define enable_local_irq __enable_local_irq
 #define disable_local_irq __disable_local_irq
+#define local_irq_is_on __local_irq_is_on
 
 #define IRQCHIP_INIT_TABLE __irqchip_init_table
 #define IRQCHIP_INIT_TABLE_END __irqchip_init_table_end
