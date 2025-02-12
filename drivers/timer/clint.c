@@ -209,7 +209,7 @@ int clint_timer_init(unsigned long base, int len, struct irq_domain *d, void *pr
 		return -1;
 	}
 #if !CONFIG_USE_RISCV_TIMER
-	base_address = (unsigned long)ioremap((void *)base, len, 0);
+	base_address = (unsigned long)ioremap_2M((void *)base, len, 0);
 #else
 	cpu_set_stime_counteren();
 #endif
