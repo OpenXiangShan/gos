@@ -581,7 +581,7 @@ static int mmu_code_page_mapping()
 		     _PAGE_DIRTY);
 
 	print("Code mapping: start:0x%lx size:0x%lx\n", phy_start, size);
-	return mmu_page_mapping(phy_start, virt_start, size, pgprot);
+	return mmu_page_mapping_2M(phy_start, virt_start, size, pgprot);
 }
 
 void enable_mmu(int on)

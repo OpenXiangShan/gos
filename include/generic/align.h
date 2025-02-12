@@ -22,8 +22,8 @@
 #define PTR_ALIGN(p, a) (typeof(p))ALIGN((unsigned long)p, a)
 #define ALIGN_SIZE(addr, size) (((addr) + (size) - 1) & (~((unsigned long)(size) - 1)))
 #define ALIGN_SIZE_UP(addr, size) ((addr) & ~((unsigned long)(size) - 1))
+#define IS_ALIGN(addr, size) (!(((addr) & ((size) - 1))))
 
-
-#define RESIZE(v, up) ((v / up == 0) ?  (v) : ((v / up + 1)*up))
+#define RESIZE(v, up) ((v % up == 0) ?  (v) : ((v / up + 1)*up))
 
 #endif

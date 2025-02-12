@@ -148,7 +148,8 @@ void vmap_free(void *addr, unsigned int size)
 	spin_unlock(&vmem_lock);
 }
 
-void *ioremap(void *addr, unsigned int size, int gfp)
+
+static void *__ioremap(void *addr, unsigned int size, int align_size, int gfp)
 {
 	pgprot_t pgprot;
 	unsigned long phys = (unsigned long)addr;
@@ -157,7 +158,10 @@ void *ioremap(void *addr, unsigned int size, int gfp)
 	if (!mmu_is_on)
 		return addr;
 
-	virt = (unsigned long)vmap_alloc(size);
+	if (!IS_ALIGN(phys, align_size))
+		return NULL;
+
+	virt = (unsigned long)vmap_alloc_align(align_size, size);
 	if (!virt) {
 		print("%s -- vmap out of memory!\n", __FUNCTION__);
 		return NULL;
@@ -165,15 +169,46 @@ void *ioremap(void *addr, unsigned int size, int gfp)
 
 	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
 
-	if (-1 == mmu_page_mapping(phys, virt, size, pgprot)) {
-		print("%s -- page mapping failed\n", __FUNCTION__);
-		return NULL;
+	if (align_size == PAGE_SIZE) {
+		if (-1 == mmu_page_mapping(phys, virt, size, pgprot)) {
+			print("%s -- page mapping failed\n", __FUNCTION__);
+			return NULL;
+		}
+	} else if (align_size == PAGE_2M_SIZE) {
+		if (-1 == mmu_page_mapping_2M(phys, virt, size, pgprot)) {
+			print("%s -- page mapping failed\n", __FUNCTION__);
+			return NULL;
+		}
+	} else if (align_size == PAGE_1G_SIZE) {
+		if (-1 == mmu_page_mapping_1G(phys, virt, size, pgprot)) {
+			print("%s -- page mapping failed\n", __FUNCTION__);
+			return NULL;
+		}
+	} else {
+		if (-1 == mmu_page_mapping(phys, virt, size, pgprot)) {
+			print("%s -- page mapping failed\n", __FUNCTION__);
+			return NULL;
+		}
 	}
 
-	virt |= ((unsigned long)addr) & (PAGE_SIZE - 1);
+	virt |= ((unsigned long)addr) & (align_size - 1);
 
-	__asm__ __volatile("sfence.vma":::"memory");
 	return (void *)virt;
+}
+
+void *ioremap(void *addr, unsigned int size, int gfp)
+{
+	return __ioremap(addr, size, PAGE_SIZE, gfp);
+}
+
+void *ioremap_2M(void *addr, unsigned int size, int gfp)
+{
+	return __ioremap(addr, size, PAGE_2M_SIZE, gfp);
+}
+
+void *ioremap_1G(void *addr, unsigned int size, int gfp)
+{
+	return __ioremap(addr, size, PAGE_1G_SIZE, gfp);
 }
 
 static void vmap_cancel_mapping(void* addr)

@@ -18,6 +18,8 @@
 #define __VMAP_H
 
 void *ioremap(void *addr, unsigned int size, int gfp);
+void *ioremap_2M(void *addr, unsigned int size, int gfp);
+void *ioremap_1G(void *addr, unsigned int size, int gfp);
 void iounmap(void *addr, unsigned int size);
 void *vmem_map(void *addr, unsigned int size, int gfp);
 void *vmap_alloc(unsigned int size);
