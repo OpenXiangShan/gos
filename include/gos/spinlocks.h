@@ -18,9 +18,23 @@
 #define __SPINLOCK_H
 
 #include "asm/asm-irq.h"
+#include "gos.h"
 
 typedef unsigned int irq_flags_t;
 
+#if CONFIG_USE_TICKET_SPINLOCK
+typedef struct {
+	volatile long lock;
+	volatile long in_turn;
+} spinlock_t;
+#define __SPINLOCK_INIT(lock_ptr) \
+	(lock_ptr)->lock = 0; \
+	(lock_ptr)->in_turn = 1
+
+#define __SPINLOCK_INITIALIZER   \
+	{ .lock = 0, .in_turn = 1}
+
+#else
 typedef struct {
 	volatile long lock;
 } spinlock_t;
@@ -30,6 +44,7 @@ typedef struct {
 
 #define __SPINLOCK_INITIALIZER   \
 	{ .lock = 0, }
+#endif
 
 #define DEFINE_SPINLOCK(lock) spinlock_t lock = __SPINLOCK_INITIALIZER
 

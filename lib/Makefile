@@ -14,6 +14,7 @@
 
 obj-y += print.o
 obj-y += spinlocks.o
+obj-y += ticket-spinlocks.o
 obj-y += string.o
 obj-y += math.o
 obj-y += conditional_s.o

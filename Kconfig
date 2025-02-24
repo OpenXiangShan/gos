@@ -69,6 +69,21 @@ choice
 		tristate "None ipi"
 endchoice
 
+config USE_TICKET_SPINLOCK
+	bool "Use ticket spinlock"
+	default n
+if !USE_TICKET_SPINLOCK
+choice
+	prompt "Select spinlock type"
+	config SELECT_AMOSWAP_SPINLOCK
+		tristate "Select amoswap spinlock"
+	config SELECT_AMOCAS_SPINLOCK
+		tristate "Select amocas spinlock"
+	config SELECT_LRSC_SPINLOCK
+		tristate "Select lr/sc spinlock"
+endchoice
+endif
+
 config VIRT
 	bool "Virt"
 	depends on MYGUEST
@@ -114,7 +129,6 @@ config ENABLE_SVPBMT
 config ENABLE_VECTOR
 	bool "Enable V"
 	default y
-
 
 config SVNAPOT
 	bool "Enable svnapot"

@@ -16,7 +16,10 @@
 
 #include <asm/barrier.h>
 #include "spinlocks.h"
+#include "gos.h"
 
+#if !CONFIG_USE_TICKET_SPINLOCK
+#if CONFIG_SELECT_AMOSWAP_SPINLOCK
 static int spin_lock_check(spinlock_t * lock)
 {
 	__smp_mb();
@@ -45,8 +48,45 @@ void spin_lock(spinlock_t * lock)
 			break;
 	}
 }
+#elif CONFIG_SELECT_AMOCAS_SPINLOCK
+void spin_lock(spinlock_t * lock)
+{
+	unsigned int tmp = 0;
+	unsigned int compare = 1;
+
+	while (1) {
+		__asm__ __volatile__ (
+			"amocas.w.aqrl %0, %2, (%1)\n"
+			: "+r"(tmp)
+			: "r"(&lock->lock), "r"(compare)
+			: "memory"
+		);
+
+		if (!tmp)
+			break;
+
+		tmp = 0;
+	}
+}
+#elif CONFIG_SELECT_LRSC_SPINLOCK
+void spin_lock(spinlock_t * lock)
+{
+	unsigned int temp;
+
+	__asm__ __volatile__ (
+		"lock: lr.w.aq %0, (%1)\n"
+		"bnez %0, lock\n"
+		"sc.w.rl %0, %2, (%1)\n"
+		"bnez %0, lock\n"
+		: "=&r"(temp)
+		: "r"(&lock->lock), "r"(1)
+		: "memory"
+	);
+}
+#endif
 
 void spin_unlock(spinlock_t * lock)
 {
 	__smp_store_release(&lock->lock, 0);
 }
+#endif
