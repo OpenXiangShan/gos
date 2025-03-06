@@ -17,6 +17,7 @@
 #include "asm/mmio.h"
 #include "asm/pgtable.h"
 #include "asm/type.h"
+#include "align.h"
 #include "print.h"
 #include "device.h"
 #include "string.h"
@@ -42,8 +43,11 @@ static void wr_address(unsigned long address, int width, int wr,
 {
 	unsigned long val;
 	unsigned long addr;
+	unsigned long phy_align = ALIGN_SIZE_UP(address, PAGE_SIZE);
+	unsigned int offset = address - phy_align;
 
-	addr = (unsigned long)ioremap((void *)address, PAGE_SIZE, NULL);
+	addr = (unsigned long)ioremap((void *)phy_align, PAGE_SIZE, NULL);
+	addr += offset;
 
 	if (wr == READ_MEM) {
 		if (width == 8)
