@@ -33,6 +33,8 @@
 
 #define PCI_HEAD_TYPE 0x0e
 
+#define PCI_MEMORY_BASE 0x20
+
 #define PCI_CAPABILITY_START 0x34
 
 #define  PCI_CAP_ID_PM		0x01	/* Power Management */

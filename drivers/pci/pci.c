@@ -223,6 +223,20 @@ static struct pci_device *pci_setup_device(
 	return dev;
 }
 
+static void pci_setup_bus_base_limit(struct pci_bus *bus, unsigned int base, unsigned int limit)
+{
+	unsigned int l;
+
+	if (!bus->parent)
+		return;
+
+	l = (base >> 16) & 0xfff0;
+	l |= limit & 0xfff00000;
+
+	print("pci: bus%d -- base:0x%x limit:0x%x base-limit:0x%x\n", bus->parent->bus_number, base, limit, l);
+	pci_write_config_word(bus->parent, bus->devfn, PCI_MEMORY_BASE, l);
+}
+
 static struct pci_bus *pci_setup_bridge(struct pci_bus *bus, int devfn, unsigned int vendor_id)
 {
 	struct pci_bus *child;
@@ -235,7 +249,7 @@ static struct pci_bus *pci_setup_bridge(struct pci_bus *bus, int devfn, unsigned
 	}
 	INIT_LIST_HEAD(&child->devices);
 	INIT_LIST_HEAD(&child->child_buses);
-	INIT_LIST_HEAD(&bus->res_used);
+	INIT_LIST_HEAD(&child->res_used);
 	child->parent = bus;
 	child->devfn = devfn;
 	child->vendor = vendor_id & 0xffff;
@@ -264,7 +278,7 @@ static int pci_scan_slot(struct pci_bus *bus, int devfn)
 	for (fn = devfn; fn < devfn + 8; fn++) {
 		is_multifun = 0;
 		vendor_id = pci_read_dev_vendor_id(bus, fn);
-		if (vendor_id == 0xffffffff)
+		if (vendor_id == 0xffffffff || vendor_id == 0)
 			return -1;
 		
 		cmd = pci_read_config_word(bus, fn, PCI_COMMAND);
@@ -408,27 +422,27 @@ static int pci_scan_bus(struct pci_bus *bus, int bus_number)
 		int bctl = 0;
 		unsigned int buses = 0;
 
-		bctl = pci_read_config_word(child, child->devfn, PCI_BRIDGE_CONTROL);
-		pci_write_config_word(child, child->devfn, PCI_BRIDGE_CONTROL, bctl & ~PCI_BRIDGE_CTL_MASTER_ABORT);
+		bctl = pci_read_config_word(bus, child->devfn, PCI_BRIDGE_CONTROL);
+		pci_write_config_word(bus, child->devfn, PCI_BRIDGE_CONTROL, bctl & ~PCI_BRIDGE_CTL_MASTER_ABORT);
 
-		pci_write_config_word(child, child->devfn, PCI_STATUS, 0xffff);
+		pci_write_config_word(bus, child->devfn, PCI_STATUS, 0xffff);
 
 		bus_end += 1;
 		child->primary = bus_number;
 		child->bus_number = bus_end;
 		child->subordinate = 0xFF;
 
-		buses = pci_read_config_dword(child, child->devfn, PCI_PRIMARY_BUS);
+		buses = pci_read_config_dword(bus, child->devfn, PCI_PRIMARY_BUS);
 		buses = (buses & 0xff000000)
 			| ((unsigned long)(child->primary) << 0)
 			| ((unsigned long)(child->bus_number) << 8)
 			| ((unsigned long)(child->subordinate) << 16);
-		pci_write_config_dword(child, child->devfn, PCI_PRIMARY_BUS, buses);
+		pci_write_config_dword(bus, child->devfn, PCI_PRIMARY_BUS, buses);
 
 		bus_end = pci_scan_bus(child, bus_end);
 
 		child->subordinate = bus_end;
-		pci_write_config_byte(child, child->devfn, PCI_SUBORDINATE_BUS, child->subordinate);
+		pci_write_config_byte(bus, child->devfn, PCI_SUBORDINATE_BUS, child->subordinate);
 		print("pci: bus:%d primary:%d subordinate:%d\n", child->bus_number, child->primary, child->subordinate);
 	}	
 
@@ -493,7 +507,7 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 	dev_res->dev = NULL;
 	list_add_tail(&dev_res->res.list, &root->res_used);
 
-	print("pci: bus%d -- base:0x%lx limit:0x%lx\n", bus->bus_number, base, limit);
+	pci_setup_bus_base_limit(bus, bus->base - root->offset, bus->limit - root->offset);
 
 	return 0;
 }
@@ -673,7 +687,7 @@ int pci_root_bus_init(struct device *dev, struct pci_bus *bus,
 	bus->bus_number = 0;
 	bus->parent = NULL;
 	bus->res.base = res->base + offset;
-	bus->res.end = res->end;
+	bus->res.end = res->end + offset;
 	bus->offset = offset;
 	bus->dev = dev;
 
