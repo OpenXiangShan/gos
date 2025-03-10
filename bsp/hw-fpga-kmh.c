@@ -23,6 +23,7 @@
 #include "riscv_iommu_data.h"
 #include "imsic_data.h"
 #include "aplic_data.h"
+#include "pci_data.h"
 #include "uart_data.h"
 
 extern struct clint_data clint_kmh_hw_data;
@@ -30,6 +31,12 @@ extern struct clint_data qemu_clint_hw_data;
 extern struct plic_data plic_hw_data;
 extern struct riscv_iommu_data riscv_iommu_data;
 extern struct uart_data ns16550_uart_data;
+
+struct pci_data xdma_ecam_pci_data = {
+	.pci_addr = 0x40000000,
+	.size = 0x20000000,
+	.offset = 0x20000000,
+};
 
 static const struct device_init_entry __attribute__((used))
     device_info[] __attribute__((section(".device_init_table"))) = {
@@ -143,6 +150,17 @@ static const struct device_init_entry __attribute__((used))
 	 0,
 	  },
 #endif
+	{
+	 "xilinx,xdma",
+	 0x33000000,
+	 0x10000000,
+	 " ",
+	 { 0xFF,},
+	 0,
+	 " ",
+	 0,
+	 &xdma_ecam_pci_data,
+	  },
 	{
 	 "THE END",
 	 0xFF,
