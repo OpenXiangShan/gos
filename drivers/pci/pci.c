@@ -384,6 +384,8 @@ static int pci_dev_assign_resources(struct pci_bus *bus)
 		b->base = pci_addr;
 		b->size = r->end - r->base + 1;
 
+		print("r->base:0x%lx r->end:0x%lx\n", r->base, r->end);
+
 		print("pci: 0:%x:%x:%x: [%x:%x] -- BAR[%d] : 0x%lx - 0x%lx\n", 
 		       dev->bus->bus_number, PCI_SLOT(dev->devfn),
 		       PCI_FUNC(dev->devfn), dev->vendor,
@@ -456,12 +458,11 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 	struct pci_bus *child;
 	unsigned long base = -1UL, limit = 0;
 	struct resource *allocated;
-	struct pci_dev_res *dev_res;
 
 	start = root->res.base;
 	end = root->res.end;
 
-	list_for_each_entry(allocated, &root->res_used, list) {
+	list_for_each_entry(allocated, &root->res_allocated, list) {
 		if (allocated->end > start)
 			start = allocated->end + 1;
 	}
@@ -469,13 +470,9 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 
 	list_for_each_entry(r, &bus->res_used, list) {
 		int size = r->end - r->base + 1;
-		unsigned long last = start;
+		struct resource *new;
 
-		list_for_each_entry(allocated, &root->res_used, list) {
-			if (allocated->end > last)
-				last = allocated->end + 1;	
-		}
-		r->base = ALIGN_SIZE(last, size);
+		r->base = ALIGN_SIZE(start, size);
 		r->end = r->base + size - 1;
 
 		if (r->end > end) {
@@ -488,6 +485,12 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 		if (limit < r->end)
 			limit = r->end;
 
+		new = (struct resource *)mm_alloc(sizeof(struct resource));
+		new->base = r->base;
+		new->end = r->end;
+		list_add_tail(&new->list, &root->res_allocated);
+
+		start += 1;
 		//print("%s -- start:0x%lx end:0x%lx\n", __FUNCTION__, r->base, r->end);
 	}
 
@@ -500,12 +503,6 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 
 	bus->base = base;
 	bus->limit = limit;
-
-	dev_res = (struct pci_dev_res *)mm_alloc(sizeof(struct pci_dev_res));
-	dev_res->res.base = base;
-	dev_res->res.end = limit;
-	dev_res->dev = NULL;
-	list_add_tail(&dev_res->res.list, &root->res_used);
 
 	pci_setup_bus_base_limit(bus, bus->base - root->offset, bus->limit - root->offset);
 
@@ -657,6 +654,7 @@ int pci_probe_root_bus(struct pci_bus *bus)
 	INIT_LIST_HEAD(&bus->devices);
 	INIT_LIST_HEAD(&bus->child_buses);
 	INIT_LIST_HEAD(&bus->res_used);
+	INIT_LIST_HEAD(&bus->res_allocated);
 	bus->parent = NULL;
 
 	print("pci: pci probe root bus...\n");

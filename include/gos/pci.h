@@ -207,6 +207,7 @@ struct pci_bus {
 	unsigned int class;
 	struct resource res;
 	struct list_head res_used;
+	struct list_head res_allocated;
 	unsigned long offset;
 	int base;
 	int limit;
