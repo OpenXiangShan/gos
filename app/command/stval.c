@@ -36,82 +36,76 @@ unsigned long ref_addr;
 //define internal_* functions for sepc comparison
 void internal_ebreak()
 {
-    asm volatile("ebreak");
+	asm volatile("ebreak");
 }
 
 void internal_illegal_instruction()
 {
-    asm volatile(ILLEGAL_INSTRUCTION);
+	asm volatile(ILLEGAL_INSTRUCTION);
 }
 
 static unsigned int internal_readl(unsigned long addr)
 {
-    return readl(addr);
+	return readl(addr);
 }
 
 static void internal_writel(unsigned long addr, int val)
 {
-    writel(addr, val);;
+	writel(addr, val);
 }
 
 static void ebreak_stub_handler(struct pt_regs *regs)
 {
-    unsigned long stval;
+	unsigned long stval;
 
-    stval = read_csr(CSR_STVAL);
-    print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
-          __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
-    if (regs->sepc == internal_ebreak &&
-        regs->scause == EXC_BREAKPOINT &&
-        (stval == 0x0 || stval == internal_ebreak))
-    {
-        print("TEST PASS\n");
-    }
-    else
-    {
-        print("TEST FAIL\n");
-    }
+	stval = read_csr(CSR_STVAL);
+	print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
+		  __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
+	if (regs->sepc == internal_ebreak &&
+		regs->scause == EXC_BREAKPOINT &&
+		(stval == 0x0 || stval == internal_ebreak)) {
+		print("TEST PASS\n");
+	} else {
+		print("TEST FAIL\n");
+	}
 }
 
 static int ebreak_test(void)
 {
 	unsigned long medeleg = 0;
 
-    register_ebreak_stub_handler(ebreak_stub_handler);
+	register_ebreak_stub_handler(ebreak_stub_handler);
 
 	medeleg = sbi_get_medeleg();
 	medeleg |= (1UL << CAUSE_BREAKPOINT);
 	sbi_set_medeleg(medeleg);
-    internal_ebreak();
+	internal_ebreak();
 	return 0;
 }
 
 static void load_misaligned_stub_handler(struct pt_regs *regs)
 {
-    unsigned long stval;
+	unsigned long stval;
 
 
-    stval = read_csr(CSR_STVAL);
-    print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
-          __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
-    //based on the objdump info of internal_readl, the sepc value should be internal_readl addr + 6
-    if (regs->scause == EXC_LOAD_MISALIGNED &&
-        regs->sepc == internal_readl+6 &&
-        (stval == 0x0 || stval == MISALIGNED_ADDR))
-    {
-        print("TEST PASS\n");
-    }
-    else
-    {
-        print("TEST FAIL\n");
-    }
+	stval = read_csr(CSR_STVAL);
+	print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
+		  __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
+	//based on the objdump info of internal_readl, the sepc value should be internal_readl addr + 6
+	if (regs->scause == EXC_LOAD_MISALIGNED &&
+		regs->sepc == internal_readl + 6 &&
+		(stval == 0x0 || stval == MISALIGNED_ADDR)) {
+		print("TEST PASS\n");
+	} else {
+		print("TEST FAIL\n");
+	}
 }
 
 static int load_misaligned_test(void)
 {
 	unsigned int val = 0;
 
-    register_handle_exception_stub_handler(load_misaligned_stub_handler);
+	register_handle_exception_stub_handler(load_misaligned_stub_handler);
 
 	val = internal_readl(MISALIGNED_ADDR);
 	print("0x%x = %x\n", MISALIGNED_ADDR, val);
@@ -120,32 +114,29 @@ static int load_misaligned_test(void)
 
 static void store_misaligned_stub_handler(struct pt_regs *regs)
 {
-    unsigned long stval;
+	unsigned long stval;
 
 
-    stval = read_csr(CSR_STVAL);
-    print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
-          __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
-    //based on the objdump info of internal_writel, the sepc value should be internal_writel addr + 20
-    if (regs->scause == EXC_STORE_MISALIGNED &&
-        regs->sepc == internal_writel+20 &&
-        (stval == 0x0 || stval == MISALIGNED_ADDR))
-    {
-        print("TEST PASS\n");
-    }
-    else
-    {
-        print("TEST FAIL\n");
-    }
+	stval = read_csr(CSR_STVAL);
+	print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
+		  __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
+	//based on the objdump info of internal_writel, the sepc value should be internal_writel addr + 20
+	if (regs->scause == EXC_STORE_MISALIGNED &&
+		regs->sepc == internal_writel + 20 &&
+		(stval == 0x0 || stval == MISALIGNED_ADDR)) {
+		print("TEST PASS\n");
+	} else {
+		print("TEST FAIL\n");
+	}
 }
 
 static int store_misaligned_test(void)
 {
 	unsigned int val = 0;
 
-    register_handle_exception_stub_handler(store_misaligned_stub_handler);
+	register_handle_exception_stub_handler(store_misaligned_stub_handler);
 
-    internal_writel(MISALIGNED_ADDR, val);
+	internal_writel(MISALIGNED_ADDR, val);
 	print("0x%x = %x\n", MISALIGNED_ADDR, val);
 	return 0;
 
@@ -153,98 +144,89 @@ static int store_misaligned_test(void)
 
 static void load_page_stub_handler(struct pt_regs *regs)
 {
-    unsigned long stval;
+	unsigned long stval;
 
 
-    stval = read_csr(CSR_STVAL);
-    print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
-          __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
-    //based on the objdump info of internal_readl, the sepc value should be internal_readl addr + 6
-    if (regs->scause == EXC_LOAD_PAGE_FAULT &&
-        regs->sepc == internal_readl+6 &&
-        regs->sbadaddr == INVALID_ADDRESS &&
-        (stval == 0x0 || stval == INVALID_ADDRESS))
-    {
-        print("TEST PASS\n");
-    }
-    else
-    {
-        print("TEST FAIL\n");
-    }
+	stval = read_csr(CSR_STVAL);
+	print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
+		  __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
+	//based on the objdump info of internal_readl, the sepc value should be internal_readl addr + 6
+	if (regs->scause == EXC_LOAD_PAGE_FAULT &&
+		regs->sepc == internal_readl + 6 &&
+		regs->sbadaddr == INVALID_ADDRESS &&
+		(stval == 0x0 || stval == INVALID_ADDRESS)) {
+		print("TEST PASS\n");
+	} else {
+		print("TEST FAIL\n");
+	}
 }
 
 static int load_page_test(void)
 {
 	int val = 0;
 
-    register_handle_exception_stub_handler(load_page_stub_handler);
+	register_handle_exception_stub_handler(load_page_stub_handler);
 
-    val = internal_readl(INVALID_ADDRESS);
+	val = internal_readl(INVALID_ADDRESS);
 	print("0x%lx = %x\n", INVALID_ADDRESS, val);
 	return 0;
 }
 
 static void store_page_stub_handler(struct pt_regs *regs)
 {
-    unsigned long stval;
+	unsigned long stval;
 
-    stval = read_csr(CSR_STVAL);
-    print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
-          __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
-    //based on the objdump info of internal_writel, the sepc value should be internal_writel addr + 20
-    if (regs->scause == EXC_STORE_PAGE_FAULT &&
-        regs->sepc == internal_writel+20 &&
-        regs->sbadaddr == INVALID_ADDRESS &&
-        (stval == 0x0 || stval == INVALID_ADDRESS))
-    {
-        print("TEST PASS\n");
-    }
-    else
-    {
-        print("TEST FAIL\n");
-    }
+	stval = read_csr(CSR_STVAL);
+	print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
+		  __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
+	//based on the objdump info of internal_writel, the sepc value should be internal_writel addr + 20
+	if (regs->scause == EXC_STORE_PAGE_FAULT &&
+		regs->sepc == internal_writel + 20 &&
+		regs->sbadaddr == INVALID_ADDRESS &&
+		(stval == 0x0 || stval == INVALID_ADDRESS)) {
+		print("TEST PASS\n");
+	} else {
+		print("TEST FAIL\n");
+	}
 }
 
 static int store_page_test(void)
 {
 	int val = 0;
 
-    register_handle_exception_stub_handler(store_page_stub_handler);
+	register_handle_exception_stub_handler(store_page_stub_handler);
 
-    internal_writel(INVALID_ADDRESS, val);
+	internal_writel(INVALID_ADDRESS, val);
 	print("0x%lx = %x\n", INVALID_ADDRESS, val);
 	return 0;
 }
 
 static void load_access_stub_handler(struct pt_regs *regs)
 {
-    unsigned long stval;
+	unsigned long stval;
 
-    stval = read_csr(CSR_STVAL);
-    print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
-          __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
-    //based on the objdump info of internal_readl, the sepc value should be internal_readl addr + 6
-    print("ref_addr:0x%lx\n", ref_addr);
-    if (regs->scause == EXC_LOAD_ACCESS &&
-        regs->sepc == internal_readl+6 &&
-        regs->sbadaddr == ref_addr &&
-        (stval == 0x0 || stval == ref_addr))
-    {
-        print("TEST PASS\n");
-    }
-    else
-    {
-        print("TEST FAIL\n");
-    }
+	stval = read_csr(CSR_STVAL);
+	print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
+		  __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
+	//based on the objdump info of internal_readl, the sepc value should be internal_readl addr + 6
+	print("ref_addr:0x%lx\n", ref_addr);
+	if (regs->scause == EXC_LOAD_ACCESS &&
+		regs->sepc == internal_readl + 6 &&
+		regs->sbadaddr == ref_addr &&
+		(stval == 0x0 || stval == ref_addr)) {
+		print("TEST PASS\n");
+	} else {
+		print("TEST FAIL\n");
+	}
 }
 
 static int load_access_test(void)
 {
 	unsigned long val = 0;
 
-    register_handle_exception_stub_handler(load_access_stub_handler);
+	register_handle_exception_stub_handler(load_access_stub_handler);
 
-	ref_addr = (unsigned long)ioremap(0, 4096, 0);
+	ref_addr = (unsigned long) ioremap(0, 4096, 0);
 
 	val = internal_readl(ref_addr);
 	print("0x%x = %x\n", ref_addr, val);
@@ -253,62 +235,56 @@ static int load_access_test(void)
 
 static void store_access_stub_handler(struct pt_regs *regs)
 {
-    unsigned long stval;
+	unsigned long stval;
 
-    stval = read_csr(CSR_STVAL);
-    print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
-          __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
-    //based on the objdump info of internal_writel, the sepc value should be internal_writel addr + 20
-    if (regs->scause == EXC_STORE_ACCESS &&
-        regs->sepc == internal_writel+20 &&
-        regs->sbadaddr == ref_addr &&
-        (stval == 0x0 || stval == ref_addr))
-    {
-        print("TEST PASS\n");
-    }
-    else
-    {
-        print("TEST FAIL\n");
-    }
+	stval = read_csr(CSR_STVAL);
+	print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
+		  __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
+	//based on the objdump info of internal_writel, the sepc value should be internal_writel addr + 20
+	if (regs->scause == EXC_STORE_ACCESS &&
+		regs->sepc == internal_writel + 20 &&
+		regs->sbadaddr == ref_addr &&
+		(stval == 0x0 || stval == ref_addr)) {
+		print("TEST PASS\n");
+	} else {
+		print("TEST FAIL\n");
+	}
 }
 
 static int store_access_test(void)
 {
 	unsigned long val = 0;
 
-    register_handle_exception_stub_handler(store_access_stub_handler);
-	ref_addr = (unsigned long)ioremap(0, 4096, 0);
+	register_handle_exception_stub_handler(store_access_stub_handler);
+	ref_addr = (unsigned long) ioremap(0, 4096, 0);
 
-    internal_writel(ref_addr, val);
+	internal_writel(ref_addr, val);
 	print("0x%x = %x\n", ref_addr, val);
 	return 0;
 }
 
 static void illegal_instruction_stub_handler(struct pt_regs *regs)
 {
-    unsigned long stval;
+	unsigned long stval;
 
-    stval = read_csr(CSR_STVAL);
-    print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
-          __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
-    if (regs->scause == EXC_INST_ILLEGAL &&
-        regs->sepc == internal_illegal_instruction &&
-        regs->sbadaddr == ILLEGAL_INSTRUCTION_ADDR &&
-        (stval == 0x0 || stval == ILLEGAL_INSTRUCTION))
-    {
-        print("TEST PASS\n");
-    }
-    else
-    {
-        print("TEST FAIL\n");
-    }
+	stval = read_csr(CSR_STVAL);
+	print("%s %d scause:0x%lx sepc:0x%lx stval:0x%lx\n",
+		  __FUNCTION__, __LINE__, regs->scause, regs->sepc, stval);
+	if (regs->scause == EXC_INST_ILLEGAL &&
+		regs->sepc == internal_illegal_instruction &&
+		regs->sbadaddr == ILLEGAL_INSTRUCTION_ADDR &&
+		(stval == 0x0 || stval == ILLEGAL_INSTRUCTION)) {
+		print("TEST PASS\n");
+	} else {
+		print("TEST FAIL\n");
+	}
 }
 
 static int illegal_instruction_test(void)
 {
-    register_handle_exception_stub_handler(illegal_instruction_stub_handler);
+	register_handle_exception_stub_handler(illegal_instruction_stub_handler);
 
-    internal_illegal_instruction();
+	internal_illegal_instruction();
 	return 0;
 }
 
@@ -361,8 +337,7 @@ static int cmd_stval_test_handler(int argc, char *argv[], void *priv)
 }
 
 
-
-static const struct command cmd_stval_test= {
+static const struct command cmd_stval_test = {
 	.cmd = "stval_test",
 	.handler = cmd_stval_test_handler,
 	.priv = NULL,
