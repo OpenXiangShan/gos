@@ -25,6 +25,7 @@
 #include "pci_device_driver.h"
 #include "irq.h"
 #include "device.h"
+#include "gos.h"
 
 unsigned int pci_read_config_byte(struct pci_bus *bus, int devfn, int addr)
 {
@@ -233,7 +234,8 @@ static void pci_setup_bus_base_limit(struct pci_bus *bus, unsigned int base, uns
 	l = (base >> 16) & 0xfff0;
 	l |= limit & 0xfff00000;
 
-	print("pci: bus%d -- base:0x%x limit:0x%x base-limit:0x%x\n", bus->parent->bus_number, base, limit, l);
+	print("pci: bus%d -- devfn:%d base:0x%x limit:0x%x base-limit:0x%x\n",
+		bus->parent->bus_number, bus->devfn, base, limit, l);
 	pci_write_config_word(bus->parent, bus->devfn, PCI_MEMORY_BASE, l);
 }
 
@@ -370,7 +372,7 @@ static int pci_dev_assign_resources(struct pci_bus *bus)
 		struct pci_dev_res *dev_res;
 		struct pci_device *dev;
 		unsigned int reg;
-		unsigned long pci_addr;
+		unsigned long pci_addr, cpu_addr;
 		unsigned int val;
 		struct bar *b;
 
@@ -380,11 +382,10 @@ static int pci_dev_assign_resources(struct pci_bus *bus)
 			continue;
 		b = &dev->bar[dev_res->bar];
 
-		pci_addr = r->base;
-		b->base = pci_addr;
+		cpu_addr = r->base;
+		pci_addr = cpu_addr - root->offset;
+		b->base = cpu_addr;
 		b->size = r->end - r->base + 1;
-
-		print("r->base:0x%lx r->end:0x%lx\n", r->base, r->end);
 
 		print("pci: 0:%x:%x:%x: [%x:%x] -- BAR[%d] : 0x%lx - 0x%lx\n", 
 		       dev->bus->bus_number, PCI_SLOT(dev->devfn),
@@ -396,7 +397,6 @@ static int pci_dev_assign_resources(struct pci_bus *bus)
 		val = pci_read_config_dword(dev->bus, dev->devfn, reg) & (0xFUL);
 		val |= pci_addr & 0xffffffffUL;
 		pci_write_config_dword(dev->bus, dev->devfn, reg, val);
-
 		if ((val & 0xFUL) == PCI_BASE_ADDRESS_MEM_TYPE_64) {
 			val = pci_addr >> 32;
 			pci_write_config_dword(dev->bus, dev->devfn, reg + 4, val);
@@ -472,7 +472,8 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 		int size = r->end - r->base + 1;
 		struct resource *new;
 
-		r->base = ALIGN_SIZE(start, size);
+		//r->base = ALIGN_SIZE(start, size);
+		r->base = ALIGN_SIZE(start, PAGE_SIZE);
 		r->end = r->base + size - 1;
 
 		if (r->end > end) {

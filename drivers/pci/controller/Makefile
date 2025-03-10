@@ -13,3 +13,4 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 obj-$(CONFIG_PCI) += pci_host_ecam_generic.o
+obj-$(CONFIG_PCI) += pci_host_xdma.o
