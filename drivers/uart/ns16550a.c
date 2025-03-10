@@ -133,8 +133,6 @@ static int __ns16550a_init(unsigned long base, int len)
 
 	writel(base_address + LCR, 0x83);
 
-	while (readl(base_address + USR) & 0x1) ;
-
 	writel(base_address + DLH, 0);
 	writel(base_address + DLL, divisor);
 	writel(base_address + LCR, 0x03);
@@ -174,8 +172,6 @@ int ns16550a_init(struct device *dev, void *data)
 
 	print("ns16550a: base: 0x%lx, len: %d, irq: %d\n",
 	      dev->base, dev->len, dev->irqs[0]);
-
-	while (readl(base_address + USR) & 0x1) ;
 
 	writel(base_address + IER, 1);
 

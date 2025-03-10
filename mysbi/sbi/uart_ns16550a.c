@@ -64,8 +64,6 @@ void uart_ns16550a_init(unsigned long base, struct sbi_uart_ops *ops, void *data
 
 	writel(base_address + LCR, 0x83);
 
-	while (readl(base_address + USR) & 0x1) ;
-
 	writel(base_address + DLH, 0);
 	writel(base_address + DLL, divisor);
 	writel(base_address + LCR, 0x03);
