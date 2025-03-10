@@ -472,8 +472,7 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 		int size = r->end - r->base + 1;
 		struct resource *new;
 
-		//r->base = ALIGN_SIZE(start, size);
-		r->base = ALIGN_SIZE(start, PAGE_SIZE);
+		r->base = ALIGN_SIZE(start, size);
 		r->end = r->base + size - 1;
 
 		if (r->end > end) {
@@ -491,7 +490,7 @@ static int __pci_assign_resource(struct pci_bus *root, struct pci_bus *bus)
 		new->end = r->end;
 		list_add_tail(&new->list, &root->res_allocated);
 
-		start += 1;
+		start = r->end + 1;
 		//print("%s -- start:0x%lx end:0x%lx\n", __FUNCTION__, r->base, r->end);
 	}
 
