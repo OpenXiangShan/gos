@@ -93,3 +93,7 @@ make
 if [ "$1" = "fpga" ];then
 	make fpga
 fi
+if [ "$1" = "fpga-h" ];then
+        make fpga
+fi
+
