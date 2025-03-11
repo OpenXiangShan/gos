@@ -643,14 +643,12 @@ int paging_init(struct device_init_entry *hw)
 	return 0;
 }
 
-int do_page_fault(unsigned long addr)
+static int handle_fault(unsigned long addr)
 {
 	int ret = -1;
 	unsigned long phy_start;
 	unsigned long virt_start;
 	pgprot_t pgprot;
-
-	print("Page Fault -- fault addr:0x%lx\n", addr);
 
 	if (addr >= VMAP_START && addr <= VMAP_END) {
 		virt_start = addr;
@@ -669,6 +667,22 @@ int do_page_fault(unsigned long addr)
 	}
 
 	return ret;
+}
+
+int do_page_fault(unsigned long addr)
+{
+	print("Page Fault -- fault addr:0x%lx\n", addr);
+
+	if ((addr < VMAP_START) || (addr > VMAP_END))
+		return -1;
+
+	if (!mmu_get_pte(addr))
+		return -1;
+
+	if (pte_is_valid(*mmu_get_pte(addr)))
+		return -1;
+
+	return handle_fault(addr);
 }
 
 unsigned long get_default_pgd(void)

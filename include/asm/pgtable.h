@@ -143,6 +143,8 @@ typedef struct {
 #define PAGE_WRITE_EXEC         __pgprot(_PAGE_BASE | _PAGE_READ |      \
                                          _PAGE_EXEC | _PAGE_WRITE)
 
+#define pte_is_valid(pte)   (((unsigned long)pte) & _PAGE_PRESENT)
+
 #define pfn_to_phys(pfn)    (pfn << PAGE_SHIFT)
 
 /*
