@@ -53,6 +53,8 @@ void *vmap_alloc(unsigned int size)
 		} else {
 			nr = 0;
 			addr += (nr + 1) * PAGE_SIZE;
+			index = ((unsigned long)addr - VMAP_START) / PAGE_SIZE;
+			continue;
 		}
 
 		index++;
@@ -161,7 +163,7 @@ static void *__ioremap(void *addr, unsigned int size, int align_size, int gfp)
 	if (!IS_ALIGN(phys, align_size))
 		return NULL;
 
-	virt = (unsigned long)vmap_alloc_align(align_size, size);
+	virt = (unsigned long)vmap_alloc_align(align_size, RESIZE(size, align_size));
 	if (!virt) {
 		print("%s -- vmap out of memory!\n", __FUNCTION__);
 		return NULL;
