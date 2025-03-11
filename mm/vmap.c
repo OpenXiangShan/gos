@@ -51,9 +51,9 @@ void *vmap_alloc(unsigned int size)
 			if (++nr == page_nr)
 				goto success;
 		} else {
-			nr = 0;
 			addr += (nr + 1) * PAGE_SIZE;
 			index = ((unsigned long)addr - VMAP_START) / PAGE_SIZE;
+			nr = 0;
 			continue;
 		}
 

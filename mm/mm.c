@@ -277,6 +277,7 @@ void *__mm_alloc(unsigned int size)
 	n = mm_blocks.avail;
 	for (i = 0; i < n; i++) {
 		int total;
+		void *start;
 
 		index = 0;
 		nr = 0;
@@ -285,7 +286,7 @@ void *__mm_alloc(unsigned int size)
 		total = mem_maps->map_nr;
 		per_mem_map = sizeof(mem_maps->maps[0]) * 8;
 		addr = (void *)mm_blocks.memory_block_start[i];
-
+		start = addr;
 		/* 
 		 * Find free pages from mem_maps according to page_nr 
 		 * index/per_mem_map indicates that the page represented by index is located in which mem_map of mem_maps  
@@ -299,8 +300,10 @@ void *__mm_alloc(unsigned int size)
 				if (++nr == page_nr)
 					goto success;
 			} else {
-				nr = 0;
 				addr += (nr + 1) * PAGE_SIZE;
+				index = ((unsigned long)addr - (unsigned long)start) / PAGE_SIZE;
+				nr = 0;
+				continue;
 			}
 
 			index++;
