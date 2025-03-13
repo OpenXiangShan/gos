@@ -173,13 +173,13 @@ ifeq ($(CONFIG_SELECT_PLIC), y)
 run:
 	./qemu-system-riscv64 -nographic \
 	-machine virt -smp 4 \
-	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,x-zicond=on,v=on -m 8G \
+	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on,v=on -m 8G \
 	-device my_dmaengine \
 	-bios out/Image.bin
 run-debug:
 	./qemu-system-riscv64 -nographic \
 	-machine virt -smp 4 \
-	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,x-zicond=on,v=on -m 8G \
+	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on,v=on -m 8G \
 	-device my_dmaengine \
 	-bios out/Image.bin \
 	-S -s
@@ -187,13 +187,13 @@ else ifeq ($(CONFIG_SELECT_AIA), y)
 run:
 	./qemu-system-riscv64 -nographic \
         -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
-	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,x-zicond=on,v=on,Zfh=on,Zfhmin=on -m 8G \
+	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on,v=on,Zfh=on,Zfhmin=on -m 8G \
 	-device my_dmaengine \
 	-bios out/Image.bin
 run-debug:
 	./qemu-system-riscv64 -nographic \
         -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
-	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,x-zicond=on,v=on -m 8G \
+	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on,v=on -m 8G \
 	-device my_dmaengine \
         -bios out/Image.bin \
 	-S -s
