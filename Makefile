@@ -156,13 +156,13 @@ myGuest-clean:
 	@make -C myGuest clean --no-print-directory
 
 clean: mysbi-clean myGuest-clean myUser-clean
-	@rm -rf $(shell find -name "*.o")
-	@rm -rf $(BUILD_DIR)
-	@rm -rf out
-	@rm -rf include/config
-	@rm -rf include/gos-auto
-	@rm -f $(DTS_DIR)/*.dtb
-	@rm $(GOS_DIR)/tmp_kallsyms.S
+	-@rm -rf $(shell find -name "*.o")
+	-@rm -rf $(BUILD_DIR)
+	-@rm -rf out
+	-@rm -rf include/config
+	-@rm -rf include/gos-auto
+	-@rm -f $(DTS_DIR)/*.dtb
+	-@rm $(GOS_DIR)/tmp_kallsyms.S
 
 %.dtb: $(DTS_DIR)/$(patsubst %.dtb,%.dts,$@)
 	dtc -O dtb -I dts -o $(DTS_DIR)/$@ $(DTS_DIR)/$(patsubst %.dtb,%.dts,$@)
