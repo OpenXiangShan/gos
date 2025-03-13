@@ -85,7 +85,7 @@ CONFIG_UART=y
 CONFIG_NS16550A=y
 CONFIG_QEMU_8250=y
 CONFIG_UARTLITE=y
-CONFIG_PCI=y
+# CONFIG_PCI is not set
 # end of drivers
 
 #
