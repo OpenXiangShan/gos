@@ -170,6 +170,20 @@ static void *__ioremap(void *addr, unsigned int size, int align_size, int gfp)
 	}
 
 	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_DIRTY);
+	if (gfp & GFP_NOCACHE) {
+#if CONFIG_ENABLE_SVPBMT
+		pgprot_val(pgprot) |=  _PAGE_SVPBMT_NOCACHE;
+#else
+		print("warning: %s: CONFIG_SVPBMT not selected, GFP_NOCACHE takes no effect!\n", __FUNCTION__);
+#endif
+	}
+	if (gfp & GFP_IO) {
+#if CONFIG_ENABLE_SVPBMT
+		pgprot_val(pgprot) |=  _PAGE_SVPBMT_IO;
+#else
+		print("warning: %s: CONFIG_SVPBMT not selected, GFP_IO takes no effect!\n", __FUNCTION__);
+#endif
+	}
 
 	if (align_size == PAGE_SIZE) {
 		if (-1 == mmu_page_mapping(phys, virt, size, pgprot)) {
