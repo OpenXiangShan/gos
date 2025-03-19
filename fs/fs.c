@@ -64,7 +64,10 @@ static int unflatten_root_dir(struct fs_node *node, struct fs_type *fs)
 }
 
 int load_file(struct file_entry *entry,
-	      int (*parse_block_content)(unsigned long start, unsigned int len))
+	      int (*parse_block_content)(unsigned long start,
+					 unsigned int len,
+					 void *priv),
+	      void *priv)
 {
 	struct fs_type *fs;
 	struct fs_node *node;
@@ -80,7 +83,7 @@ int load_file(struct file_entry *entry,
 	if (!fs->ops->load_file_content)
 		return -1;
 
-	return fs->ops->load_file_content(entry, parse_block_content);
+	return fs->ops->load_file_content(entry, parse_block_content, priv);
 }
 
 void ls_all_fs_node(void)
@@ -137,7 +140,7 @@ int load_fs(u8 type, void *blk)
 
 	unflatten_root_dir(node, fs);
 
-	return 0;
+	return node->id;
 }
 
 int register_fs_type(struct fs_type *new)
@@ -157,15 +160,6 @@ int register_fs_type(struct fs_type *new)
 
 	return 0;
 }
-
-#ifdef CONFIG_ENABLE_INIT_FS
-void mount_init_fs(void)
-{
-	extern const char init_fs[];
-	print("mount %s as initfs, addr: 0x%lx\n", CONFIG_INIT_FS, init_fs);
-	load_fs(FS_TYPE_EXT4, (void *)init_fs);
-}
-#endif
 
 void fs_init(void)
 {

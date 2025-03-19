@@ -89,7 +89,8 @@ static int fs_cd(struct dir_entry **dir, char *path, int argc, char *argv[])
 	return 0;
 }
 
-static int fs_file_parse_content(unsigned long start, unsigned int len)
+static int fs_file_parse_content(unsigned long start, unsigned int len,
+				 void *priv)
 {
 	char *tmp = (char *)start;
 
@@ -115,7 +116,7 @@ static int fs_cat(struct dir_entry **dir, char *path, int argc, char *argv[])
 
 	list_for_each_entry(file_e, &_dir->file_entry, list) {
 		if (!strcmp(file_e->name, file_name)) {
-			load_file(file_e, fs_file_parse_content);
+			load_file(file_e, fs_file_parse_content, NULL);
 			return 0;
 		}
 	}
@@ -138,7 +139,7 @@ static int fs_reader(struct dir_entry **dir, char *path, int argc, char *argv[])
 
 	list_for_each_entry(file_e, &_dir->file_entry, list) {
 		if (!strcmp(file_e->name, file_name)) {
-			load_file(file_e, reader_load_file);
+			load_file(file_e, reader_load_file, NULL);
 			break;
 		}
 	}

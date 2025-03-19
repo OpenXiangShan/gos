@@ -22,7 +22,7 @@
 
 static struct file_reader reader = { 0 };
 
-int reader_load_file(unsigned long start, unsigned int len)
+int reader_load_file(unsigned long start, unsigned int len, void *priv)
 {
 	char *ptr;
 

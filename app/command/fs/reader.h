@@ -10,7 +10,7 @@ struct file_reader {
 	int current_line;
 };
 
-int reader_load_file(unsigned long start, unsigned int len);
+int reader_load_file(unsigned long start, unsigned int len, void *priv);
 int reader_enter(void);
 void reader_exit(void);
 int reader_init(void);

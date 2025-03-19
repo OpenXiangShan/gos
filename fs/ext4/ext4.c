@@ -217,8 +217,9 @@ err:
 static int
 __parse_ext4_extent_file(struct ext4_extent_header *eh,
 			 int (*parse_file_entry)(unsigned long start,
-						 unsigned int len),
-			 struct fs_node *node)
+						 unsigned int len,
+						 void *priv),
+			 struct fs_node *node, void *priv)
 {
 	struct ext4_extent_idx *idx;
 	struct ext4_extent *ex;
@@ -239,7 +240,7 @@ __parse_ext4_extent_file(struct ext4_extent_header *eh,
 
 			if (parse_file_entry
 			    ((unsigned long)get_block_addr(node, start_block),
-			     block_count * block_size))
+			     block_count * block_size, priv))
 				return -1;
 		}
 
@@ -256,7 +257,7 @@ __parse_ext4_extent_file(struct ext4_extent_header *eh,
 		h = (struct ext4_extent_header *)get_block_addr(node,
 								leaf_block);
 
-		__parse_ext4_extent_file(h, parse_file_entry, node);
+		__parse_ext4_extent_file(h, parse_file_entry, node, priv);
 	}
 
 	return 0;
@@ -312,8 +313,9 @@ __parse_ext4_extent_dir(struct ext4_extent_header *eh,
 static int
 ext4_parse_extent_inode_file(struct ext4_inode *dir,
 			     int (*parse_file_entry)(unsigned long start,
-						     unsigned int len),
-			     struct fs_node *node)
+						     unsigned int len,
+						     void *priv),
+			     struct fs_node *node, void *priv)
 {
 	struct ext4_extent_header *eh =
 	    (struct ext4_extent_header *)dir->i_block;
@@ -323,7 +325,7 @@ ext4_parse_extent_inode_file(struct ext4_inode *dir,
 		return -1;
 	}
 
-	return __parse_ext4_extent_file(eh, parse_file_entry, node);
+	return __parse_ext4_extent_file(eh, parse_file_entry, node, priv);
 }
 
 static unsigned int
@@ -478,7 +480,9 @@ static int ext4_fs_parse_dir(struct fs_node *node, char *dir_name)
 
 static int ext4_fs_load_file(struct file_entry *entry,
 			     int (*parse_block_content)(unsigned long start,
-							unsigned int len))
+							unsigned int len,
+							void *priv),
+			     void *priv)
 {
 	struct ext4_inode *inode =(struct ext4_inode *)entry->data;
 	struct fs_node *node = entry->node;
@@ -490,7 +494,7 @@ static int ext4_fs_load_file(struct file_entry *entry,
 		return -1;
 
 	if (inode->i_flags & EXT4_EXTENTS_FL) {
-		ext4_parse_extent_inode_file(inode, parse_block_content, node);
+		ext4_parse_extent_inode_file(inode, parse_block_content, node, priv);
 	} else {
 		print("ext4: warning!! ToDo... iflags:%d\n", inode->i_flags);
 		return -1;
