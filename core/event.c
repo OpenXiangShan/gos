@@ -42,6 +42,20 @@ void wait_for_ms(unsigned long ms)
 			break;
 }
 
+char wait_for_input(int fd)
+{
+	char c;
+	int ret = 0;
+
+	while (1) {
+		ret = read(fd, &c, 0, 1, NONBLOCK);
+		if (ret > 0)
+			break;
+	}
+
+	return c;
+}
+
 char wait_for_input_timeout(int fd, unsigned long ms)
 {
 	char c;
