@@ -38,4 +38,12 @@ menuconfig UART
 config PCI
 	bool "Pcie drivers"
 	default y
+
+config DISPLAY
+	bool "Display Drivers"
+	default n
+	if DISPLAY
+		source "drivers/display/Kconfig"
+	endif
+
 endmenu

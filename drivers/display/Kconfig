@@ -1,0 +1,5 @@
+menu "display"
+config CHR_DISPLAY
+	bool "Char Display Drivers"
+	default n
+endmenu

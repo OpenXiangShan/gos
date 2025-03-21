@@ -12,12 +12,4 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-obj-$(CONFIG_UART) += uart/
-obj-$(CONFIG_IRQCHIP) += irqchip/
-obj-$(CONFIG_TIMER) += timer/
-obj-$(CONFIG_DMAC) += dmac/
-obj-$(CONFIG_IOMMU) += iommu/
-obj-$(CONFIG_IMSIC_TEST) += imsic-test/
-obj-$(CONFIG_PCI) += pci/
-obj-$(CONFIG_DISPLAY) += display/
-
+obj-$(CONFIG_CHR_DISPLAY) += my-chr-display.o

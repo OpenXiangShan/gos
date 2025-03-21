@@ -28,3 +28,4 @@ obj-y += clock.o
 obj-y += ipi.o
 obj-$(CONFIG_PCI) += pci_device_driver.o
 obj-y += stub.o
+obj-y += display.o
