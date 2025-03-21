@@ -65,12 +65,13 @@ void *dma_alloc(struct device *dev, unsigned long *ret_iova, int len, int gfp)
 	struct iommu_group *group;
 	struct iommu *iommu = dev->iommu;
 	unsigned long iova;
-	void *addr;
+	void *addr, *va;
 
 	if (!iommu || !iommu->ops->alloc) {
-		addr = (void *)virt_to_phy(mm_alloc(len));
+		va = mm_alloc(len);
+		addr = (void *)virt_to_phy(va);
 		*ret_iova = (unsigned long)addr;
-		return addr;
+		return va;
 	}
 
 	group = iommu_get_group(dev);
