@@ -125,7 +125,7 @@ static int qemu_8250_read(struct device *dev, char *buf,
 		ret++;
 	}
 
-	return 0;
+	return ret;
 }
 
 static const struct driver_ops qemu_8250_ops = {
