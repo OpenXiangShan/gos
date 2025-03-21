@@ -253,6 +253,7 @@ static void *riscv_iommu_alloc(struct device *dev, unsigned long iova,
 			       unsigned int size, unsigned int gfp)
 {
 	void *addr = NULL;
+	void *va;
 	struct iommu *iommu = dev->iommu;
 	struct riscv_iommu *riscv_iommu;
 	static struct riscv_iommu_dc *dc;
@@ -268,7 +269,8 @@ static void *riscv_iommu_alloc(struct device *dev, unsigned long iova,
 		return NULL;
 	}
 
-	addr = (void *)virt_to_phy(mm_alloc_align(PAGE_SIZE, PAGE_SIZE));
+	va = mm_alloc_align(PAGE_SIZE, PAGE_SIZE);
+	addr = (void *)virt_to_phy(va);
 	if (!addr) {
 		print("Error -- riscv-iommu: alloc failed\n");
 		return NULL;
@@ -279,7 +281,7 @@ static void *riscv_iommu_alloc(struct device *dev, unsigned long iova,
 		return NULL;
 	}
 
-	return addr;
+	return va;
 }
 
 static void riscv_iommu_enable_gstage(struct device *dev, int gstage)
