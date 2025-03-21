@@ -124,6 +124,9 @@ config APP_INTR_TEST
 config APP_IPI_TEST
 	bool "APP_IPI_TEST"
 	default y
+config APP_DOOM
+	bool "DOOM"
+	default n
 menuconfig MULTICORE_MEMORY_TEST
 	bool "MULTI_CORE_MEMORY_TEST"
 	default y
