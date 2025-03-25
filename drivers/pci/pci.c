@@ -25,6 +25,7 @@
 #include "pci_device_driver.h"
 #include "irq.h"
 #include "device.h"
+#include "spinlocks.h"
 #include "gos.h"
 
 unsigned int pci_read_config_byte(struct pci_bus *bus, int devfn, int addr)
@@ -89,6 +90,8 @@ static void pci_set_device_msi_domain(struct pci_device *dev)
 		return;
 
 	dev->dev.irq_domain = domain;
+
+	__SPINLOCK_INIT(&dev->msi_lock);
 }
 
 static void pci_init_capabilities(struct pci_device *dev)
@@ -395,7 +398,11 @@ static int pci_dev_assign_resources(struct pci_bus *bus)
 
 		reg = PCI_BASE_ADDRESS_0 + dev_res->bar * sizeof(unsigned int);
 		val = pci_read_config_dword(dev->bus, dev->devfn, reg) & (0xFUL);
+#ifdef CONFIG_SELECT_QEMU
+		val |= cpu_addr & 0xffffffffUL;
+#else
 		val |= pci_addr & 0xffffffffUL;
+#endif
 		pci_write_config_dword(dev->bus, dev->devfn, reg, val);
 		if ((val & 0xFUL) == PCI_BASE_ADDRESS_MEM_TYPE_64) {
 			val = pci_addr >> 32;

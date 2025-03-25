@@ -78,11 +78,22 @@ struct irq_domain {
 	write_msi_msg_t write_msi_msg;
 };
 
+struct msi_attr {
+	int is_64;
+	int multiple;
+	unsigned char mask_pos;
+};
+
 struct msi_desc {
 	struct list_head list;
 	void *base;
 	int entry_index;
+	int irq_base;
 	int hwirq;
+	int can_mask;
+	unsigned int mask;
+	int is_msix;
+	struct msi_attr msi_attr;
 	struct irq_domain *domain;
 };
 

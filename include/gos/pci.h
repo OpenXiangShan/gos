@@ -1,3 +1,23 @@
+/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
+/*
+ *	PCI standard defines
+ *	Copyright 1994, Drew Eckhardt
+ *	Copyright 1997--1999 Martin Mares <mj@ucw.cz>
+ *
+ *	For more information, please consult the following manuals (look at
+ *	http://www.pcisig.com/ for how to get them):
+ *
+ *	PCI BIOS Specification
+ *	PCI Local Bus Specification
+ *	PCI to PCI Bridge Specification
+ *	PCI System Design Guide
+ *
+ *	For HyperTransport information, please consult the following manuals
+ *	from http://www.hypertransport.org :
+ *
+ *	The HyperTransport I/O Link Specification
+ */
+
 /*
  * Copyright (c) 2024 Beijing Institute of Open Source Chip (BOSC)
  *
@@ -19,6 +39,7 @@
 
 #include "list.h"
 #include "device.h"
+#include "spinlocks.h"
 
 #define PCI_VENDOR_ID 0x00
 #define PCI_DEVICE_ID 0x02
@@ -80,6 +101,25 @@
 #define PCI_MSIX_ENTRY_DATA		0x8  /* Message Data */
 #define PCI_MSIX_ENTRY_VECTOR_CTRL	0xc  /* Vector Control */
 #define  PCI_MSIX_ENTRY_CTRL_MASKBIT	0x00000001
+
+/* Message Signaled Interrupt registers */
+#define PCI_MSI_FLAGS		0x02	/* Message Control */
+#define  PCI_MSI_FLAGS_ENABLE	0x0001	/* MSI feature enabled */
+#define  PCI_MSI_FLAGS_QMASK	0x000e	/* Maximum queue size available */
+#define  PCI_MSI_FLAGS_QMASK_SHIFT 1	/* Maximum queue size available shift */
+#define  PCI_MSI_FLAGS_QSIZE	0x0070	/* Message queue size configured */
+#define  PCI_MSI_FLAGS_QSIZE_SHIFT 4	/* Message queue size configured shift */
+#define  PCI_MSI_FLAGS_64BIT	0x0080	/* 64-bit addresses allowed */
+#define  PCI_MSI_FLAGS_MASKBIT	0x0100	/* Per-vector masking capable */
+#define PCI_MSI_RFU		3	/* Rest of capability flags */
+#define PCI_MSI_ADDRESS_LO	0x04	/* Lower 32 bits */
+#define PCI_MSI_ADDRESS_HI	0x08	/* Upper 32 bits (if PCI_MSI_FLAGS_64BIT set) */
+#define PCI_MSI_DATA_32		0x08	/* 16 bits of data for 32-bit devices */
+#define PCI_MSI_MASK_32		0x0c	/* Mask bits register for 32-bit devices */
+#define PCI_MSI_PENDING_32	0x10	/* Pending intrs for 32-bit devices */
+#define PCI_MSI_DATA_64		0x0c	/* 16 bits of data for 64-bit devices */
+#define PCI_MSI_MASK_64		0x10	/* Mask bits register for 64-bit devices */
+#define PCI_MSI_PENDING_64	0x14	/* Pending intrs for 64-bit devices */
 
 #define PCI_BASE_ADDRESS_0  0x10
 #define PCI_BASE_ADDRESS_1  0x14
@@ -176,6 +216,7 @@ struct pci_device {
 	unsigned int msi_cap_pos;
 	unsigned int msix_cap_pos;
 	unsigned long msix_base;
+	spinlock_t msi_lock;
 };
 
 struct pci_dev_res {
@@ -231,6 +272,10 @@ unsigned int pci_write_config_word(struct pci_bus *bus, int devfn, int addr, uns
 unsigned int pci_write_config_dword(struct pci_bus *bus, int devfn, int addr, unsigned int val);
 void pci_get_config(struct pci_device *dev, char *out);
 int pci_msix_enable(struct pci_device *pdev, int *irqs);
+int pci_msi_enable(struct pci_device *pdev, int *irqs);
 int pci_msix_get_vec_count(struct pci_device *pdev);
+int pci_msi_get_vec_count(struct pci_device *pdev);
+void pci_msi_mask(struct device *dev, int hwirq);
+void pci_msi_unmask(struct device *dev, int hwirq);
 
 #endif

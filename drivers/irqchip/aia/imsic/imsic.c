@@ -29,6 +29,7 @@
 #include "ipi.h"
 #include "irq.h"
 #include "gos.h"
+#include "pci.h"
 
 static struct imsic imsic;
 extern int mmu_is_on;
@@ -278,12 +279,18 @@ static int imsic_mask_irq(struct device *dev, int hwirq, void *data)
 {
 	struct imsic *p_imsic = (struct imsic *)data;
 
+	if (is_pci_device(dev))
+		pci_msi_mask(dev, hwirq);
+
 	return imsic_disable_id(p_imsic, hwirq);
 }
 
 static int imsic_unmask_irq(struct device *dev, int hwirq, void *data)
 {
 	struct imsic *p_imsic = (struct imsic *)data;
+
+	if (is_pci_device(dev))
+		pci_msi_unmask(dev, hwirq);
 
 	return imsic_enable_id(p_imsic, hwirq);
 }
