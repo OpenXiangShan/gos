@@ -68,6 +68,25 @@ static void __pci_msi_mask(struct pci_device *pdev, struct msi_desc *desc,
 	spin_unlock_irqrestore(&pdev->msi_lock, flags);
 }
 
+static void __pci_msix_mask(struct pci_device *pdev, struct msi_desc *desc,
+			    int mask)
+{
+	void *addr;
+	unsigned int vector_ctrl;
+
+	if (!desc)
+		return;
+
+	addr = desc->base + desc->entry_index * PCI_MSIX_ENTRY_SIZE;
+	vector_ctrl = readl(addr + PCI_MSIX_ENTRY_VECTOR_CTRL);
+	if (mask)
+		vector_ctrl |= PCI_MSIX_ENTRY_CTRL_MASKBIT;
+	else
+		vector_ctrl &= ~PCI_MSIX_ENTRY_CTRL_MASKBIT;
+
+	writel(addr + PCI_MSIX_ENTRY_VECTOR_CTRL, vector_ctrl);
+}
+
 void pci_msi_mask(struct device *dev, int hwirq)
 {
 	struct pci_device *pdev = to_pci_dev(dev);
@@ -76,6 +95,8 @@ void pci_msi_mask(struct device *dev, int hwirq)
 
 	if (!desc->is_msix)
 		__pci_msi_mask(pdev, desc, mask, 0);
+	else
+		__pci_msix_mask(pdev, desc, 1);
 }
 
 void pci_msi_unmask(struct device *dev, int hwirq)
@@ -86,6 +107,8 @@ void pci_msi_unmask(struct device *dev, int hwirq)
 
 	if (!desc->is_msix)
 		__pci_msi_mask(pdev, desc, 0, mask);
+	else
+		__pci_msix_mask(pdev, desc, 0);
 }
 
 static void pci_msi_set_irq_base(struct pci_device *pdev, int irq_base, int nr)
