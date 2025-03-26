@@ -279,9 +279,10 @@ static int imsic_mask_irq(struct device *dev, int hwirq, void *data)
 {
 	struct imsic *p_imsic = (struct imsic *)data;
 
+#if CONFIG_PCI
 	if (is_pci_device(dev))
 		pci_msi_mask(dev, hwirq);
-
+#endif
 	return imsic_disable_id(p_imsic, hwirq);
 }
 
@@ -289,9 +290,10 @@ static int imsic_unmask_irq(struct device *dev, int hwirq, void *data)
 {
 	struct imsic *p_imsic = (struct imsic *)data;
 
+#if CONFIG_PCI
 	if (is_pci_device(dev))
 		pci_msi_unmask(dev, hwirq);
-
+#endif
 	return imsic_enable_id(p_imsic, hwirq);
 }
 

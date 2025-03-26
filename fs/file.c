@@ -191,7 +191,11 @@ void *fopen(const char *filename, const char *mode)
 	char file_dir[64];
 	char *ptr = (char *)filename;
 	char *tmp = file_dir;
+#if CONFIG_ENABLE_INIT_FS
 	struct dir_entry *parent = get_init_fs_root();
+#else
+	struct dir_entry *parent = NULL;
+#endif
 	struct file_entry *file_e;
 	struct file *file;
 
